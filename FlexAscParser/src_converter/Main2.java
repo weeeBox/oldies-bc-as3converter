@@ -86,8 +86,8 @@ import bc.lang.BcVectorTypeNode;
 
 public class Main2
 {
-	private static FileWriteDestination hdr;
-	private static FileWriteDestination impl;
+	private static FileWriteDestination src;
+	private static ListWriteDestination impl;
 	
 	private static WriteDestination dest;
 	private static Stack<WriteDestination> destStack;
@@ -1709,43 +1709,43 @@ public class Main2
 		String className = getClassName(bcClass);
 		String classExtends = getBaseClassName(bcClass);
 		
-		hdr = new FileWriteDestination(new File(outputDir, className + ".h"));
+		src = new FileWriteDestination(new File(outputDir, className + ".as"));
 		impl = null;
 		
 		lastVisiblityModifier = null;
 		
 		String defGuardName = className + "_h__";
 		
-		hdr.writeln("#ifndef " + defGuardName);
-		hdr.writeln("#define " + defGuardName);
-		hdr.writeln();
+		src.writeln("#ifndef " + defGuardName);
+		src.writeln("#define " + defGuardName);
+		src.writeln();
 		
-		hdr.writeln("#include \"AsBase.h\"");
-		hdr.writeln();
+		src.writeln("#include \"AsBase.h\"");
+		src.writeln();
 		
-		hdr.writelnf("#include \"%s.h\"", classExtends);
-		hdr.writeln();
+		src.writelnf("#include \"%s.h\"", classExtends);
+		src.writeln();
 		
 		List<BcTypeNode> headerTypes = getHeaderTypedefs(bcClass);
 		
-		writeHeaderTypes(hdr, headerTypes);
+		writeHeaderTypes(src, headerTypes);
 		
-		hdr.writeln();
+		src.writeln();
 		
-		hdr.writelnf("class %s : public %s", className, classExtends);
-		hdr.writeln("{");
-		hdr.incTab();
+		src.writelnf("class %s : public %s", className, classExtends);
+		src.writeln("{");
+		src.incTab();
 		
 		writeTypename(bcClass);
 		writeInterfaceFunctions(bcClass);
 		
-		hdr.decTab();
-		hdr.writeln("};");
-		hdr.writeln();
+		src.decTab();
+		src.writeln("};");
+		src.writeln();
 		
-		hdr.writeln("#endif // " + defGuardName);
+		src.writeln("#endif // " + defGuardName);
 		
-		hdr.close();
+		src.close();
 	}
 
 	private static void writeInterfaceFunctions(BcClassDefinitionNode bcClass)
@@ -1765,7 +1765,7 @@ public class Main2
 			writeVisiblity(bcFunc.getVisiblity(), forceVisiblity);
 			forceVisiblity = false;
 			
-			hdr.writef("virtual %s %s(", type, name);
+			src.writef("virtual %s %s(", type, name);
 			
 			StringBuilder paramsBuffer = new StringBuilder();
 			StringBuilder argsBuffer = new StringBuilder();
@@ -1784,8 +1784,8 @@ public class Main2
 				}
 			}
 			
-			hdr.write(paramsBuffer);
-			hdr.writeln(") = 0;");
+			src.write(paramsBuffer);
+			src.writeln(") = 0;");
 		}
 	}
 
@@ -1794,37 +1794,37 @@ public class Main2
 		String className = getClassName(bcClass);
 		String classExtends = getBaseClassName(bcClass);
 		
-		hdr = new FileWriteDestination(new File(outputDir, className + ".h"));
-		impl = new FileWriteDestination(new File(outputDir, className + ".cpp"));
+		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
+		impl = new ListWriteDestination();
 		
 		lastVisiblityModifier = null;
 		
 		String defGuardName = className + "_h__";
 		
-		hdr.writeln("#ifndef " + defGuardName);
-		hdr.writeln("#define " + defGuardName);
-		hdr.writeln();
+		src.writeln("#ifndef " + defGuardName);
+		src.writeln("#define " + defGuardName);
+		src.writeln();
 		
-		hdr.writeln("#include \"AsBase.h\"");
-		hdr.writeln();
+		src.writeln("#include \"AsBase.h\"");
+		src.writeln();
 		
-		hdr.writelnf("#include \"%s.h\"", classExtends);
-		hdr.writeln();
+		src.writelnf("#include \"%s.h\"", classExtends);
+		src.writeln();
 		
 		impl.writelnf("#include \"%s.h\"", className);
 		
 		List<BcTypeNode> headerTypes = getHeaderTypedefs(bcClass);
 		List<BcTypeNode> implTypes = getImplementationTypedefs(bcClass);
 		
-		writeHeaderTypes(hdr, headerTypes);
+		writeHeaderTypes(src, headerTypes);
 		writeImplementationTypes(impl, headerTypes);
 		writeImplementationTypes(impl, implTypes);
 		
-		hdr.writeln();
+		src.writeln();
 		
-		hdr.writelnf("class %s : public %s", className, classExtends);
-		hdr.writeln("{");
-		hdr.incTab();
+		src.writelnf("class %s : public %s", className, classExtends);
+		src.writeln("{");
+		src.incTab();
 		
 		writeTypename(bcClass);
 		writeFields(bcClass);
@@ -1842,8 +1842,8 @@ public class Main2
 			writeBoxingInterfacesAccessors(bcClass);
 		}
 		
-		hdr.decTab();
-		hdr.writeln("};");
+		src.decTab();
+		src.writeln("};");
 		
 		writeBlankLine();
 
@@ -1853,10 +1853,9 @@ public class Main2
 			writeBoxingInterfaces(bcClass);
 		}
 		
-		hdr.writeln("#endif // " + defGuardName);
+		src.writeln("#endif // " + defGuardName);
 		
-		hdr.close();
-		impl.close();		
+		src.close();
 	}
 
 	private static void writeHeaderTypes(WriteDestination dst, List<BcTypeNode> types)
@@ -1916,7 +1915,7 @@ public class Main2
 			
 			if (bcField.isStatic())
 			{
-				hdr.write("static ");
+				src.write("static ");
 				if (canBeClass)
 				{
 					impl.writelnf("%s %s::%s(true);", type, className, name);
@@ -1928,15 +1927,15 @@ public class Main2
 			}
 			if (bcField.isConst() && !canBeClass)
 			{
-				hdr.write("const ");
+				src.write("const ");
 			}
-			hdr.writef("%s %s", type, name);
+			src.writef("%s %s", type, name);
 			if (isConst && bcField.isIntegralInitializerFlag())
 			{
-				hdr.writef(" = %s", bcField.getInitializer());
+				src.writef(" = %s", bcField.getInitializer());
 			}
 			
-			hdr.writeln(";");
+			src.writeln(";");
 		}
 	}
 	
@@ -1946,7 +1945,7 @@ public class Main2
 		String baseClassName = getBaseClassName(bcClass);
 		
 		writeVisiblity("public", true);
-		hdr.writelnf("__TYPENAME(%s, %s);", className, baseClassName);
+		src.writelnf("__TYPENAME(%s, %s);", className, baseClassName);
 	}
 
 	private static void writeFunctions(BcClassDefinitionNode bcClass)
@@ -1968,13 +1967,13 @@ public class Main2
 			
 			if (bcFunc.isStatic())
 			{
-				hdr.write("static ");
+				src.write("static ");
 			}
 			else
 			{
-				hdr.write("virtual ");
+				src.write("virtual ");
 			}
-			hdr.writef("%s %s(", type, name);
+			src.writef("%s %s(", type, name);
 			
 			impl.writeln();
 			impl.writef("%s %s::%s(", type, getClassName(bcClass), name);
@@ -1993,9 +1992,9 @@ public class Main2
 				}
 			}
 			
-			hdr.write(paramsBuffer);
+			src.write(paramsBuffer);
 			impl.write(paramsBuffer);
-			hdr.writeln(");");
+			src.writeln(");");
 			impl.writeln(")");
 			
 			impl.writeln(bcFunc.getBody());
@@ -2029,7 +2028,7 @@ public class Main2
 		
 		String createFuncName = classCreateName + className;
 		
-		hdr.writef("static %s %s(", classRef, createFuncName);
+		src.writef("static %s %s(", classRef, createFuncName);
 		
 		impl.writeln();
 		impl.writef("%s %s::%s(", classRef, className, createFuncName);
@@ -2050,9 +2049,9 @@ public class Main2
 			}
 		}
 		
-		hdr.write(paramsBuffer);
+		src.write(paramsBuffer);
 		impl.write(paramsBuffer);
-		hdr.writeln(");");
+		src.writeln(");");
 		impl.writeln(")");
 		writeBlockOpen(impl);
 		
@@ -2085,7 +2084,7 @@ public class Main2
 		{
 			String constructFuncName = classConstructName + className;
 			
-			hdr.writef("void %s(", constructFuncName);
+			src.writef("void %s(", constructFuncName);
 			impl.writeln();
 			impl.writef("void %s::%s(", className, constructFuncName);
 			
@@ -2103,9 +2102,9 @@ public class Main2
 				}
 			}
 			
-			hdr.write(paramsBuffer);
+			src.write(paramsBuffer);
 			impl.write(paramsBuffer);
-			hdr.writeln(");");
+			src.writeln(");");
 			impl.writeln(")");
 			
 			ListWriteDestination body = bcFunc.getBody();
@@ -2144,7 +2143,7 @@ public class Main2
 		
 		writeVisiblity("public", false);
 		
-		hdr.writelnf("void %s();", initializeName);
+		src.writelnf("void %s();", initializeName);
 		
 		impl.writeln();
 		impl.writelnf("void %s::%s()", className, initializeName);
@@ -2176,11 +2175,11 @@ public class Main2
 		String initializedFlagName = classStaticInitializedName + classType;
 		
 		writeVisiblity("private", true);
-		hdr.writelnf("static StaticInit %s;", initializerName);
-		hdr.writelnf("static BOOL %s;", initializedFlagName);
+		src.writelnf("static StaticInit %s;", initializerName);
+		src.writelnf("static BOOL %s;", initializedFlagName);
 		
 		writeVisiblity("public", true);
-		hdr.writelnf("static void %s();", classStaticInitFuncName);
+		src.writelnf("static void %s();", classStaticInitFuncName);
 		
 		impl.writeln();
 		impl.writelnf("StaticInit %s::%s(&%s::%s);", classType, initializerName, classType, classStaticInitFuncName);
@@ -2226,7 +2225,7 @@ public class Main2
 		String className = getClassName(bcClass);
 		
 		writeVisiblity("protected", true);
-		hdr.writelnf("%s();", className);
+		src.writelnf("%s();", className);
 		
 		impl.writeln();
 		impl.writef("%s::%s()", className, className);
@@ -2289,7 +2288,7 @@ public class Main2
 			
 			writeVisiblity("public", true);
 			
-			hdr.writelnf("void %s();", classGcName);
+			src.writelnf("void %s();", classGcName);
 			
 			impl.writeln();
 			impl.writelnf("void %s::%s()", className, classGcName);
@@ -2323,7 +2322,7 @@ public class Main2
 	
 	private static void writeBoxingInterfacesAccessors(BcClassDefinitionNode bcClass)
 	{
-		hdr.writeln();
+		src.writeln();
 		writeVisiblity("public", true);
 		
 		List<BcTypeNode> interfaces = bcClass.getInterfaces();
@@ -2343,7 +2342,7 @@ public class Main2
 		String interfaceRef = BcCode.typeRef(interfaceName);
 		String boxName = interfaceBoxName + interfaceName; 
 		
-		hdr.writelnf("%s %s();", interfaceRef, boxName);
+		src.writelnf("%s %s();", interfaceRef, boxName);
 		impl.writelnf("%s %s::%s()", interfaceRef, className, boxName);
 		writeBlockOpen(impl);
 		impl.writelnf("return %s(new %s(this));", interfaceRef, className + "_" + interfaceClass.getName());
@@ -2352,9 +2351,9 @@ public class Main2
 
 	private static void writeBoxingInterfaces(BcClassDefinitionNode bcClass)
 	{
-		hdr.writeln("/////////////////////////////////////////////////////////////////////////////");
-		hdr.writeln("// interface boxing");
-		hdr.writeln("/////////////////////////////////////////////////////////////////////////////");		
+		src.writeln("/////////////////////////////////////////////////////////////////////////////");
+		src.writeln("// interface boxing");
+		src.writeln("/////////////////////////////////////////////////////////////////////////////");		
 		impl.writeln("/////////////////////////////////////////////////////////////////////////////");
 		impl.writeln("// interface boxing");
 		impl.writeln("/////////////////////////////////////////////////////////////////////////////");		
@@ -2369,7 +2368,7 @@ public class Main2
 			writeBoxingInterface(bcClass, interfaceClass);
 		}
 		
-		hdr.writeln();
+		src.writeln();
 	}
 	
 	private static void writeBoxingInterface(BcClassDefinitionNode bcClass, BcClassDefinitionNode interfaceClass)
@@ -2385,20 +2384,20 @@ public class Main2
 		String interfaceName = getClassName(bcClass) + "_" + interfaceClass.getName();
 		String interfaceBaseName = getClassName(interfaceClass);
 		
-		hdr.writelnf("#include \"%s.h\"", interfaceBaseName);
-		hdr.writeln();
+		src.writelnf("#include \"%s.h\"", interfaceBaseName);
+		src.writeln();
 		
-		hdr.writelnf("class %s : public %s", interfaceName, interfaceBaseName);
-		hdr.writeln("{");
-		hdr.incTab();
+		src.writelnf("class %s : public %s", interfaceName, interfaceBaseName);
+		src.writeln("{");
+		src.incTab();
 		
 		// delegate
 		writeVisiblity("private", true);
-		hdr.writelnf("%s m_base;", classRef);
+		src.writelnf("%s m_base;", classRef);
 		
 		// constructor
 		writeVisiblity("public", true);
-		hdr.writelnf("%s(const %s& base);", interfaceName, classRef);
+		src.writelnf("%s(const %s& base);", interfaceName, classRef);
 		impl.writelnf("%s::%s(const %s& base) : m_base(base)", interfaceName, interfaceName, classRef);
 		writeBlockOpen(impl);
 		writeBlockClose(impl);
@@ -2411,7 +2410,7 @@ public class Main2
 			String type = bcFunc.hasReturnType() ? BcCode.typeRef(bcFunc.getReturnType()) : "void";
 			String name = BcCode.identifier(bcFunc.getName());
 			
-			hdr.writef("%s %s(", type, name);
+			src.writef("%s %s(", type, name);
 			
 			impl.writeln();
 			impl.writef("%s %s::%s(", type, interfaceName, name);
@@ -2433,9 +2432,9 @@ public class Main2
 				}
 			}
 			
-			hdr.write(paramsBuffer);
+			src.write(paramsBuffer);
 			impl.write(paramsBuffer);
-			hdr.writeln(");");
+			src.writeln(");");
 			impl.writeln(")");
 			
 			writeBlockOpen(impl);
@@ -2454,7 +2453,7 @@ public class Main2
 		impl.writeln();
 		
 		writeVisiblity("public", true);
-		hdr.writelnf("void %s();", classGcName);
+		src.writelnf("void %s();", classGcName);
 		impl.writelnf("void %s::%s()", interfaceName, classGcName);
 		writeBlockOpen(impl);
 		impl.writelnf("if(%s())", classGcNeeded);
@@ -2464,8 +2463,8 @@ public class Main2
 		writeBlockClose(impl);		
 		writeBlockClose(impl);		
 		
-		hdr.decTab();
-		hdr.writeln("};");
+		src.decTab();
+		src.writeln("};");
 	}
 
 	private static void writeBlockOpen(WriteDestination dest)
@@ -2492,7 +2491,7 @@ public class Main2
 	
 	private static void writeBlankLine()
 	{
-		hdr.writeln();
+		src.writeln();
 		impl.writeln();
 	}
 	
@@ -2508,11 +2507,11 @@ public class Main2
 		{
 			if (lastVisiblityModifier != null)
 			{
-				hdr.writeln();
+				src.writeln();
 			}
-			hdr.decTab();
-			hdr.writeln(visiblity + ":");
-			hdr.incTab();
+			src.decTab();
+			src.writeln(visiblity + ":");
+			src.incTab();
 			lastVisiblityModifier = visiblity;
 		}
 	}
