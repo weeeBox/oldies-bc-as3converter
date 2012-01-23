@@ -7,7 +7,7 @@ import macromedia.asc.parser.IdentifierNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
 
-public class BcCode
+public class BcCodeCs
 {
 	private static final String NEW = "__NEW";
 	private static final String NEWVECTOR = "__NEWVECTOR";
@@ -43,8 +43,8 @@ public class BcCode
 		if (bcType instanceof BcVectorTypeNode)
 		{
 			BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
-			String genericName = BcCode.type(vectorType.getGeneric());
-			return BcCode.VECTOR_TYPE_PREFIX + genericName;
+			String genericName = BcCodeCs.type(vectorType.getGeneric());
+			return BcCodeCs.VECTOR_TYPE_PREFIX + genericName;
 		}
 		
 		return type(typeName);

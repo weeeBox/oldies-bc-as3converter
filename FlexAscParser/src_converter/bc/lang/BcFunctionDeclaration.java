@@ -12,7 +12,7 @@ import macromedia.asc.parser.ListNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.StatementListNode;
 import bc.code.ListWriteDestination;
-import bc.help.BcCode;
+import bc.help.BcCodeCpp;
 
 public class BcFunctionDeclaration extends BcDeclaration
 {
@@ -188,7 +188,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 		bcFunc.params = newParams;
 		
 		// this is a big mess. Just take it as is
-		IdentifierNode identifier = new IdentifierNode(bcFunc.isConstructor ? BcCode.thisCallMarker : name, 0);
+		IdentifierNode identifier = new IdentifierNode(bcFunc.isConstructor ? BcCodeCpp.thisCallMarker : name, 0);
 		ArgumentListNode args = new ArgumentListNode(null, 0);
 		args.items.clear(); // this is more like a hack. The first element is added from the constructor and we don't need it
 		counter = 0;

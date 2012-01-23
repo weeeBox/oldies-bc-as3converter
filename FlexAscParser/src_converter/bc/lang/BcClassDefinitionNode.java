@@ -3,7 +3,7 @@ package bc.lang;
 import java.util.ArrayList;
 import java.util.List;
 
-import bc.help.BcCode;
+import bc.help.BcCodeCpp;
 
 import macromedia.asc.parser.Node;
 
@@ -101,7 +101,7 @@ public class BcClassDefinitionNode extends BcNode
 	
 	public void add(BcVariableDeclaration var)
 	{
-		if (BcCode.canBeClass(var.getType()))
+		if (BcCodeCpp.canBeClass(var.getType()))
 		{
 			hasReferenceVars = true;
 		}
