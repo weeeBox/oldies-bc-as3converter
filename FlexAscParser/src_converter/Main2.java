@@ -940,8 +940,9 @@ public class Main2
 					pushDest(initDest);
 					for (Node elementNode : elementlist.items)
 					{
-						initDest.write(" << ");
+						initDest.write(".add(");
 						process(elementNode);
+						initDest.write(")");
 					}
 					popDest();
 					
