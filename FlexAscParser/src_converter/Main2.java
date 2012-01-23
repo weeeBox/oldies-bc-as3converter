@@ -514,7 +514,7 @@ public class Main2
 		BcTypeNode varType = bcVar.getType();
 		String varId = bcVar.getIdentifier();
 		
-		dest.writef("%s %s", BcCode.typeRef(varType.getName()), BcCode.identifier(varId));
+		dest.writef("%s %s", BcCode.type(varType.getName()), BcCode.identifier(varId));
 		
 		Node initializer = bcVar.getInitializerNode();
 		if (initializer != null)
@@ -642,7 +642,7 @@ public class Main2
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
 		
-		dest.writef("%s %s", BcCode.typeRef(varType.getName()), BcCode.identifier(bcIdentifier));
+		dest.writef("%s %s", BcCode.type(varType.getName()), BcCode.identifier(bcIdentifier));
 		
 		if (varBindNode.initializer != null)
 		{
@@ -1001,7 +1001,7 @@ public class Main2
 			{
 				if (BcCode.canBeClass(type) || BcCode.isBasicType(type))
 				{
-					dest.writef("((%s)(%s))", BcCode.typeRef(exprDest.toString()), argsDest);
+					dest.writef("((%s)(%s))", BcCode.type(exprDest.toString()), argsDest);
 				}
 				else
 				{
@@ -1161,7 +1161,7 @@ public class Main2
 		}
 		else if (node instanceof LiteralNullNode)
 		{
-			dest.write(BcCode.NULL);
+			dest.write("null");
 		}
 		else if (node instanceof LiteralBooleanNode)
 		{
@@ -1801,8 +1801,8 @@ public class Main2
 				String genericName = BcCode.type(vectorType.getGeneric());
 				String typeName = BcCode.type(bcType);
 				
-				dst.writelnf("typedef %s<%s> %s;", BcCode.type(BcCode.VECTOR_TYPE), BcCode.typeRef(genericName), typeName);
-				dst.writelnf("typedef %s::Ref %s;", typeName, BcCode.typeRef(typeName));
+				dst.writelnf("typedef %s<%s> %s;", BcCode.type(BcCode.VECTOR_TYPE), BcCode.type(genericName), typeName);
+				dst.writelnf("typedef %s::Ref %s;", typeName, BcCode.type(typeName));
 			}
 			else
 			{
@@ -1922,7 +1922,7 @@ public class Main2
 	private static void writeClassCreateFunction(BcClassDefinitionNode bcClass, List<BcFuncParam> params)
 	{
 		String className = getClassName(bcClass);
-		String classRef = BcCode.typeRef(bcClass.getName());
+		String classRef = BcCode.type(bcClass.getName());
 		
 		String createFuncName = classCreateName + className;
 		
@@ -2174,7 +2174,7 @@ public class Main2
 	{
 		String className = getClassName(bcClass);
 		String interfaceName = getClassName(interfaceClass);
-		String interfaceRef = BcCode.typeRef(interfaceName);
+		String interfaceRef = BcCode.type(interfaceName);
 		String boxName = interfaceBoxName + interfaceName; 
 		
 		src.writelnf("%s %s();", interfaceRef, boxName);
@@ -2212,7 +2212,7 @@ public class Main2
 		impl.writeln();
 		
 		String className = getClassName(bcClass);
-		String classRef = BcCode.typeRef(className);
+		String classRef = BcCode.type(className);
 		
 		String interfaceName = getClassName(bcClass) + "_" + interfaceClass.getName();
 		String interfaceBaseName = getClassName(interfaceClass);
