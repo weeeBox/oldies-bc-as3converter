@@ -72,7 +72,7 @@ import bc.builtin.BuiltinClasses;
 import bc.code.FileWriteDestination;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
-import bc.help.BcCodeCpp;
+import bc.help.BcCodeCs;
 import bc.help.BcNodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
@@ -514,7 +514,7 @@ public class Main2
 		BcTypeNode varType = bcVar.getType();
 		String varId = bcVar.getIdentifier();
 		
-		dest.writef("%s %s", BcCodeCpp.type(varType.getName()), BcCodeCpp.identifier(varId));
+		dest.writef("%s %s", BcCodeCs.type(varType.getName()), BcCodeCs.identifier(varId));
 		
 		Node initializer = bcVar.getInitializerNode();
 		if (initializer != null)
@@ -642,7 +642,7 @@ public class Main2
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
 		
-		dest.writef("%s %s", BcCodeCpp.type(varType.getName()), BcCodeCpp.identifier(bcIdentifier));
+		dest.writef("%s %s", BcCodeCs.type(varType.getName()), BcCodeCs.identifier(bcIdentifier));
 		
 		if (varBindNode.initializer != null)
 		{
@@ -690,7 +690,7 @@ public class Main2
 				baseIdentifier = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)base);
 				if (baseIdentifier != null)
 				{
-					staticCall = BcCodeCpp.canBeClass(baseIdentifier);
+					staticCall = BcCodeCs.canBeClass(baseIdentifier);
 					
 					BcTypeNode baseType = findIdentifierType(baseIdentifier);
 					if (baseType != null)
@@ -847,7 +847,7 @@ public class Main2
 
 	private static BcTypeNode findIdentifierType(String name)
 	{
-		if (BcCodeCpp.canBeClass(name))
+		if (BcCodeCs.canBeClass(name))
 		{
 			BcClassDefinitionNode bcClass = findClass(name);
 			if (bcClass != null)
@@ -955,16 +955,16 @@ public class Main2
 					}
 					popDest();
 					
-					dest.write(BcCodeCpp.construct(vectorType, elementlist.size()) + initDest);
+					dest.write(BcCodeCs.construct(vectorType, elementlist.size()) + initDest);
 				}
 				else
 				{
-					dest.write(BcCodeCpp.construct(vectorType, argsDest));
+					dest.write(BcCodeCs.construct(vectorType, argsDest));
 				}
 			}
 			else
 			{
-				dest.write(BcCodeCpp.construct(type, argsDest.toString()));
+				dest.write(BcCodeCs.construct(type, argsDest.toString()));
 			}
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
@@ -988,20 +988,20 @@ public class Main2
 					process(elementNode);
 				}
 				popDest();
-				dest.write(BcCodeCpp.construct(bcVector, elementlist.size()) + initDest);
+				dest.write(BcCodeCs.construct(bcVector, elementlist.size()) + initDest);
 			}
 			else
 			{
-				dest.write(BcCodeCpp.construct(type, 1) + " << " + argsDest);
+				dest.write(BcCodeCs.construct(type, 1) + " << " + argsDest);
 			}			
 		}
 		else
 		{
 			if (node.getMode() == Tokens.EMPTY_TOKEN && node.args != null && node.args.items.size() == 1)
 			{
-				if (BcCodeCpp.canBeClass(type) || BcCodeCpp.isBasicType(type))
+				if (BcCodeCs.canBeClass(type) || BcCodeCs.isBasicType(type))
 				{
-					dest.writef("((%s)(%s))", BcCodeCpp.type(exprDest.toString()), argsDest);
+					dest.writef("((%s)(%s))", BcCodeCs.type(exprDest.toString()), argsDest);
 				}
 				else
 				{
@@ -1098,7 +1098,7 @@ public class Main2
 			for (Node genericTypeNode : typeArgs.items)
 			{
 				BcTypeNode genericType = extractBcType(genericTypeNode);
-				typeBuffer.append(BcCodeCpp.type(genericType));
+				typeBuffer.append(BcCodeCs.type(genericType));
 				if (++genericIndex < genericCount)
 				{
 					typeBuffer.append(",");
@@ -1171,7 +1171,7 @@ public class Main2
 		else if (node instanceof LiteralStringNode)
 		{
 			LiteralStringNode stringNode = (LiteralStringNode) node;
-			dest.write(BcCodeCpp.construct(classString, String.format("\"%s\"", stringNode.value)));
+			dest.write(BcCodeCs.construct(classString, String.format("\"%s\"", stringNode.value)));
 		}
 		else if (node instanceof LiteralRegExpNode)
 		{
@@ -1320,12 +1320,12 @@ public class Main2
 			if (child3.expr instanceof QualifiedIdentifierNode)
 			{
 				QualifiedIdentifierNode identifier = (QualifiedIdentifierNode) child3.expr;
-				loopVarName = BcCodeCpp.identifier(identifier.name);
+				loopVarName = BcCodeCs.identifier(identifier.name);
 			}
 			else if (child3.expr instanceof IdentifierNode)
 			{
 				IdentifierNode identifier = (IdentifierNode) child3.expr;
-				loopVarName = BcCodeCpp.identifier(identifier.name);
+				loopVarName = BcCodeCs.identifier(identifier.name);
 			}
 			else
 			{
@@ -1336,7 +1336,7 @@ public class Main2
 			assert loopVar != null : loopVarName;
 			
 			// get loop body
-			dest.writelnf("for (%s::Iterator __it = %s->__internalIterator(); __it.hasNext();)", BcCodeCpp.type(collectionType), collection);
+			dest.writelnf("for (%s::Iterator __it = %s->__internalIterator(); __it.hasNext();)", BcCodeCs.type(collectionType), collection);
 			Node bodyNode = statements.items.get(1);
 			if (bodyNode != null)
 			{
@@ -1472,7 +1472,7 @@ public class Main2
 
 		if (node.op == Tokens.IS_TOKEN)
 		{
-			dest.write(BcCodeCpp.operatorIs(ldest, rdest));
+			dest.write(BcCodeCs.operatorIs(ldest, rdest));
 		}
 		else if (node.op == Tokens.AS_TOKEN)
 		{
@@ -1523,7 +1523,7 @@ public class Main2
 		dest.write("break");
 		if (node.id != null)
 		{
-			String id = BcCodeCpp.identifier(node.id);
+			String id = BcCodeCs.identifier(node.id);
 			dest.write(" " + id);
 		}
 		dest.writeln(";");
@@ -1536,7 +1536,7 @@ public class Main2
 	
 	private static void process(SuperExpressionNode node)
 	{
-		String extendsClass = BcCodeCpp.type(lastBcClass.getExtendsType());
+		String extendsClass = BcCodeCs.type(lastBcClass.getExtendsType());
 		dest.write(extendsClass);
 	}
 	
@@ -1561,7 +1561,7 @@ public class Main2
 			popDest();
 		}
 		
-		dest.writelnf("%s(%s);", BcCodeCpp.superCallMarker, argsDest);
+		dest.writelnf("%s(%s);", BcCodeCs.superCallMarker, argsDest);
 	}
 	
 	private static void process(BcFunctionDeclaration bcFunc)
@@ -1728,8 +1728,8 @@ public class Main2
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? BcCodeCpp.typeRef(bcFunc.getReturnType()) : "void";
-			String name = BcCodeCpp.identifier(bcFunc.getName());
+			String type = bcFunc.hasReturnType() ? BcCodeCs.typeRef(bcFunc.getReturnType()) : "void";
+			String name = BcCodeCs.identifier(bcFunc.getName());
 			
 			if (bcFunc.isConstructor())
 			{
@@ -1744,8 +1744,8 @@ public class Main2
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = BcCodeCpp.type(bcParam.getType());
-				String paramName = BcCodeCpp.identifier(bcParam.getIdentifier());
+				String paramType = BcCodeCs.type(bcParam.getType());
+				String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(paramName);
 				if (++paramIndex < params.size())
@@ -1798,15 +1798,15 @@ public class Main2
 			if (bcType instanceof BcVectorTypeNode)
 			{
 				BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
-				String genericName = BcCodeCpp.type(vectorType.getGeneric());
-				String typeName = BcCodeCpp.type(bcType);
+				String genericName = BcCodeCs.type(vectorType.getGeneric());
+				String typeName = BcCodeCs.type(bcType);
 				
-				dst.writelnf("typedef %s<%s> %s;", BcCodeCpp.type(BcCodeCpp.VECTOR_TYPE), BcCodeCpp.type(genericName), typeName);
-				dst.writelnf("typedef %s::Ref %s;", typeName, BcCodeCpp.type(typeName));
+				dst.writelnf("typedef %s<%s> %s;", BcCodeCs.type(BcCodeCs.VECTOR_TYPE), BcCodeCs.type(genericName), typeName);
+				dst.writelnf("typedef %s::Ref %s;", typeName, BcCodeCs.type(typeName));
 			}
 			else
 			{
-				String typeName = BcCodeCpp.type(bcType);
+				String typeName = BcCodeCs.type(bcType);
 				dst.writelnf("__TYPEREF_DEF(%s)", typeName);				
 			}
 		}
@@ -1822,7 +1822,7 @@ public class Main2
 			}
 			else
 			{
-				String typeName = BcCodeCpp.type(type);
+				String typeName = BcCodeCs.type(type);
 				dst.writelnf("#include \"%s.h\"", typeName);
 			}
 		}
@@ -1835,8 +1835,8 @@ public class Main2
 		
 		for (BcVariableDeclaration bcField : fields)
 		{
-			String type = BcCodeCpp.type(bcField.getType());
-			String name = BcCodeCpp.identifier(bcField.getIdentifier());
+			String type = BcCodeCs.type(bcField.getType());
+			String name = BcCodeCs.identifier(bcField.getIdentifier());
 						
 			src.write(bcField.getVisiblity() + " ");
 			
@@ -1863,8 +1863,8 @@ public class Main2
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? BcCodeCpp.type(bcFunc.getReturnType()) : "void";
-			String name = BcCodeCpp.identifier(bcFunc.getName());			
+			String type = bcFunc.hasReturnType() ? BcCodeCs.type(bcFunc.getReturnType()) : "void";
+			String name = BcCodeCs.identifier(bcFunc.getName());			
 			
 			src.write(bcFunc.getVisiblity() + " ");
 			if (!bcFunc.isConstructor())
@@ -1886,8 +1886,8 @@ public class Main2
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = BcCodeCpp.type(bcParam.getType());
-				String paramName = BcCodeCpp.identifier(bcParam.getIdentifier());
+				String paramType = BcCodeCs.type(bcParam.getType());
+				String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				if (++paramIndex < params.size())
 				{
@@ -1922,7 +1922,7 @@ public class Main2
 	private static void writeClassCreateFunction(BcClassDefinitionNode bcClass, List<BcFuncParam> params)
 	{
 		String className = getClassName(bcClass);
-		String classRef = BcCodeCpp.type(bcClass.getName());
+		String classRef = BcCodeCs.type(bcClass.getName());
 		
 		String createFuncName = classCreateName + className;
 		
@@ -1936,8 +1936,8 @@ public class Main2
 		int paramIndex = 0;
 		for (BcVariableDeclaration bcParam : params)
 		{
-			String paramType = BcCodeCpp.typeArgRef(bcParam.getType());
-			String paramName = BcCodeCpp.identifier(bcParam.getIdentifier());
+			String paramType = BcCodeCs.typeArgRef(bcParam.getType());
+			String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
 			paramsBuffer.append(String.format("%s %s", paramType, paramName));
 			argsBuffer.append(paramName);
 			if (++paramIndex < params.size())
@@ -1989,8 +1989,8 @@ public class Main2
 			int paramIndex = 0;
 			for (BcVariableDeclaration bcParam : params)
 			{
-				String paramType = BcCodeCpp.typeArgRef(bcParam.getType());
-				String paramName = BcCodeCpp.identifier(bcParam.getIdentifier());
+				String paramType = BcCodeCs.typeArgRef(bcParam.getType());
+				String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				if (++paramIndex < params.size())
 				{
@@ -2008,15 +2008,15 @@ public class Main2
 			String constructorLine = bodyLines.get(1);
 			
 			String superConstructFuncName = classConstructName + getBaseClassName(bcClass);
-			if (constructorLine.contains(BcCodeCpp.superCallMarker))
+			if (constructorLine.contains(BcCodeCs.superCallMarker))
 			{
-				String newConstructorLine = constructorLine.replace(BcCodeCpp.superCallMarker, superConstructFuncName);
+				String newConstructorLine = constructorLine.replace(BcCodeCs.superCallMarker, superConstructFuncName);
 				bodyLines.set(1, newConstructorLine);				
 			}
-			else if (constructorLine.contains(BcCodeCpp.thisCallMarker))
+			else if (constructorLine.contains(BcCodeCs.thisCallMarker))
 			{
 				String thisConstructFuncName = classConstructName + getClassName(bcClass);
-				String newConstructorLine = constructorLine.replace(BcCodeCpp.thisCallMarker, thisConstructFuncName);
+				String newConstructorLine = constructorLine.replace(BcCodeCs.thisCallMarker, thisConstructFuncName);
 				bodyLines.set(1, newConstructorLine);
 			}
 			else
@@ -2053,7 +2053,7 @@ public class Main2
 			
 			if (field.hasInitializer())
 			{
-				impl.writelnf("%s = %s;", BcCodeCpp.identifier(field.getIdentifier()), field.getInitializer());
+				impl.writelnf("%s = %s;", BcCodeCs.identifier(field.getIdentifier()), field.getInitializer());
 			}
 		}
 		
@@ -2105,7 +2105,7 @@ public class Main2
 				continue;
 			}
 			
-			impl.writelnf("%s = %s;", BcCodeCpp.identifier(field.getIdentifier()), field.getInitializer());
+			impl.writelnf("%s = %s;", BcCodeCs.identifier(field.getIdentifier()), field.getInitializer());
 		}
 		
 		writeBlockClose(impl);		
@@ -2147,13 +2147,13 @@ public class Main2
 			{
 				impl.write("  ");
 				
-				if (BcCodeCpp.canBeClass(field.getType()))
+				if (BcCodeCs.canBeClass(field.getType()))
 				{
-					impl.writef("%s(false)", BcCodeCpp.identifier(field.getIdentifier()));
+					impl.writef("%s(false)", BcCodeCs.identifier(field.getIdentifier()));
 				}
 				else
 				{
-					impl.writef("%s(0)", BcCodeCpp.identifier(field.getIdentifier()));
+					impl.writef("%s(0)", BcCodeCs.identifier(field.getIdentifier()));
 				}
 				if (++fieldIndex < initializedFields.size())
 				{
@@ -2174,7 +2174,7 @@ public class Main2
 	{
 		String className = getClassName(bcClass);
 		String interfaceName = getClassName(interfaceClass);
-		String interfaceRef = BcCodeCpp.type(interfaceName);
+		String interfaceRef = BcCodeCs.type(interfaceName);
 		String boxName = interfaceBoxName + interfaceName; 
 		
 		src.writelnf("%s %s();", interfaceRef, boxName);
@@ -2212,7 +2212,7 @@ public class Main2
 		impl.writeln();
 		
 		String className = getClassName(bcClass);
-		String classRef = BcCodeCpp.type(className);
+		String classRef = BcCodeCs.type(className);
 		
 		String interfaceName = getClassName(bcClass) + "_" + interfaceClass.getName();
 		String interfaceBaseName = getClassName(interfaceClass);
@@ -2237,8 +2237,8 @@ public class Main2
 		List<BcFunctionDeclaration> functions = interfaceClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? BcCodeCpp.typeRef(bcFunc.getReturnType()) : "void";
-			String name = BcCodeCpp.identifier(bcFunc.getName());
+			String type = bcFunc.hasReturnType() ? BcCodeCs.typeRef(bcFunc.getReturnType()) : "void";
+			String name = BcCodeCs.identifier(bcFunc.getName());
 			
 			src.writef("%s %s(", type, name);
 			
@@ -2251,8 +2251,8 @@ public class Main2
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = BcCodeCpp.typeArgRef(bcParam.getType());
-				String paramName = BcCodeCpp.identifier(bcParam.getIdentifier());
+				String paramType = BcCodeCs.typeArgRef(bcParam.getType());
+				String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(String.format("%s", paramName));
 				if (++paramIndex < params.size())
@@ -2414,7 +2414,7 @@ public class Main2
 	
 	private static void tryAddUniqueType(List<BcTypeNode> types, BcTypeNode type)
 	{
-		if (BcCodeCpp.canBeClass(type))
+		if (BcCodeCs.canBeClass(type))
 		{
 			if (type instanceof BcVectorTypeNode)
 			{
@@ -2430,17 +2430,17 @@ public class Main2
 	
 	private static String getClassName(BcClassDefinitionNode bcClass)
 	{
-		return BcCodeCpp.type(bcClass.getName());
+		return BcCodeCs.type(bcClass.getName());
 	}
 	
 	private static String getBaseClassName(BcClassDefinitionNode bcClass)
 	{
 		if (bcClass.hasExtendsType())
 		{
-			return BcCodeCpp.type(bcClass.getExtendsType());
+			return BcCodeCs.type(bcClass.getExtendsType());
 		}
 		
-		return BcCodeCpp.type(classObject);
+		return BcCodeCs.type(classObject);
 	}
 	
 	public static BcTypeNode evaluateType(Node node)
@@ -2448,7 +2448,7 @@ public class Main2
 		if (node instanceof IdentifierNode)
 		{
 			IdentifierNode identifier = (IdentifierNode) node;
-			return findIdentifierType(BcCodeCpp.identifier(identifier));
+			return findIdentifierType(BcCodeCs.identifier(identifier));
 		}
 		
 		if (node instanceof LiteralNumberNode)
@@ -2609,7 +2609,7 @@ public class Main2
 					{
 						return BcTypeNode.create(classXMLList); // dirty hack
 					}
-					else if (BcCodeCpp.identifier(identifier).equals(BcCodeCpp.thisCallMarker))
+					else if (BcCodeCs.identifier(identifier).equals(BcCodeCs.thisCallMarker))
 					{
 						return lastBcClass.getClassType(); // this referes to the current class
 					}
@@ -2655,7 +2655,7 @@ public class Main2
 		String name = BcNodeHelper.extractBcIdentifier(identifier);
 		
 		// check if it's class
-		if (BcCodeCpp.canBeClass(name))
+		if (BcCodeCs.canBeClass(name))
 		{
 			BcClassDefinitionNode bcClass = findClass(name);
 			if (bcClass != null)
@@ -2663,7 +2663,7 @@ public class Main2
 				return bcClass.getClassType();
 			}
 		}
-		else if (BcCodeCpp.isBasicType(name))
+		else if (BcCodeCs.isBasicType(name))
 		{			
 			return BcTypeNode.create(name);
 		}
