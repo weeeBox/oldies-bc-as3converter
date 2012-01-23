@@ -1161,7 +1161,7 @@ public class Main2
 		}
 		else if (node instanceof LiteralNullNode)
 		{
-			dest.write("null");
+			dest.write(BcCodeCs.NULL);
 		}
 		else if (node instanceof LiteralBooleanNode)
 		{

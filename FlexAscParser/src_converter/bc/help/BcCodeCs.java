@@ -9,18 +9,18 @@ import bc.lang.BcVectorTypeNode;
 
 public class BcCodeCs
 {
-	private static final String NEW = "__NEW";
+	private static final String NEW = "new";
 	private static final String NEWVECTOR = "__NEWVECTOR";
-	private static final String REF_POSTFIX = "_ref";
+	private static final String REF_POSTFIX = "";
 
-	private static final String INSTANCE_OF = "__INSTANCEOF";
+	private static final String INSTANCE_OF = "is";
 	
 	public static final String TYPE_PREFIX = "As";
 	
 	public static final String VECTOR_TYPE = "Vector";
-	public static final String VECTOR_TYPE_PREFIX = "__V_";
+	public static final String VECTOR_TYPE_PREFIX = "Bc";
 	
-	public static final String NULL = "__NULL";
+	public static final String NULL = "null";
 	
 	public static final String superCallMarker = "__$super$__";
 	public static final String thisCallMarker = "__$this$__";
@@ -93,11 +93,7 @@ public class BcCodeCs
 	}
 
 	public static String typeArgRef(BcTypeNode bcType)
-	{
-		if (canBeClass(bcType))
-		{
-			return "const " + typeRef(bcType) + "&";
-		}
+	{		
 		return type(bcType);
 	}
 	
@@ -136,14 +132,14 @@ public class BcCodeCs
 		if (type instanceof BcVectorTypeNode)
 		{
 			BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
-			return NEWVECTOR + "(" + VECTOR_TYPE_PREFIX + type(vectorType.getGeneric()) + ", (" + initializer + "))";
+			return NEW + " " + VECTOR_TYPE_PREFIX + type(vectorType.getGeneric()) + "(" + initializer + ")";
 		}
 		return construct(type.getName(), initializer);
 	}
 	
 	public static String construct(String type, Object initializer)
 	{
-		return NEW + "(" + type(type) + ", (" + initializer + "))";
+		return NEW + " " + type(type) + "(" + initializer + ")";
 	}
 
 	public static String operatorIs(Object lhs, Object rhs)
