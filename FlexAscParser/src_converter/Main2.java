@@ -940,7 +940,7 @@ public class Main2
 					pushDest(initDest);
 					for (Node elementNode : elementlist.items)
 					{
-						initDest.write(".add(");
+						initDest.write(".a(");
 						process(elementNode);
 						initDest.write(")");
 					}

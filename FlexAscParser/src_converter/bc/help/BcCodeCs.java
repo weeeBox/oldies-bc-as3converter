@@ -10,15 +10,13 @@ import bc.lang.BcVectorTypeNode;
 public class BcCodeCs
 {
 	private static final String NEW = "new";
-	private static final String NEWVECTOR = "__NEWVECTOR";
-	private static final String REF_POSTFIX = "";
 
 	private static final String IS = "is";
 	
 	public static final String TYPE_PREFIX = "As";
 	
 	public static final String VECTOR_TYPE = "Vector";
-	public static final String VECTOR_TYPE_PREFIX = "Bc";
+	public static final String VECTOR_BC_TYPE = "Vector";
 	
 	public static final String NULL = "null";
 	
@@ -44,7 +42,7 @@ public class BcCodeCs
 		{
 			BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
 			String genericName = BcCodeCs.type(vectorType.getGeneric());
-			return BcCodeCs.VECTOR_TYPE_PREFIX + genericName;
+			return type(VECTOR_BC_TYPE) + "<" + genericName + ">";
 		}
 		
 		return type(typeName);
@@ -58,7 +56,7 @@ public class BcCodeCs
 			return basic;
 		}
 		
-		if (name.startsWith(TYPE_PREFIX) || name.startsWith(VECTOR_TYPE_PREFIX))
+		if (name.startsWith(TYPE_PREFIX))
 		{
 			return name; 
 		}
@@ -82,9 +80,6 @@ public class BcCodeCs
 
 	public static boolean canBeClass(String name)
 	{
-		if (name.startsWith(VECTOR_TYPE_PREFIX))
-			return true;
-		
 		if (isBasicType(name))
 			return false;
 		
@@ -99,21 +94,11 @@ public class BcCodeCs
 	
 	public static String typeRef(BcTypeNode bcType)
 	{
-		if (canBeClass(bcType))
-		{
-			return type(bcType) + REF_POSTFIX;
-		}
-		
 		return type(bcType);
 	}
 
 	public static String typeRef(String type)
 	{
-		if (canBeClass(type))
-		{
-			return type(type) + REF_POSTFIX;
-		}
-		
 		return type(type);
 	}
 
@@ -132,7 +117,7 @@ public class BcCodeCs
 		if (type instanceof BcVectorTypeNode)
 		{
 			BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
-			return NEW + " " + VECTOR_TYPE_PREFIX + type(vectorType.getGeneric()) + "(" + initializer + ")";
+			return NEW + " " + type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGeneric()) + ">" + "(" + initializer + ")";
 		}
 		return construct(type.getName(), initializer);
 	}
