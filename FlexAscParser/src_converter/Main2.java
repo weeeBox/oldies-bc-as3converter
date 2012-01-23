@@ -1833,37 +1833,25 @@ public class Main2
 		List<BcVariableDeclaration> fields = bcClass.getFields();
 		impl.writeln();
 		
-		String className = getClassName(bcClass);
-		
 		for (BcVariableDeclaration bcField : fields)
 		{
-			String type = BcCode.typeRef(bcField.getType());
+			String type = BcCode.type(bcField.getType());
 			String name = BcCode.identifier(bcField.getIdentifier());
-			boolean canBeClass = BcCode.canBeClass(bcField.getType());
-			boolean isConst = bcField.isConst();
-			
+						
 			if (bcField.isStatic())
 			{
 				src.write("static ");
-				if (canBeClass)
-				{
-					impl.writelnf("%s %s::%s(true);", type, className, name);
-				}
-				else if (!bcField.hasInitializer())
-				{
-					impl.writelnf("%s %s::%s(0);", type, className, name);
-				}
 			}
-			if (bcField.isConst() && !canBeClass)
+			
+			if (bcField.isConst())
 			{
 				src.write("const ");
 			}
 			src.writef("%s %s", type, name);
-			if (isConst && bcField.isIntegralInitializerFlag())
+			if (bcField.hasInitializer())
 			{
 				src.writef(" = %s", bcField.getInitializer());
 			}
-			
 			src.writeln(";");
 		}
 	}
@@ -1873,14 +1861,10 @@ public class Main2
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? BcCode.typeRef(bcFunc.getReturnType()) : "void";
-			String name = BcCode.identifier(bcFunc.getName());
+			String type = bcFunc.hasReturnType() ? BcCode.type(bcFunc.getReturnType()) : "void";
+			String name = BcCode.identifier(bcFunc.getName());			
 			
-			if (bcFunc.isConstructor())
-			{
-				continue;
-			}
-			
+			src.write(bcFunc.getVisiblity() + " ");			
 			if (bcFunc.isStatic())
 			{
 				src.write("static ");
@@ -1890,9 +1874,6 @@ public class Main2
 				src.write("virtual ");
 			}
 			src.writef("%s %s(", type, name);
-			
-			impl.writeln();
-			impl.writef("%s %s::%s(", type, getClassName(bcClass), name);
 			
 			StringBuilder paramsBuffer = new StringBuilder();
 			List<BcFuncParam> params = bcFunc.getParams();
@@ -1909,11 +1890,8 @@ public class Main2
 			}
 			
 			src.write(paramsBuffer);
-			impl.write(paramsBuffer);
-			src.writeln(");");
-			impl.writeln(")");
-			
-			impl.writeln(bcFunc.getBody());
+			src.writeln(")");
+			src.writeln(bcFunc.getBody());
 		}
 	}
 	
