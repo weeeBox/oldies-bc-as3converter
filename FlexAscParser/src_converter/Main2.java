@@ -97,8 +97,6 @@ public class Main2
 	private static BcTypeNode lastBcMemberType;
 	
 	private static final String classInitialiseName = "__internalInitialise";
-	private static final String classGcName = "__internalGc";
-	private static final String classGcNeeded = "__internalGcNeeded";
 	private static final String classConstructName = "__internalConstruct";
 	private static final String classCreateName = "__create";
 	
@@ -1770,32 +1768,14 @@ public class Main2
 		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
 		impl = new ListWriteDestination();
 		
-		String defGuardName = className + "_h__";
-		
-		src.writeln("#ifndef " + defGuardName);
-		src.writeln("#define " + defGuardName);
-		src.writeln();
-		
-		src.writeln("#include \"AsBase.h\"");
-		src.writeln();
-		
-		src.writelnf("#include \"%s.h\"", classExtends);
-		src.writeln();
-		
-		impl.writelnf("#include \"%s.h\"", className);
-		
 		List<BcTypeNode> headerTypes = getHeaderTypedefs(bcClass);
 		List<BcTypeNode> implTypes = getImplementationTypedefs(bcClass);
 		
-		writeHeaderTypes(src, headerTypes);
-		writeImplementationTypes(impl, headerTypes);
-		writeImplementationTypes(impl, implTypes);
+		src.writeln("namespace bc");
+		writeBlockOpen(src);
 		
-		src.writeln();
-		
-		src.writelnf("class %s : public %s", className, classExtends);
-		src.writeln("{");
-		src.incTab();
+		src.writelnf("public class %s : %s", className, classExtends);
+		writeBlockOpen(src);
 		
 		writeFields(bcClass);
 		writeFunctions(bcClass);
@@ -1804,26 +1784,9 @@ public class Main2
 		writeClassInit(bcClass);
 		writeClassStaticInit(bcClass);
 		writeClassDefaultConstructor(bcClass);
-		writeClassInternalGc(bcClass);
 		
-		// generate interface boxers accessors if any
-		if (bcClass.hasInterfaces())
-		{
-			writeBoxingInterfacesAccessors(bcClass);
-		}
-		
-		src.decTab();
-		src.writeln("};");
-		
-		writeBlankLine();
-
-		// generate interface boxers if any
-		if (bcClass.hasInterfaces())
-		{
-			writeBoxingInterfaces(bcClass);
-		}
-		
-		src.writeln("#endif // " + defGuardName);
+		writeBlockClose(src);
+		writeBlockClose(src);
 		
 		src.close();
 	}
@@ -2223,59 +2186,6 @@ public class Main2
 		writeEmptyBlock(impl);
 	}
 	
-	private static void writeClassInternalGc(BcClassDefinitionNode bcClass)
-	{
-		if (bcClass.hasReferenceVars())
-		{
-			String className = getClassName(bcClass);
-			String baseClassName = getBaseClassName(bcClass);
-			
-			src.writelnf("void %s();", classGcName);
-			
-			impl.writeln();
-			impl.writelnf("void %s::%s()", className, classGcName);
-			writeBlockOpen(impl);
-
-			impl.writelnf("if(%s())", classGcNeeded);
-			writeBlockOpen(impl);
-			impl.writelnf("%s::%s();", baseClassName, classGcName);
-			
-			List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
-			for (BcVariableDeclaration field : fields)
-			{
-				if (field.isStatic())
-				{
-					continue;
-				}
-				
-				if (!BcCode.canBeClass(field.getType()))
-				{
-					continue;
-				}
-				
-				String identifier = BcCode.identifier(field.getIdentifier());
-				impl.writelnf("if (%s != %s) %s->%s();", identifier, BcCode.NULL, identifier, classGcName);
-			}
-			
-			writeBlockClose(impl);
-			writeBlockClose(impl);
-		}
-	}
-	
-	private static void writeBoxingInterfacesAccessors(BcClassDefinitionNode bcClass)
-	{
-		src.writeln();
-		
-		List<BcTypeNode> interfaces = bcClass.getInterfaces();
-		for (BcTypeNode bcInterface : interfaces)
-		{
-			BcClassDefinitionNode interfaceClass = bcInterface.getClassNode();
-			assert interfaceClass != null : bcInterface.getName();
-			
-			writeBoxingInterfaceAccessor(bcClass, interfaceClass);
-		}
-	}
-	
 	private static void writeBoxingInterfaceAccessor(BcClassDefinitionNode bcClass, BcClassDefinitionNode interfaceClass)
 	{
 		String className = getClassName(bcClass);
@@ -2386,17 +2296,7 @@ public class Main2
 		
 		// internalGc
 
-		impl.writeln();
-		
-		src.writelnf("void %s();", classGcName);
-		impl.writelnf("void %s::%s()", interfaceName, classGcName);
-		writeBlockOpen(impl);
-		impl.writelnf("if(%s())", classGcNeeded);
-		writeBlockOpen(impl);
-		impl.writelnf("%s::%s();", interfaceBaseName, classGcName);
-		impl.writelnf("m_base->%s();", classGcName);
-		writeBlockClose(impl);		
-		writeBlockClose(impl);		
+		impl.writeln();						
 		
 		src.decTab();
 		src.writeln("};");
