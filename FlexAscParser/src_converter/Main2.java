@@ -94,7 +94,6 @@ public class Main2
 	
 	private static BcClassDefinitionNode lastBcClass;
 	private static BcFunctionDeclaration lastBcFunction;
-	private static BcTypeNode lastBcMemberType;
 	
 	private static final String classObject = "Object";
 	private static final String classString = "String";
@@ -658,9 +657,6 @@ public class Main2
 	
 	private static void process(MemberExpressionNode node)
 	{
-		lastBcMemberType = null;
-		String baseIdentifier = null;
-		
 		Node base = node.base;
 		SelectorNode selector = node.selector;
 		
@@ -673,70 +669,11 @@ public class Main2
 		{
 			process(base);
 
-			boolean staticCall = false;
-			
-			if (base instanceof MemberExpressionNode)
-			{
-				baseIdentifier = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)base);
-				if (baseIdentifier != null)
-				{
-					staticCall = BcCodeCs.canBeClass(baseIdentifier);
-					
-					BcTypeNode baseType = findIdentifierType(baseIdentifier);
-					if (baseType != null)
-					{
-						lastBcMemberType = baseType;
-					}
-				}
-			} 
-			else if (base instanceof ThisExpressionNode)
-			{
-				lastBcMemberType = lastBcClass.getClassType();
-			}
-			else if (base instanceof SuperExpressionNode)
-			{
-				lastBcMemberType = lastBcClass.getExtendsType();
-			}
-			else if (base instanceof ListNode)
-			{
-				ListNode list = (ListNode) base;
-				assert list.items.size() == 1 : list.items.size();
-				
-				Node item = list.items.get(0);
-				if (item instanceof MemberExpressionNode)
-				{
-					MemberExpressionNode member = (MemberExpressionNode) item;
-					assert member.base == null : member.base.getClass();
-					
-					assert member.selector instanceof CallExpressionNode : member.selector.getClass();
-					CallExpressionNode call = (CallExpressionNode) member.selector;
-					
-					assert call.expr instanceof IdentifierNode : call.expr.getClass();
-					IdentifierNode identifier = (IdentifierNode) call.expr;
-					
-					BcClassDefinitionNode castClass = findClass(identifier.name);
-					assert castClass != null : identifier.name;
-					
-					lastBcMemberType = castClass.getClassType();
-				}
-			}
-			else
-			{
-				assert false;
-			}
-			
 			if (selector instanceof GetExpressionNode || 
 				selector instanceof CallExpressionNode || 
 				selector instanceof SetExpressionNode)
 			{
-				if (selector.getMode() == Tokens.DOT_TOKEN)
-				{
-					dest.write(staticCall ? "::" : "->");
-				}
-				else
-				{
-					dest.write("->");
-				}
+				dest.write(".");
 			}
 		}
 		
@@ -774,7 +711,7 @@ public class Main2
 		popDest();
 		
 		assert node.getMode() == Tokens.LEFTBRACKET_TOKEN;
-		dest.writef("->remove(%s)", expr);
+		dest.writef(".remove(%s)", expr);
 	}
 	
 	private static void process(GetExpressionNode node)
@@ -785,40 +722,6 @@ public class Main2
 		popDest();
 		
 		String expr = exprDest.toString();
-		
-		if (lastBcMemberType != null)
-		{
-			BcTypeNode memberType = lastBcMemberType;
-			lastBcMemberType = null;
-			
-			if (node.expr instanceof IdentifierNode)
-			{
-				String identifier = expr;
-				
-				BcClassDefinitionNode bcClass = memberType.getClassNode();
-				if (bcClass != null)
-				{
-					BcFunctionDeclaration bcFunc = bcClass.findGetterFunction(identifier);
-					if (bcFunc != null)
-					{
-						BcTypeNode funcType = bcFunc.getReturnType();
-						assert funcType != null : identifier;
-						
-						expr = identifier + "()";
-						lastBcMemberType = funcType;
-					}
-					else
-					{
-						BcVariableDeclaration bcField = bcClass.findField(identifier);
-						if (bcField != null)
-						{
-							BcTypeNode fieldType = bcField.getType();
-							lastBcMemberType = fieldType;
-						}
-					}
-				}
-			}
-		}
 		
 		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 		{
@@ -890,28 +793,7 @@ public class Main2
 		popDest();
 		
 		String expr = exprDest.toString();
-		
-		if (lastBcMemberType != null)
-		{
-			BcTypeNode memberType = lastBcMemberType;
-			lastBcMemberType = null;
-			
-			if (node.expr instanceof IdentifierNode)
-			{
-				String identifier = expr;
-				
-				BcClassDefinitionNode bcClass = memberType.getClassNode();
-				if (bcClass != null)
-				{
-					BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier);
-					if (bcFunc != null)
-					{
-						lastBcMemberType = bcFunc.getReturnType();
-					}
-				}
-			}
-		}
-		
+						
 		ListWriteDestination argsDest = new ListWriteDestination();
 		if (node.args != null)
 		{
@@ -1013,60 +895,18 @@ public class Main2
 		process(node.expr);
 		popDest();
 		
-		String expr = exprDest.toString();
-		boolean setterCalled = false;
-		
-		if (lastBcMemberType != null)
-		{
-			BcTypeNode memberType = lastBcMemberType;
-			lastBcMemberType = null;
-			
-			if (node.expr instanceof IdentifierNode)
-			{
-				String identifier = expr;
-				
-				BcClassDefinitionNode bcClass = memberType.getClassNode();
-				if (bcClass != null)
-				{
-					BcFunctionDeclaration bcFunc = bcClass.findSetterFunction(identifier);
-					if (bcFunc != null)
-					{
-						List<BcFuncParam> funcParams = bcFunc.getParams();
-						BcTypeNode setterType = funcParams.get(0).getType();
-						setterCalled = true;
-						
-						lastBcMemberType = setterType;
-					}
-				}
-			}
-		}
-
 		ListWriteDestination argsDest = new ListWriteDestination();
 		pushDest(argsDest);
 		process(node.args);
 		popDest();
 		
-		if (setterCalled)
+		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 		{
-			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
-			{
-				dest.writef("[%s](%s)", exprDest, argsDest);
-			}
-			else
-			{
-				dest.writef("%s(%s)", exprDest, argsDest);
-			}
+			dest.writef("[%s] = %s", exprDest, argsDest);
 		}
 		else
 		{
-			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
-			{
-				dest.writef("[%s] = %s", exprDest, argsDest);
-			}
-			else
-			{
-				dest.writef("%s = %s", exprDest, argsDest);
-			}
+			dest.writef("%s = %s", exprDest, argsDest);
 		}
 	}
 	
@@ -1162,7 +1002,7 @@ public class Main2
 		else if (node instanceof LiteralStringNode)
 		{
 			LiteralStringNode stringNode = (LiteralStringNode) node;
-			dest.write(BcCodeCs.construct(classString, String.format("\"%s\"", stringNode.value)));
+			dest.writef("\"%s\"", stringNode.value);
 		}
 		else if (node instanceof LiteralRegExpNode)
 		{
@@ -1327,7 +1167,7 @@ public class Main2
 			assert loopVar != null : loopVarName;
 			
 			// get loop body
-			dest.writelnf("for (%s::Iterator __it = %s->__internalIterator(); __it.hasNext();)", BcCodeCs.type(collectionType), collection);
+			dest.writelnf("foreach (%s %s in %s)", BcCodeCs.type(collectionType), loopVarName, collection);
 			Node bodyNode = statements.items.get(1);
 			if (bodyNode != null)
 			{
@@ -1335,8 +1175,6 @@ public class Main2
 				StatementListNode statementsNode = (StatementListNode) bodyNode;
 				
 				writeBlockOpen(dest);
-				
-				dest.writelnf("%s = __it.next();", loopVarName);
 				
 				ObjectList<Node> items = statementsNode.items;
 				for (Node itemNode : items)

@@ -20,8 +20,8 @@ public class BcCodeCs
 	
 	public static final String NULL = "null";
 	
-	public static final String superCallMarker = "__$super$__";
-	public static final String thisCallMarker = "__$this$__";
+	public static final String superCallMarker = "super";
+	public static final String thisCallMarker = "this";
 	
 	private static Map<String, String> basicTypes;
 	static
