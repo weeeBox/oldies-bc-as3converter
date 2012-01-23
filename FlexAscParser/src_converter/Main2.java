@@ -1838,6 +1838,8 @@ public class Main2
 			String type = BcCode.type(bcField.getType());
 			String name = BcCode.identifier(bcField.getIdentifier());
 						
+			src.write(bcField.getVisiblity() + " ");
+			
 			if (bcField.isStatic())
 			{
 				src.write("static ");
@@ -1864,23 +1866,27 @@ public class Main2
 			String type = bcFunc.hasReturnType() ? BcCode.type(bcFunc.getReturnType()) : "void";
 			String name = BcCode.identifier(bcFunc.getName());			
 			
-			src.write(bcFunc.getVisiblity() + " ");			
-			if (bcFunc.isStatic())
+			src.write(bcFunc.getVisiblity() + " ");
+			if (!bcFunc.isConstructor())
 			{
-				src.write("static ");
+				if (bcFunc.isStatic())
+				{
+					src.write("static ");
+				}
+				else
+				{
+					src.write("virtual ");
+				}
+				src.write(type + " ");
 			}
-			else
-			{
-				src.write("virtual ");
-			}
-			src.writef("%s %s(", type, name);
+			src.writef("%s(", name);
 			
 			StringBuilder paramsBuffer = new StringBuilder();
 			List<BcFuncParam> params = bcFunc.getParams();
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = BcCode.typeArgRef(bcParam.getType());
+				String paramType = BcCode.type(bcParam.getType());
 				String paramName = BcCode.identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				if (++paramIndex < params.size())
