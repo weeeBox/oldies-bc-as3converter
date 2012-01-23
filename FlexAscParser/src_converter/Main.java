@@ -209,6 +209,9 @@ public class Main
 	
 	public static void main(String[] args)
 	{
+		BcFunctionDeclaration.thisCallMarker = BcCodeCpp.thisCallMarker;
+		BcFunctionDeclaration.superCallMarker = BcCodeCpp.superCallMarker;		
+		
 		File outputDir = new File(args[0]);
 
 		String[] filenames = new String[args.length - 1];

@@ -33,6 +33,7 @@ public class BcCodeCs
 		basicTypes.put("Number", "float");
 		basicTypes.put("float", "float");
 		basicTypes.put("Boolean", "BOOL");
+		basicTypes.put("String", "String");
 	};
 	
 	public static String type(BcTypeNode bcType)

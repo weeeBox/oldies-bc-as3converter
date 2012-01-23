@@ -18,6 +18,9 @@ public class BcFunctionDeclaration extends BcDeclaration
 {
 	private List<BcFuncParam> params;
 	
+	public static String thisCallMarker;
+	public static String superCallMarker;
+	
 	private BcTypeNode returnType;
 	private String name;
 	private boolean isConstructor;
@@ -188,7 +191,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 		bcFunc.params = newParams;
 		
 		// this is a big mess. Just take it as is
-		IdentifierNode identifier = new IdentifierNode(bcFunc.isConstructor ? BcCodeCpp.thisCallMarker : name, 0);
+		IdentifierNode identifier = new IdentifierNode(bcFunc.isConstructor ? thisCallMarker : name, 0);
 		ArgumentListNode args = new ArgumentListNode(null, 0);
 		args.items.clear(); // this is more like a hack. The first element is added from the constructor and we don't need it
 		counter = 0;

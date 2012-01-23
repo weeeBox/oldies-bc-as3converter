@@ -72,6 +72,7 @@ import bc.builtin.BuiltinClasses;
 import bc.code.FileWriteDestination;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
+import bc.help.BcCodeCpp;
 import bc.help.BcCodeCs;
 import bc.help.BcNodeHelper;
 import bc.lang.BcClassDefinitionNode;
@@ -193,6 +194,9 @@ public class Main2
 	
 	public static void main(String[] args)
 	{
+		BcFunctionDeclaration.thisCallMarker = BcCodeCs.thisCallMarker;
+		BcFunctionDeclaration.superCallMarker = BcCodeCs.superCallMarker;
+		
 		File outputDir = new File(args[0]);
 
 		String[] filenames = new String[args.length - 1];
@@ -1002,7 +1006,7 @@ public class Main2
 		else if (node instanceof LiteralStringNode)
 		{
 			LiteralStringNode stringNode = (LiteralStringNode) node;
-			dest.writef("\"%s\"", stringNode.value);
+			dest.writef("\"%s\"", replaceEscapes(stringNode.value));
 		}
 		else if (node instanceof LiteralRegExpNode)
 		{
@@ -1012,7 +1016,6 @@ public class Main2
 		{
 			LiteralArrayNode arrayNode = (LiteralArrayNode) node;
 			ArgumentListNode elementlist = arrayNode.elementlist;
-			BcTypeNode type = null;
 			
 			WriteDestination elementDest = new ListWriteDestination();
 			pushDest(elementDest);
@@ -1037,6 +1040,11 @@ public class Main2
 		{
 			assert false : node.getClass();
 		}
+	}
+	
+	private static String replaceEscapes(String str)
+	{
+		return str.replace("\"", "\\\"").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
 	}
 	
 	private static void process(IfStatementNode node)
@@ -1691,7 +1699,11 @@ public class Main2
 			String name = BcCodeCs.identifier(bcFunc.getName());			
 			
 			src.write(bcFunc.getVisiblity() + " ");
-			if (!bcFunc.isConstructor())
+			if (bcFunc.isConstructor())
+			{
+				src.write(getClassName(bcClass));
+			}
+			else
 			{
 				if (bcFunc.isStatic())
 				{
@@ -1701,9 +1713,9 @@ public class Main2
 				{
 					src.write("virtual ");
 				}
-				src.write(type + " ");
+				src.writef("%s %s", type, name);
 			}
-			src.writef("%s(", name);
+			src.write("(");
 			
 			StringBuilder paramsBuffer = new StringBuilder();
 			List<BcFuncParam> params = bcFunc.getParams();
