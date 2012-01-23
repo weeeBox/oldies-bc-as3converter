@@ -92,8 +92,6 @@ public class Main2
 	private static WriteDestination dest;
 	private static Stack<WriteDestination> destStack;
 	
-	private static String lastVisiblityModifier;
-	
 	private static BcClassDefinitionNode lastBcClass;
 	private static BcFunctionDeclaration lastBcFunction;
 	private static BcTypeNode lastBcMemberType;
@@ -105,7 +103,6 @@ public class Main2
 	private static final String classCreateName = "__create";
 	
 	private static final String interfaceBoxName = "__internalBox";
-	private static final String interfaceUnboxName = "__internalUnbox";
 	
 	private static final String classStaticInitializerName = "__internalStaticInitializer";
 	private static final String classStaticInitializedName = "__internalStaticInitialized";
@@ -1709,48 +1706,27 @@ public class Main2
 		String className = getClassName(bcClass);
 		String classExtends = getBaseClassName(bcClass);
 		
-		src = new FileWriteDestination(new File(outputDir, className + ".as"));
+		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
 		impl = null;
-		
-		lastVisiblityModifier = null;
-		
-		String defGuardName = className + "_h__";
-		
-		src.writeln("#ifndef " + defGuardName);
-		src.writeln("#define " + defGuardName);
-		src.writeln();
-		
-		src.writeln("#include \"AsBase.h\"");
-		src.writeln();
-		
-		src.writelnf("#include \"%s.h\"", classExtends);
-		src.writeln();
 		
 		List<BcTypeNode> headerTypes = getHeaderTypedefs(bcClass);
 		
-		writeHeaderTypes(src, headerTypes);
+		src.writeln("namespace bc");
+		writeBlockOpen(src);
 		
-		src.writeln();
+		src.writelnf("public interface %s : %s", className, classExtends);
+		writeBlockOpen(src);
 		
-		src.writelnf("class %s : public %s", className, classExtends);
-		src.writeln("{");
-		src.incTab();
-		
-		writeTypename(bcClass);
 		writeInterfaceFunctions(bcClass);
-		
-		src.decTab();
-		src.writeln("};");
-		src.writeln();
-		
-		src.writeln("#endif // " + defGuardName);
+
+		writeBlockClose(src);
+		writeBlockClose(src);
 		
 		src.close();
 	}
 
 	private static void writeInterfaceFunctions(BcClassDefinitionNode bcClass)
 	{
-		boolean forceVisiblity = true;
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
@@ -1762,10 +1738,7 @@ public class Main2
 				continue;
 			}
 			
-			writeVisiblity(bcFunc.getVisiblity(), forceVisiblity);
-			forceVisiblity = false;
-			
-			src.writef("virtual %s %s(", type, name);
+			src.writef("%s %s(", type, name);
 			
 			StringBuilder paramsBuffer = new StringBuilder();
 			StringBuilder argsBuffer = new StringBuilder();
@@ -1773,7 +1746,7 @@ public class Main2
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = BcCode.typeArgRef(bcParam.getType());
+				String paramType = BcCode.type(bcParam.getType());
 				String paramName = BcCode.identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(paramName);
@@ -1785,7 +1758,7 @@ public class Main2
 			}
 			
 			src.write(paramsBuffer);
-			src.writeln(") = 0;");
+			src.writeln(");");
 		}
 	}
 
@@ -1796,8 +1769,6 @@ public class Main2
 		
 		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
 		impl = new ListWriteDestination();
-		
-		lastVisiblityModifier = null;
 		
 		String defGuardName = className + "_h__";
 		
@@ -1826,7 +1797,6 @@ public class Main2
 		src.writeln("{");
 		src.incTab();
 		
-		writeTypename(bcClass);
 		writeFields(bcClass);
 		writeFunctions(bcClass);
 		writeCreate(bcClass);
@@ -1900,7 +1870,6 @@ public class Main2
 		List<BcVariableDeclaration> fields = bcClass.getFields();
 		impl.writeln();
 		
-		boolean forceVisiblity = true;
 		String className = getClassName(bcClass);
 		
 		for (BcVariableDeclaration bcField : fields)
@@ -1909,9 +1878,6 @@ public class Main2
 			String name = BcCode.identifier(bcField.getIdentifier());
 			boolean canBeClass = BcCode.canBeClass(bcField.getType());
 			boolean isConst = bcField.isConst();
-			
-			writeVisiblity(bcField.getVisiblity(), forceVisiblity);
-			forceVisiblity = false;
 			
 			if (bcField.isStatic())
 			{
@@ -1939,18 +1905,8 @@ public class Main2
 		}
 	}
 	
-	private static void writeTypename(BcClassDefinitionNode bcClass)
-	{
-		String className = getClassName(bcClass);
-		String baseClassName = getBaseClassName(bcClass);
-		
-		writeVisiblity("public", true);
-		src.writelnf("__TYPENAME(%s, %s);", className, baseClassName);
-	}
-
 	private static void writeFunctions(BcClassDefinitionNode bcClass)
 	{
-		boolean forceVisiblity = true;
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
@@ -1961,9 +1917,6 @@ public class Main2
 			{
 				continue;
 			}
-			
-			writeVisiblity(bcFunc.getVisiblity(), forceVisiblity);
-			forceVisiblity = false;
 			
 			if (bcFunc.isStatic())
 			{
@@ -2003,8 +1956,6 @@ public class Main2
 	
 	private static void writeCreate(BcClassDefinitionNode bcClass)
 	{
-		writeVisiblity("public", true);
-		
 		if (bcClass.hasConstructors())
 		{
 			List<BcFunctionDeclaration> constructors = bcClass.getConstructors();
@@ -2078,8 +2029,6 @@ public class Main2
 		
 		String className = getClassName(bcClass);
 		
-		writeVisiblity("private", true);
-		
 		for (BcFunctionDeclaration bcFunc : constructors)
 		{
 			String constructFuncName = classConstructName + className;
@@ -2141,8 +2090,6 @@ public class Main2
 		
 		String initializeName = classInitialiseName + className;
 		
-		writeVisiblity("public", false);
-		
 		src.writelnf("void %s();", initializeName);
 		
 		impl.writeln();
@@ -2174,11 +2121,9 @@ public class Main2
 		String initializerName = classStaticInitializerName + classType;
 		String initializedFlagName = classStaticInitializedName + classType;
 		
-		writeVisiblity("private", true);
 		src.writelnf("static StaticInit %s;", initializerName);
 		src.writelnf("static BOOL %s;", initializedFlagName);
 		
-		writeVisiblity("public", true);
 		src.writelnf("static void %s();", classStaticInitFuncName);
 		
 		impl.writeln();
@@ -2224,7 +2169,6 @@ public class Main2
 	{
 		String className = getClassName(bcClass);
 		
-		writeVisiblity("protected", true);
 		src.writelnf("%s();", className);
 		
 		impl.writeln();
@@ -2286,8 +2230,6 @@ public class Main2
 			String className = getClassName(bcClass);
 			String baseClassName = getBaseClassName(bcClass);
 			
-			writeVisiblity("public", true);
-			
 			src.writelnf("void %s();", classGcName);
 			
 			impl.writeln();
@@ -2323,7 +2265,6 @@ public class Main2
 	private static void writeBoxingInterfacesAccessors(BcClassDefinitionNode bcClass)
 	{
 		src.writeln();
-		writeVisiblity("public", true);
 		
 		List<BcTypeNode> interfaces = bcClass.getInterfaces();
 		for (BcTypeNode bcInterface : interfaces)
@@ -2373,8 +2314,6 @@ public class Main2
 	
 	private static void writeBoxingInterface(BcClassDefinitionNode bcClass, BcClassDefinitionNode interfaceClass)
 	{
-		lastVisiblityModifier = null;
-		
 		impl.writelnf("// %s", interfaceClass.getName());
 		impl.writeln();
 		
@@ -2392,18 +2331,15 @@ public class Main2
 		src.incTab();
 		
 		// delegate
-		writeVisiblity("private", true);
 		src.writelnf("%s m_base;", classRef);
 		
 		// constructor
-		writeVisiblity("public", true);
 		src.writelnf("%s(const %s& base);", interfaceName, classRef);
 		impl.writelnf("%s::%s(const %s& base) : m_base(base)", interfaceName, interfaceName, classRef);
 		writeBlockOpen(impl);
 		writeBlockClose(impl);
 		
 		// functions
-		writeVisiblity("public", true);
 		List<BcFunctionDeclaration> functions = interfaceClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
@@ -2452,7 +2388,6 @@ public class Main2
 
 		impl.writeln();
 		
-		writeVisiblity("public", true);
 		src.writelnf("void %s();", classGcName);
 		impl.writelnf("void %s::%s()", interfaceName, classGcName);
 		writeBlockOpen(impl);
@@ -2499,21 +2434,6 @@ public class Main2
 	{
 		writeBlockOpen(dest);
 		writeBlockClose(dest);
-	}
-	
-	private static void writeVisiblity(String visiblity, boolean force)
-	{
-		if (force || !visiblity.equals(lastVisiblityModifier))
-		{
-			if (lastVisiblityModifier != null)
-			{
-				src.writeln();
-			}
-			src.decTab();
-			src.writeln(visiblity + ":");
-			src.incTab();
-			lastVisiblityModifier = visiblity;
-		}
 	}
 	
 	private static void pushDest(WriteDestination newDest)
