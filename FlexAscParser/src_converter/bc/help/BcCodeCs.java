@@ -13,7 +13,7 @@ public class BcCodeCs
 	private static final String NEWVECTOR = "__NEWVECTOR";
 	private static final String REF_POSTFIX = "";
 
-	private static final String INSTANCE_OF = "is";
+	private static final String IS = "is";
 	
 	public static final String TYPE_PREFIX = "As";
 	
@@ -144,7 +144,7 @@ public class BcCodeCs
 
 	public static String operatorIs(Object lhs, Object rhs)
 	{
-		return INSTANCE_OF + String.format("(%s, %s)", lhs, type(rhs.toString()));
+		return String.format("%s %s %s", lhs, IS, type(rhs.toString()));
 	}
 	
 	public static boolean isVectorType(String typeName)
