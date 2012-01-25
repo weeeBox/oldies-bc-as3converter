@@ -13,6 +13,8 @@ public class BcClassDefinitionNode extends BcNode
 	
 	private boolean hasReferenceVars;
 	
+	private String packageName;
+	
 	private List<BcVariableDeclaration> fields;
 	private List<BcFunctionDeclaration> functions;
 	private List<BcFunctionDeclaration> constructors;
@@ -57,6 +59,16 @@ public class BcClassDefinitionNode extends BcNode
 	public BcTypeNode getClassType()
 	{
 		return classType;
+	}
+	
+	public void setPackageName(String packageName) 
+	{
+		this.packageName = packageName;
+	}
+	
+	public String getPackageName() 
+	{
+		return packageName;
 	}
 	
 	public BcTypeNode getExtendsType()

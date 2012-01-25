@@ -32,7 +32,7 @@ public class BcCodeCs
 		basicTypes.put("int", "int");
 		basicTypes.put("Number", "float");
 		basicTypes.put("float", "float");
-		basicTypes.put("Boolean", "BOOL");
+		basicTypes.put("Boolean", "bool");
 		basicTypes.put("String", "String");
 	};
 	
@@ -136,5 +136,10 @@ public class BcCodeCs
 	public static boolean isVectorType(String typeName)
 	{
 		return typeName.equals(VECTOR_TYPE);
+	}
+
+	public static String namespace(String packageName) 
+	{
+		return packageName;
 	}
 }

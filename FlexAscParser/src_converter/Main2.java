@@ -93,6 +93,7 @@ public class Main2
 	private static WriteDestination dest;
 	private static Stack<WriteDestination> destStack;
 	
+	private static String packageName;
 	private static BcClassDefinitionNode lastBcClass;
 	private static BcFunctionDeclaration lastBcFunction;
 	
@@ -264,6 +265,8 @@ public class Main2
 //		NodePrinter printer = new NodePrinter();
 //		printer.evaluate(cx, programNode);
 
+		packageName = null;
+		
 		for (Node node : programNode.statements.items)
 		{
 			dest = new ListWriteDestination();
@@ -279,9 +282,19 @@ public class Main2
 				BcClassDefinitionNode bcClass = collect((ClassDefinitionNode) node);
 				bcClasses.add(bcClass);
 			}
-			else if (node instanceof ImportDirectiveNode || 
-					 node instanceof PackageDefinitionNode ||
-					 node instanceof MetaDataNode)
+			else if (node instanceof PackageDefinitionNode)
+			{
+				if (packageName == null)
+				{
+					PackageDefinitionNode packageNode = (PackageDefinitionNode) node;
+					String packageNameString = packageNode.name.id.pkg_part;
+					if (packageNameString.length() > 0)
+					{
+						packageName = packageNameString;
+					}
+				}
+			}
+			else if (node instanceof MetaDataNode || node instanceof ImportDirectiveNode)
 			{
 				// nothing
 			}
@@ -296,6 +309,7 @@ public class Main2
 		
 		BcTypeNode interfaceType = BcTypeNode.create(interfaceDeclaredName);
 		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);
+		bcInterface.setPackageName(packageName);
 		bcInterface.setDeclaredVars(declaredVars);
 		
 		lastBcClass = bcInterface;
@@ -326,6 +340,7 @@ public class Main2
 		
 		BcTypeNode classType = BcTypeNode.create(classDeclaredName);
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
+		bcClass.setPackageName(packageName);
 		bcClass.setDeclaredVars(declaredVars);
 		
 		lastBcClass = bcClass;		
@@ -1544,9 +1559,9 @@ public class Main2
 		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
 		impl = null;
 		
-		List<BcTypeNode> headerTypes = getHeaderTypedefs(bcClass);
+		writeImports(src, getImports(bcClass));
 		
-		src.writeln("namespace bc");
+		src.writeln("namespace " + BcCodeCs.namespace(bcClass.getPackageName()));
 		writeBlockOpen(src);
 		
 		src.writelnf("public interface %s : %s", className, classExtends);
@@ -1558,6 +1573,14 @@ public class Main2
 		writeBlockClose(src);
 		
 		src.close();
+	}
+
+	private static void writeImports(WriteDestination dest, List<BcTypeNode> imports)	
+	{
+		for (BcTypeNode typeNode : imports)
+		{
+			dest.writelnf("using %s;", BcCodeCs.type(typeNode));
+		}
 	}
 
 	private static void writeInterfaceFunctions(BcClassDefinitionNode bcClass)
@@ -1605,10 +1628,9 @@ public class Main2
 		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
 		impl = new ListWriteDestination();
 		
-		List<BcTypeNode> headerTypes = getHeaderTypedefs(bcClass);
-		List<BcTypeNode> implTypes = getImplementationTypedefs(bcClass);
+		writeImports(src, getImports(bcClass));
 		
-		src.writeln("namespace bc");
+		src.writeln("namespace " + BcCodeCs.namespace(bcClass.getPackageName()));
 		writeBlockOpen(src);
 		
 		src.writelnf("public class %s : %s", className, classExtends);
@@ -1803,18 +1825,18 @@ public class Main2
 		return null;
 	}
 	
-	private static List<BcTypeNode> getHeaderTypedefs(BcClassDefinitionNode bcClass)
+	private static List<BcTypeNode> getImports(BcClassDefinitionNode bcClass)
 	{
-		List<BcTypeNode> includes = new ArrayList<BcTypeNode>();
+		List<BcTypeNode> imports = new ArrayList<BcTypeNode>();
 		
-		tryAddUniqueType(includes, bcClass.getClassType());
+		tryAddUniqueType(imports, bcClass.getClassType());
 		
 		if (bcClass.hasInterfaces())
 		{
 			List<BcTypeNode> interfaces = bcClass.getInterfaces();
 			for (BcTypeNode bcInterface : interfaces)
 			{
-				tryAddUniqueType(includes, bcInterface);
+				tryAddUniqueType(imports, bcInterface);
 			}
 		}
 		
@@ -1822,7 +1844,7 @@ public class Main2
 		for (BcVariableDeclaration bcVar : classVars)
 		{
 			BcTypeNode type = bcVar.getType();
-			tryAddUniqueType(includes, type);
+			tryAddUniqueType(imports, type);
 		}
 		
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
@@ -1831,36 +1853,18 @@ public class Main2
 			if (bcFunc.hasReturnType())
 			{
 				BcTypeNode returnType = bcFunc.getReturnType();
-				tryAddUniqueType(includes, returnType);
+				tryAddUniqueType(imports, returnType);
 			}
 			
 			List<BcFuncParam> params = bcFunc.getParams();
 			for (BcFuncParam param : params)
 			{
 				BcTypeNode type = param.getType();
-				tryAddUniqueType(includes, type);
+				tryAddUniqueType(imports, type);
 			}
 		}
 		
-		return includes;
-	}
-	
-	private static List<BcTypeNode> getImplementationTypedefs(BcClassDefinitionNode bcClass)
-	{
-		List<BcTypeNode> includes = new ArrayList<BcTypeNode>();
-		
-		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
-		for (BcFunctionDeclaration bcFunc : functions)
-		{
-			List<BcVariableDeclaration> funcVars = bcFunc.getDeclaredVars();
-			for (BcVariableDeclaration var : funcVars)
-			{
-				BcTypeNode type = var.getType();
-				tryAddUniqueType(includes, type);
-			}
-		}
-		
-		return includes;
+		return imports;
 	}
 	
 	private static void tryAddUniqueType(List<BcTypeNode> types, BcTypeNode type)
