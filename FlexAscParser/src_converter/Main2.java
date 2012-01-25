@@ -72,7 +72,6 @@ import bc.builtin.BuiltinClasses;
 import bc.code.FileWriteDestination;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
-import bc.help.BcCodeCpp;
 import bc.help.BcCodeCs;
 import bc.help.BcNodeHelper;
 import bc.lang.BcClassDefinitionNode;
@@ -80,7 +79,6 @@ import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcInterfaceDefinitionNode;
-import bc.lang.BcMemberExpressionNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -107,70 +105,15 @@ public class Main2
 	private static List<BcVariableDeclaration> declaredVars;
 	
 	private static List<BcClassDefinitionNode> bcClasses;
-	private static Map<String, BcClassDefinitionNode> builtinClasses; // builtin classes
 	private static Map<String, BcFunctionDeclaration> bcBuitinFunctions; // top level functions	
-	
-	// FIXME: filter class names
-	private static String[] builtinClassesNames = 
-	{
-		"Object",
-		"Array",
-		"Dictionary",
-		"Sprite",
-		"Rectangle",
-		"Stage",
-		"Event",
-		"MouseEvent",
-		"KeyboardEvent",		
-		"DisplayObject",
-		"DisplayObjectContainer",
-		"MovieClip",
-		"TextField",
-		"TextFormat",
-		"DropShadowFilter",
-		"Bitmap",
-		"Sound",
-		"SoundTransform",
-		"SoundChannel",
-		"ColorTransform",
-		"BitmapData",
-		"ByteArray",
-		"Class",
-		"RegExp",
-		"URLRequest",
-		"Loader",
-		"URLLoader",
-		"IOErrorEvent",
-		"*",
-		"SharedObject",
-		"Shape",
-		"Graphics",
-		"BlurFilter",
-		"Point",
-		"Math",
-		"StageAlign",
-		"StageScaleMode",
-		"StageQuality",
-		"StageDisplayState",
-		"PixelSnapping",
-		"TextFieldAutoSize",
-		"Mouse",
-		"Keyboard",
-	};
 	
 	static
 	{
-		builtinClasses = new HashMap<String, BcClassDefinitionNode>();
 		bcBuitinFunctions = new HashMap<String, BcFunctionDeclaration>();
-		
-		for (String className : builtinClassesNames)
-		{
-			builtinClasses.put(className, new BcClassDefinitionNode(BcTypeNode.create(className)));
-		}
 		
 		try
 		{
-			List<BcClassDefinitionNode> classes = BuiltinClasses.load(new File("as_classes"));
+			List<BcClassDefinitionNode> classes = BuiltinClasses.load(new File("api/src"));
 			for (BcClassDefinitionNode bcClass : classes)
 			{
 				if (bcClass.getName().equals(BuiltinClasses.TOPLEVEL_DUMMY_CLASS_NAME))
@@ -180,10 +123,6 @@ public class Main2
 					{
 						bcBuitinFunctions.put(bcFunc.getName(), bcFunc);
 					}
-				}
-				else
-				{
-					builtinClasses.put(bcClass.getName(), bcClass);
 				}
 			}
 		}
@@ -198,6 +137,8 @@ public class Main2
 		BcFunctionDeclaration.thisCallMarker = BcCodeCs.thisCallMarker;
 		BcFunctionDeclaration.superCallMarker = BcCodeCs.superCallMarker;
 		
+		bcClasses = new ArrayList<BcClassDefinitionNode>();
+		
 		File outputDir = new File(args[0]);
 
 		String[] filenames = new String[args.length - 1];
@@ -205,6 +146,7 @@ public class Main2
 		
 		try
 		{
+			collect(new File("api/src")); // collect api classes
 			collect(filenames);
 			process();
 			write(outputDir);
@@ -215,9 +157,8 @@ public class Main2
 		}
 	}
 
-	private static void collect(String[] filenames) throws IOException
-	{
-		bcClasses = new ArrayList<BcClassDefinitionNode>();
+	private static void collect(String... filenames) throws IOException
+	{		
 		for (int i = 0; i < filenames.length; ++i)
 		{
 			collect(new File(filenames[i]));
@@ -490,7 +431,6 @@ public class Main2
 
 	private static void process(BcInterfaceDefinitionNode bcInterface)
 	{
-		List<BcVariableDeclaration> oldDeclaredVars = declaredVars;
 		declaredVars = bcInterface.getDeclaredVars();
 	}
 	
@@ -811,8 +751,6 @@ public class Main2
 		process(node.expr);
 		popDest();
 		
-		String expr = exprDest.toString();
-						
 		ListWriteDestination argsDest = new ListWriteDestination();
 		if (node.args != null)
 		{
@@ -1467,12 +1405,6 @@ public class Main2
 	
 	private static BcClassDefinitionNode findClass(String name)
 	{
-		BcClassDefinitionNode builtinClass = findBuiltinClass(name);
-		if (builtinClass != null)
-		{
-			return builtinClass;
-		}
-		
 		for (BcClassDefinitionNode bcClass : bcClasses)
 		{
 			if (bcClass.getClassType().getName().equals(name))
@@ -1482,11 +1414,6 @@ public class Main2
 		}
 		
 		return null;
-	}
-	
-	private static BcClassDefinitionNode findBuiltinClass(String name)
-	{
-		return builtinClasses.get(name);
 	}
 	
 	private static BcFunctionDeclaration findBuiltinFunc(String name)
@@ -1645,43 +1572,6 @@ public class Main2
 		src.close();
 	}
 
-	private static void writeHeaderTypes(WriteDestination dst, List<BcTypeNode> types)
-	{
-		for (BcTypeNode bcType : types)
-		{
-			if (bcType instanceof BcVectorTypeNode)
-			{
-				BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
-				String genericName = BcCodeCs.type(vectorType.getGeneric());
-				String typeName = BcCodeCs.type(bcType);
-				
-				dst.writelnf("typedef %s<%s> %s;", BcCodeCs.type(BcCodeCs.VECTOR_TYPE), BcCodeCs.type(genericName), typeName);
-				dst.writelnf("typedef %s::Ref %s;", typeName, BcCodeCs.type(typeName));
-			}
-			else
-			{
-				String typeName = BcCodeCs.type(bcType);
-				dst.writelnf("__TYPEREF_DEF(%s)", typeName);				
-			}
-		}
-	}
-	
-	private static void writeImplementationTypes(WriteDestination dst, List<BcTypeNode> types)
-	{
-		for (BcTypeNode type : types)
-		{
-			if (type instanceof BcVectorTypeNode)
-			{
-				System.err.println("Fix me!!! Vector in implementation");
-			}
-			else
-			{
-				String typeName = BcCodeCs.type(type);
-				dst.writelnf("#include \"%s.h\"", typeName);
-			}
-		}
-	}
-	
 	private static void writeFields(BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> fields = bcClass.getFields();
@@ -2154,9 +2044,9 @@ public class Main2
 		BcTypeNode bcType = BcNodeHelper.extractBcType(node);
 		if (bcType instanceof BcVectorTypeNode)
 		{
-			BcClassDefinitionNode vectorGenericClass = findBuiltinClass(classVector).clone();
+			BcClassDefinitionNode vectorGenericClass = findClass(classVector).clone();
 			vectorGenericClass.setClassType(bcType);
-			builtinClasses.put(bcType.getNameEx(), vectorGenericClass);
+			bcClasses.add(vectorGenericClass);
 			
 			bcType.setClassNode(vectorGenericClass);
 		}
@@ -2164,24 +2054,5 @@ public class Main2
 		BcTypeNode.add(bcType.getNameEx(), bcType);
 		
 		return bcType;
-	}
-	
-	private static void generateFunctor(WriteDestination dest, String className)
-	{
-//		BcClassDefinitionNode bcClass = new BcClassDefinitionNode("Functor");
-//		bcClass.setExtendsType(new BcTypeNode("Object"));
-//		
-//		List<String> targetModifiers = new ArrayList<String>();
-//		targetModifiers.add("private");
-//		
-//		BcVariableDeclaration targetVar = new BcVariableDeclaration(new BcTypeNode("Object"), new BcIdentifierNode("target"));
-//		targetVar.setModifiers(targetModifiers);
-//		bcClass.add(targetVar);
-//		
-//		List<String> operatorModifiers = new ArrayList<String>();
-//		operatorModifiers.add("public");
-//		
-//		BcFunctionDeclaration operatorFunc = new BcFunctionDeclaration("operator()");
-//		operatorFunc.setModifiers(operatorModifiers);
 	}
 }

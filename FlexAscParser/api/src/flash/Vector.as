@@ -7,7 +7,7 @@ package flash
 
 		public function Vector(length : uint = 0, fixed : Boolean = false) {}
 
-		public function concat(...args : *) : Vector { return null; }
+		/* public function concat(...args : *) : Vector { return null; } */
 
 		/* public function every(callback : Function, thisObject : Object = null) : Boolean { return false; } */
 
