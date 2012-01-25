@@ -416,7 +416,8 @@ public class Main2
 			process(type);
 		}
 				
-		for (BcClassDefinitionNode bcClass : bcClasses)
+		List<BcClassDefinitionNode> iterList = new ArrayList<BcClassDefinitionNode>(bcClasses);
+		for (BcClassDefinitionNode bcClass : iterList)
 		{
 			if (bcClass.isInterface())
 			{
