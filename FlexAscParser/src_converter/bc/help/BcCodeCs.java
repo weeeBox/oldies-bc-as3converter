@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import macromedia.asc.parser.IdentifierNode;
+import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
 
@@ -35,6 +36,20 @@ public class BcCodeCs
 		basicTypes.put("Boolean", "bool");
 		basicTypes.put("String", "String");
 	};
+	
+	public static String fullType(BcTypeNode bcType)
+	{
+		if (isBasicType(bcType))
+			return type(bcType);
+		
+		BcClassDefinitionNode classNode = bcType.getClassNode();
+		assert classNode != null : bcType.getName();
+		
+		String packageName = classNode.getPackageName();
+		assert packageName != null : classNode.getName();
+		
+		return packageName + "." + type(bcType.getName());
+	}
 	
 	public static String type(BcTypeNode bcType)
 	{

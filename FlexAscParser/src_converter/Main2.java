@@ -1579,7 +1579,7 @@ public class Main2
 	{
 		for (BcTypeNode typeNode : imports)
 		{
-			dest.writelnf("using %s;", BcCodeCs.type(typeNode));
+			dest.writelnf("using %s;", BcCodeCs.fullType(typeNode));
 		}
 	}
 
