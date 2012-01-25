@@ -2,7 +2,7 @@ package flash.events
 {
 	public class EventDispatcher extends Object /* implements IEventDispatcher, IEventDispatcher */ 
 	{
-		function EventDispatcher(target : IEventDispatcher = null) : void { }
+		/* function EventDispatcher(target : IEventDispatcher = null) : void { } */
 
 		/* public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void; */
 
