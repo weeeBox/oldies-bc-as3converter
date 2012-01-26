@@ -145,6 +145,11 @@ public class BcFunctionDeclaration extends BcDeclaration
 	{
 		return kind == KIND_GETTER;
 	}
+	
+	public boolean isProperty()
+	{
+		return kind != KIND_REGULAR;
+	}
 
 	public int getDefaultParamsCount()
 	{

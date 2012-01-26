@@ -1674,6 +1674,11 @@ public class Main2
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
+			if (bcFunc.isSetter() && bcClass.findGetterFunction(bcFunc.getName()) != null)
+			{
+				continue; // we'll write setter with getter
+			}
+			
 			String type = bcFunc.hasReturnType() ? BcCodeCs.type(bcFunc.getReturnType()) : "void";
 			String name = BcCodeCs.identifier(bcFunc.getName());			
 			
@@ -1681,7 +1686,7 @@ public class Main2
 			if (bcFunc.isConstructor())
 			{
 				src.write(getClassName(bcClass));
-			}
+			}			
 			else
 			{
 				if (bcFunc.isStatic())
@@ -1692,36 +1697,98 @@ public class Main2
 				{
 					src.write("virtual ");
 				}
-				src.writef("%s %s", type, name);
-			}
-			src.write("(");
-			
-			StringBuilder paramsBuffer = new StringBuilder();
-			List<BcFuncParam> params = bcFunc.getParams();
-			int paramIndex = 0;
-			for (BcFuncParam bcParam : params)
-			{
-				String paramType = BcCodeCs.type(bcParam.getType());
-				String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
-				paramsBuffer.append(String.format("%s %s", paramType, paramName));
-				if (++paramIndex < params.size())
+				
+				if (bcFunc.isSetter())
 				{
-					paramsBuffer.append(", ");
+					List<BcFuncParam> params = bcFunc.getParams();
+					assert params.size() == 1;
+					
+					BcFuncParam param = params.get(0);
+					src.writef("%s %s", BcCodeCs.type(param.getType()), name);
+				}
+				else
+				{
+					src.writef("%s %s", type, name);
 				}
 			}
 			
-			src.write(paramsBuffer);
-			src.writeln(")");
+			if (!bcFunc.isProperty())
+			{
+				StringBuilder paramsBuffer = new StringBuilder();
+				List<BcFuncParam> params = bcFunc.getParams();
+				int paramIndex = 0;
+				for (BcFuncParam bcParam : params)
+				{
+					String paramType = BcCodeCs.type(bcParam.getType());
+					String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
+					paramsBuffer.append(String.format("%s %s", paramType, paramName));
+					if (++paramIndex < params.size())
+					{
+						paramsBuffer.append(", ");
+					}
+				}
+
+				src.write("(");
+				src.write(paramsBuffer);
+				src.write(")");
+			}
+			
+			src.writeln();
+			
 			ListWriteDestination body = bcFunc.getBody();
 			if (bcFunc.isConstructor())
 			{
 				writeConstructorBody(body);
+			}
+			else if (bcFunc.isProperty())
+			{
+				writeBlockOpen(src);
+				
+				if (bcFunc.isGetter())
+				{
+					writeFunctionGetter(bcFunc);
+					
+					// write setter in one block
+					BcFunctionDeclaration bcSetterFunc = bcClass.findSetterFunction(bcFunc.getName());
+					if (bcSetterFunc != null)
+					{
+						writeFunctionSetter(bcSetterFunc);
+					}
+				}
+				else
+				{
+					writeFunctionSetter(bcFunc);					
+				}
+				
+				writeBlockClose(src);
 			}
 			else
 			{
 				src.writeln(body);
 			}
 		}
+	}
+
+	private static void writeFunctionGetter(BcFunctionDeclaration bcFunc) 
+	{
+		assert bcFunc.getParams().isEmpty();
+		
+		src.writeln("get");
+		src.writeln(bcFunc.getBody());
+	}
+	
+	private static void writeFunctionSetter(BcFunctionDeclaration bcFunc) 
+	{
+		List<BcFuncParam> params = bcFunc.getParams();
+		assert params.size() == 1;
+		
+		BcFuncParam param = params.get(0);
+		
+		src.writeln("set");
+		writeBlockOpen(src);
+		src.writelnf("%s %s = value;", BcCodeCs.type(param.getType()), param.getIdentifier());
+		src.writeln(bcFunc.getBody());
+		writeBlockClose(src);
 	}
 
 	private static void writeConstructorBody(ListWriteDestination body) 
