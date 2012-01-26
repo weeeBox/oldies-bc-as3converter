@@ -1478,6 +1478,8 @@ public class Main2
 		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
 		impl = null;
 		
+		src.writeln("using System;");
+		
 		writeImports(src, getImports(bcClass));
 		
 		src.writeln("namespace " + BcCodeCs.namespace(bcClass.getPackageName()));
@@ -1546,6 +1548,8 @@ public class Main2
 		
 		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
 		impl = new ListWriteDestination();
+		
+		src.writeln("using System;");
 		
 		writeImports(src, getImports(bcClass));
 		
@@ -1710,6 +1714,11 @@ public class Main2
 	private static List<BcTypeNode> getImports(BcClassDefinitionNode bcClass)
 	{
 		List<BcTypeNode> imports = new ArrayList<BcTypeNode>();
+		
+		if (bcClass.hasExtendsType())
+		{
+			tryAddUniqueType(imports, bcClass.getExtendsType());
+		}
 		
 		if (bcClass.hasInterfaces())
 		{
