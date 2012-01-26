@@ -244,7 +244,7 @@ public class Main2
 
 	private static BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
 	{
-		String interfaceDeclaredName = interfaceDefinitionNode.name.name;
+		String interfaceDeclaredName = BcCodeCs.identifier(interfaceDefinitionNode.name);
 		
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
@@ -276,7 +276,7 @@ public class Main2
 	
 	private static BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
 	{
-		String classDeclaredName = classDefinitionNode.name.name;
+		String classDeclaredName = BcCodeCs.identifier(classDefinitionNode.name);
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
 		BcTypeNode classType = BcTypeNode.create(classDeclaredName);
@@ -341,7 +341,7 @@ public class Main2
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
 		BcTypeNode bcType = extractBcType(varBindNode.variable.type);
-		String bcIdentifier = BcNodeHelper.extractBcIdentifier(varBindNode.variable.identifier);	
+		String bcIdentifier = BcCodeCs.identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcType, bcIdentifier);
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
@@ -357,7 +357,7 @@ public class Main2
 	private static BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode)
 	{
 		FunctionNameNode functionNameNode = functionDefinitionNode.name;
-		String name = functionNameNode.identifier.name;
+		String name = BcCodeCs.identifier(functionNameNode.identifier);
 		BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);
 		
 		if (functionNameNode.kind == Tokens.GET_TOKEN)
@@ -384,7 +384,7 @@ public class Main2
 			ObjectList<ParameterNode> params = parameterNode.items;
 			for (ParameterNode param : params)
 			{
-				BcFuncParam bcParam = new BcFuncParam(extractBcType(param.type), param.identifier.name);
+				BcFuncParam bcParam = new BcFuncParam(extractBcType(param.type), BcCodeCs.identifier(param.identifier));
 				
 				if (param.init != null)
 				{
@@ -586,7 +586,7 @@ public class Main2
 		
 		BcTypeNode varType = extractBcType(varBindNode.variable.type);
 		
-		String bcIdentifier = BcNodeHelper.extractBcIdentifier(varBindNode.variable.identifier);	
+		String bcIdentifier = BcCodeCs.identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier);
 		
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
@@ -876,7 +876,7 @@ public class Main2
 		process(node.expr);
 		popDest();
 		
-		String typeName = ((IdentifierNode)node.expr).name;
+		String typeName = BcCodeCs.identifier((IdentifierNode)node.expr);
 		StringBuilder typeBuffer = new StringBuilder(typeName);
 		
 		ListNode typeArgs = node.typeArgs;
@@ -929,7 +929,7 @@ public class Main2
 		}
 		else
 		{
-			dest.write(node.name);
+			dest.write(BcCodeCs.identifier(node));
 		}
 	}
 	
@@ -1114,12 +1114,12 @@ public class Main2
 			if (child3.expr instanceof QualifiedIdentifierNode)
 			{
 				QualifiedIdentifierNode identifier = (QualifiedIdentifierNode) child3.expr;
-				loopVarName = BcCodeCs.identifier(identifier.name);
+				loopVarName = BcCodeCs.identifier(identifier);
 			}
 			else if (child3.expr instanceof IdentifierNode)
 			{
 				IdentifierNode identifier = (IdentifierNode) child3.expr;
-				loopVarName = BcCodeCs.identifier(identifier.name);
+				loopVarName = BcCodeCs.identifier(identifier);
 			}
 			else
 			{
@@ -1987,7 +1987,7 @@ public class Main2
 			return BcTypeNode.create(classString); // hack
 		}
 		
-		String name = BcNodeHelper.extractBcIdentifier(identifier);
+		String name = BcCodeCs.identifier(identifier);
 		
 		// check if it's class
 		if (BcCodeCs.canBeClass(name))

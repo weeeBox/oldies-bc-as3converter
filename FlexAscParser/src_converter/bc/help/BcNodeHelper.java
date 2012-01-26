@@ -33,7 +33,7 @@ public class BcNodeHelper
 		{
 			if (node instanceof MemberExpressionNode)
 			{
-				modifiers.add(tryExtractIdentifier((MemberExpressionNode) node));
+				modifiers.add(tryExtractIdentifier((MemberExpressionNode) node).name);
 			}
 			else if (node instanceof ListNode)
 			{
@@ -42,7 +42,7 @@ public class BcNodeHelper
 				{
 					if (innerNode instanceof MemberExpressionNode)
 					{
-						modifiers.add(tryExtractIdentifier((MemberExpressionNode) innerNode));
+						modifiers.add(tryExtractIdentifier((MemberExpressionNode) innerNode).name);
 					}
 					else
 					{
@@ -107,7 +107,7 @@ public class BcNodeHelper
 		return null;
 	}
 	
-	public static String tryExtractIdentifier(MemberExpressionNode memberNode)
+	public static IdentifierNode tryExtractIdentifier(MemberExpressionNode memberNode)
 	{
 		if (memberNode.base != null)
 		{
@@ -123,12 +123,7 @@ public class BcNodeHelper
 		{
 			return null;
 		}
-		return ((IdentifierNode) selector.expr).name;
-	}
-	
-	public static String extractBcIdentifier(IdentifierNode identifier)
-	{
-		return identifier.name;
+		return (IdentifierNode) selector.expr;
 	}
 	
 	public static boolean isIntegralLiteralNode(Node node)

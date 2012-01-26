@@ -305,7 +305,7 @@ public class Main
 
 	private static BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
 	{
-		String interfaceDeclaredName = interfaceDefinitionNode.name.name;
+		String interfaceDeclaredName = BcCodeCpp.identifier(interfaceDefinitionNode.name);
 		
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
@@ -336,7 +336,7 @@ public class Main
 	
 	private static BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
 	{
-		String classDeclaredName = classDefinitionNode.name.name;
+		String classDeclaredName = BcCodeCpp.identifier(classDefinitionNode.name);
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
 		BcTypeNode classType = BcTypeNode.create(classDeclaredName);
@@ -400,7 +400,7 @@ public class Main
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
 		BcTypeNode bcType = extractBcType(varBindNode.variable.type);
-		String bcIdentifier = BcNodeHelper.extractBcIdentifier(varBindNode.variable.identifier);	
+		String bcIdentifier = BcCodeCpp.identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcType, bcIdentifier);
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
@@ -416,7 +416,7 @@ public class Main
 	private static BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode)
 	{
 		FunctionNameNode functionNameNode = functionDefinitionNode.name;
-		String name = functionNameNode.identifier.name;
+		String name = BcCodeCpp.identifier(functionNameNode.identifier);
 		BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);
 		
 		if (functionNameNode.kind == Tokens.GET_TOKEN)
@@ -443,7 +443,7 @@ public class Main
 			ObjectList<ParameterNode> params = parameterNode.items;
 			for (ParameterNode param : params)
 			{
-				BcFuncParam bcParam = new BcFuncParam(extractBcType(param.type), param.identifier.name);
+				BcFuncParam bcParam = new BcFuncParam(extractBcType(param.type), BcCodeCpp.identifier(param.identifier));
 				
 				if (param.init != null)
 				{
@@ -644,7 +644,7 @@ public class Main
 		
 		BcTypeNode varType = extractBcType(varBindNode.variable.type);
 		
-		String bcIdentifier = BcNodeHelper.extractBcIdentifier(varBindNode.variable.identifier);	
+		String bcIdentifier = BcCodeCpp.identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier);
 		
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
@@ -695,7 +695,8 @@ public class Main
 			
 			if (base instanceof MemberExpressionNode)
 			{
-				baseIdentifier = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)base);
+				IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)base);
+				baseIdentifier = BcCodeCpp.identifier(identifierNode);
 				if (baseIdentifier != null)
 				{
 					staticCall = BcCodeCpp.canBeClass(baseIdentifier);
@@ -732,8 +733,9 @@ public class Main
 					assert call.expr instanceof IdentifierNode : call.expr.getClass();
 					IdentifierNode identifier = (IdentifierNode) call.expr;
 					
-					BcClassDefinitionNode castClass = findClass(identifier.name);
-					assert castClass != null : identifier.name;
+					String identifierName = BcCodeCpp.identifier(identifier);
+					BcClassDefinitionNode castClass = findClass(identifierName);
+					assert castClass != null : identifierName;
 					
 					lastBcMemberType = castClass.getClassType();
 				}
@@ -1094,7 +1096,7 @@ public class Main
 		process(node.expr);
 		popDest();
 		
-		String typeName = ((IdentifierNode)node.expr).name;
+		String typeName = BcCodeCpp.type(((IdentifierNode)node.expr).name);
 		StringBuilder typeBuffer = new StringBuilder(typeName);
 		
 		ListNode typeArgs = node.typeArgs;
@@ -1147,7 +1149,7 @@ public class Main
 		}
 		else
 		{
-			dest.write(node.name);
+			dest.write(BcCodeCpp.identifier(node));
 		}
 	}
 	
@@ -1189,7 +1191,6 @@ public class Main
 		{
 			LiteralArrayNode arrayNode = (LiteralArrayNode) node;
 			ArgumentListNode elementlist = arrayNode.elementlist;
-			BcTypeNode type = null;
 			
 			WriteDestination elementDest = new ListWriteDestination();
 			pushDest(elementDest);
@@ -1328,12 +1329,12 @@ public class Main
 			if (child3.expr instanceof QualifiedIdentifierNode)
 			{
 				QualifiedIdentifierNode identifier = (QualifiedIdentifierNode) child3.expr;
-				loopVarName = BcCodeCpp.identifier(identifier.name);
+				loopVarName = BcCodeCpp.identifier(identifier);
 			}
 			else if (child3.expr instanceof IdentifierNode)
 			{
 				IdentifierNode identifier = (IdentifierNode) child3.expr;
-				loopVarName = BcCodeCpp.identifier(identifier.name);
+				loopVarName = BcCodeCpp.identifier(identifier);
 			}
 			else
 			{
@@ -2852,7 +2853,7 @@ public class Main
 			return BcTypeNode.create(classString); // hack
 		}
 		
-		String name = BcNodeHelper.extractBcIdentifier(identifier);
+		String name = BcCodeCpp.identifier(identifier);
 		
 		// check if it's class
 		if (BcCodeCpp.canBeClass(name))
