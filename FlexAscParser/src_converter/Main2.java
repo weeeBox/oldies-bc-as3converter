@@ -1658,15 +1658,15 @@ public class Main2
 						
 			src.write(bcField.getVisiblity() + " ");
 			
-			if (bcField.isStatic())
-			{
-				src.write("static ");
-			}
-			
 			if (bcField.isConst())
 			{
 				src.write("const ");
 			}
+			else if (bcField.isStatic())
+			{
+				src.write("static ");
+			}			
+			
 			src.writef("%s %s", type, name);
 			if (bcField.hasInitializer())
 			{
