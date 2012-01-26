@@ -87,10 +87,6 @@ public class BcNodeHelper
 		{
 			GetExpressionNode selector = (GetExpressionNode) expr.selector;
 			String name = ((IdentifierNode)selector.expr).name;
-			if (name.equals("Function"))
-			{				
-				return new BcFunctionTypeNode();
-			}
 			
 			return BcTypeNode.create(name);
 		}

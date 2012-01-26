@@ -1,8 +1,8 @@
 package flash 
 {
-	public dynamic class Function extends Object 
+	public class Function 
 	{
-		public static const length : int = 1;
+		/* public static const length : int = 1; */
 
 		/* public function apply(thisArg : * = undefined, argArray : * = undefined) : *; */
 

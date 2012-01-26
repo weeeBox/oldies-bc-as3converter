@@ -577,6 +577,7 @@ public class Main2
 	private static void process(FunctionCommonNode node)
 	{
 		System.err.println("Fix me!!! FunctionCommonNode");
+		assert false;
 	}
 	
 	private static BcVariableDeclaration process(VariableDefinitionNode node)
@@ -1422,16 +1423,6 @@ public class Main2
 		return bcBuitinFunctions.get(name);
 	}
 	
-	private static BcFunctionTypeNode findFunctionType(String identifier)
-	{
-		BcTypeNode foundType = findVariableType(identifier);
-		if (foundType instanceof BcFunctionTypeNode)
-		{
-			return (BcFunctionTypeNode) foundType;
-		}
-		return null;
-	}
-
 	private static BcTypeNode findVariableType(String indentifier)
 	{
 		if (indentifier.equals("this"))
@@ -1719,8 +1710,6 @@ public class Main2
 	private static List<BcTypeNode> getImports(BcClassDefinitionNode bcClass)
 	{
 		List<BcTypeNode> imports = new ArrayList<BcTypeNode>();
-		
-		tryAddUniqueType(imports, bcClass.getClassType());
 		
 		if (bcClass.hasInterfaces())
 		{

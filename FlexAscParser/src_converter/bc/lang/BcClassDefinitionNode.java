@@ -280,6 +280,7 @@ public class BcClassDefinitionNode extends BcNode
 	{
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.extendsType = extendsType;
+		bcClass.packageName = packageName;
 		
 		bcClass.fields = fields;
 		bcClass.functions = functions;
