@@ -658,7 +658,7 @@ public class Main2
 			if (base instanceof MemberExpressionNode)
 			{
 				IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)base);
-				staticCall = identifierNode != null && BcCodeCs.canBeClass(identifierNode.name);
+				staticCall = identifierNode != null && canBeClass(identifierNode.name);
 			}
 			
 			if (staticCall)
@@ -737,13 +737,10 @@ public class Main2
 
 	private static BcTypeNode findIdentifierType(String name)
 	{
-		if (BcCodeCs.canBeClass(name))
+		BcClassDefinitionNode bcClass = findClass(name);
+		if (bcClass != null)
 		{
-			BcClassDefinitionNode bcClass = findClass(name);
-			if (bcClass != null)
-			{
-				return bcClass.getClassType();
-			}
+			return bcClass.getClassType();
 		}
 		
 		BcVariableDeclaration bcVar = findVariable(name);
@@ -867,7 +864,7 @@ public class Main2
 		{
 			if (node.getMode() == Tokens.EMPTY_TOKEN && node.args != null && node.args.items.size() == 1)
 			{
-				if (BcCodeCs.canBeClass(type) || BcCodeCs.isBasicType(type))
+				if (canBeClass(type) || BcCodeCs.isBasicType(type))
 				{
 					dest.writef("((%s)(%s))", BcCodeCs.type(exprDest.toString()), argsDest);
 				}
@@ -1938,7 +1935,7 @@ public class Main2
 	
 	private static void tryAddUniqueNamespace(List<String> imports, BcTypeNode type)
 	{
-		if (BcCodeCs.canBeClass(type))
+		if (canBeClass(type))
 		{
 			BcClassDefinitionNode classNode = type.getClassNode();
 			assert classNode != null : type.getName();
@@ -2180,15 +2177,13 @@ public class Main2
 		String name = BcCodeCs.identifier(identifier);
 		
 		// check if it's class
-		if (BcCodeCs.canBeClass(name))
+		BcClassDefinitionNode bcClass = findClass(name);
+		if (bcClass != null)
 		{
-			BcClassDefinitionNode bcClass = findClass(name);
-			if (bcClass != null)
-			{
-				return bcClass.getClassType();
-			}
+			return bcClass.getClassType();
 		}
-		else if (BcCodeCs.isBasicType(name))
+		
+		if (BcCodeCs.isBasicType(name))
 		{			
 			return BcTypeNode.create(name);
 		}
@@ -2234,5 +2229,15 @@ public class Main2
 		BcTypeNode.add(bcType.getNameEx(), bcType);
 		
 		return bcType;
+	}
+
+	private static boolean canBeClass(String name) 
+	{
+		return findClass(name) != null;
+	}
+	
+	private static boolean canBeClass(BcTypeNode type) 
+	{
+		return canBeClass(type.getName());
 	}
 }

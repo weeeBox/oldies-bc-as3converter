@@ -126,20 +126,6 @@ public class BcCodeCs
 		return basicTypes.containsKey(name);
 	}
 	
-	public static boolean canBeClass(BcTypeNode type)
-	{
-		return canBeClass(type.getName());
-	}
-
-	public static boolean canBeClass(String name)
-	{
-		if (isBasicType(name))
-			return false;
-		
-		char firstChar = name.charAt(0);
-		return Character.isUpperCase(firstChar);
-	}
-
 	public static String typeArgRef(BcTypeNode bcType)
 	{		
 		return type(bcType);
