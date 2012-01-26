@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1521,9 +1522,16 @@ public class Main2
 
 	private static void writeImports(WriteDestination dest, List<BcTypeNode> imports)	
 	{
+		List<String> importStrings = new ArrayList<String>();
 		for (BcTypeNode typeNode : imports)
 		{
-			dest.writelnf("using %s;", BcCodeCs.fullType(typeNode));
+			importStrings.add(BcCodeCs.fullType(typeNode));
+		}
+		Collections.sort(importStrings);
+		
+		for (String importString : importStrings)
+		{
+			dest.writelnf("using %s;", importString);
 		}
 	}
 
