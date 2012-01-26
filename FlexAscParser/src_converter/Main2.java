@@ -1503,8 +1503,10 @@ public class Main2
 		impl = null;
 		
 		src.writeln("using System;");
+		writeBlankLine(src);
 		
 		writeImports(src, getImports(bcClass));
+		writeBlankLine(src);
 		
 		src.writeln("namespace " + BcCodeCs.namespace(bcClass.getPackageName()));
 		writeBlockOpen(src);
