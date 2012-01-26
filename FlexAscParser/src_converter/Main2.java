@@ -155,7 +155,7 @@ public class Main2
 			bcClasses = new ArrayList<BcClassDefinitionNode>();
 			collect(filenames);
 			process();
-			write(outputDir, bcApiClasses);
+			// write(outputDir, bcApiClasses);
 			write(outputDir, bcClasses);
 		}
 		catch (IOException e)
@@ -674,7 +674,7 @@ public class Main2
 				selector instanceof CallExpressionNode || 
 				selector instanceof SetExpressionNode)
 			{
-				if (!(selector instanceof SetExpressionNode) || selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
+				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
 				{
 					dest.write(".");
 				}
@@ -720,21 +720,14 @@ public class Main2
 	
 	private static void process(GetExpressionNode node)
 	{
-		ListWriteDestination exprDest = new ListWriteDestination();
-		pushDest(exprDest);
+		ListWriteDestination expr = new ListWriteDestination();
+		pushDest(expr);
 		process(node.expr);
 		popDest();
 		
-		String expr = exprDest.toString();
-		
 		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 		{
-			ListWriteDestination argsDest = new ListWriteDestination();
-			pushDest(argsDest);
-			process(node.expr);
-			popDest();
-			
-			dest.writef("%s[%s]", expr, argsDest);
+			dest.writef("[%s]", expr);
 		}
 		else
 		{
@@ -1695,7 +1688,7 @@ public class Main2
 				{
 					src.write("static ");
 				}
-				else
+				else if (!bcFunc.isPrivate())
 				{
 					src.write("virtual ");
 				}
@@ -1889,6 +1882,16 @@ public class Main2
 			if (!imports.contains(packageName))
 			{
 				imports.add(packageName);
+			}
+			
+			if (type instanceof BcVectorTypeNode)
+			{
+				BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
+				BcTypeNode generic = vectorType.getGeneric();
+				if (generic != null)
+				{
+					tryAddUniqueNamespace(imports, generic);
+				}
 			}
 		}
 	}

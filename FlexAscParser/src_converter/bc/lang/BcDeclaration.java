@@ -20,12 +20,22 @@ public class BcDeclaration extends BcNode
 	
 	public String getVisiblity()
 	{
-		if (modifiers.contains("private"))
+		if (isPrivate())
 			return "private";
-		if (modifiers.contains("protected"))
+		if (isProtected())
 			return "protected";
 		
 		return "public";
+	}
+
+	private boolean isProtected() 
+	{
+		return modifiers.contains("protected");
+	}
+
+	public boolean isPrivate() 
+	{
+		return modifiers.contains("private");
 	}
 	
 	public boolean isConst()
