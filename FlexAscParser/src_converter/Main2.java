@@ -106,6 +106,7 @@ public class Main2
 	private static List<BcVariableDeclaration> declaredVars;
 	
 	private static List<BcClassDefinitionNode> bcClasses;
+	private static List<BcClassDefinitionNode> bcApiClasses;
 	private static Map<String, BcFunctionDeclaration> bcBuitinFunctions; // top level functions	
 	
 	static
@@ -138,7 +139,6 @@ public class Main2
 		BcFunctionDeclaration.thisCallMarker = BcCodeCs.thisCallMarker;
 		BcFunctionDeclaration.superCallMarker = BcCodeCs.superCallMarker;
 		
-		bcClasses = new ArrayList<BcClassDefinitionNode>();
 		
 		File outputDir = new File(args[0]);
 
@@ -147,10 +147,16 @@ public class Main2
 		
 		try
 		{
+			
+			bcClasses = new ArrayList<BcClassDefinitionNode>();
 			collect(new File("api/src")); // collect api classes
+			bcApiClasses = bcClasses;
+			
+			bcClasses = new ArrayList<BcClassDefinitionNode>();
 			collect(filenames);
 			process();
-			write(outputDir);
+			write(outputDir, bcApiClasses);
+			write(outputDir, bcClasses);
 		}
 		catch (IOException e)
 		{
@@ -289,7 +295,15 @@ public class Main2
 
 		// super type
 		Node baseclass = classDefinitionNode.baseclass;
-		if (baseclass != null)
+		if (baseclass == null)
+		{
+			BcTypeNode typeObject = BcTypeNode.create(classObject);
+			if (classType != typeObject)
+			{
+				bcClass.setExtendsType(typeObject);
+			}
+		}
+		else
 		{
 			BcTypeNode bcSuperType = extractBcType(baseclass);
 			bcClass.setExtendsType(bcSuperType);
@@ -417,8 +431,13 @@ public class Main2
 			process(type);
 		}
 				
-		List<BcClassDefinitionNode> iterList = new ArrayList<BcClassDefinitionNode>(bcClasses);
-		for (BcClassDefinitionNode bcClass : iterList)
+		process(new ArrayList<BcClassDefinitionNode>(bcApiClasses));
+		process(bcClasses);
+	}
+
+	private static void process(List<BcClassDefinitionNode> classes) 
+	{
+		for (BcClassDefinitionNode bcClass : classes)
 		{
 			if (bcClass.isInterface())
 			{
@@ -1431,7 +1450,18 @@ public class Main2
 	
 	private static BcClassDefinitionNode findClass(String name)
 	{
-		for (BcClassDefinitionNode bcClass : bcClasses)
+		BcClassDefinitionNode bcClass = findClass(bcApiClasses, name);
+		if (bcClass != null)
+		{
+			return bcClass;
+		}
+		
+		return findClass(bcClasses, name);
+	}
+
+	private static BcClassDefinitionNode findClass(List<BcClassDefinitionNode> classes, String name) 
+	{
+		for (BcClassDefinitionNode bcClass : classes)
 		{
 			if (bcClass.getClassType().getName().equals(name))
 			{
@@ -1479,59 +1509,20 @@ public class Main2
 		return null;
 	}
 
-	private static void write(File outputDir) throws IOException
+	private static void write(File outputDir, List<BcClassDefinitionNode> classes) throws IOException
 	{
-		for (BcClassDefinitionNode bcClass : bcClasses)
+		for (BcClassDefinitionNode bcClass : classes)
 		{
-			if (bcClass.isInterface())
-			{
-				writeIntefaceDefinition(bcClass, outputDir);
-			}
-			else
-			{
-				writeClassDefinition(bcClass, outputDir);
-			}
+			writeClassDefinition(bcClass, outputDir);
 		}
 	}
 	
-	private static void writeIntefaceDefinition(BcClassDefinitionNode bcClass, File outputDir) throws IOException
+	private static void writeImports(WriteDestination dest, List<String> imports)	
 	{
-		String className = getClassName(bcClass);
-		String classExtends = getBaseClassName(bcClass);
+		List<String> sortedImports = new ArrayList<String>(imports);
+		Collections.sort(sortedImports);
 		
-		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
-		impl = null;
-		
-		src.writeln("using System;");
-		writeBlankLine(src);
-		
-		writeImports(src, getImports(bcClass));
-		writeBlankLine(src);
-		
-		src.writeln("namespace " + BcCodeCs.namespace(bcClass.getPackageName()));
-		writeBlockOpen(src);
-		
-		src.writelnf("public interface %s : %s", className, classExtends);
-		writeBlockOpen(src);
-		
-		writeInterfaceFunctions(bcClass);
-
-		writeBlockClose(src);
-		writeBlockClose(src);
-		
-		src.close();
-	}
-
-	private static void writeImports(WriteDestination dest, List<BcTypeNode> imports)	
-	{
-		List<String> importStrings = new ArrayList<String>();
-		for (BcTypeNode typeNode : imports)
-		{
-			importStrings.add(BcCodeCs.fullType(typeNode));
-		}
-		Collections.sort(importStrings);
-		
-		for (String importString : importStrings)
+		for (String importString : sortedImports)
 		{
 			dest.writelnf("using %s;", importString);
 		}
@@ -1576,26 +1567,80 @@ public class Main2
 
 	private static void writeClassDefinition(BcClassDefinitionNode bcClass, File outputDir) throws IOException
 	{
-		String className = getClassName(bcClass);
-		String classExtends = getBaseClassName(bcClass);
+		boolean isInterface = bcClass instanceof BcInterfaceDefinitionNode;
 		
-		src = new FileWriteDestination(new File(outputDir, className + ".cs"));
+		String className = getClassName(bcClass);
+		
+		String packageName = bcClass.getPackageName();
+		String subPath = packageName.replace(".", "/");
+		
+		File srcFileDir = new File(outputDir, subPath);
+		if (!srcFileDir.exists())
+		{
+			boolean successed = srcFileDir.mkdirs();
+			assert successed : srcFileDir.getAbsolutePath();
+		}
+		
+		src = new FileWriteDestination(new File(srcFileDir, className + ".cs"));		
 		impl = new ListWriteDestination();
 		
 		src.writeln("using System;");
+		writeBlankLine(src);
 		
 		writeImports(src, getImports(bcClass));
+		writeBlankLine(src);
 		
 		src.writeln("namespace " + BcCodeCs.namespace(bcClass.getPackageName()));
 		writeBlockOpen(src);
 		
-		src.writelnf("public class %s : %s", className, classExtends);
-		writeBlockOpen(src);
+		if (isInterface)
+		{
+			src.writelnf("public interface %s", className);
+			writeBlockOpen(src);
+			writeInterfaceFunctions(bcClass);
+			writeBlockClose(src);
+		}
+		else
+		{
+			src.writef("public class %s", className);
+			
+			boolean hasExtendsType = bcClass.hasExtendsType();
+			boolean hasInterfaces = bcClass.hasInterfaces();
+			
+			if (hasExtendsType || hasInterfaces)
+			{
+				src.write(" : ");
+			}
+			
+			if (hasExtendsType)
+			{
+				src.write(BcCodeCs.type(bcClass.getExtendsType()));
+				if (hasInterfaces)
+				{
+					src.write(", ");
+				}
+			}
+			
+			if (hasInterfaces)
+			{
+				List<BcTypeNode> interfaces = bcClass.getInterfaces();
+				int interfaceIndex= 0;
+				for (BcTypeNode bcInterface : interfaces) 
+				{					
+					String interfaceType = BcCodeCs.type(bcInterface);
+					src.write(++interfaceIndex == interfaces.size() ? interfaceType : (interfaceType + ", "));
+				}
+			}
+			
+			src.writeln();
+			writeBlockOpen(src);
+			
+			writeFields(bcClass);
+			writeFunctions(bcClass);
+			
+			writeBlockClose(src);
+		}		
 		
-		writeFields(bcClass);
-		writeFunctions(bcClass);
-		
-		writeBlockClose(src);
 		writeBlockClose(src);
 		
 		src.close();
@@ -1786,13 +1831,13 @@ public class Main2
 		return null;
 	}
 	
-	private static List<BcTypeNode> getImports(BcClassDefinitionNode bcClass)
+	private static List<String> getImports(BcClassDefinitionNode bcClass)
 	{
-		List<BcTypeNode> imports = new ArrayList<BcTypeNode>();
+		List<String> imports = new ArrayList<String>();
 		
 		if (bcClass.hasExtendsType())
 		{
-			tryAddUniqueType(imports, bcClass.getExtendsType());
+			tryAddUniqueNamespace(imports, bcClass.getExtendsType());
 		}
 		
 		if (bcClass.hasInterfaces())
@@ -1800,7 +1845,7 @@ public class Main2
 			List<BcTypeNode> interfaces = bcClass.getInterfaces();
 			for (BcTypeNode bcInterface : interfaces)
 			{
-				tryAddUniqueType(imports, bcInterface);
+				tryAddUniqueNamespace(imports, bcInterface);
 			}
 		}
 		
@@ -1808,7 +1853,7 @@ public class Main2
 		for (BcVariableDeclaration bcVar : classVars)
 		{
 			BcTypeNode type = bcVar.getType();
-			tryAddUniqueType(imports, type);
+			tryAddUniqueNamespace(imports, type);
 		}
 		
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
@@ -1817,32 +1862,33 @@ public class Main2
 			if (bcFunc.hasReturnType())
 			{
 				BcTypeNode returnType = bcFunc.getReturnType();
-				tryAddUniqueType(imports, returnType);
+				tryAddUniqueNamespace(imports, returnType);
 			}
 			
 			List<BcFuncParam> params = bcFunc.getParams();
 			for (BcFuncParam param : params)
 			{
 				BcTypeNode type = param.getType();
-				tryAddUniqueType(imports, type);
+				tryAddUniqueNamespace(imports, type);
 			}
 		}
 		
 		return imports;
 	}
 	
-	private static void tryAddUniqueType(List<BcTypeNode> types, BcTypeNode type)
+	private static void tryAddUniqueNamespace(List<String> imports, BcTypeNode type)
 	{
 		if (BcCodeCs.canBeClass(type))
 		{
-			if (type instanceof BcVectorTypeNode)
+			BcClassDefinitionNode classNode = type.getClassNode();
+			assert classNode != null : type.getName();
+			
+			String packageName = classNode.getPackageName();
+			assert packageName != null : classNode.getName();
+			
+			if (!imports.contains(packageName))
 			{
-				BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
-				tryAddUniqueType(types, vectorType.getGeneric());
-			}
-			if (!types.contains(type))
-			{
-				types.add(type);
+				imports.add(packageName);
 			}
 		}
 	}
@@ -1850,16 +1896,6 @@ public class Main2
 	private static String getClassName(BcClassDefinitionNode bcClass)
 	{
 		return BcCodeCs.type(bcClass.getName());
-	}
-	
-	private static String getBaseClassName(BcClassDefinitionNode bcClass)
-	{
-		if (bcClass.hasExtendsType())
-		{
-			return BcCodeCs.type(bcClass.getExtendsType());
-		}
-		
-		return BcCodeCs.type(classObject);
 	}
 	
 	public static BcTypeNode evaluateType(Node node)
@@ -2120,7 +2156,7 @@ public class Main2
 		{
 			BcClassDefinitionNode vectorGenericClass = findClass(classVector).clone();
 			vectorGenericClass.setClassType(bcType);
-			bcClasses.add(vectorGenericClass);
+			bcApiClasses.add(vectorGenericClass);
 			
 			bcType.setClassNode(vectorGenericClass);
 		}

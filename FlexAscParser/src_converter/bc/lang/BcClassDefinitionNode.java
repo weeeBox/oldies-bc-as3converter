@@ -98,7 +98,7 @@ public class BcClassDefinitionNode extends BcNode
 	
 	public boolean hasInterfaces()
 	{
-		return interfaces != null;
+		return interfaces.size() > 0;
 	}
 	
 	public void setDeclaredVars(List<BcVariableDeclaration> declaredVars)
