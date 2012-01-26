@@ -634,7 +634,10 @@ public class Main2
 				selector instanceof CallExpressionNode || 
 				selector instanceof SetExpressionNode)
 			{
-				dest.write(".");
+				if (!(selector instanceof SetExpressionNode) || selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
+				{
+					dest.write(".");
+				}
 			}
 		}
 		
