@@ -34,7 +34,7 @@ public class BcCodeCs
 		"event", "explicit", "extern", "false", "finally", 
 		"fixed", "float", "for", "foreach", "from", 
 		"get", "global", "goto", "group", "if", 
-		"implicit", "in", "int", "interface", "internal", 
+		"implicit", "in", "interface", "internal", 
 		"into", "is", "join", "let", "lock", 
 		"long", "namespace", "new", "null", "object", 
 		"operator", "orderby", "out", "override", "params", 
@@ -42,7 +42,7 @@ public class BcCodeCs
 		"ref", "remove", "return", "sbyte", "sealed", 
 		"select", "set", "short", "sizeof", "stackalloc", 
 		"static", "string", "struct", "switch", "this", 
-		"throw", "true", "try", "typeof", "uint", 
+		"throw", "true", "try", "typeof", 
 		"ulong", "unchecked", "unsafe", "ushort", "using", 
 		"value", "var", "virtual", "void", "volatile", 
 		"while", "yield"
