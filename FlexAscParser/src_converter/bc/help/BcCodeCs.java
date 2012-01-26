@@ -103,6 +103,19 @@ public class BcCodeCs
 		return TYPE_PREFIX + name;
 	}
 	
+	public static String keywordSafe(String name)
+	{
+		for (String keyword : keyWords)
+		{
+			if (name.equals(keyword))
+			{
+				return "_" + name;
+			}
+		}
+		
+		return name;
+	}
+	
 	public static boolean isBasicType(BcTypeNode type)
 	{
 		return isBasicType(type.getName());
@@ -149,7 +162,7 @@ public class BcCodeCs
 	
 	public static String identifier(String name)
 	{
-		return name;
+		return keywordSafe(name);
 	}
 	
 	public static String construct(BcTypeNode type, Object initializer)
