@@ -11,6 +11,8 @@ package flash
 		/* protected static function _setPropertyIsEnumerable(o : *, V : String, enumerable : Boolean) : void; */
 
 		public function hasOwnProperty(name : String) : Boolean { return false; }
+		
+		public virtual function toString() : String { return null; }
 
 		/* internal static function init() : *; */
 

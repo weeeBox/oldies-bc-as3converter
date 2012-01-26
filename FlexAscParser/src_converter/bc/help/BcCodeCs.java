@@ -58,7 +58,6 @@ public class BcCodeCs
 		basicTypes.put("Number", "float");
 		basicTypes.put("float", "float");
 		basicTypes.put("Boolean", "bool");
-		basicTypes.put("String", "String");
 	};
 	
 	public static String fullType(BcTypeNode bcType)

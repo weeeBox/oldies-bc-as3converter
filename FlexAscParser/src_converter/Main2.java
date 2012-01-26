@@ -1671,14 +1671,6 @@ public class Main2
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			if (bcFunc.isSetter() && bcClass.findGetterFunction(bcFunc.getName()) != null)
-			{
-				continue; // we'll write setter with getter
-			}
-			
-			String type = bcFunc.hasReturnType() ? BcCodeCs.type(bcFunc.getReturnType()) : "void";
-			String name = BcCodeCs.identifier(bcFunc.getName());			
-			
 			src.write(bcFunc.getVisiblity() + " ");
 			if (bcFunc.isConstructor())
 			{
@@ -1695,97 +1687,45 @@ public class Main2
 					src.write("virtual ");
 				}
 				
-				if (bcFunc.isSetter())
+				String type = bcFunc.hasReturnType() ? BcCodeCs.type(bcFunc.getReturnType()) : "void";
+				String name = BcCodeCs.identifier(bcFunc.getName());			
+				
+				if (bcFunc.isGetter())
 				{
-					List<BcFuncParam> params = bcFunc.getParams();
-					assert params.size() == 1;
-					
-					BcFuncParam param = params.get(0);
-					src.writef("%s %s", BcCodeCs.type(param.getType()), name);
+					name = "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
 				}
-				else
+				else if (bcFunc.isSetter())
 				{
-					src.writef("%s %s", type, name);
+					name = "set" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
 				}
+				src.writef("%s %s", type, name);
 			}
 			
-			if (!bcFunc.isProperty())
+			StringBuilder paramsBuffer = new StringBuilder();
+			List<BcFuncParam> params = bcFunc.getParams();
+			int paramIndex = 0;
+			for (BcFuncParam bcParam : params)
 			{
-				StringBuilder paramsBuffer = new StringBuilder();
-				List<BcFuncParam> params = bcFunc.getParams();
-				int paramIndex = 0;
-				for (BcFuncParam bcParam : params)
+				String paramType = BcCodeCs.type(bcParam.getType());
+				String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
+				paramsBuffer.append(String.format("%s %s", paramType, paramName));
+				if (++paramIndex < params.size())
 				{
-					String paramType = BcCodeCs.type(bcParam.getType());
-					String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
-					paramsBuffer.append(String.format("%s %s", paramType, paramName));
-					if (++paramIndex < params.size())
-					{
-						paramsBuffer.append(", ");
-					}
+					paramsBuffer.append(", ");
 				}
-
-				src.write("(");
-				src.write(paramsBuffer);
-				src.write(")");
 			}
-			
-			src.writeln();
+			src.writelnf("(%s)", paramsBuffer);
 			
 			ListWriteDestination body = bcFunc.getBody();
 			if (bcFunc.isConstructor())
 			{
 				writeConstructorBody(body);
 			}
-			else if (bcFunc.isProperty())
-			{
-				writeBlockOpen(src);
-				
-				if (bcFunc.isGetter())
-				{
-					writeFunctionGetter(bcFunc);
-					
-					// write setter in one block
-					BcFunctionDeclaration bcSetterFunc = bcClass.findSetterFunction(bcFunc.getName());
-					if (bcSetterFunc != null)
-					{
-						writeFunctionSetter(bcSetterFunc);
-					}
-				}
-				else
-				{
-					writeFunctionSetter(bcFunc);					
-				}
-				
-				writeBlockClose(src);
-			}
 			else
 			{
 				src.writeln(body);
 			}
 		}
-	}
-
-	private static void writeFunctionGetter(BcFunctionDeclaration bcFunc) 
-	{
-		assert bcFunc.getParams().isEmpty();
-		
-		src.writeln("get");
-		src.writeln(bcFunc.getBody());
-	}
-	
-	private static void writeFunctionSetter(BcFunctionDeclaration bcFunc) 
-	{
-		List<BcFuncParam> params = bcFunc.getParams();
-		assert params.size() == 1;
-		
-		BcFuncParam param = params.get(0);
-		
-		src.writeln("set");
-		writeBlockOpen(src);
-		src.writelnf("%s %s = value;", BcCodeCs.type(param.getType()), param.getIdentifier());
-		src.writeln(bcFunc.getBody());
-		writeBlockClose(src);
 	}
 
 	private static void writeConstructorBody(ListWriteDestination body) 
@@ -2127,7 +2067,7 @@ public class Main2
 				}
 				else 
 				{
-					if (baseClass.getName().equals(classXML))				
+					if (classEquals(baseClass, classXML))				
 					{
 						return BcTypeNode.create(classXMLList); // dirty hack
 					}
@@ -2135,7 +2075,7 @@ public class Main2
 					{
 						return lastBcClass.getClassType(); // this referes to the current class
 					}
-					else if (baseClass.getName().endsWith(classObject))
+					else if (classEquals(baseClass, classObject))
 					{
 						return BcTypeNode.create(classObject);
 					}
@@ -2229,6 +2169,16 @@ public class Main2
 		BcTypeNode.add(bcType.getNameEx(), bcType);
 		
 		return bcType;
+	}
+	
+	private static boolean classEquals(BcClassDefinitionNode classNode, String name)
+	{
+		return typeEquals(classNode.getClassType(), name);
+	}
+	
+	private static boolean typeEquals(BcTypeNode type, String name)
+	{
+		return type == BcTypeNode.create(name);
 	}
 
 	private static boolean canBeClass(String name) 
