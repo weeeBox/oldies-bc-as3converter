@@ -1664,7 +1664,49 @@ public class Main2
 			
 			src.write(paramsBuffer);
 			src.writeln(")");
-			src.writeln(bcFunc.getBody());
+			ListWriteDestination body = bcFunc.getBody();
+			if (bcFunc.isConstructor())
+			{
+				writeConstructorBody(body);
+			}
+			else
+			{
+				src.writeln(body);
+			}
+		}
+	}
+
+	private static void writeConstructorBody(ListWriteDestination body) 
+	{
+		List<String> lines = body.getLines();
+		String firstLine = lines.get(1).trim();
+		if (firstLine.startsWith(BcCodeCs.thisCallMarker))
+		{
+			firstLine = firstLine.replace(BcCodeCs.thisCallMarker, "this");
+			if (firstLine.endsWith(";"))
+			{
+				firstLine = firstLine.substring(0, firstLine.length() - 1);
+			}
+			
+			src.writeln(" : " + firstLine);
+			lines.remove(1);
+			src.writeln(new ListWriteDestination(lines));
+		}
+		else if (firstLine.startsWith(BcCodeCs.superCallMarker))
+		{
+			firstLine = firstLine.replace(BcCodeCs.superCallMarker, "base");
+			if (firstLine.endsWith(";"))
+			{
+				firstLine = firstLine.substring(0, firstLine.length() - 1);
+			}
+			
+			src.writeln(" : " + firstLine);
+			lines.remove(1);
+			src.writeln(new ListWriteDestination(lines));
+		}
+		else
+		{
+			src.writeln(body);
 		}
 	}
 	

@@ -9,7 +9,12 @@ public class ListWriteDestination extends WriteDestination
 	
 	public ListWriteDestination()
 	{
-		lines = new ArrayList<String>();
+		this(new ArrayList<String>());
+	}
+	
+	public ListWriteDestination(List<String> lines)
+	{
+		this.lines = lines;
 	}
 	
 	@Override

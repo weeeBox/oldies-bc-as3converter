@@ -21,8 +21,8 @@ public class BcCodeCs
 	
 	public static final String NULL = "null";
 	
-	public static final String superCallMarker = "super";
-	public static final String thisCallMarker = "this";
+	public static final String superCallMarker = "__$super$__";
+	public static final String thisCallMarker = "__$base$__";
 	
 	private static String[] keyWords = 
 	{
