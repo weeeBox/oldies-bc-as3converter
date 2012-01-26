@@ -10,6 +10,7 @@ import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.IdentifierNode;
 import macromedia.asc.parser.ListNode;
 import macromedia.asc.parser.MemberExpressionNode;
+import macromedia.asc.parser.ReturnStatementNode;
 import macromedia.asc.parser.StatementListNode;
 import bc.code.ListWriteDestination;
 import bc.help.BcCodeCpp;
@@ -217,9 +218,17 @@ public class BcFunctionDeclaration extends BcDeclaration
 		
 		CallExpressionNode selector = new CallExpressionNode(identifier, args);
 		MemberExpressionNode member = new MemberExpressionNode(null, selector, 0);
-		ListNode list = new ListNode(null, member, 0);
-		ExpressionStatementNode exprNode = new ExpressionStatementNode(list);
-		StatementListNode newStatements = new StatementListNode(exprNode);
+		StatementListNode newStatements;
+		if (hasReturnType())
+		{
+			newStatements = new StatementListNode(new ReturnStatementNode(member));
+		}
+		else
+		{
+			ListNode list = new ListNode(null, member, 0);
+			ExpressionStatementNode exprNode = new ExpressionStatementNode(list);
+			newStatements = new StatementListNode(exprNode);
+		}
 		
 		bcFunc.statements = newStatements;
 		
