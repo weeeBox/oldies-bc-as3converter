@@ -628,7 +628,27 @@ public class Main2
 		
 		if (base != null)
 		{
+			ListWriteDestination baseExpr = new ListWriteDestination();
+			pushDest(baseExpr);
 			process(base);
+			popDest();
+			
+			boolean staticCall = false;
+			
+			if (base instanceof MemberExpressionNode)
+			{
+				IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)base);
+				staticCall = identifierNode != null && BcCodeCs.canBeClass(identifierNode.name);
+			}
+			
+			if (staticCall)
+			{
+				dest.write(BcCodeCs.type(baseExpr.toString()));
+			}
+			else
+			{
+				dest.write(baseExpr);
+			}
 
 			if (selector instanceof GetExpressionNode || 
 				selector instanceof CallExpressionNode || 
