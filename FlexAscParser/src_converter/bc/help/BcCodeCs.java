@@ -95,6 +95,11 @@ public class BcCodeCs
 			return basic;
 		}
 		
+		if (name.equals("String"))
+		{
+			return name;
+		}
+		
 		if (name.startsWith(TYPE_PREFIX))
 		{
 			return name; 

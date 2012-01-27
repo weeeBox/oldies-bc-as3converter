@@ -12,6 +12,7 @@ import macromedia.asc.parser.LiteralBooleanNode;
 import macromedia.asc.parser.LiteralNumberNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.Node;
+import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.TypeExpressionNode;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcTypeNode;
@@ -104,6 +105,15 @@ public class BcNodeHelper
 		}
 		
 		assert false : expr.selector.getClass();
+		return null;
+	}
+	
+	public static IdentifierNode tryExtractIdentifier(SelectorNode selector)
+	{
+		if ((selector.expr instanceof IdentifierNode))
+		{
+			return (IdentifierNode) selector.expr;
+		}
 		return null;
 	}
 	

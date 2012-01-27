@@ -648,6 +648,9 @@ public class Main2
 		Node base = node.base;
 		SelectorNode selector = node.selector;
 		
+		ListWriteDestination memberDest = new ListWriteDestination();
+		pushDest(memberDest);
+		
 		if (base != null)
 		{
 			ListWriteDestination baseExpr = new ListWriteDestination();
@@ -674,7 +677,30 @@ public class Main2
 			{
 				dest.write(baseExpr);
 			}
-
+		}
+		
+		
+		BcTypeNode baseType = lastBcMemberType;
+		
+		ListWriteDestination selectorDest = new ListWriteDestination();
+		if (selector != null)
+		{
+			pushDest(selectorDest);
+			process(selector);
+			popDest();
+		}
+		
+		boolean stringCall = false;
+		boolean needDot = true;
+		if (base != null && typeEquals(baseType, classString))
+		{
+			String selectorCode = selectorDest.toString();
+			stringCall = !selectorCode.equals("ToString()") && !selectorCode.equals("Length");
+			needDot = !stringCall;
+		}
+		
+		if (base != null && needDot)
+		{
 			if (selector instanceof GetExpressionNode || 
 				selector instanceof CallExpressionNode || 
 				selector instanceof SetExpressionNode)
@@ -686,10 +712,45 @@ public class Main2
 			}
 		}
 		
-		if (selector != null)
+		if (stringCall)
 		{
-			process(selector);
+			popDest(); // member dest
+
+			assert selector instanceof CallExpressionNode;
+			CallExpressionNode callExpr = (CallExpressionNode) selector;
+			
+			ListWriteDestination argsDest = new ListWriteDestination();
+			if (callExpr.args != null)
+			{
+				pushDest(argsDest);
+				process(callExpr.args);
+				popDest();
+			}
+			
+			IdentifierNode funcIndentifierNode = BcNodeHelper.tryExtractIdentifier(selector);
+			assert funcIndentifierNode != null;
+			
+			String funcName = BcCodeCs.identifier(funcIndentifierNode);
+			if (funcName.equals("charAt"))
+			{
+				dest.writef("%s[%s])", memberDest, argsDest);
+			}
+			else if (callExpr.args != null)
+			{
+				dest.writef("AsString.%s(%s, %s)", funcName, memberDest, argsDest);
+			}
+			else
+			{
+				dest.writef("AsString.%s(%s)", funcName, memberDest);
+			}
 		}
+		else
+		{
+			dest.write(selectorDest);
+			popDest(); // member dest
+			dest.write(memberDest);
+		}
+		
 		
 		lastBcMemberType = bcMembersTypesStack.pop();
 	}
@@ -732,6 +793,7 @@ public class Main2
 		
 		boolean accessingDynamicProperty = false;
 		String identifier = expr.toString();
+		boolean getterCalled = false;
 		
 		if (node.expr instanceof IdentifierNode)
 		{
@@ -762,7 +824,17 @@ public class Main2
 					assert funcType != null : identifier;
 					
 					lastBcMemberType = funcType;
-					identifier = BcCodeCs.getter(identifier);
+					if (classEquals(bcClass, classString) && identifier.equals("length"))
+					{
+						// keep String.length property as a "Lenght" property
+						identifier = Character.toUpperCase(identifier.charAt(0)) + identifier.substring(1);
+					}
+					else
+					{
+						identifier = BcCodeCs.getter(identifier);
+						getterCalled = true;
+					}
+						
 				}
 				else
 				{
@@ -832,6 +904,10 @@ public class Main2
 		else if (accessingDynamicProperty)
 		{
 			dest.writef("getOwnProperty(\"%s\")", identifier);
+		}
+		else if (getterCalled)
+		{
+			dest.writef("%s()", identifier);
 		}
 		else
 		{
@@ -934,6 +1010,14 @@ public class Main2
 				if (bcFunc != null)
 				{
 					lastBcMemberType = bcFunc.getReturnType();
+					if (classEquals(bcClass, classString))
+					{
+						if (identifier.equals("toString"))
+						{
+							// turn toString() into ToString() for all strings
+							identifier = Character.toUpperCase(identifier.charAt(0)) + identifier.substring(1);
+						}
+					}
 				}
 				else
 				{
@@ -1047,16 +1131,16 @@ public class Main2
 			{
 				if (canBeClass(type) || BcCodeCs.isBasicType(type))
 				{
-					dest.writef("((%s)(%s))", BcCodeCs.type(exprDest.toString()), argsDest);
+					dest.writef("((%s)(%s))", BcCodeCs.type(identifier), argsDest);
 				}
 				else
 				{
-					dest.writef("%s(%s)", exprDest, argsDest);
+					dest.writef("%s(%s)", identifier, argsDest);
 				}
 			}
 			else
 			{
-				dest.writef("%s(%s)", exprDest, argsDest);
+				dest.writef("%s(%s)", identifier, argsDest);
 			}
 		}
 	}
@@ -1270,7 +1354,7 @@ public class Main2
 		else if (node instanceof LiteralStringNode)
 		{			
 			LiteralStringNode stringNode = (LiteralStringNode) node;
-			dest.writef("(%s)", BcCodeCs.construct(BcTypeNode.create(classString), '"' + replaceEscapes(stringNode.value) + '"'));
+			dest.writef("\"%s\"", replaceEscapes(stringNode.value));
 		}
 		else if (node instanceof LiteralRegExpNode)
 		{
