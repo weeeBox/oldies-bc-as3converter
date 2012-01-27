@@ -655,6 +655,13 @@ public class Main2
 			
 			boolean staticCall = false;
 			
+			BcTypeNode baseType = evaluateType(base);
+			if (baseType == null)
+			{
+				evaluateType(base);
+				assert baseType != null;
+			}
+			
 			if (base instanceof MemberExpressionNode)
 			{
 				IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)base);
@@ -1907,6 +1914,11 @@ public class Main2
 	
 	public static BcTypeNode evaluateType(Node node)
 	{
+		if (node instanceof MemberExpressionNode)
+		{
+			return evaluateMemberExpression((MemberExpressionNode) node);
+		}
+		
 		if (node instanceof IdentifierNode)
 		{
 			IdentifierNode identifier = (IdentifierNode) node;
@@ -1948,9 +1960,12 @@ public class Main2
 			return lastBcClass.getClassType();
 		}
 		
-		if (node instanceof MemberExpressionNode)
+		if (node instanceof SuperExpressionNode)
 		{
-			return evaluateMemberExpression((MemberExpressionNode) node);
+			assert lastBcClass != null;
+			assert lastBcClass.hasExtendsType();
+			
+			return lastBcClass.getExtendsType();
 		}
 		
 		if (node instanceof GetExpressionNode)
@@ -1965,48 +1980,27 @@ public class Main2
 			assert args.size() == 1;
 			return evaluateType(args.items.get(0));
 		}
+
+		if (node instanceof BinaryExpressionNode)
+		{
+			BinaryExpressionNode binaryNode = (BinaryExpressionNode) node;
+			BcTypeNode lhsType = evaluateType(binaryNode.lhs);
+			BcTypeNode rhsType = evaluateType(binaryNode.rhs);
+			
+			if (typeEquals(lhsType, classString) || typeEquals(lhsType, classString))
+			{
+				return BcTypeNode.create(classString);
+			}
+			
+			if (typeEquals(lhsType, "int") || typeEquals(rhsType, "int"))
+			{
+				return rhsType;
+			}
+			
+			assert false;
+		}
 		
-//		MemberExpressionNode expr = null;
-//		if (node instanceof TypeExpressionNode)
-//		{
-//			TypeExpressionNode typeNode = (TypeExpressionNode) node;
-//			expr = (MemberExpressionNode) typeNode.expr;
-//		}
-//		else if (node instanceof MemberExpressionNode)
-//		{
-//			expr = (MemberExpressionNode) node;
-//		}
-//		else
-//		{
-//			BcDebug.implementMe(node);
-//		}
-//		
-//		if (expr.selector instanceof GetExpressionNode)
-//		{
-//			GetExpressionNode selector = (GetExpressionNode) expr.selector;
-//			String name = ((IdentifierNode)selector.expr).name;
-//			if (name.equals("Function"))
-//			{
-//				assert false;
-//				return new BcFunctionTypeNode();
-//			}
-//			
-//			return BcTypeNode.create(name);
-//		}
-//		
-//		if (expr.selector instanceof ApplyTypeExprNode)
-//		{
-//			ApplyTypeExprNode selector = (ApplyTypeExprNode) expr.selector;
-//			String typeName = ((IdentifierNode)selector.expr).name;
-//			
-//			ListNode typeArgs = selector.typeArgs;
-//			assert typeArgs.size() == 1;
-//			
-//			BcTypeNode genericType = extractBcType(typeArgs.items.get(0));
-//			return new BcVectorTypeNode(typeName, genericType);
-//		}
-//		
-//		assert false : expr.selector.getClass();
+		assert false : node;
 		return null;
 	}
 
