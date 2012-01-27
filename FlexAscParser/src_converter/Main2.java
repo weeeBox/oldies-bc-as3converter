@@ -1443,7 +1443,11 @@ public class Main2
 		BcTypeNode conditionType = evaluateType(condition);
 		if (!typeEquals(conditionType, classBoolean))
 		{
-			return String.format("%s != null", condString);
+			if (typeEquals(conditionType, "int") || typeEquals(conditionType, "uint"))
+			{
+				return String.format("(%s) != 0", condString);
+			}
+			return String.format("(%s) != null", condString);
 		}
 		else
 		{
