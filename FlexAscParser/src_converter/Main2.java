@@ -999,9 +999,9 @@ public class Main2
 			dest.write(booleanNode.value ? "true" : "false");
 		}
 		else if (node instanceof LiteralStringNode)
-		{
+		{			
 			LiteralStringNode stringNode = (LiteralStringNode) node;
-			dest.writef("\"%s\"", replaceEscapes(stringNode.value));
+			dest.writef("(%s)", BcCodeCs.construct(BcTypeNode.create(classString), '"' + replaceEscapes(stringNode.value) + '"'));
 		}
 		else if (node instanceof LiteralRegExpNode)
 		{

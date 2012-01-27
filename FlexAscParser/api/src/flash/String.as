@@ -4,9 +4,9 @@ package flash
 	{
 		public static const length : int = 1;
 
-		// function String(value : * = "") : void;
+		function String(value : Object) : void {}
 
-		public function charAt(i : uint) : String;
+		public function charAt(i : uint) : String { return null; }
 
 		/* public function charCodeAt(i : uint) : Number; */
 
