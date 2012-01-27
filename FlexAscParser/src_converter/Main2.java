@@ -731,11 +731,11 @@ public class Main2
 			assert funcIndentifierNode != null;
 			
 			String funcName = BcCodeCs.identifier(funcIndentifierNode);
-			if (funcName.equals("charAt"))
-			{
-				dest.writef("%s[%s])", memberDest, argsDest);
-			}
-			else if (callExpr.args != null)
+//			if (funcName.equals("charAt"))
+//			{
+//				dest.writef("%s[%s]", memberDest, argsDest);
+//			}
+			if (callExpr.args != null)
 			{
 				dest.writef("AsString.%s(%s, %s)", funcName, memberDest, argsDest);
 			}
