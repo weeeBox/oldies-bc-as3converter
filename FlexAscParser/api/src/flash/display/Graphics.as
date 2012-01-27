@@ -50,7 +50,7 @@ package flash.display {
 		/* [Version("10")] */
 		/* public function lineShaderStyle(shader : Shader, matrix : Matrix = null) : void; */
 
-		public function lineStyle(thickness : Number = undefined, color : uint = 0, alpha : Number = 1.0, pixelHinting : Boolean = false, scaleMode : String = "normal", caps : String = null, joints : String = null, miterLimit : Number = 3) : void;
+		public function lineStyle(thickness : Number, color : uint = 0, alpha : Number = 1.0, pixelHinting : Boolean = false, scaleMode : String = "normal", caps : String = null, joints : String = null, miterLimit : Number = 3) : void;
 
 		public function lineTo(x : Number, y : Number) : void;
 

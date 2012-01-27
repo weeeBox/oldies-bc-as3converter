@@ -4,7 +4,7 @@ package flash
 	{
 		public static const length : int = 1;
 
-		function String(value : Object) : void {}
+		function String(value : String = "") : void {}
 
 		public function charAt(i : uint) : String { return null; }
 
@@ -24,7 +24,7 @@ package flash
 
 		/* public function match(p : * = undefined) : Array; */
 
-		public function replace(p : String, repl : String) : String {}
+		public function replace(p : String, repl : String) : String { return null; }
 
 		/* public function search(p : * = undefined) : int; */
 
@@ -44,8 +44,8 @@ package flash
 
 		public function toString() : String { return null; }
 
-		public function toUpperCase() : String;
+		public function toUpperCase() : String { return null; }
 
-		public function valueOf() : String;
+		public function valueOf() : String { return null; }
 	}
 }

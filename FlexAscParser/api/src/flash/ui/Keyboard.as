@@ -149,7 +149,7 @@ package flash.ui
 		public static const STRING_FIND : String = "";
 		public static const STRING_HELP : String = "";
 		public static const STRING_MODESWITCH : String = "";
-		public static const CharCodeStrings : Array;
+		/* public static const CharCodeStrings : Array; */
 		public static const NUMBER_0 : uint = 48;
 		public static const NUMBER_1 : uint = 49;
 		public static const NUMBER_2 : uint = 50;
