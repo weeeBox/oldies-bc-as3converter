@@ -163,17 +163,38 @@ public class BcClassDefinitionNode extends BcNode
 		return constructors.size() > 0;
 	}
 
-	public BcVariableDeclaration findField(String name)
+	public BcVariableDeclaration findField(final String name)
 	{
-		return findField(this, name);
+		return findField(this, new BcVariableDeclarationFilter() {
+			
+			@Override
+			public boolean accept(BcVariableDeclaration bcVar) 
+			{
+				return bcVar.getIdentifier().equals(name);
+			}
+		});
 	}
 	
-	private static BcVariableDeclaration findField(BcClassDefinitionNode bcClass, String name)
+	public BcVariableDeclaration findFunctionField(final String name)
+	{
+		final BcTypeNode functionType = BcTypeNode.create("Function"); 
+		
+		return findField(this, new BcVariableDeclarationFilter() {
+			
+			@Override
+			public boolean accept(BcVariableDeclaration bcVar) 
+			{
+				return bcVar.getType() == functionType && bcVar.getIdentifier().equals(name);
+			}
+		});
+	}
+	
+	private static BcVariableDeclaration findField(BcClassDefinitionNode bcClass, BcVariableDeclarationFilter searchCriteria)
 	{
 		List<BcVariableDeclaration> fields = bcClass.getFields();
 		for (BcVariableDeclaration bcField : fields)
 		{
-			if (bcField.getIdentifier().equals(name))
+			if (searchCriteria.accept(bcField))
 			{
 				return bcField;
 			}
@@ -182,7 +203,7 @@ public class BcClassDefinitionNode extends BcNode
 		if (bcClass.hasExtendsType())
 		{
 			BcClassDefinitionNode bcSuperClass = bcClass.getExtendsType().getClassNode();
-			return findField(bcSuperClass, name);
+			return findField(bcSuperClass, searchCriteria);
 		}
 		
 		return null;
@@ -290,5 +311,10 @@ public class BcClassDefinitionNode extends BcNode
 		bcClass.statements = statements;
 		
 		return bcClass;
+	}
+	
+	private static interface BcVariableDeclarationFilter
+	{
+		boolean accept(BcVariableDeclaration bcVar);
 	}
 }

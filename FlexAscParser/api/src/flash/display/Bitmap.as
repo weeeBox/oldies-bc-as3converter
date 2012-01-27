@@ -11,12 +11,12 @@ package flash.display
 
 		public function set bitmapData(value : BitmapData) : void {}
 
-		/* public function get pixelSnapping() : String; */
+		public function get pixelSnapping() : String { return null; }
 
-		/* public function set pixelSnapping(value : String) : void; */
+		public function set pixelSnapping(value : String) : void { }
 
-		/* public function get smoothing() : Boolean; */
+		public function get smoothing() : Boolean { return false; }
 
-		/* public function set smoothing(value : Boolean) : void; */
+		public function set smoothing(value : Boolean) : void { }
 	}
 }

@@ -113,9 +113,9 @@ package flash.display
 		[Version("10")]
 		public function set scaleZ(value : Number) : void { }
 
-		/* public function get scrollRect() : Rectangle; */
+		public function get scrollRect() : Rectangle { return null; }
 
-		/* public function set scrollRect(value : Rectangle) : void; */
+		public function set scrollRect(value : Rectangle) : void { }
 
 		public function get stage() : Stage { return null; }
 

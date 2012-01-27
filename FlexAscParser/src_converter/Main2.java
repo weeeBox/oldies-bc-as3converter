@@ -809,13 +809,13 @@ public class Main2
 				lastBcMemberType = vectorType.getGeneric();
 				assert lastBcMemberType != null;
 			}
-			else if (typeEquals(lastBcMemberType, classObject) || typeEquals(lastBcMemberType, classDictionary))
+			else if (typeEquals(lastBcMemberType, classXMLList))
 			{
-				lastBcMemberType = BcTypeNode.create(classObject);
+				lastBcMemberType = BcTypeNode.create(classXML);
 			}
 			else
 			{
-				assert false;
+				lastBcMemberType = BcTypeNode.create(classObject);
 			}
 		}
 		else
@@ -924,9 +924,30 @@ public class Main2
 				assert bcClass != null;
 				
 				BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier);
-				assert bcFunc != null;
-				
-				lastBcMemberType = bcFunc.getReturnType();
+				if (bcFunc != null)
+				{
+					lastBcMemberType = bcFunc.getReturnType();
+				}
+				else
+				{
+					BcVariableDeclaration bcFuncVar = findVariable(bcClass, identifier);
+					if (bcFuncVar != null)
+					{
+						if (typeEquals(bcFuncVar.getType(), classFunction))
+						{
+							System.err.println("Warning! Function type: " + identifier);
+							lastBcMemberType = bcFuncVar.getType();
+						}
+						else
+						{
+							assert false : identifier;
+						}
+					}
+					else
+					{
+						assert false : identifier;
+					}
+				}
 			}
 		}
 		else if (node.expr instanceof MemberExpressionNode)
@@ -1085,13 +1106,9 @@ public class Main2
 				lastBcMemberType = vectorType.getGeneric();
 				assert lastBcMemberType != null;
 			}
-			else if (typeEquals(lastBcMemberType, classObject) || typeEquals(lastBcMemberType, classDictionary))
-			{
-				lastBcMemberType = BcTypeNode.create(classObject);
-			}
 			else
 			{
-				assert false;
+				lastBcMemberType = BcTypeNode.create(classObject);
 			}
 		}
 		else
