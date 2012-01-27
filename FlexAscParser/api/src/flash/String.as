@@ -28,7 +28,7 @@ package flash
 
 		/* public function search(p : * = undefined) : int; */
 
-		/* public function slice(start : uint, end : Number = 2147483647) : String; */
+		public function slice(start : uint, end : uint = 2147483647) : String { return null; }
 
 		/* public function split(delim : * = undefined, limit : * = 4.294967295E9) : Array; */
 

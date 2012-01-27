@@ -100,6 +100,7 @@ public class Main2
 	private static final String classString = "String";
 	private static final String classVector = "Vector";
 	private static final String classDictionary = "Dictionary";
+	private static final String classFunction = "Function";
 	private static final String classXML = "XML";
 	private static final String classXMLList = "XMLList";
 	
@@ -770,21 +771,30 @@ public class Main2
 						lastBcMemberType = bcVar.getType();
 						assert lastBcMemberType != null;
 					}
-					else if (classEquals(bcClass, classXML))
+					else
 					{
-						IdentifierNode identifierNode = (IdentifierNode) node.expr;
-						if (identifierNode.isAttribute())
+						BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
+						if (bcFunction != null)
 						{
-							lastBcMemberType = BcTypeNode.create(classString);
+							System.err.println("Warning! Function type: " + identifier);
+							lastBcMemberType = BcTypeNode.create(classFunction);
+						}
+						else if (classEquals(bcClass, classXML))
+						{
+							IdentifierNode identifierNode = (IdentifierNode) node.expr;
+							if (identifierNode.isAttribute())
+							{
+								lastBcMemberType = BcTypeNode.create(classString);
+							}
+							else
+							{
+								assert false : identifierNode.name;
+							}
 						}
 						else
 						{
-							assert false : identifierNode.name;
+							assert false;
 						}
-					}
-					else
-					{
-						assert false;
 					}
 				}
 				

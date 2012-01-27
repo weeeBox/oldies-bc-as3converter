@@ -10,15 +10,15 @@ package flash.display
 
 		/* public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void; */
 
-		/* public function get align() : String; */
+		public function get align() : String { return null; }
 
-		/* public function set align(value : String) : void; */
+		public function set align(value : String) : void { }
 
-		/* public function set alpha(value : Number) : void; */
+		public function set alpha(value : Number) : void { }
 
-		/* public function set blendMode(value : String) : void; */
+		public function set blendMode(value : String) : void { }
 
-		/* public function set cacheAsBitmap(value : Boolean) : void; */
+		public function set cacheAsBitmap(value : Boolean) : void { }
 
 		/* [Version("10")] */
 		/* public function get colorCorrection() : String; */
@@ -33,9 +33,9 @@ package flash.display
 
 		/* public function dispatchEvent(event : Event) : Boolean; */
 
-		/* public function get displayState() : String; */
+		public function get displayState() : String { return null; }
 
-		/* public function set displayState(value : String) : void; */
+		public function set displayState(value : String) : void { }
 
 		/* public function set filters(value : Array) : void; */
 
@@ -45,17 +45,17 @@ package flash.display
 
 		/* public function set focusRect(value : Object) : void; */
 
-		/* public function get frameRate() : Number; */
+		public function get frameRate() : Number { return null; }
 
-		/* public function set frameRate(value : Number) : void; */
+		public function set frameRate(value : Number) : void { }
 
-		/* public function get fullScreenHeight() : uint; */
+		public function get fullScreenHeight() : uint { return 0; }
 
 		/* public function get fullScreenSourceRect() : Rectangle; */
 
 		/* public function set fullScreenSourceRect(value : Rectangle) : void; */
 
-		/* public function get fullScreenWidth() : uint; */
+		public function get fullScreenWidth() : uint { return 0; }
 
 		/* public function hasEventListener(type : String) : Boolean; */
 
@@ -81,9 +81,9 @@ package flash.display
 
 		/* public function set opaqueBackground(value : Object) : void; */
 
-		/* public function get quality() : String; */
+		public function get quality() : String { return null; }
 
-		/* public function set quality(value : String) : void; */
+		public function set quality(value : String) : void { }
 
 		/* public function removeChildAt(index : int) : DisplayObject; */
 
@@ -100,9 +100,9 @@ package flash.display
 
 		/* public function set scale9Grid(value : Rectangle) : void; */
 
-		/* public function get scaleMode() : String; */
+		public function get scaleMode() : String { return null; }
 
-		/* public function set scaleMode(value : String) : void; */
+		public function set scaleMode(value : String) : void {}
 
 		/* public function set scaleX(value : Number) : void; */
 
@@ -123,13 +123,13 @@ package flash.display
 
 		/* public function set stageFocusRect(on : Boolean) : void; */
 
-		/* public function get stageHeight() : int; */
+		public function get stageHeight() : int { return 0; }
 
-		/* public function set stageHeight(value : int) : void; */
+		public function set stageHeight(value : int) : void { }
 
-		/* public function get stageWidth() : int; */
+		public function get stageWidth() : int { return 0; }
 
-		/* public function set stageWidth(value : int) : void; */
+		public function set stageWidth(value : int) : void { }
 
 		/* public function swapChildrenAt(index1 : int, index2 : int) : void; */
 
