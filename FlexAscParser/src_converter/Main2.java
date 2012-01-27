@@ -1098,10 +1098,36 @@ public class Main2
 			else
 			{
 				BcVariableDeclaration bcVar = findVariable(bcClass, identifier);
-				assert bcVar != null;
-				
-				lastBcMemberType = bcVar.getType();
-				assert lastBcMemberType != null;
+				if (bcVar != null)
+				{
+					lastBcMemberType = bcVar.getType();
+					assert lastBcMemberType != null;
+				}
+				else
+				{
+					BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
+					if (bcFunction != null)
+					{
+						System.err.println("Warning! Function type: " + identifier);
+						lastBcMemberType = BcTypeNode.create(classFunction);
+					}
+					else if (classEquals(bcClass, classXML))
+					{
+						IdentifierNode identifierNode = (IdentifierNode) node.expr;
+						if (identifierNode.isAttribute())
+						{
+							lastBcMemberType = BcTypeNode.create(classString);
+						}
+						else
+						{
+							assert false : identifierNode.name;
+						}
+					}
+					else
+					{
+						System.err.println("Warning! Dymaic set property: " + identifier);
+					}
+				}
 			}
 		}
 		else if (node.expr instanceof ArgumentListNode)

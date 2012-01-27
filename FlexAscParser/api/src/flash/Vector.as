@@ -35,9 +35,9 @@ package flash
 
 		/* public function some(callback : Function, thisObject : Object = null) : Boolean; */
 
-		/* public function sort(compareFunction : Function) : Vector; */
+		public function sort(compareFunction : Function) : Vector { return null; }
 
-		/* public function splice(startIndex : int, deleteCount : uint, ...items : *) : Vector; */
+		public function splice(startIndex : int, deleteCount : uint) : Vector { return null; }
 
 		/* public function toLocaleString() : String; */
 
