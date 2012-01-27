@@ -142,7 +142,13 @@ public class BcCodeCs
 
 	public static String identifier(IdentifierNode identifier)
 	{
-		return identifier(identifier.name);
+		String name = identifier.name;
+		if (identifier.isAttr() && name.startsWith("@"))
+		{
+			name = name.substring(1);
+		}
+		
+		return identifier(name);
 	}
 	
 	public static String identifier(String name)
@@ -163,6 +169,16 @@ public class BcCodeCs
 	public static String construct(String type, Object initializer)
 	{
 		return NEW + " " + type(type) + "(" + initializer + ")";
+	}
+	
+	public static String getter(String name)
+	{
+		return "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+	}
+	
+	public static String setter(String name)
+	{
+		return "set" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
 	}
 
 	public static String operatorIs(Object lhs, Object rhs)

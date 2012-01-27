@@ -155,7 +155,7 @@ public class Main2
 			bcClasses = new ArrayList<BcClassDefinitionNode>();
 			collect(filenames);
 			process();
-			// write(outputDir, bcApiClasses);
+			write(outputDir, bcApiClasses);
 			write(outputDir, bcClasses);
 		}
 		catch (IOException e)
@@ -439,6 +439,8 @@ public class Main2
 	{
 		for (BcClassDefinitionNode bcClass : classes)
 		{
+			bcMembersTypesStack = new Stack<BcTypeNode>();
+			
 			if (bcClass.isInterface())
 			{
 				process((BcInterfaceDefinitionNode)bcClass);
@@ -634,17 +636,16 @@ public class Main2
 	
 	// dirty hack: we need to check the recursion depth
 	
-	private static MemberExpressionNode rootMemberNode;
+	private static BcTypeNode lastBcMemberType;
+	private static Stack<BcTypeNode> bcMembersTypesStack;
 	
 	private static void process(MemberExpressionNode node)
 	{
+		bcMembersTypesStack.push(lastBcMemberType);
+		lastBcMemberType = null;
+		
 		Node base = node.base;
 		SelectorNode selector = node.selector;
-		
-		if (rootMemberNode == null)
-		{
-			rootMemberNode = node;
-		}
 		
 		if (base != null)
 		{
@@ -653,14 +654,10 @@ public class Main2
 			process(base);
 			popDest();
 			
-			boolean staticCall = false;
+			lastBcMemberType = evaluateType(base);
+			assert lastBcMemberType != null;
 			
-			BcTypeNode baseType = evaluateType(base);
-			if (baseType == null)
-			{
-				evaluateType(base);
-				assert baseType != null;
-			}
+			boolean staticCall = false;
 			
 			if (base instanceof MemberExpressionNode)
 			{
@@ -693,7 +690,7 @@ public class Main2
 			process(selector);
 		}
 		
-		rootMemberNode = null;
+		lastBcMemberType = bcMembersTypesStack.pop();
 	}
 	
 	private static void process(SelectorNode node)
@@ -732,13 +729,97 @@ public class Main2
 		process(node.expr);
 		popDest();
 		
-		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
+		String identifier = expr.toString();
+		
+		if (node.expr instanceof IdentifierNode)
 		{
-			dest.writef("[%s]", expr);
+			BcClassDefinitionNode bcClass;
+			if (lastBcMemberType != null)
+			{
+				bcClass = lastBcMemberType.getClassNode();
+				assert bcClass != null;
+			}
+			else
+			{
+				assert lastBcClass != null;
+				bcClass = lastBcClass;
+			}
+			
+			BcClassDefinitionNode bcStaticClass = findClass(identifier);
+			if (bcStaticClass != null)
+			{
+				lastBcMemberType = bcStaticClass.getClassType();
+				assert lastBcMemberType != null;
+			}
+			else
+			{
+				BcFunctionDeclaration bcFunc = bcClass.findGetterFunction(identifier);
+				if (bcFunc != null)
+				{
+					BcTypeNode funcType = bcFunc.getReturnType();
+					assert funcType != null : identifier;
+					
+					lastBcMemberType = funcType;
+					identifier = BcCodeCs.getter(identifier);
+				}
+				else
+				{
+					BcVariableDeclaration bcVar = findVariable(bcClass, identifier);
+					if (bcVar != null)
+					{
+						lastBcMemberType = bcVar.getType();
+						assert lastBcMemberType != null;
+					}
+					else if (classEquals(bcClass, classXML))
+					{
+						IdentifierNode identifierNode = (IdentifierNode) node.expr;
+						if (identifierNode.isAttribute())
+						{
+							lastBcMemberType = BcTypeNode.create(classString);
+						}
+						else
+						{
+							assert false : identifierNode.name;
+						}
+					}
+					else
+					{
+						assert false;
+					}
+				}
+				
+			}
+		}
+		else if (node.expr instanceof ArgumentListNode)
+		{
+			assert lastBcMemberType != null;
+			if (lastBcMemberType instanceof BcVectorTypeNode)
+			{
+				BcVectorTypeNode vectorType = (BcVectorTypeNode) lastBcMemberType;
+				lastBcMemberType = vectorType.getGeneric();
+				assert lastBcMemberType != null;
+			}
+			else if (typeEquals(lastBcMemberType, classObject) || typeEquals(lastBcMemberType, classDictionary))
+			{
+				lastBcMemberType = BcTypeNode.create(classObject);
+			}
+			else
+			{
+				assert false;
+			}
 		}
 		else
 		{
-			dest.write(expr);
+			assert false;
+		}
+		
+		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
+		{
+			dest.writef("[%s]", identifier);
+		}
+		else
+		{
+			dest.write(identifier);
 		}
 	}
 
@@ -767,13 +848,18 @@ public class Main2
 	
 	private static BcVariableDeclaration findVariable(String name)
 	{
+		return findVariable(lastBcClass, name);
+	}
+
+	private static BcVariableDeclaration findVariable(BcClassDefinitionNode bcClass, String name) 
+	{
 		BcVariableDeclaration bcVar = findLocalVar(name);
 		if (bcVar != null)
 		{
 			return bcVar;
 		}
 		
-		return lastBcClass.findField(name);
+		return bcClass.findField(name);
 	}
 	
 	private static BcVariableDeclaration findLocalVar(String name)
@@ -792,6 +878,56 @@ public class Main2
 		pushDest(exprDest);
 		process(node.expr);
 		popDest();
+		
+		String identifier = exprDest.toString();
+		
+		if (node.expr instanceof IdentifierNode)
+		{
+			if (lastBcMemberType == null)
+			{
+				lastBcMemberType = null;
+				
+				if (!(identifier.equals(BcCodeCs.thisCallMarker) && identifier.equals(BcCodeCs.thisCallMarker)))
+				{
+					BcFunctionDeclaration bcFunc = findFunction(identifier);
+					if (bcFunc != null)
+					{
+						if (bcFunc.hasReturnType())
+						{
+							lastBcMemberType = bcFunc.getReturnType();
+							assert lastBcMemberType != null;
+						}
+					}
+					else if (node.is_new)
+					{
+						BcClassDefinitionNode bcNewClass = findClass(identifier);
+						BcTypeNode bcClassType = bcNewClass.getClassType();
+						assert bcClassType != null : identifier;
+						
+						lastBcMemberType = bcClassType;
+					}
+				}
+			}
+			else
+			{
+				BcClassDefinitionNode bcClass = lastBcMemberType.getClassNode();
+				assert bcClass != null;
+				
+				BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier);
+				assert bcFunc != null;
+				
+				lastBcMemberType = bcFunc.getReturnType();
+			}
+		}
+		else if (node.expr instanceof MemberExpressionNode)
+		{
+			lastBcMemberType = evaluateMemberExpression((MemberExpressionNode) node.expr);
+			assert lastBcMemberType != null;
+		}
+		else
+		{
+			assert false : node;
+		}
 		
 		ListWriteDestination argsDest = new ListWriteDestination();
 		if (node.args != null)
@@ -894,18 +1030,91 @@ public class Main2
 		process(node.expr);
 		popDest();
 		
+		String identifier = exprDest.toString();
+		
+		boolean setterCalled = false;
+		if (node.expr instanceof IdentifierNode)
+		{
+			BcClassDefinitionNode bcClass;
+			if (lastBcMemberType != null)
+			{
+				bcClass = lastBcMemberType.getClassNode();
+				assert bcClass != null;
+			}
+			else
+			{
+				assert lastBcClass != null;
+				bcClass = lastBcClass;
+			}
+			
+			BcFunctionDeclaration bcFunc = bcClass.findSetterFunction(identifier);
+			if (bcFunc != null)
+			{
+				List<BcFuncParam> funcParams = bcFunc.getParams();
+				BcTypeNode setterType = funcParams.get(0).getType();
+				setterCalled = true;
+				
+				identifier = BcCodeCs.setter(identifier);
+				lastBcMemberType = setterType;
+			}
+			else
+			{
+				BcVariableDeclaration bcVar = findVariable(bcClass, identifier);
+				assert bcVar != null;
+				
+				lastBcMemberType = bcVar.getType();
+				assert lastBcMemberType != null;
+			}
+		}
+		else if (node.expr instanceof ArgumentListNode)
+		{
+			assert lastBcMemberType != null;
+			if (lastBcMemberType instanceof BcVectorTypeNode)
+			{
+				BcVectorTypeNode vectorType = (BcVectorTypeNode) lastBcMemberType;
+				lastBcMemberType = vectorType.getGeneric();
+				assert lastBcMemberType != null;
+			}
+			else if (typeEquals(lastBcMemberType, classObject) || typeEquals(lastBcMemberType, classDictionary))
+			{
+				lastBcMemberType = BcTypeNode.create(classObject);
+			}
+			else
+			{
+				assert false;
+			}
+		}
+		else
+		{
+			assert false;
+		}
+		
 		ListWriteDestination argsDest = new ListWriteDestination();
 		pushDest(argsDest);
 		process(node.args);
 		popDest();
 		
-		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
+		if (setterCalled)
 		{
-			dest.writef("[%s] = %s", exprDest, argsDest);
+			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
+			{
+				dest.writef("[%s](%s)", identifier, argsDest);
+			}
+			else
+			{
+				dest.writef("%s(%s)", identifier, argsDest);
+			}
 		}
 		else
 		{
-			dest.writef("%s = %s", exprDest, argsDest);
+			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
+			{
+				dest.writef("[%s] = %s", identifier, argsDest);
+			}
+			else
+			{
+				dest.writef("%s = %s", identifier, argsDest);
+			}
 		}
 	}
 	
@@ -964,7 +1173,7 @@ public class Main2
 		if (node.isAttr())
 		{
 			dest.write("attribute(\"");
-			dest.write(node.name);
+			dest.write(BcCodeCs.identifier(node));
 			dest.write("\")");
 		}
 		else
@@ -1699,11 +1908,11 @@ public class Main2
 				
 				if (bcFunc.isGetter())
 				{
-					name = "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+					name = BcCodeCs.getter(name);
 				}
 				else if (bcFunc.isSetter())
 				{
-					name = "set" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+					name = BcCodeCs.setter(name);
 				}
 				src.writef("%s %s", type, name);
 			}

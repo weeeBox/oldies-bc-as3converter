@@ -883,13 +883,18 @@ public class Main
 	
 	private static BcVariableDeclaration findVariable(String name)
 	{
+		return findVariable(lastBcClass, name);
+	}
+
+	private static BcVariableDeclaration findVariable(BcClassDefinitionNode bcClass, String name) 
+	{
 		BcVariableDeclaration bcVar = findLocalVar(name);
 		if (bcVar != null)
 		{
 			return bcVar;
 		}
 		
-		return lastBcClass.findField(name);
+		return bcClass.findField(name);
 	}
 	
 	private static BcVariableDeclaration findLocalVar(String name)
@@ -1144,7 +1149,7 @@ public class Main
 		if (node.isAttr())
 		{
 			dest.write("attribute(\"");
-			dest.write(node.name);
+			dest.write(BcCodeCpp.identifier(node));
 			dest.write("\")");
 		}
 		else
