@@ -1403,7 +1403,13 @@ public class Main2
 		process(node.condition);
 		popDest();	
 		
-		dest.writelnf("if(%s)", condDest);
+		String condString = condDest.toString();
+		
+		assert node.condition instanceof ListNode : node.condition;
+		ListNode listNode = (ListNode) node.condition;
+		
+		condString = createSafeConditionString(condString, listNode);
+		dest.writelnf("if(%s)", condString);
 		
 		if (node.thenactions != null)
 		{
@@ -1427,6 +1433,22 @@ public class Main2
 			dest.writeln("else");
 			dest.writeln(elseDest);
 		}
+	}
+
+	private static String createSafeConditionString(String condString, ListNode listNode) 
+	{
+		assert listNode.size() == 1 : listNode.size();
+		Node condition = listNode.items.get(0);
+		
+		BcTypeNode conditionType = evaluateType(condition);
+		if (!typeEquals(conditionType, classBoolean))
+		{
+			return String.format("%s != null", condString);
+		}
+		else
+		{
+			return String.format("%s", condString);
+		}		
 	}
 	
 	private static void process(ConditionalExpressionNode node)
@@ -1456,7 +1478,13 @@ public class Main2
 		process(node.expr);
 		popDest();
 		
-		dest.writelnf("while(%s)", exprDest);
+		String condString = exprDest.toString();
+		
+		assert node.expr instanceof ListNode : node.expr;
+		ListNode listNode = (ListNode) node.expr;
+		
+		condString = createSafeConditionString(condString, listNode);
+		dest.writelnf("while(%s)", condString);
 		
 		if (node.statement != null)
 		{
