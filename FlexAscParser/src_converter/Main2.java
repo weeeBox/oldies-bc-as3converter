@@ -1447,7 +1447,7 @@ public class Main2
 		else if (node instanceof MemberExpressionNode)
 		{
 			MemberExpressionNode memberNode = (MemberExpressionNode) node;
-			String fixedCondition = tryFixedCondition(memberNode, false);
+			String fixedCondition = tryFixedCondition(memberNode, true);
 			if (fixedCondition != null)
 			{
 				return fixedCondition;
@@ -1461,7 +1461,7 @@ public class Main2
 			if (unary.expr instanceof MemberExpressionNode)
 			{
 				MemberExpressionNode memberNode = (MemberExpressionNode) unary.expr;
-				String fixedCondition = tryFixedCondition(memberNode, true);
+				String fixedCondition = tryFixedCondition(memberNode, false);
 				if (fixedCondition != null)
 				{
 					return fixedCondition;
@@ -1525,7 +1525,16 @@ public class Main2
 		process(node.expr);
 		popDest();
 		
-		dest.writelnf("while(%s)", exprDest);
+		String condString = exprDest.toString();
+		
+		assert node.expr instanceof ListNode;
+		ListNode listNode = (ListNode) node.expr;
+		
+		assert listNode.size() == 1 : listNode.size();
+		
+		condString = fixConditionString(listNode.items.get(0), condString);
+		
+		dest.writelnf("while(%s)", condString);
 		
 		if (node.statement != null)
 		{
