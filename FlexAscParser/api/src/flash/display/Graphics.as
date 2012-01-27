@@ -32,7 +32,7 @@ package flash.display {
 
 		public function drawRect(x : Number, y : Number, width : Number, height : Number) : void;
 
-		/* public function drawRoundRect(x : Number, y : Number, width : Number, height : Number, ellipseWidth : Number, ellipseHeight : Number = undefined) : void; */
+		public function drawRoundRect(x : Number, y : Number, width : Number, height : Number, ellipseWidth : Number, ellipseHeight : Number) : void {}
 
 		/* [Inspectable(environment="none")] */
 		/* public function drawRoundRectComplex(x : Number, y : Number, width : Number, height : Number, topLeftRadius : Number, topRightRadius : Number, bottomLeftRadius : Number, bottomRightRadius : Number) : void; */

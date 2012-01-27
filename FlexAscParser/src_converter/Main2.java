@@ -730,6 +730,7 @@ public class Main2
 		process(node.expr);
 		popDest();
 		
+		boolean accessingDynamicProperty = false;
 		String identifier = expr.toString();
 		
 		if (node.expr instanceof IdentifierNode)
@@ -793,7 +794,8 @@ public class Main2
 						}
 						else
 						{
-							assert false;
+							System.err.println("Warning! Dymaic property: " + identifier);
+							accessingDynamicProperty = true;
 						}
 					}
 				}
@@ -826,6 +828,10 @@ public class Main2
 		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 		{
 			dest.writef("[%s]", identifier);
+		}
+		else if (accessingDynamicProperty)
+		{
+			dest.writef("getOwnProperty(\"%s\")", identifier);
 		}
 		else
 		{
@@ -911,6 +917,7 @@ public class Main2
 					else if (node.is_new)
 					{
 						BcClassDefinitionNode bcNewClass = findClass(identifier);
+						assert bcNewClass != null : bcNewClass;
 						BcTypeNode bcClassType = bcNewClass.getClassType();
 						assert bcClassType != null : identifier;
 						

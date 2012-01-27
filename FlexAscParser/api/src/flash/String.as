@@ -30,7 +30,7 @@ package flash
 
 		public function slice(start : uint, end : uint = 2147483647) : String { return null; }
 
-		/* public function split(delim : * = undefined, limit : * = 4.294967295E9) : Array; */
+		public function split(delim : String) : Array { return null; }
 
 		public function substr(start : uint, len : uint = 2147483647) : String { return null; }
 

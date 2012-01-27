@@ -37,9 +37,9 @@ package flash.display
 
 		public function swapChildrenAt(index1 : int, index2 : int) : void { }
 
-		/* public function get tabChildren() : Boolean; */
+		public function get tabChildren() : Boolean { return false; }
 
-		/* public function set tabChildren(enable : Boolean) : void; */
+		public function set tabChildren(enable : Boolean) : void { }
 
 		/* public function get textSnapshot() : TextSnapshot; */
 	}

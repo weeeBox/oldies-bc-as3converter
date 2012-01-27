@@ -15,9 +15,9 @@ package flash.display
 
 		public function set doubleClickEnabled(enabled : Boolean) : void { }
 
-		/* public function get focusRect() : Object; */
+		public function get focusRect() : Object { return null; }
 
-		/* public function set focusRect(focusRect : Object) : void { } */
+		public function set focusRect(focusRect : Object) : void { }
 
 		public function get mouseEnabled() : Boolean { return false; }
 
