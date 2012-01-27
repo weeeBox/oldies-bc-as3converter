@@ -1411,7 +1411,20 @@ public class Main2
 		assert listNode.size() == 1 : listNode.size();
 		
 		Node conditionNode = listNode.items.get(0);
-		if (conditionNode instanceof UnaryExpressionNode)
+		if (conditionNode instanceof BinaryExpressionNode)
+		{
+			// everything is ok
+		}
+		else if (conditionNode instanceof MemberExpressionNode)
+		{
+			MemberExpressionNode memberNode = (MemberExpressionNode) conditionNode;
+			String fixedCondition = fixedCondition(memberNode, false);
+			if (fixedCondition != null)
+			{
+				condString = fixedCondition;
+			}
+		}
+		else if (conditionNode instanceof UnaryExpressionNode)
 		{
 			UnaryExpressionNode unary = (UnaryExpressionNode) conditionNode;
 			assert unary.op == Tokens.NOT_TOKEN : unary.op;
@@ -1419,21 +1432,20 @@ public class Main2
 			if (unary.expr instanceof MemberExpressionNode)
 			{
 				MemberExpressionNode memberNode = (MemberExpressionNode) unary.expr;
-				BcTypeNode conditionType = evaluateMemberExpression(memberNode);
-				if (!typeEquals(conditionType, classBoolean))
+				String fixedCondition = fixedCondition(memberNode, true);
+				if (fixedCondition != null)
 				{
-					ListWriteDestination pureCondDest = new ListWriteDestination();
-					pushDest(pureCondDest);
-					process(memberNode);
-					popDest();
-					
-					condString = String.format("%s != null", pureCondDest); 
+					condString = fixedCondition;
 				}
 			}
 			else
 			{
 				assert false : unary.expr;
 			}
+		}
+		else
+		{
+			assert false;
 		}
 		
 		dest.writelnf("if(%s)", condString);
@@ -1460,6 +1472,24 @@ public class Main2
 			dest.writeln("else");
 			dest.writeln(elseDest);
 		}
+	}
+
+	private static String fixedCondition(MemberExpressionNode memberNode, boolean not) 
+	{
+		BcTypeNode conditionType = evaluateMemberExpression(memberNode);
+		assert conditionType != null;
+		
+		if (!typeEquals(conditionType, classBoolean))
+		{
+			ListWriteDestination pureCondDest = new ListWriteDestination();
+			pushDest(pureCondDest);
+			process(memberNode);
+			popDest();
+								
+			return String.format("%s %s null", pureCondDest, (not ? "!=" : "==")); 
+		}
+		
+		return null;
 	}
 	
 	private static void process(ConditionalExpressionNode node)
