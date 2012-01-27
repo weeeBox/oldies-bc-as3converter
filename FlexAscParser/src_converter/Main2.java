@@ -1403,16 +1403,7 @@ public class Main2
 		process(node.condition);
 		popDest();	
 		
-		String condString = condDest.toString();
-		
-		assert node.condition instanceof ListNode;
-		ListNode listNode = (ListNode) node.condition;
-		
-		assert listNode.size() == 1 : listNode.size();
-		
-		condString = fixConditionString(listNode.items.get(0), condString);
-		
-		dest.writelnf("if(%s)", condString);
+		dest.writelnf("if(%s)", condDest);
 		
 		if (node.thenactions != null)
 		{
@@ -1436,66 +1427,6 @@ public class Main2
 			dest.writeln("else");
 			dest.writeln(elseDest);
 		}
-	}
-
-	private static String fixConditionString(Node node, String conditionString) 
-	{
-		if (node instanceof BinaryExpressionNode)
-		{
-			return conditionString;
-		}
-		else if (node instanceof MemberExpressionNode)
-		{
-			MemberExpressionNode memberNode = (MemberExpressionNode) node;
-			String fixedCondition = tryFixedCondition(memberNode, true);
-			if (fixedCondition != null)
-			{
-				return fixedCondition;
-			}
-		}
-		else if (node instanceof UnaryExpressionNode)
-		{
-			UnaryExpressionNode unary = (UnaryExpressionNode) node;
-			assert unary.op == Tokens.NOT_TOKEN : unary.op;
-			
-			if (unary.expr instanceof MemberExpressionNode)
-			{
-				MemberExpressionNode memberNode = (MemberExpressionNode) unary.expr;
-				String fixedCondition = tryFixedCondition(memberNode, false);
-				if (fixedCondition != null)
-				{
-					return fixedCondition;
-				}
-			}
-			else
-			{
-				assert false : unary.expr;
-			}
-		}
-		else
-		{
-			assert false;
-		}
-		
-		return conditionString;
-	}
-
-	private static String tryFixedCondition(MemberExpressionNode memberNode, boolean not) 
-	{
-		BcTypeNode conditionType = evaluateMemberExpression(memberNode);
-		assert conditionType != null;
-		
-		if (!typeEquals(conditionType, classBoolean))
-		{
-			ListWriteDestination pureCondDest = new ListWriteDestination();
-			pushDest(pureCondDest);
-			process(memberNode);
-			popDest();
-								
-			return String.format("%s %s null", pureCondDest, (not ? "!=" : "==")); 
-		}
-		
-		return null;
 	}
 	
 	private static void process(ConditionalExpressionNode node)
@@ -1525,16 +1456,7 @@ public class Main2
 		process(node.expr);
 		popDest();
 		
-		String condString = exprDest.toString();
-		
-		assert node.expr instanceof ListNode;
-		ListNode listNode = (ListNode) node.expr;
-		
-		assert listNode.size() == 1 : listNode.size();
-		
-		condString = fixConditionString(listNode.items.get(0), condString);
-		
-		dest.writelnf("while(%s)", condString);
+		dest.writelnf("while(%s)", exprDest);
 		
 		if (node.statement != null)
 		{
@@ -1735,7 +1657,26 @@ public class Main2
 		process(node.rhs);
 		popDest();
 
-		if (node.op == Tokens.IS_TOKEN)
+		if (node.op == Tokens.LOGICALAND_TOKEN || node.op == Tokens.LOGICALOR_TOKEN)
+		{
+			String lshString = ldest.toString();
+			String rshString = rdest.toString();
+			
+			BcTypeNode lshType = evaluateType(node.lhs);
+			BcTypeNode rshType = evaluateType(node.rhs);
+			
+			if (!typeEquals(lshType, classBoolean))
+			{
+				lshString = String.format("(%s != null)", lshString);
+			}
+			if (!typeEquals(rshType, classBoolean))
+			{
+				rshString = String.format("(%s != null)", rshString);
+			}
+			
+			dest.writef("%s %s %s", lshString, Tokens.tokenToString[-node.op], rshString);
+		}
+		else if (node.op == Tokens.IS_TOKEN)
 		{
 			dest.write(BcCodeCs.operatorIs(ldest, rdest));
 		}
@@ -1759,8 +1700,26 @@ public class Main2
 		switch (node.op)
 		{
 		case Tokens.NOT_TOKEN:
-			dest.writef("!(%s)", expr);
+		{
+			if (node.expr instanceof MemberExpressionNode)
+			{
+				MemberExpressionNode memberNode = (MemberExpressionNode) node.expr;
+				BcTypeNode memberType = evaluateMemberExpression(memberNode);
+				if (!typeEquals(memberType, classBoolean))
+				{
+					dest.writef("(%s == null)", expr);
+				}
+				else
+				{
+					dest.writef("!(%s)", expr);
+				}
+			}
+			else
+			{
+				assert false : node.expr;
+			}
 			break;
+		}
 		case Tokens.MINUS_TOKEN:
 			dest.writef("-%s", expr);
 			break;
@@ -2420,17 +2379,57 @@ public class Main2
 			BcTypeNode lhsType = evaluateType(binaryNode.lhs);
 			BcTypeNode rhsType = evaluateType(binaryNode.rhs);
 			
-			if (typeEquals(lhsType, classString) || typeEquals(lhsType, classString))
+			if (binaryNode.op == Tokens.LOGICALAND_TOKEN || 
+				binaryNode.op == Tokens.LOGICALOR_TOKEN || 
+				binaryNode.op == Tokens.EQUALS_TOKEN ||
+				binaryNode.op == Tokens.NOTEQUALS_TOKEN ||
+				binaryNode.op == Tokens.GREATERTHAN_TOKEN ||
+				binaryNode.op == Tokens.GREATERTHANOREQUALS_TOKEN ||
+				binaryNode.op == Tokens.LESSTHAN_TOKEN ||
+				binaryNode.op == Tokens.LESSTHANOREQUALS_TOKEN ||
+				binaryNode.op == Tokens.IS_TOKEN)
+			{
+				return BcTypeNode.create(classBoolean);
+			}
+			
+			if (typeEquals(lhsType, classString) || typeEquals(rhsType, classString))
 			{
 				return BcTypeNode.create(classString);
 			}
 			
-			if (typeEquals(lhsType, "int") || typeEquals(rhsType, "int"))
+			if (typeEquals(lhsType, "Number") || typeEquals(rhsType, "Number"))
 			{
-				return rhsType;
+				return BcTypeNode.create("Number");
 			}
 			
+			if (typeEquals(lhsType, "uint") || typeEquals(rhsType, "uint"))
+			{
+				return BcTypeNode.create("int");
+			}
+			
+			if (typeEquals(lhsType, "int") || typeEquals(rhsType, "int"))
+			{
+				return BcTypeNode.create("int");
+			}			
+			
 			assert false;
+		}
+		
+		if (node instanceof UnaryExpressionNode)
+		{
+			UnaryExpressionNode unary = (UnaryExpressionNode) node;
+			if (unary.expr instanceof MemberExpressionNode)
+			{
+				if (unary.op == Tokens.NOT_TOKEN)
+				{
+					return BcTypeNode.create(classBoolean);
+				}				
+				return evaluateMemberExpression((MemberExpressionNode) unary.expr);
+			}
+			else
+			{
+				assert false;
+			}
 		}
 		
 		assert false : node;
