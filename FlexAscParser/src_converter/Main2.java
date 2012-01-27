@@ -103,6 +103,7 @@ public class Main2
 	private static final String classFunction = "Function";
 	private static final String classXML = "XML";
 	private static final String classXMLList = "XMLList";
+	private static final String classBoolean = "Boolean";
 	
 	private static List<BcVariableDeclaration> declaredVars;
 	
@@ -1400,8 +1401,42 @@ public class Main2
 		ListWriteDestination condDest = new ListWriteDestination();
 		pushDest(condDest);
 		process(node.condition);
-		popDest();
-		dest.writelnf("if(%s)", condDest);
+		popDest();	
+		
+		String condString = condDest.toString();
+		
+		assert node.condition instanceof ListNode;
+		ListNode listNode = (ListNode) node.condition;
+		
+		assert listNode.size() == 1 : listNode.size();
+		
+		Node conditionNode = listNode.items.get(0);
+		if (conditionNode instanceof UnaryExpressionNode)
+		{
+			UnaryExpressionNode unary = (UnaryExpressionNode) conditionNode;
+			assert unary.op == Tokens.NOT_TOKEN : unary.op;
+			
+			if (unary.expr instanceof MemberExpressionNode)
+			{
+				MemberExpressionNode memberNode = (MemberExpressionNode) unary.expr;
+				BcTypeNode conditionType = evaluateMemberExpression(memberNode);
+				if (!typeEquals(conditionType, classBoolean))
+				{
+					ListWriteDestination pureCondDest = new ListWriteDestination();
+					pushDest(pureCondDest);
+					process(memberNode);
+					popDest();
+					
+					condString = String.format("%s != null", pureCondDest); 
+				}
+			}
+			else
+			{
+				assert false : unary.expr;
+			}
+		}
+		
+		dest.writelnf("if(%s)", condString);
 		
 		if (node.thenactions != null)
 		{
