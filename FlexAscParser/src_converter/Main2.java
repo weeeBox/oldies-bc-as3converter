@@ -1410,43 +1410,7 @@ public class Main2
 		
 		assert listNode.size() == 1 : listNode.size();
 		
-		Node conditionNode = listNode.items.get(0);
-		if (conditionNode instanceof BinaryExpressionNode)
-		{
-			// everything is ok
-		}
-		else if (conditionNode instanceof MemberExpressionNode)
-		{
-			MemberExpressionNode memberNode = (MemberExpressionNode) conditionNode;
-			String fixedCondition = fixedCondition(memberNode, false);
-			if (fixedCondition != null)
-			{
-				condString = fixedCondition;
-			}
-		}
-		else if (conditionNode instanceof UnaryExpressionNode)
-		{
-			UnaryExpressionNode unary = (UnaryExpressionNode) conditionNode;
-			assert unary.op == Tokens.NOT_TOKEN : unary.op;
-			
-			if (unary.expr instanceof MemberExpressionNode)
-			{
-				MemberExpressionNode memberNode = (MemberExpressionNode) unary.expr;
-				String fixedCondition = fixedCondition(memberNode, true);
-				if (fixedCondition != null)
-				{
-					condString = fixedCondition;
-				}
-			}
-			else
-			{
-				assert false : unary.expr;
-			}
-		}
-		else
-		{
-			assert false;
-		}
+		condString = fixConditionString(listNode.items.get(0), condString);
 		
 		dest.writelnf("if(%s)", condString);
 		
@@ -1474,7 +1438,49 @@ public class Main2
 		}
 	}
 
-	private static String fixedCondition(MemberExpressionNode memberNode, boolean not) 
+	private static String fixConditionString(Node node, String conditionString) 
+	{
+		if (node instanceof BinaryExpressionNode)
+		{
+			return conditionString;
+		}
+		else if (node instanceof MemberExpressionNode)
+		{
+			MemberExpressionNode memberNode = (MemberExpressionNode) node;
+			String fixedCondition = tryFixedCondition(memberNode, false);
+			if (fixedCondition != null)
+			{
+				return fixedCondition;
+			}
+		}
+		else if (node instanceof UnaryExpressionNode)
+		{
+			UnaryExpressionNode unary = (UnaryExpressionNode) node;
+			assert unary.op == Tokens.NOT_TOKEN : unary.op;
+			
+			if (unary.expr instanceof MemberExpressionNode)
+			{
+				MemberExpressionNode memberNode = (MemberExpressionNode) unary.expr;
+				String fixedCondition = tryFixedCondition(memberNode, true);
+				if (fixedCondition != null)
+				{
+					return fixedCondition;
+				}
+			}
+			else
+			{
+				assert false : unary.expr;
+			}
+		}
+		else
+		{
+			assert false;
+		}
+		
+		return conditionString;
+	}
+
+	private static String tryFixedCondition(MemberExpressionNode memberNode, boolean not) 
 	{
 		BcTypeNode conditionType = evaluateMemberExpression(memberNode);
 		assert conditionType != null;
