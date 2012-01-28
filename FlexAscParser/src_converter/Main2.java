@@ -99,6 +99,7 @@ public class Main2
 	private static final String classObject = "Object";
 	private static final String classString = "String";
 	private static final String classVector = "Vector";
+	private static final String classArray = "Array";
 	private static final String classDictionary = "Dictionary";
 	private static final String classFunction = "Function";
 	private static final String classXML = "XML";
@@ -1382,7 +1383,7 @@ public class Main2
 			}
 			popDest();
 			
-			dest.writef("__NEWARRAY(Foo, %s)", elementDest);
+			dest.writef("new %s(%s)", BcCodeCs.type(classArray), elementDest);
 		}
 		else if (node instanceof LiteralObjectNode)
 		{
@@ -2084,7 +2085,14 @@ public class Main2
 			
 			if (bcField.isConst())
 			{
-				src.write("const ");
+				if (canBeClass(bcField.getType()))
+				{
+					src.write("static ");
+				}
+				else
+				{
+					src.write("const ");
+				}
 			}
 			else if (bcField.isStatic())
 			{
