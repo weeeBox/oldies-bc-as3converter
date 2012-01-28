@@ -20,6 +20,7 @@ public class BcClassDefinitionNode extends BcNode
 	private List<BcFunctionDeclaration> constructors;
 	
 	private List<BcVariableDeclaration> declaredVars;
+	private List<BcTypeNode> additionalImports;
 	
 	private BcTypeNode extendsType;
 	private List<BcTypeNode> interfaces;
@@ -34,6 +35,7 @@ public class BcClassDefinitionNode extends BcNode
 		constructors = new ArrayList<BcFunctionDeclaration>();
 		statements = new ArrayList<Node>();
 		interfaces = new ArrayList<BcTypeNode>();
+		additionalImports = new ArrayList<BcTypeNode>();
 	}
 	
 	public void addStatement(Node statement)
@@ -143,6 +145,14 @@ public class BcClassDefinitionNode extends BcNode
 		}		
 	}
 
+	public void addToImport(BcTypeNode bcType)
+	{
+		if (!additionalImports.contains(bcType))
+		{
+			additionalImports.add(bcType);
+		}
+	}
+	
 	public List<BcVariableDeclaration> getFields()
 	{
 		return fields;
@@ -156,6 +166,11 @@ public class BcClassDefinitionNode extends BcNode
 	public List<BcFunctionDeclaration> getConstructors()
 	{
 		return constructors;
+	}
+	
+	public List<BcTypeNode> getAdditionalImports() 
+	{
+		return additionalImports;
 	}
 	
 	public boolean hasConstructors()

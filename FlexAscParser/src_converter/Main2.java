@@ -815,6 +815,8 @@ public class Main2
 			{
 				lastBcMemberType = bcStaticClass.getClassType();
 				assert lastBcMemberType != null;
+				
+				addToImport(lastBcMemberType);
 			}
 			else
 			{
@@ -1132,6 +1134,7 @@ public class Main2
 			{
 				if (canBeClass(type) || BcCodeCs.isBasicType(type))
 				{
+					addToImport(type);
 					dest.writef("((%s)(%s))", BcCodeCs.type(identifier), argsDest);
 				}
 				else
@@ -1145,7 +1148,7 @@ public class Main2
 			}
 		}
 	}
-	
+
 	private static void process(SetExpressionNode node)
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
@@ -2301,6 +2304,12 @@ public class Main2
 			}
 		}
 		
+		List<BcTypeNode> additionalImports = bcClass.getAdditionalImports();
+		for (BcTypeNode bcType : additionalImports) 
+		{
+			tryAddUniqueNamespace(imports, bcType);
+		}
+		
 		return imports;
 	}
 	
@@ -2328,6 +2337,15 @@ public class Main2
 					tryAddUniqueNamespace(imports, generic);
 				}
 			}
+		}
+	}
+	
+	private static void addToImport(BcTypeNode bcType) 
+	{
+		if (canBeClass(bcType))
+		{
+			assert lastBcClass != null;
+			lastBcClass.addToImport(bcType);
 		}
 	}
 	
