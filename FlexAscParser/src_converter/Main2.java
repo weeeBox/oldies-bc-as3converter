@@ -489,7 +489,7 @@ public class Main2
 		BcTypeNode varType = bcVar.getType();
 		String varId = bcVar.getIdentifier();
 		
-		dest.writef("%s %s", BcCodeCs.type(varType.getName()), BcCodeCs.identifier(varId));
+		dest.writef("%s %s", BcCodeCs.type(varType), BcCodeCs.identifier(varId));
 		
 		Node initializer = bcVar.getInitializerNode();
 		if (initializer != null)
@@ -618,7 +618,7 @@ public class Main2
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
 		
-		dest.writef("%s %s", BcCodeCs.type(varType.getName()), BcCodeCs.identifier(bcIdentifier));
+		dest.writef("%s %s", BcCodeCs.type(varType), BcCodeCs.identifier(bcIdentifier));
 		
 		if (varBindNode.initializer != null)
 		{
