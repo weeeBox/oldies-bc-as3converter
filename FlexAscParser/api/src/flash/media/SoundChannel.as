@@ -4,11 +4,11 @@ package flash.media
 	
 	public final class SoundChannel /* extends EventDispatcher */ 
 	{
-		public function get leftPeak() : Number { return null; }
+		public function get leftPeak() : Number { return 0; }
 
-		public function get position() : Number { return null; }
+		public function get position() : Number { return 0; }
 
-		public function get rightPeak() : Number { return null; }
+		public function get rightPeak() : Number { return 0; }
 
 		public function get soundTransform() : SoundTransform { return null; }
 

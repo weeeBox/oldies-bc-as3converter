@@ -2,7 +2,7 @@ package flash
 {
 	public final class String extends Object 
 	{
-		public static const length : int = 1;
+		/* public static const length : int = 1; */
 
 		function String(value : String = "") : void {}
 

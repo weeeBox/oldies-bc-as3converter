@@ -11,7 +11,7 @@ package flash.geom
 
 		function Rectangle(x : Number = 0, y : Number = 0, width : Number = 0, height : Number = 0) : void { }
 
-		public function get bottom() : Number { return null; }
+		public function get bottom() : Number { return 0; }
 
 		public function set bottom(value : Number) : void { }
 
@@ -39,7 +39,7 @@ package flash.geom
 
 		public function isEmpty() : Boolean { return false; }
 
-		public function get left() : Number { return null; }
+		public function get left() : Number { return 0; }
 
 		public function set left(value : Number) : void { }
 
@@ -47,7 +47,7 @@ package flash.geom
 
 		public function offsetPoint(point : Point) : void { }
 
-		public function get right() : Number { return null; }
+		public function get right() : Number { return 0; }
 
 		public function set right(value : Number) : void { }
 
@@ -57,7 +57,7 @@ package flash.geom
 
 		public function set size(value : Point) : void { }
 
-		public function get top() : Number { return null; }
+		public function get top() : Number { return 0; }
 
 		public function set top(value : Number) : void { }
 

@@ -45,7 +45,7 @@ package flash.display
 
 		/* public function set focusRect(value : Object) : void; */
 
-		public function get frameRate() : Number { return null; }
+		public function get frameRate() : Number { return 0; }
 
 		public function set frameRate(value : Number) : void { }
 

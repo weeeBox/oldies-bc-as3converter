@@ -7,7 +7,7 @@ package flash
 		public static const UNIQUESORT : uint = 4;
 		public static const RETURNINDEXEDARRAY : uint = 8;
 		public static const NUMERIC : uint = 16;
-		public static const length : int = 1;
+		/* public static const length : int = 1; */
 
 		/* public function concat(...args : *) : Array; */
 

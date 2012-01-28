@@ -36,7 +36,7 @@ package flash.events
 		public static const UNLOAD : String = "unload";
 		public static const FULLSCREEN : String = "fullScreen";
 
-		function Event(type : String, bubbles : Boolean = false, cancelable : Boolean = false) : void;
+		/* function Event(type : String, bubbles : Boolean = false, cancelable : Boolean = false) : void; */
 
 		/* public function get bubbles() : Boolean; */
 

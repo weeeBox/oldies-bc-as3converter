@@ -4,7 +4,7 @@ package flash
 	{
 		public static var prototype : Object;
 		public var constructor : Object;
-		public static const length : int = 1;
+		/* public static const length : int = 1; */
 
 		/* protected static function _dontEnumPrototype(proto : Object) : void; */
 

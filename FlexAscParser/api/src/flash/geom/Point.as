@@ -11,13 +11,13 @@ package flash.geom
 
 		public function clone() : Point { return null; }
 
-		public static function distance(pt1 : Point, pt2 : Point) : Number { return null; }
+		public static function distance(pt1 : Point, pt2 : Point) : Number { return 0; }
 
 		public function equals(toCompare : Point) : Boolean { return null; }
 
 		public static function interpolate(pt1 : Point, pt2 : Point, f : Number) : Point { return null; }
 
-		public function get length() : Number { return null; }
+		public function get length() : Number { return 0; }
 
 		public function normalize(thickness : Number) : void { }
 

@@ -38,7 +38,7 @@ package flash.display
 		/* [Version("10")] */
 		/* public function globalToLocal3D(point : Point) : Vector3D; */
 
-		public function get height() : Number { return null; }
+		public function get height() : Number { return 0; }
 
 		public function set height(value : Number) : void {}
 
@@ -73,24 +73,24 @@ package flash.display
 
 		public function get root() : DisplayObject { return null; }
 
-		public function get rotation() : Number { return null; }
+		public function get rotation() : Number { return 0; }
 
 		public function set rotation(value : Number) : void { }
 
 		[Version("10")]
-		public function get rotationX() : Number { return null; }
+		public function get rotationX() : Number { return 0; }
 
 		[Version("10")]
 		public function set rotationX(value : Number) : void { }
 
 		[Version("10")]
-		public function get rotationY() : Number { return null; }
+		public function get rotationY() : Number { return 0; }
 
 		[Version("10")]
 		public function set rotationY(value : Number) : void { }
 
 		[Version("10")]
-		public function get rotationZ() : Number { return null; }
+		public function get rotationZ() : Number { return 0; }
 
 		[Version("10")]
 		public function set rotationZ(value : Number) : void { }
@@ -99,16 +99,16 @@ package flash.display
 
 		/* public function set scale9Grid(innerRectangle : Rectangle) : void; */
 
-		public function get scaleX() : Number { return null; }
+		public function get scaleX() : Number { return 0; }
 
 		public function set scaleX(value : Number) : void { }
 
-		public function get scaleY() : Number { return null; }
+		public function get scaleY() : Number { return 0; }
 
 		public function set scaleY(value : Number) : void { }
 
 		[Version("10")]
-		public function get scaleZ() : Number { return null; }
+		public function get scaleZ() : Number { return 0; }
 
 		[Version("10")]
 		public function set scaleZ(value : Number) : void { }
@@ -127,20 +127,20 @@ package flash.display
 
 		public function set visible(value : Boolean) : void { }
 
-		public function get width() : Number { return null; }
+		public function get width() : Number { return 0; }
 
 		public function set width(value : Number) : void { }
 
-		public function get x() : Number { return null; }
+		public function get x() : Number { return 0; }
 
 		public function set x(value : Number) : void { }
 
-		public function get y() : Number { return null; }
+		public function get y() : Number { return 0; }
 
 		public function set y(value : Number) : void { }
 
 		[Version("10")]
-		public function get z() : Number { return null; }
+		public function get z() : Number { return 0; }
 
 		[Version("10")]
 		public function set z(value : Number) : void { }

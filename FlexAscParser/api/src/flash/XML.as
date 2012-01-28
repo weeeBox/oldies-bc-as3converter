@@ -5,13 +5,15 @@ package flash
 	
 	public dynamic final class XML extends Object 
 	{
-		public static const length : uint = 1;
+		/* public static const length : uint = 1; */
 
 		/* function XML(value : * = undefined) : void; */
 
 		/* public function addNamespace(ns : *) : XML; */
 
 		/* public function appendChild(child : *) : XML; */
+
+		public function attributeValue(arg : String) : Object { return null; }
 
 		public function attribute(arg : String) : XMLList { return null; }
 

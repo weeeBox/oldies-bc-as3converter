@@ -1293,7 +1293,7 @@ public class Main2
 	{
 		if (node.isAttr())
 		{
-			dest.write("attribute(\"");
+			dest.write("attributeValue(\"");
 			dest.write(BcCodeCs.identifier(node));
 			dest.write("\")");
 		}

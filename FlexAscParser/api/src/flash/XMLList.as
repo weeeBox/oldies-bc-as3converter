@@ -2,7 +2,7 @@ package flash
 {	
 	public dynamic final class XMLList extends Object 
 	{
-		public static const length : uint = 1;
+		/* public static const length : uint = 1; */
 
 		/* function XMLList(value : * = undefined) : void; */
 
