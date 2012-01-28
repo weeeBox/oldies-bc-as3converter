@@ -80,6 +80,7 @@ import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcInterfaceDefinitionNode;
+import bc.lang.BcNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -1070,67 +1071,34 @@ public class Main2
 		{
 			if (type instanceof BcVectorTypeNode)
 			{
-				BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
-				
-				ObjectList<Node> args;
-				if (node.args != null && (args = node.args.items).size() == 1 && args.get(0) instanceof LiteralArrayNode)
-				{
-					LiteralArrayNode arrayNode = (LiteralArrayNode) args.get(0);
-					
-					ArgumentListNode elementlist = arrayNode.elementlist;
-					
-					WriteDestination initDest = new ListWriteDestination();
-					pushDest(initDest);
-					for (Node elementNode : elementlist.items)
-					{
-						initDest.write(".a(");
-						process(elementNode);
-						initDest.write(")");
-					}
-					popDest();
-					
-					dest.write(BcCodeCs.construct(vectorType, elementlist.size()) + initDest);
-				}
-				else
-				{
-					dest.write(BcCodeCs.construct(vectorType, argsDest));
-				}
+				ObjectList<Node> args = node.args != null ? node.args.items : null;
+				writeNewLiteralVector((BcVectorTypeNode) type, args);
 			}
 			else
 			{
-				dest.write(BcCodeCs.construct(type, argsDest.toString()));
+				dest.write(BcCodeCs.construct(type, argsDest));
 			}
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
 		{
-			assert type instanceof BcVectorTypeNode;
-			BcVectorTypeNode bcVector = (BcVectorTypeNode) type;
-			
+			assert type instanceof BcVectorTypeNode : type;
 			Node argNode = node.args.items.get(0);
 			
 			if (argNode instanceof LiteralArrayNode)
 			{
 				LiteralArrayNode arrayNode = (LiteralArrayNode) argNode;
-				
 				ArgumentListNode elementlist = arrayNode.elementlist;
 				
-				WriteDestination initDest = new ListWriteDestination();
-				pushDest(initDest);
-				int elementIndex = 0;
-				for (Node elementNode : elementlist.items)
-				{				
-					process(elementNode);
-					if (++elementIndex < elementlist.size())
-					{
-						dest.write(", ");
-					}
-				}
-				popDest();
-				dest.write(BcCodeCs.construct(bcVector, initDest));
+				writeNewLiteralVector((BcVectorTypeNode) type, elementlist.items);
 			}
 			else
 			{
-				dest.write(BcCodeCs.construct(type, argsDest));
+				ListWriteDestination argDest = new ListWriteDestination();
+				pushDest(argDest);
+				process(argNode);
+				popDest();
+				
+				dest.writef("(%s)(%s)", BcCodeCs.type(type), argDest);
 			}			
 		}
 		else
@@ -1372,22 +1340,7 @@ public class Main2
 		else if (node instanceof LiteralArrayNode)
 		{
 			LiteralArrayNode arrayNode = (LiteralArrayNode) node;
-			ArgumentListNode elementlist = arrayNode.elementlist;
-			
-			WriteDestination elementDest = new ListWriteDestination();
-			pushDest(elementDest);
-			int elementIndex = 0;
-			for (Node elementNode : elementlist.items)
-			{
-				process(elementNode);
-				if (++elementIndex < elementlist.items.size())
-				{
-					elementDest.write(", ");
-				}
-			}
-			popDest();
-			
-			dest.writef("new %s(%s)", BcCodeCs.type(classArray), elementDest);
+			writeNewLiteralArray(dest, arrayNode.elementlist.items);			
 		}
 		else if (node instanceof LiteralObjectNode)
 		{
@@ -2657,6 +2610,86 @@ public class Main2
 		BcTypeNode.add(bcType.getNameEx(), bcType);
 		
 		return bcType;
+	}
+	
+	private static void writeNewLiteralArray(WriteDestination dest, ObjectList<Node> args)
+	{
+		WriteDestination elementDest = new ListWriteDestination();
+		pushDest(elementDest);
+		int elementIndex = 0;
+		for (Node elementNode : args)
+		{
+			process(elementNode);
+			if (++elementIndex < args.size())
+			{
+				elementDest.write(", ");
+			}
+		}
+		popDest();
+		
+		dest.writef("new %s(%s)", BcCodeCs.type(classArray), elementDest);		
+	}
+	
+	private static void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
+	{
+		if (args == null)
+		{
+			dest.write(BcCodeCs.construct(vectorType));
+		}
+		else
+		{
+			// check if vector is initialized with literal array (in that case we should cast each arg to generic type)
+			if (args.size() == 1 && args.size() == 1 && args.get(0) instanceof LiteralArrayNode)
+			{
+				LiteralArrayNode arrayNode = (LiteralArrayNode) args.get(0);
+				BcTypeNode genericType = vectorType.getGeneric();
+				
+				ArgumentListNode elementlist = arrayNode.elementlist;
+				
+				WriteDestination initDest = new ListWriteDestination();
+				pushDest(initDest);
+				for (Node elementNode : elementlist.items)
+				{
+					ListWriteDestination argDest = new ListWriteDestination();
+					pushDest(argDest);
+					process(elementNode);
+					popDest();
+					
+					BcTypeNode argType = evaluateType(elementNode);
+					if (argType != genericType)
+					{
+						dest.writef("%s(%s)", BcCodeCs.type(genericType), argDest);
+					}
+					else
+					{
+						dest.write(argDest);
+					}
+				}
+				popDest();
+				
+				dest.write(BcCodeCs.construct(vectorType, initDest));
+			}
+			else
+			{
+				ListWriteDestination argsDest = new ListWriteDestination();
+				pushDest(argsDest);
+				
+				int itemIndex = 0;
+				for (Node arg : args)
+				{
+					process(arg);
+					
+					if (++itemIndex < args.size())
+					{
+						dest.write(", ");
+					}
+				}
+				
+				popDest();
+				
+				dest.write(BcCodeCs.construct(vectorType, argsDest));
+			}
+		}
 	}
 	
 	private static boolean classEquals(BcClassDefinitionNode classNode, String name)

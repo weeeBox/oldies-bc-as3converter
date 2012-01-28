@@ -161,6 +161,11 @@ public class BcCodeCs
 		return keywordSafe(name);
 	}
 	
+	public static String construct(BcTypeNode type)
+	{
+		return construct(type, "");
+	}
+	
 	public static String construct(BcTypeNode type, Object initializer)
 	{
 		if (type instanceof BcVectorTypeNode)
