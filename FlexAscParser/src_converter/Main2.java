@@ -1116,17 +1116,21 @@ public class Main2
 				
 				WriteDestination initDest = new ListWriteDestination();
 				pushDest(initDest);
+				int elementIndex = 0;
 				for (Node elementNode : elementlist.items)
-				{
-					initDest.write(" << ");
+				{				
 					process(elementNode);
+					if (++elementIndex < elementlist.size())
+					{
+						dest.write(", ");
+					}
 				}
 				popDest();
-				dest.write(BcCodeCs.construct(bcVector, elementlist.size()) + initDest);
+				dest.write(BcCodeCs.construct(bcVector, initDest));
 			}
 			else
 			{
-				dest.write(BcCodeCs.construct(type, 1) + " << " + argsDest);
+				dest.write(BcCodeCs.construct(type, argsDest));
 			}			
 		}
 		else
