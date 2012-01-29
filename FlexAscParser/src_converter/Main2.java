@@ -111,32 +111,7 @@ public class Main2
 	
 	private static List<BcClassDefinitionNode> bcClasses;
 	private static List<BcClassDefinitionNode> bcApiClasses;
-	private static Map<String, BcFunctionDeclaration> bcBuitinFunctions; // top level functions	
-	
-	static
-	{
-		bcBuitinFunctions = new HashMap<String, BcFunctionDeclaration>();
-		
-		try
-		{
-			List<BcClassDefinitionNode> classes = BuiltinClasses.load(new File("api/src"));
-			for (BcClassDefinitionNode bcClass : classes)
-			{
-				if (bcClass.getName().equals(BuiltinClasses.TOPLEVEL_DUMMY_CLASS_NAME))
-				{
-					List<BcFunctionDeclaration> bcTopLevelFunctions = bcClass.getFunctions();
-					for (BcFunctionDeclaration bcFunc : bcTopLevelFunctions)
-					{
-						bcBuitinFunctions.put(bcFunc.getName(), bcFunc);
-					}
-				}
-			}
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
+	private static List<BcFunctionDeclaration> bcGlobalFunctions;
 	
 	public static void main(String[] args)
 	{
@@ -151,8 +126,8 @@ public class Main2
 		
 		try
 		{
-			
 			bcClasses = new ArrayList<BcClassDefinitionNode>();
+			bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
 			collect(new File("api/src")); // collect api classes
 			bcApiClasses = bcClasses;
 			
@@ -249,6 +224,10 @@ public class Main2
 			else if (node instanceof MetaDataNode || node instanceof ImportDirectiveNode)
 			{
 				// nothing
+			}
+			else if (node instanceof FunctionDefinitionNode)
+			{
+				bcGlobalFunctions.add(collect((FunctionDefinitionNode)node));
 			}
 		}
 	}
@@ -1210,6 +1189,8 @@ public class Main2
 			assert false;
 		}
 		
+		BcTypeNode selectorType = lastBcMemberType;
+		
 		ListWriteDestination argsDest = new ListWriteDestination();
 		pushDest(argsDest);
 		process(node.args);
@@ -1228,13 +1209,40 @@ public class Main2
 		}
 		else
 		{
+			assert node.args.size() == 1 : node.args.size();
+			
+			Node argNode = node.args.items.get(0);
+			
+			BcTypeNode argType = evaluateType(argNode);
+			if (argType == null)
+			{
+				evaluateType(argNode);
+			}
+			assert argType != null : argNode;
+			
+			boolean needCast = needExplicitCast(argType, selectorType);
+			
 			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 			{
-				dest.writef("[%s] = %s", identifier, argsDest);
+				if (needCast)
+				{
+					dest.writef("[%s] = (%s)(%s)", identifier, BcCodeCs.type(selectorType), argsDest);
+				}
+				else
+				{
+					dest.writef("[%s] = %s", identifier, argsDest);
+				}
 			}
 			else
 			{
-				dest.writef("%s = %s", identifier, argsDest);
+				if (needCast)
+				{
+					dest.writef("%s = (%s)(%s)", identifier, BcCodeCs.type(selectorType), argsDest);
+				}
+				else
+				{
+					dest.writef("%s = %s", identifier, argsDest);
+				}
 			}
 		}
 	}
@@ -1854,43 +1862,6 @@ public class Main2
 		return null;
 	}
 	
-	private static BcFunctionDeclaration findBuiltinFunc(String name)
-	{
-		return bcBuitinFunctions.get(name);
-	}
-	
-	private static BcTypeNode findVariableType(String indentifier)
-	{
-		if (indentifier.equals("this"))
-		{
-			return BcTypeNode.create(lastBcClass.getName());
-		}
-		
-		BcTypeNode foundType = null;
-		if (lastBcFunction != null)
-		{
-			foundType = findVariableType(lastBcFunction.getDeclaredVars(), indentifier);
-			if (foundType != null)
-			{
-				return foundType;
-			}
-		}
-		
-		return findVariableType(lastBcClass.getDeclaredVars(), indentifier);
-	}
-
-	private static BcTypeNode findVariableType(List<BcVariableDeclaration> vars, String indentifier)
-	{
-		for (BcVariableDeclaration var : vars)
-		{
-			if (var.getIdentifier().equals(indentifier)) 
-			{
-				return var.getType();
-			}
-		}
-		return null;
-	}
-
 	private static void write(File outputDir, List<BcClassDefinitionNode> classes) throws IOException
 	{
 		for (BcClassDefinitionNode bcClass : classes)
@@ -2211,7 +2182,26 @@ public class Main2
 	
 	private static BcFunctionDeclaration findFunction(String name)
 	{
-		return lastBcClass.findFunction(name);
+		BcFunctionDeclaration classFunc = lastBcClass.findFunction(name);
+		if (classFunc != null)
+		{
+			return classFunc;
+		}
+		
+		return findGlobalFunction(name);
+	}
+	
+	private static BcFunctionDeclaration findGlobalFunction(String name)
+	{
+		for (BcFunctionDeclaration bcFunc : bcGlobalFunctions) 
+		{
+			if (bcFunc.getName().equals(name))
+			{
+				return bcFunc;
+			}
+		}
+		
+		return null;
 	}
 	
 	private static BcVariableDeclaration findDeclaredVar(String name)
@@ -2447,6 +2437,19 @@ public class Main2
 			}
 		}
 		
+		if (node instanceof CallExpressionNode)
+		{
+			CallExpressionNode callExpr = (CallExpressionNode) node;
+			if (callExpr.expr instanceof MemberExpressionNode)
+			{
+				return extractBcType(callExpr.expr);
+			}
+			else
+			{
+				assert false;
+			}
+		}
+		
 		assert false : node;
 		return null;
 	}
@@ -2577,7 +2580,7 @@ public class Main2
 		}				
 		// search for function
 		BcFunctionDeclaration bcFunc = baseClass.findFunction(name);
-		if (bcFunc != null || (bcFunc = findBuiltinFunc(name)) != null)
+		if (bcFunc != null || (bcFunc = findGlobalFunction(name)) != null)
 		{
 			if (bcFunc.hasReturnType())
 			{
@@ -2710,5 +2713,17 @@ public class Main2
 	private static boolean canBeClass(BcTypeNode type) 
 	{
 		return canBeClass(type.getName());
+	}
+	
+	private static boolean needExplicitCast(BcTypeNode fromType, BcTypeNode toType)
+	{
+		if (fromType.isIntegral() && toType.isIntegral())
+		{
+			if (typeEquals(fromType, "float") && (typeEquals(toType, "int") || typeEquals(toType, "uint")))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }
