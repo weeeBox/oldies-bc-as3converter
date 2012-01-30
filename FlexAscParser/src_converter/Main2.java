@@ -1005,6 +1005,8 @@ public class Main2
 						assert bcClassType != null : identifier;
 						
 						lastBcMemberType = bcClassType;
+						
+						addToImport(bcClassType);
 					}
 				}
 			}
