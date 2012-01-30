@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 import macromedia.asc.parser.ApplyTypeExprNode;
@@ -69,7 +67,6 @@ import macromedia.asc.parser.WhileStatementNode;
 import macromedia.asc.util.Context;
 import macromedia.asc.util.ContextStatics;
 import macromedia.asc.util.ObjectList;
-import bc.builtin.BuiltinClasses;
 import bc.code.FileWriteDestination;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
@@ -78,9 +75,7 @@ import bc.help.BcNodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
-import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcInterfaceDefinitionNode;
-import bc.lang.BcNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -870,8 +865,12 @@ public class Main2
 							}
 							else
 							{
-								System.err.println("Warning! Dymaic property: " + identifier);
-								accessingDynamicProperty = true;
+								IdentifierNode identifierNode = (IdentifierNode) node.expr;
+								if (!identifierNode.isAttr())
+								{
+									System.err.println("Warning! Dymaic property: " + identifier);
+									accessingDynamicProperty = true;
+								}
 							}
 						}
 					}
