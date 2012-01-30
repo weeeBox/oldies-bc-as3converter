@@ -801,61 +801,69 @@ public class Main2
 			}
 			else
 			{
-				BcFunctionDeclaration bcFunc = bcClass.findGetterFunction(identifier);
-				if (bcFunc != null)
+				BcVariableDeclaration localVar = findLocalVar(identifier);
+				if (localVar != null)
 				{
-					BcTypeNode funcType = bcFunc.getReturnType();
-					assert funcType != null : identifier;
-					
-					lastBcMemberType = funcType;
-					if (classEquals(bcClass, classString) && identifier.equals("length"))
-					{
-						// keep String.length property as a "Lenght" property
-						identifier = Character.toUpperCase(identifier.charAt(0)) + identifier.substring(1);
-					}
-					else
-					{
-						identifier = BcCodeCs.getter(identifier);
-						getterCalled = true;
-					}
-						
+					lastBcMemberType = localVar.getType();
+					assert lastBcMemberType != null;
 				}
 				else
 				{
-					BcVariableDeclaration bcVar = findVariable(bcClass, identifier);
-					if (bcVar != null)
+					BcFunctionDeclaration bcFunc = bcClass.findGetterFunction(identifier);				
+					if (bcFunc != null)
 					{
-						lastBcMemberType = bcVar.getType();
-						assert lastBcMemberType != null;
-					}
-					else
-					{
-						BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
-						if (bcFunction != null)
+						BcTypeNode funcType = bcFunc.getReturnType();
+						assert funcType != null : identifier;
+						
+						lastBcMemberType = funcType;
+						if (classEquals(bcClass, classString) && identifier.equals("length"))
 						{
-							System.err.println("Warning! Function type: " + identifier);
-							lastBcMemberType = BcTypeNode.create(classFunction);
-						}
-						else if (classEquals(bcClass, classXML))
-						{
-							IdentifierNode identifierNode = (IdentifierNode) node.expr;
-							if (identifierNode.isAttribute())
-							{
-								lastBcMemberType = BcTypeNode.create(classString);
-							}
-							else
-							{
-								assert false : identifierNode.name;
-							}
+							// keep String.length property as a "Lenght" property
+							identifier = Character.toUpperCase(identifier.charAt(0)) + identifier.substring(1);
 						}
 						else
 						{
-							System.err.println("Warning! Dymaic property: " + identifier);
-							accessingDynamicProperty = true;
+							identifier = BcCodeCs.getter(identifier);
+							getterCalled = true;
+						}
+							
+					}
+					else
+					{
+						BcVariableDeclaration bcVar = findVariable(bcClass, identifier);
+						if (bcVar != null)
+						{
+							lastBcMemberType = bcVar.getType();
+							assert lastBcMemberType != null;
+						}
+						else
+						{
+							BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
+							if (bcFunction != null)
+							{
+								System.err.println("Warning! Function type: " + identifier);
+								lastBcMemberType = BcTypeNode.create(classFunction);
+							}
+							else if (classEquals(bcClass, classXML))
+							{
+								IdentifierNode identifierNode = (IdentifierNode) node.expr;
+								if (identifierNode.isAttribute())
+								{
+									lastBcMemberType = BcTypeNode.create(classString);
+								}
+								else
+								{
+									assert false : identifierNode.name;
+								}
+							}
+							else
+							{
+								System.err.println("Warning! Dymaic property: " + identifier);
+								accessingDynamicProperty = true;
+							}
 						}
 					}
 				}
-				
 			}
 		}
 		else if (node.expr instanceof ArgumentListNode)
