@@ -774,8 +774,11 @@ public class Main2
 		popDest();
 		
 		boolean accessingDynamicProperty = false;
+		boolean accessingDynamicXMLList = false;
 		String identifier = expr.toString();
 		boolean getterCalled = false;
+		
+		boolean needLocalVars = false;
 		
 		if (node.expr instanceof IdentifierNode)
 		{
@@ -789,6 +792,7 @@ public class Main2
 			{
 				assert lastBcClass != null;
 				bcClass = lastBcClass;
+				needLocalVars = true;
 			}
 			
 			BcClassDefinitionNode bcStaticClass = findClass(identifier);
@@ -801,7 +805,7 @@ public class Main2
 			}
 			else
 			{
-				BcVariableDeclaration localVar = findLocalVar(identifier);
+				BcVariableDeclaration localVar = needLocalVars ? findLocalVar(identifier) : null;
 				if (localVar != null)
 				{
 					lastBcMemberType = localVar.getType();
@@ -830,7 +834,7 @@ public class Main2
 					}
 					else
 					{
-						BcVariableDeclaration bcVar = findVariable(bcClass, identifier);
+						BcVariableDeclaration bcVar = bcClass.findField(identifier);
 						if (bcVar != null)
 						{
 							lastBcMemberType = bcVar.getType();
@@ -847,13 +851,15 @@ public class Main2
 							else if (classEquals(bcClass, classXML))
 							{
 								IdentifierNode identifierNode = (IdentifierNode) node.expr;
-								if (identifierNode.isAttribute())
+								if (identifierNode.isAttr())
 								{
 									lastBcMemberType = BcTypeNode.create(classString);
 								}
 								else
 								{
-									assert false : identifierNode.name;
+									lastBcMemberType = BcTypeNode.create(classXMLList);
+									accessingDynamicXMLList = true;
+									System.err.println("Warning! Dynamic XMLList: " + identifier);
 								}
 							}
 							else
@@ -896,6 +902,10 @@ public class Main2
 		else if (accessingDynamicProperty)
 		{
 			dest.writef("getOwnProperty(\"%s\")", identifier);
+		}
+		else if (accessingDynamicXMLList)
+		{
+			dest.writef("elements(\"%s\")", identifier);
 		}
 		else if (getterCalled)
 		{
