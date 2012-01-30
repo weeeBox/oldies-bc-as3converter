@@ -685,12 +685,18 @@ public class Main2
 		{
 			if (selector instanceof GetExpressionNode || 
 				selector instanceof CallExpressionNode || 
-				selector instanceof SetExpressionNode)
+				selector instanceof SetExpressionNode ||
+				selector instanceof DeleteExpressionNode ||
+				selector instanceof IncrementNode)
 			{
 				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
 				{
 					dest.write(".");
 				}
+			}
+			else
+			{
+				assert false;
 			}
 		}
 		
@@ -763,7 +769,7 @@ public class Main2
 		popDest();
 		
 		assert node.getMode() == Tokens.LEFTBRACKET_TOKEN;
-		dest.writef(".remove(%s)", expr);
+		dest.writef("remove(%s)", expr);
 	}
 	
 	private static void process(GetExpressionNode node)
