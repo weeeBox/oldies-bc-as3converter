@@ -1683,7 +1683,7 @@ public class Main2
 				rshString = String.format("(%s != null)", rshString);
 			}
 			
-			dest.writef("%s %s %s", lshString, Tokens.tokenToString[-node.op], rshString);
+			dest.writef("(%s %s %s)", lshString, Tokens.tokenToString[-node.op], rshString);
 		}
 		else if (node.op == Tokens.IS_TOKEN)
 		{
@@ -1695,7 +1695,7 @@ public class Main2
 		}
 		else
 		{
-			dest.writef("%s %s %s", ldest, Tokens.tokenToString[-node.op], rdest);
+			dest.writef("(%s %s %s)", ldest, Tokens.tokenToString[-node.op], rdest);
 		}
 	}
 	
