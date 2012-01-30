@@ -605,6 +605,10 @@ public class Main2
 			
 			dest.write(" = " + initializer);
 		}
+		else if (lastBcFunction != null)
+		{
+			dest.write(" = " + typeDefault(varType));
+		}
 		dest.writeln(";");
 		
 		declaredVars.add(bcVar);
@@ -2738,6 +2742,36 @@ public class Main2
 	private static boolean canBeClass(BcTypeNode type) 
 	{
 		return canBeClass(type.getName());
+	}
+	
+	private static String typeDefault(BcTypeNode type)
+	{
+		if (type.isIntegral())
+		{
+			if (typeEquals(type, classBoolean))
+			{
+				return "false";
+			}
+			
+			return "0";
+		}
+		
+		return BcCodeCs.NULL;
+	}
+	
+	private static boolean typeDerivesFrom(BcTypeNode type, BcTypeNode superType)
+	{
+		if (!canBeClass(type))
+		{
+			return false;
+		}
+		
+		if (!canBeClass(superType))
+		{
+			return false;
+		}
+		
+		return false;
 	}
 	
 	private static boolean needExplicitCast(BcTypeNode fromType, BcTypeNode toType)

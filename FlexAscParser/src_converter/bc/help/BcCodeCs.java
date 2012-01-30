@@ -53,7 +53,7 @@ public class BcCodeCs
 	{
 		basicTypes = new HashMap<String, String>();
 		basicTypes.put("void", "void");
-		basicTypes.put("uint", "int");
+		basicTypes.put("uint", "uint");
 		basicTypes.put("int", "int");
 		basicTypes.put("Number", "float");
 		basicTypes.put("float", "float");
