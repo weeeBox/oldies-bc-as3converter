@@ -222,7 +222,9 @@ public class Main2
 			}
 			else if (node instanceof FunctionDefinitionNode)
 			{
-				bcGlobalFunctions.add(collect((FunctionDefinitionNode)node));
+				BcFunctionDeclaration bcFunc = collect((FunctionDefinitionNode)node);
+				bcFunc.setGlobal();
+				bcGlobalFunctions.add(bcFunc);
 			}
 		}
 	}
@@ -996,6 +998,7 @@ public class Main2
 		BcFunctionDeclaration calledFunction = null;
 		
 		boolean isCast = false;
+		boolean isGlobalCalled = false;
 		
 		BcTypeNode type = extractBcType(node.expr);
 		assert type != null : node.expr.getClass();
@@ -1016,6 +1019,8 @@ public class Main2
 							lastBcMemberType = bcFunc.getReturnType();
 							assert lastBcMemberType != null;
 						}
+						
+						isGlobalCalled = bcFunc.isGlobal();
 					}
 					else if (node.is_new)
 					{
@@ -1177,6 +1182,10 @@ public class Main2
 			if (isCast)
 			{				
 				dest.write(BcCodeCs.cast(argsDest, identifier));
+			}
+			else if (isGlobalCalled)
+			{
+				dest.writef("AsGlobal.%s(%s)", identifier, argsDest);
 			}
 			else
 			{

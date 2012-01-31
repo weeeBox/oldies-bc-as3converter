@@ -34,6 +34,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 	private static final int KIND_REGULAR = 0;
 	private static final int KIND_GETTER = 1;
 	private static final int KIND_SETTER = 2;
+	private static final int KIND_GLOBAL = 3;
 	private int kind = KIND_REGULAR;
 	
 	private StatementListNode statements;
@@ -136,6 +137,11 @@ public class BcFunctionDeclaration extends BcDeclaration
 		kind = KIND_SETTER;
 	}
 	
+	public void setGlobal()
+	{
+		kind = KIND_GLOBAL;
+	}
+	
 	public boolean isSetter()
 	{
 		return kind == KIND_SETTER;
@@ -146,9 +152,14 @@ public class BcFunctionDeclaration extends BcDeclaration
 		return kind == KIND_GETTER;
 	}
 	
+	public boolean isGlobal()
+	{
+		return kind == KIND_GLOBAL;
+	}
+	
 	public boolean isProperty()
 	{
-		return kind != KIND_REGULAR;
+		return kind == KIND_GETTER || kind == KIND_SETTER;
 	}
 
 	public int getDefaultParamsCount()
