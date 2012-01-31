@@ -698,7 +698,7 @@ public class Main2
 				selector instanceof DeleteExpressionNode ||
 				selector instanceof IncrementNode)
 			{
-				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
+				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN || selector instanceof DeleteExpressionNode)
 				{
 					dest.write(".");
 				}
