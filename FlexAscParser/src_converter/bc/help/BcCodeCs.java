@@ -181,12 +181,14 @@ public class BcCodeCs
 		return NEW + " " + type(type) + "(" + initializer + ")";
 	}
 	
-	public static String cast(Object expr, BcTypeNode type)
+	public static String parseString(Object expr, BcTypeNode exprType)
 	{
-		return String.format("(%s)(%s)", type(type), expr);
+		String typeString = type(exprType);
+		typeString = Character.toUpperCase(typeString.charAt(0)) + typeString.substring(1);
+		return String.format("AsString.parse%s(%s)", typeString, expr);
 	}
 	
-	public static String cast(Object expr, String type)
+	public static String cast(Object expr, BcTypeNode type)
 	{
 		return String.format("(%s)(%s)", type(type), expr);
 	}

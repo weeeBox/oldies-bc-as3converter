@@ -13,7 +13,7 @@ package flash
 
 		/* public function appendChild(child : *) : XML; */
 
-		public function attributeValue(arg : String) : Object { return null; }
+		public function attributeValue(arg : String) : String { return null; }
 
 		public function attribute(arg : String) : XMLList { return null; }
 

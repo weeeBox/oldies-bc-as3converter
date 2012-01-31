@@ -610,7 +610,7 @@ public class Main2
 			
 			if (needExplicitCast(initializerType, varType))
 			{
-				dest.writef(" = %s", BcCodeCs.cast(initializer, varType));
+				dest.writef(" = %s", cast(initializer, initializerType, varType));
 			}
 			else
 			{
@@ -1122,7 +1122,7 @@ public class Main2
 					
 					if (needExplicitCast(argType, paramType))
 					{
-						dest.write(BcCodeCs.cast(argDest, paramType));
+						dest.write(cast(argDest, argType, paramType));
 					}
 					else
 					{
@@ -1169,19 +1169,30 @@ public class Main2
 			}
 			else
 			{
+				BcTypeNode argType = evaluateType(argNode);
+				assert argType != null;
+				
 				ListWriteDestination argDest = new ListWriteDestination();
 				pushDest(argDest);
 				process(argNode);
 				popDest();
 				
-				dest.write(BcCodeCs.cast(argDest, type));
+				dest.write(cast(argDest, argType, type));
 			}			
 		}
 		else
 		{
 			if (isCast)
-			{				
-				dest.write(BcCodeCs.cast(argsDest, identifier));
+			{			
+				assert node.args != null;
+				assert node.args.size() == 1;
+				
+				Node argNode = node.args.items.get(0);
+				
+				BcTypeNode argType = evaluateType(argNode);
+				assert argType != null;
+				
+				dest.write(cast(argsDest, argType, type));
 			}
 			else if (isGlobalCalled)
 			{
@@ -1319,7 +1330,7 @@ public class Main2
 			{
 				if (needCast)
 				{
-					dest.writef("[%s] = %s", identifier, BcCodeCs.cast(argsDest, selectorType));
+					dest.writef("[%s] = %s", identifier, cast(argsDest, argType, selectorType));
 				}
 				else
 				{
@@ -1330,7 +1341,7 @@ public class Main2
 			{
 				if (needCast)
 				{
-					dest.writef("%s = %s", identifier, BcCodeCs.cast(argsDest, selectorType));
+					dest.writef("%s = %s", identifier, cast(argsDest, argType, selectorType));
 				}
 				else
 				{
@@ -2882,6 +2893,22 @@ public class Main2
 				return true;
 			}
 		}
+		
+		if (toType.isIntegral() && typeEquals(fromType, classString))
+		{
+			return true;
+		}
+		
 		return false;
+	}
+	
+	private static String cast(Object expression, BcTypeNode fromType, BcTypeNode toType) 
+	{
+		if (toType.isIntegral() && typeEquals(fromType, classString))
+		{
+			return BcCodeCs.parseString(expression, toType);
+		}
+		
+		return BcCodeCs.cast(expression, toType);
 	}
 }
