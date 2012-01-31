@@ -1555,6 +1555,9 @@ public class Main2
 			assert loopVar != null : loopVarName;
 			
 			// get loop body
+			ListWriteDestination listDest = (ListWriteDestination) dest;
+			listDest.removeLastLine();
+			
 			dest.writelnf("foreach (%s %s in %s)", BcCodeCs.type(loopVar.getType()), loopVarName, collection);
 			Node bodyNode = statements.items.get(1);
 			if (bodyNode != null)

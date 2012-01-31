@@ -20,7 +20,17 @@ public class ListWriteDestination extends WriteDestination
 	@Override
 	protected void internalWrite(String line)
 	{
+		addLine(line);
+	}
+
+	public void addLine(String line) 
+	{
 		lines.add(line);
+	}
+	
+	public void removeLastLine()
+	{
+		lines.remove(lines.size() - 1);
 	}
 	
 	public List<String> getLines()
