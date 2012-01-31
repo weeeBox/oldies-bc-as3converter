@@ -603,7 +603,17 @@ public class Main2
 			bcVar.setInitializer(initializer);
 			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(varBindNode.initializer));
 			
-			dest.write(" = " + initializer);
+			BcTypeNode initializerType = evaluateType(varBindNode.initializer);
+			assert initializerType != null;
+			
+			if (needExplicitCast(initializerType, varType))
+			{
+				dest.writef(" = (%s)(%s)", BcCodeCs.type(varType), initializer);
+			}
+			else
+			{
+				dest.write(" = " + initializer);
+			}
 		}
 		else if (lastBcFunction != null)
 		{
@@ -2438,16 +2448,32 @@ public class Main2
 			{
 				return BcTypeNode.create("Number");
 			}
+
+			if (typeEquals(lhsType, "float") || typeEquals(rhsType, "float"))
+			{
+				return BcTypeNode.create("float");
+			}
 			
-			if (typeEquals(lhsType, "uint") || typeEquals(rhsType, "uint"))
+			if (typeEquals(lhsType, "long") || typeEquals(rhsType, "long"))
+			{
+				return BcTypeNode.create("long");
+			}
+			
+			if (typeEquals(lhsType, "int") && typeEquals(rhsType, "int"))
 			{
 				return BcTypeNode.create("int");
 			}
 			
-			if (typeEquals(lhsType, "int") || typeEquals(rhsType, "int"))
+			if (typeEquals(lhsType, "uint") && typeEquals(rhsType, "uint"))
 			{
-				return BcTypeNode.create("int");
-			}			
+				return BcTypeNode.create("uint");
+			}
+			
+			if (typeEquals(lhsType, "uint") && typeEquals(rhsType, "int") || 
+				typeEquals(lhsType, "int") && typeEquals(rhsType, "uint"))
+			{
+				return BcTypeNode.create("long");
+			}
 			
 			assert false;
 		}
@@ -2781,7 +2807,7 @@ public class Main2
 	{
 		if (fromType.isIntegral() && toType.isIntegral())
 		{
-			if (typeEquals(fromType, "float") && (typeEquals(toType, "int") || typeEquals(toType, "uint")))
+			if ((typeEquals(fromType, "float") || typeEquals(fromType, "long")) && (typeEquals(toType, "int") || typeEquals(toType, "uint")))
 			{
 				return true;
 			}
