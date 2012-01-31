@@ -1564,11 +1564,17 @@ public class Main2
 			BcVariableDeclaration loopVar = findDeclaredVar(loopVarName);
 			assert loopVar != null : loopVarName;
 			
-			// get loop body
-			ListWriteDestination listDest = (ListWriteDestination) dest;
-			listDest.removeLastLine();
+			String loopVarString = String.format("%s %s", BcCodeCs.type(loopVar.getType()), loopVarName);
+			String loopVarStringGenerated = loopVarString + " = " + typeDefault(loopVar.getType()) + ";";
 			
-			dest.writelnf("foreach (%s %s in %s)", BcCodeCs.type(loopVar.getType()), loopVarName, collection);
+			ListWriteDestination listDest = (ListWriteDestination) dest;
+			if (listDest.peekLine().trim().equals(loopVarStringGenerated))
+			{
+				listDest.popLine();
+			}
+			
+			// get loop body
+			dest.writelnf("foreach (%s in %s)", loopVarString, collection);
 			Node bodyNode = statements.items.get(1);
 			if (bodyNode != null)
 			{

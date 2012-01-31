@@ -28,9 +28,16 @@ public class ListWriteDestination extends WriteDestination
 		lines.add(line);
 	}
 	
-	public void removeLastLine()
+	public String peekLine()
 	{
+		return lines.get(lines.size() - 1);
+	}
+	
+	public String popLine()
+	{
+		String line = peekLine();
 		lines.remove(lines.size() - 1);
+		return line;
 	}
 	
 	public List<String> getLines()
