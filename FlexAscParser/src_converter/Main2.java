@@ -2785,6 +2785,16 @@ public class Main2
 			{
 				return true;
 			}
+			
+			if (typeEquals(fromType, "int") && typeEquals(toType, "uint"))
+			{
+				return true;
+			}
+			
+			if (typeEquals(fromType, "uint") && typeEquals(toType, "int"))
+			{
+				return true;
+			}
 		}
 		return false;
 	}
