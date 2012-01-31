@@ -608,7 +608,7 @@ public class Main2
 			
 			if (needExplicitCast(initializerType, varType))
 			{
-				dest.writef(" = (%s)(%s)", BcCodeCs.type(varType), initializer);
+				dest.writef(" = %s", BcCodeCs.cast(initializer, varType));
 			}
 			else
 			{
@@ -993,18 +993,24 @@ public class Main2
 		popDest();
 		
 		String identifier = exprDest.toString();
+		BcFunctionDeclaration calledFunction = null;
+		
+		boolean isCast = false;
+		
+		BcTypeNode type = extractBcType(node.expr);
+		assert type != null : node.expr.getClass();
 		
 		if (node.expr instanceof IdentifierNode)
 		{
 			if (lastBcMemberType == null)
 			{
-				lastBcMemberType = null;
-				
 				if (!(identifier.equals(BcCodeCs.thisCallMarker) && identifier.equals(BcCodeCs.thisCallMarker)))
 				{
 					BcFunctionDeclaration bcFunc = findFunction(identifier);
 					if (bcFunc != null)
 					{
+						calledFunction = bcFunc;
+						
 						if (bcFunc.hasReturnType())
 						{
 							lastBcMemberType = bcFunc.getReturnType();
@@ -1022,6 +1028,14 @@ public class Main2
 						
 						addToImport(bcClassType);
 					}
+					else
+					{
+						isCast = type.isIntegral() || canBeClass(type);
+						if (isCast)
+						{
+							addToImport(type);
+						}
+					}
 				}
 			}
 			else
@@ -1032,6 +1046,8 @@ public class Main2
 				BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier);
 				if (bcFunc != null)
 				{
+					calledFunction = bcFunc;
+					
 					lastBcMemberType = bcFunc.getReturnType();
 					if (classEquals(bcClass, classString))
 					{
@@ -1078,12 +1094,49 @@ public class Main2
 		if (node.args != null)
 		{
 			pushDest(argsDest);
-			process(node.args);
+			
+			if (calledFunction != null && !isCast)
+			{
+				List<BcFuncParam> params = calledFunction.getParams();
+				ObjectList<Node> args = node.args.items;
+				
+				assert params.size() >= args.size();
+				
+				int argIndex = 0;
+				for (Node arg : args)
+				{
+					WriteDestination argDest = new ListWriteDestination();
+					pushDest(argDest);
+					process(arg);
+					popDest();					
+					
+					BcTypeNode argType = evaluateType(arg);
+					assert argType != null;
+					
+					BcTypeNode paramType = params.get(argIndex).getType();
+					
+					if (needExplicitCast(argType, paramType))
+					{
+						dest.write(BcCodeCs.cast(argDest, paramType));
+					}
+					else
+					{
+						dest.write(argDest);
+					}
+					
+					if (++argIndex < args.size())
+					{
+						dest.write(", ");
+					}
+				}
+			}
+			else
+			{
+				process(node.args);
+			}
+			
 			popDest();
 		}
-		
-		BcTypeNode type = extractBcType(node.expr);
-		assert type != null : node.expr.getClass();
 		
 		if (node.is_new)
 		{
@@ -1116,22 +1169,14 @@ public class Main2
 				process(argNode);
 				popDest();
 				
-				dest.writef("(%s)(%s)", BcCodeCs.type(type), argDest);
+				dest.write(BcCodeCs.cast(argDest, type));
 			}			
 		}
 		else
 		{
-			if (node.getMode() == Tokens.EMPTY_TOKEN && node.args != null && node.args.items.size() == 1)
-			{
-				if (canBeClass(type) || BcCodeCs.isBasicType(type))
-				{
-					addToImport(type);
-					dest.writef("((%s)(%s))", BcCodeCs.type(identifier), argsDest);
-				}
-				else
-				{
-					dest.writef("%s(%s)", identifier, argsDest);
-				}
+			if (isCast)
+			{				
+				dest.write(BcCodeCs.cast(argsDest, identifier));
 			}
 			else
 			{
@@ -1265,7 +1310,7 @@ public class Main2
 			{
 				if (needCast)
 				{
-					dest.writef("[%s] = (%s)(%s)", identifier, BcCodeCs.type(selectorType), argsDest);
+					dest.writef("[%s] = %s", identifier, BcCodeCs.cast(argsDest, selectorType));
 				}
 				else
 				{
@@ -1276,7 +1321,7 @@ public class Main2
 			{
 				if (needCast)
 				{
-					dest.writef("%s = (%s)(%s)", identifier, BcCodeCs.type(selectorType), argsDest);
+					dest.writef("%s = %s", identifier, BcCodeCs.cast(argsDest, selectorType));
 				}
 				else
 				{

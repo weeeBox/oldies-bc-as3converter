@@ -250,6 +250,11 @@ public class BcClassDefinitionNode extends BcNode
 		{
 			if (bcFunc.getName().equals(name))
 			{
+				if (bcFunc.isConstructor())
+				{
+					continue;
+				}
+				
 				if (mode == FIND_GETTER)
 				{
 					if (!bcFunc.isGetter())

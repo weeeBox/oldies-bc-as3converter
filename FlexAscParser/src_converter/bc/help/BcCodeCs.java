@@ -181,6 +181,16 @@ public class BcCodeCs
 		return NEW + " " + type(type) + "(" + initializer + ")";
 	}
 	
+	public static String cast(Object expr, BcTypeNode type)
+	{
+		return String.format("(%s)(%s)", type(type), expr);
+	}
+	
+	public static String cast(Object expr, String type)
+	{
+		return String.format("(%s)(%s)", type(type), expr);
+	}
+	
 	public static String getter(String name)
 	{
 		return "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
