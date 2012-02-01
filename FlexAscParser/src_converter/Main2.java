@@ -2915,6 +2915,11 @@ public class Main2
 			return true;
 		}
 		
+		if (!toType.isIntegral() && typeEquals(fromType, classObject) && !typeEquals(toType, classObject))
+		{
+			return true;
+		}
+		
 		return false;
 	}
 	
