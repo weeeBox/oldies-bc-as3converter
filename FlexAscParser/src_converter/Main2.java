@@ -597,6 +597,7 @@ public class Main2
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
 		BcTypeNode varType = extractBcType(varBindNode.variable.type);
+		addToImport(varType);
 		
 		String bcIdentifier = BcCodeCs.identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier);
