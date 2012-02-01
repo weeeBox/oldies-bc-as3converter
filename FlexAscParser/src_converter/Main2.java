@@ -477,7 +477,17 @@ public class Main2
 			bcVar.setInitializer(initializerDest);
 			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(initializer));
 			
-			dest.write(" = " + initializerDest);
+			BcTypeNode initializerType = evaluateType(initializer);
+			assert initializerType != null;
+			
+			if (needExplicitCast(initializerType, varType))
+			{
+				dest.write(" = " + cast(initializerDest, initializerType, varType));
+			}
+			else
+			{
+				dest.write(" = " + initializerDest);
+			}
 		}
 		dest.writeln(";");
 	}
@@ -1192,7 +1202,7 @@ public class Main2
 				BcTypeNode argType = evaluateType(argNode);
 				assert argType != null;
 				
-				dest.write(cast(argsDest, argType, type));
+				dest.writef("(%s)", cast(argsDest, argType, type));
 			}
 			else if (isGlobalCalled)
 			{
@@ -2579,6 +2589,11 @@ public class Main2
 			}
 		}
 		
+		if (node instanceof LiteralArrayNode)
+		{
+			return BcTypeNode.create(classArray);
+		}
+		
 		assert false : node;
 		return null;
 	}
@@ -2878,7 +2893,7 @@ public class Main2
 	{
 		if (fromType.isIntegral() && toType.isIntegral())
 		{
-			if ((typeEquals(fromType, "float") || typeEquals(fromType, "long")) && (typeEquals(toType, "int") || typeEquals(toType, "uint")))
+			if ((typeEquals(fromType, "float") || typeEquals(fromType, "Number") || typeEquals(fromType, "long")) && (typeEquals(toType, "int") || typeEquals(toType, "uint")))
 			{
 				return true;
 			}
