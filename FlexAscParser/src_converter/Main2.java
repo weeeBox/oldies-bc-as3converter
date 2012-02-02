@@ -1481,7 +1481,7 @@ public class Main2
 	
 	private static String replaceEscapes(String str)
 	{
-		return str.replace("\"", "\\\"").replace("\\", "\\\\").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
+		return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
 	}
 	
 	private static void process(IfStatementNode node)
