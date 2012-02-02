@@ -4,7 +4,7 @@ package flash.display
 	import flash.events.EventDispatcher;
 	import flash.display.DisplayObjectContainer;
 	
-	public class DisplayObject extends EventDispatcher /* implements IBitmapDrawable, IBitmapDrawable */ 
+	public class DisplayObject extends EventDispatcher implements IBitmapDrawable 
 	{
 		/* public function get accessibilityProperties() : AccessibilityProperties; */
 
