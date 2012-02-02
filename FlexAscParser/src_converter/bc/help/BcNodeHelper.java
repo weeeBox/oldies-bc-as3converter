@@ -13,6 +13,7 @@ import macromedia.asc.parser.LiteralNumberNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.Node;
 import macromedia.asc.parser.SelectorNode;
+import macromedia.asc.parser.SetExpressionNode;
 import macromedia.asc.parser.TypeExpressionNode;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcTypeNode;
@@ -139,5 +140,28 @@ public class BcNodeHelper
 	public static boolean isIntegralLiteralNode(Node node)
 	{
 		return node instanceof LiteralNumberNode || node instanceof LiteralBooleanNode;
+	}
+	
+	public static boolean isBinaryOperandSetExpression(Node operand)
+	{
+		if (!(operand instanceof ListNode))
+		{
+			return false;
+		}
+		
+		ListNode list = (ListNode) operand;
+		if (list.items.size() != 1)
+		{
+			return false;
+		}
+		
+		Node itemNode = list.items.get(0);
+		if (!(itemNode instanceof MemberExpressionNode))
+		{
+			return false;
+		}
+		
+		MemberExpressionNode memberNode = (MemberExpressionNode) itemNode;
+		return memberNode.selector instanceof SetExpressionNode;
 	}
 }

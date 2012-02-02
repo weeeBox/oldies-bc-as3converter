@@ -1786,10 +1786,11 @@ public class Main2
 		process(node.rhs);
 		popDest();
 
+		String lshString = ldest.toString();
+		String rshString = rdest.toString();
+		
 		if (node.op == Tokens.LOGICALAND_TOKEN || node.op == Tokens.LOGICALOR_TOKEN)
 		{
-			String lshString = ldest.toString();
-			String rshString = rdest.toString();
 			
 			BcTypeNode lshType = evaluateType(node.lhs);
 			BcTypeNode rshType = evaluateType(node.rhs);
@@ -1798,6 +1799,7 @@ public class Main2
 			{
 				lshString = String.format("(%s != null)", lshString);
 			}
+			
 			if (!typeEquals(rshType, classBoolean))
 			{
 				rshString = String.format("(%s != null)", rshString);
@@ -1815,7 +1817,15 @@ public class Main2
 		}
 		else
 		{
-			dest.writef("(%s %s %s)", ldest, Tokens.tokenToString[-node.op], rdest);
+			if (BcNodeHelper.isBinaryOperandSetExpression(node.lhs))
+			{
+				lshString = String.format("(%s)", lshString);
+			}
+			if (BcNodeHelper.isBinaryOperandSetExpression(node.rhs))
+			{
+				rshString = String.format("(%s)", rshString);
+			}
+			dest.writef("(%s %s %s)", lshString, Tokens.tokenToString[-node.op], rshString);
 		}
 	}
 	
