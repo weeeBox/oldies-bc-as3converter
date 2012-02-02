@@ -18,7 +18,7 @@ package flash.display
 
 		public function dispose() : void { }
 
-		/* public function draw(source : IBitmapDrawable, matrix : Matrix = null, colorTransform : ColorTransform = null, blendMode : String = null, clipRect : Rectangle = null, smoothing : Boolean = false) : void { } */
+		public function draw(source : IBitmapDrawable, matrix : Matrix = null, colorTransform : ColorTransform = null, blendMode : String = null, clipRect : Rectangle = null, smoothing : Boolean = false) : void { }
 
 		/* public function fillRect(rect : Rectangle, color : uint) : void { } */
 

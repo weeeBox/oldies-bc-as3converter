@@ -242,20 +242,24 @@ public class Main2
 		
 		lastBcClass = bcInterface;
 		
-		ObjectList<Node> items = interfaceDefinitionNode.statements.items;
 		
-		// collect the stuff 
-		for (Node node : items)
+		if (interfaceDefinitionNode.statements != null)
 		{
-			if (node instanceof FunctionDefinitionNode)
+			ObjectList<Node> items = interfaceDefinitionNode.statements.items;
+			
+			// collect the stuff 
+			for (Node node : items)
 			{
-				bcInterface.add(collect((FunctionDefinitionNode) node));
-			}
-			else
-			{
-				assert false;
-			}
-		}		
+				if (node instanceof FunctionDefinitionNode)
+				{
+					bcInterface.add(collect((FunctionDefinitionNode) node));
+				}
+				else
+				{
+					assert false;
+				}
+			}		
+		}
 		lastBcClass = null;
 		
 		return bcInterface;
@@ -1477,7 +1481,7 @@ public class Main2
 	
 	private static String replaceEscapes(String str)
 	{
-		return str.replace("\"", "\\\"").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
+		return str.replace("\"", "\\\"").replace("\\", "\\\\").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
 	}
 	
 	private static void process(IfStatementNode node)
