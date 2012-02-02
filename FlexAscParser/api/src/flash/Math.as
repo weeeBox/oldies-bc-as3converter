@@ -48,6 +48,6 @@ package flash
 
 		public static function sqrt(x : Number) : Number { return 0; }
 
-		public static function tan(x : Number) : Number;
+		public static function tan(x : Number) : Number { return 0; }
 	}
 }
