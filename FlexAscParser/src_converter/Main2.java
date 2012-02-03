@@ -719,6 +719,11 @@ public class Main2
 				selector instanceof DeleteExpressionNode ||
 				selector instanceof IncrementNode)
 			{
+				if (selector.getMode() == Tokens.LEFTBRACKET_TOKEN)
+				{
+					//assert typeOneOf(baseType, classVector, classDictionary, classArray, classString, classXMLList, "DisplayObject") : baseType.getName();
+				}
+				
 				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN || selector instanceof DeleteExpressionNode)
 				{
 					dest.write(".");
@@ -884,7 +889,7 @@ public class Main2
 								System.err.println("Warning! Function type: " + identifier);
 								lastBcMemberType = BcTypeNode.create(classFunction);
 							}
-							else if (classEquals(bcClass, classXML))
+							else if (classEquals(bcClass, classXML) || classEquals(bcClass, classXMLList))
 							{
 								IdentifierNode identifierNode = (IdentifierNode) node.expr;
 								if (identifierNode.isAttr())
@@ -2940,6 +2945,18 @@ public class Main2
 	private static boolean classEquals(BcClassDefinitionNode classNode, String name)
 	{
 		return typeEquals(classNode.getClassType(), name);
+	}
+	
+	private static boolean typeOneOf(BcTypeNode type, String... names)
+	{
+		for (String name : names) 
+		{
+			if (typeEquals(type, name))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private static boolean typeEquals(BcTypeNode type, String name)

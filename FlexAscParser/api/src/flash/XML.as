@@ -39,7 +39,7 @@ package flash
 
 		/* public function hasComplexContent() : Boolean; */
 
-		public function hasOwnProperty(name : String) : Boolean { return false; }
+		/* public function hasOwnProperty(name : String) : Boolean { return false; } */
 
 		/* public function hasSimpleContent() : Boolean; */
 
