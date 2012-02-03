@@ -1216,7 +1216,14 @@ public class Main2
 				BcTypeNode argType = evaluateType(argNode);
 				assert argType != null;
 				
-				dest.writef("(%s)", cast(argsDest, argType, type));
+				if (typeEquals(type, classString))
+				{
+					dest.writef("(%s).ToString()", argsDest);
+				}
+				else
+				{				
+					dest.writef("(%s)", cast(argsDest, argType, type));
+				}
 			}
 			else if (isGlobalCalled)
 			{
