@@ -1908,8 +1908,7 @@ public class Main2
 	
 	private static void process(SuperExpressionNode node)
 	{
-		String extendsClass = BcCodeCs.type(lastBcClass.getExtendsType());
-		dest.write(extendsClass);
+		dest.write("base");
 	}
 	
 	private static void process(SuperStatementNode node)
