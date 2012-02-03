@@ -92,6 +92,8 @@ public class Main2
 	private static BcClassDefinitionNode lastBcClass;
 	private static BcFunctionDeclaration lastBcFunction;
 	
+	private static final String internalFieldInitializer = "__internalInitializeFields";
+	
 	private static final String classObject = "Object";
 	private static final String classString = "String";
 	private static final String classVector = "Vector";
@@ -107,6 +109,8 @@ public class Main2
 	private static List<BcClassDefinitionNode> bcClasses;
 	private static List<BcClassDefinitionNode> bcApiClasses;
 	private static List<BcFunctionDeclaration> bcGlobalFunctions;
+	
+	private static boolean needFieldsInitializer;
 	
 	public static void main(String[] args)
 	{
@@ -2123,10 +2127,17 @@ public class Main2
 				}
 			}
 			
+			List<BcVariableDeclaration> bcInitializedFields = collectFieldsWithInitializer(bcClass);
+			needFieldsInitializer = bcInitializedFields.size() > 0;
+			
 			src.writeln();
 			writeBlockOpen(src);
 			
 			writeFields(bcClass);
+			if (needFieldsInitializer)
+			{
+				writeFieldsInitializer(bcClass, bcInitializedFields);
+			}
 			writeFunctions(bcClass);
 			
 			writeBlockClose(src);
@@ -2140,7 +2151,6 @@ public class Main2
 	private static void writeFields(BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> fields = bcClass.getFields();
-		impl.writeln();
 		
 		for (BcVariableDeclaration bcField : fields)
 		{
@@ -2166,12 +2176,26 @@ public class Main2
 			}			
 			
 			src.writef("%s %s", type, name);
-			if (bcField.hasInitializer())
+			if (bcField.hasInitializer() && isSafeInitialized(bcClass, bcField))
 			{
 				src.writef(" = %s", bcField.getInitializer());
 			}
 			src.writeln(";");
 		}
+	}
+	
+	private static void writeFieldsInitializer(BcClassDefinitionNode bcClass, List<BcVariableDeclaration> bcFields) 
+	{
+		src.writelnf("private void %s()", internalFieldInitializer);
+		writeBlockOpen(src);
+		
+		for (BcVariableDeclaration bcVar : bcFields) 
+		{
+			String name = BcCodeCs.identifier(bcVar.getIdentifier());
+			src.writelnf("%s = %s;", name, bcVar.getInitializer());
+		}
+		
+		writeBlockClose(src);
 	}
 	
 	private static void writeFunctions(BcClassDefinitionNode bcClass)
@@ -2262,12 +2286,14 @@ public class Main2
 			
 			src.writeln(" : " + firstLine);
 			lines.remove(1);
-			src.writeln(new ListWriteDestination(lines));
 		}
-		else
+		
+		if (needFieldsInitializer)
 		{
-			src.writeln(body);
+			lines.add(1, String.format("\t%s();", internalFieldInitializer));
 		}
+		
+		src.writeln(new ListWriteDestination(lines));
 	}
 	
 	private static void writeBlockOpen(WriteDestination dest)
@@ -2440,6 +2466,64 @@ public class Main2
 			assert lastBcClass != null;
 			lastBcClass.addToImport(bcType);
 		}
+	}
+	
+	private static List<BcVariableDeclaration> collectFieldsWithInitializer(BcClassDefinitionNode bcClass)
+	{
+		List<BcVariableDeclaration> bcFields = bcClass.getFields();
+		List<BcVariableDeclaration> bcInitializedFields = new ArrayList<BcVariableDeclaration>();
+		
+		for (BcVariableDeclaration bcField : bcFields) 
+		{
+			if (bcField.hasInitializer() && !isSafeInitialized(bcClass, bcField))
+			{
+				bcInitializedFields.add(bcField);
+			}
+		}
+		
+		return bcInitializedFields;
+	}
+
+	private static boolean isSafeInitialized(BcClassDefinitionNode bcClass, BcVariableDeclaration bcField) 
+	{
+		if (bcField.isStatic() || bcField.getType().isIntegral())
+		{
+			return true;
+		}
+
+		Node initializerNode = bcField.getInitializerNode();
+		if (initializerNode instanceof MemberExpressionNode)
+		{
+			MemberExpressionNode memberNode = (MemberExpressionNode) initializerNode;
+			if (memberNode.selector instanceof CallExpressionNode)
+			{
+				CallExpressionNode callNode = (CallExpressionNode) memberNode.selector;
+				ArgumentListNode args = callNode.args;
+				if (args == null || args.items.isEmpty())
+				{
+					return true;
+				}
+				
+				ObjectList<Node> argItems = args.items;
+				for (Node argItem : argItems)
+				{
+					if (argItem instanceof MemberExpressionNode)
+					{
+						IdentifierNode argIdentifier = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)argItem);
+						if (argIdentifier != null)
+						{
+							BcVariableDeclaration bcUsedField = bcClass.findField(BcCodeCs.identifier(argIdentifier));
+							if (bcUsedField != null && !bcUsedField.isStatic())
+							{
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	private static String getClassName(BcClassDefinitionNode bcClass)
