@@ -2274,7 +2274,6 @@ public class Main2
 			
 			src.writeln(" : " + firstLine);
 			lines.remove(1);
-			src.writeln(new ListWriteDestination(lines));
 		}
 		else if (firstLine.startsWith(BcCodeCs.superCallMarker))
 		{
