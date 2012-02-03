@@ -17,7 +17,7 @@ package flash.display
 
 		public function get focusRect() : Object { return null; }
 
-		public function set focusRect(focusRect : Object) : void { }
+		public function set focusRect(focusRect : Boolean) : void { }
 
 		public function get mouseEnabled() : Boolean { return false; }
 
