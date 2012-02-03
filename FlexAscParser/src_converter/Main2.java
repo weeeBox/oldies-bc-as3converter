@@ -730,7 +730,7 @@ public class Main2
 			}
 		}
 		
-		if (stringCall)
+		if (stringCall)	
 		{
 			popDest(); // member dest
 
@@ -2944,6 +2944,11 @@ public class Main2
 	
 	private static boolean typeEquals(BcTypeNode type, String name)
 	{
+		if (name.equals(classVector) && type instanceof BcVectorTypeNode)
+		{
+			return true;
+		}
+		
 		return type == BcTypeNode.create(name);
 	}
 

@@ -2,7 +2,7 @@ package flash.display
 {
 	public class BitmapData extends Object 
 	{
-		function BitmapData(width : int, height : int, transparent : Boolean = true, fillColor : uint = 4.294967295E9) : void { }
+		function BitmapData(width : int, height : int, transparent : Boolean = true, fillColor : uint = 0xffffffff) : void { }
 
 		/* public function applyFilter(sourceBitmapData : BitmapData, sourceRect : Rectangle, destPoint : Point, filter : BitmapFilter) : void; */
 
