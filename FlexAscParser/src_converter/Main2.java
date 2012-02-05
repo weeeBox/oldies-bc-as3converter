@@ -3088,6 +3088,11 @@ public class Main2
 			}
 		}
 		
+		if (typeEquals(fromType, classObject) && !typeEquals(toType, classObject))
+		{
+			return true;
+		}
+		
 		if (toType.isIntegral() && typeEquals(fromType, classString))
 		{
 			return true;
