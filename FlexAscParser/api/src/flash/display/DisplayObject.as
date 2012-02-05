@@ -65,9 +65,9 @@ package flash.display
 
 		/* public function set name(value : String) : void; */
 
-		public function get opaqueBackground() : Object { return null; }
+		public function get opaqueBackground() : uint { return 0; }
 
-		public function set opaqueBackground(value : Object) : void { }
+		public function set opaqueBackground(value : uint) : void { }
 
 		public function get parent() : DisplayObjectContainer { return null; }
 
