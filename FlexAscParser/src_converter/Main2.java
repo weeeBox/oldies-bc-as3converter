@@ -3088,7 +3088,7 @@ public class Main2
 			}
 		}
 		
-		if (typeEquals(fromType, classObject) && !typeEquals(toType, classObject))
+		if (typeEquals(fromType, classObject))
 		{
 			return true;
 		}
