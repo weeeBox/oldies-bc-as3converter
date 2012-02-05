@@ -704,6 +704,7 @@ public class Main2
 		}
 		
 		boolean stringCall = false;
+		boolean objectAsDictionaryCall = false;
 		boolean needDot = true;
 		if (base != null && typeEquals(baseType, classString))
 		{
@@ -722,10 +723,10 @@ public class Main2
 			{
 				if (selector.getMode() == Tokens.LEFTBRACKET_TOKEN)
 				{
-					//assert typeOneOf(baseType, classVector, classDictionary, classArray, classString, classXMLList, "DisplayObject") : baseType.getName();
+					objectAsDictionaryCall = !typeOneOf(baseType, classVector, classDictionary, classArray, classString, classXMLList);
 				}
 				
-				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN || selector instanceof DeleteExpressionNode)
+				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN || selector instanceof DeleteExpressionNode || objectAsDictionaryCall)
 				{
 					dest.write(".");
 				}
@@ -736,7 +737,43 @@ public class Main2
 			}
 		}
 		
-		if (stringCall)	
+		if (objectAsDictionaryCall)
+		{
+			ListWriteDestination exprDest = new ListWriteDestination();
+			pushDest(exprDest);
+			process(selector.expr);
+			popDest();
+			
+			if (selector instanceof SetExpressionNode)
+			{
+				SetExpressionNode setExpr = (SetExpressionNode) selector;
+				
+				assert setExpr.args != null;
+				
+				
+				ListWriteDestination argsDest = new ListWriteDestination();
+				pushDest(argsDest);
+				process(setExpr.args);
+				popDest();
+				
+				dest.writef("setOwnProperty(%s, %s)", exprDest, argsDest);
+				popDest(); // member dest
+				
+				dest.write(memberDest);
+			}
+			else if (selector instanceof GetExpressionNode)
+			{
+				dest.writef("getOwnProperty(%s)", exprDest);
+				popDest(); // member dest
+				
+				dest.write(memberDest);
+			}
+			else
+			{
+				assert false;
+			}
+		}
+		else if (stringCall)	
 		{
 			popDest(); // member dest
 
