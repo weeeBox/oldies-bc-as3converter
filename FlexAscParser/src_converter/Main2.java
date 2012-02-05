@@ -103,6 +103,7 @@ public class Main2
 	private static final String classXML = "XML";
 	private static final String classXMLList = "XMLList";
 	private static final String classBoolean = "Boolean";
+	private static final String classNull = "null";
 	
 	private static List<BcVariableDeclaration> declaredVars;
 	
@@ -1892,7 +1893,28 @@ public class Main2
 		if (node.expr != null)
 		{
 			dest.write(" ");
+			
+			ListWriteDestination exprDest = new ListWriteDestination();
+			pushDest(exprDest);
 			process(node.expr);
+			popDest();			
+			
+			assert lastBcFunction != null;
+			assert lastBcFunction.hasReturnType();
+			
+			BcTypeNode returnValueType = evaluateType(node.expr);
+			assert returnValueType != null;
+			
+			BcTypeNode returnType = lastBcFunction.getReturnType();
+			if (needExplicitCast(returnValueType, returnType))
+			{
+				dest.write(cast(exprDest, returnValueType, returnType));
+			}
+			else
+			{
+				dest.write(exprDest);
+			}
+			
 		}
 		dest.writeln(";");
 	}
@@ -2701,6 +2723,28 @@ public class Main2
 		if (node instanceof LiteralArrayNode)
 		{
 			return BcTypeNode.create(classArray);
+		}
+		
+		if (node instanceof ConditionalExpressionNode)
+		{
+			ConditionalExpressionNode conditional = (ConditionalExpressionNode) node;
+			BcTypeNode thenType = evaluateType(conditional.thenexpr);
+			assert thenType != null;
+			
+			if (!typeEquals(thenType, classNull))
+			{
+				return thenType;
+			}
+			
+			BcTypeNode elseType = evaluateType(conditional.elseexpr);
+			assert elseType != null;
+			
+			if (!typeEquals(elseType, classNull))
+			{
+				return elseType;
+			}
+			
+			return BcTypeNode.create(classObject);
 		}
 		
 		assert false : node;
