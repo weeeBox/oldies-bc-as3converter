@@ -2764,8 +2764,13 @@ public class Main2
 				}
 				else 
 				{
-					if (classEquals(baseClass, classXML))				
+					if (classEquals(baseClass, classXML) || classEquals(baseClass, classXMLList))				
 					{
+						if (identifier.isAttr())
+						{
+							return BcTypeNode.create(classString);
+						}
+						
 						return BcTypeNode.create(classXMLList); // dirty hack
 					}
 					else if (BcCodeCs.identifier(identifier).equals(BcCodeCs.thisCallMarker))
@@ -2785,6 +2790,10 @@ public class Main2
 				{
 					BcVectorTypeNode bcVector = (BcVectorTypeNode) baseClassType;
 					return bcVector.getGeneric();
+				}
+				else if (typeEquals(baseClassType, classXMLList))
+				{
+					return BcTypeNode.create(classXMLList);
 				}
 				else 
 				{
