@@ -1,4 +1,4 @@
-package as.flash.util
+package _as_.flash.util
 {
 	/**
 	 * @author weee

@@ -1,9 +1,7 @@
-package as.flash.display 
+package _as_.flash.display 
 {
-	import as.flash.media.SoundTransform;
+	import _as_.flash.media.SoundTransform;
 
-	import flash.display.DisplayObjectContainer;
-	
 	public class Sprite extends DisplayObjectContainer 
 	{
 		public function get buttonMode() : Boolean { return false; }

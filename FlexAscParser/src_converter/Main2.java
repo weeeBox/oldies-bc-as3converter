@@ -93,6 +93,7 @@ public class Main2
 	private static BcFunctionDeclaration lastBcFunction;
 	
 	private static final String internalFieldInitializer = "__internalInitializeFields";
+	private static final String API_PACKAGE_PREFIX = "_as_.";
 	
 	private static final String classObject = "Object";
 	private static final String classString = "String";
@@ -217,6 +218,10 @@ public class Main2
 					String packageNameString = packageNode.name.id.pkg_part;
 					if (packageNameString.length() > 0)
 					{
+						if (packageNameString.startsWith(API_PACKAGE_PREFIX))
+						{
+							packageNameString = packageNameString.substring(API_PACKAGE_PREFIX.length());
+						}
 						packageName = packageNameString;
 					}
 				}

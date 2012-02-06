@@ -1,4 +1,4 @@
-package as.flash.display 
+package _as_.flash.display 
 {
 	public dynamic class MovieClip extends Sprite 
 	{

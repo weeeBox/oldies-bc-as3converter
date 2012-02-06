@@ -1,4 +1,4 @@
-package as.flash.display 
+package _as_.flash.display 
 {
 	import flash.display.DisplayObject;
 	import flash.display.BitmapData;

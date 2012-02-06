@@ -1,4 +1,4 @@
-package as.flash.geom 
+package _as_.flash.geom 
 {
 	import flash.geom.Point;
 		
