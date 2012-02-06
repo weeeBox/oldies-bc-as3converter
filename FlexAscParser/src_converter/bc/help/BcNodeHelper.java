@@ -5,6 +5,7 @@ import java.util.List;
 
 import macromedia.asc.parser.ApplyTypeExprNode;
 import macromedia.asc.parser.AttributeListNode;
+import macromedia.asc.parser.FunctionDefinitionNode;
 import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.IdentifierNode;
 import macromedia.asc.parser.ListNode;
@@ -15,6 +16,7 @@ import macromedia.asc.parser.Node;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
 import macromedia.asc.parser.TypeExpressionNode;
+import macromedia.asc.util.ObjectList;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
@@ -108,7 +110,7 @@ public class BcNodeHelper
 		assert false : expr.selector.getClass();
 		return null;
 	}
-	
+		
 	public static IdentifierNode tryExtractIdentifier(SelectorNode selector)
 	{
 		if ((selector.expr instanceof IdentifierNode))
@@ -135,6 +137,60 @@ public class BcNodeHelper
 			return null;
 		}
 		return (IdentifierNode) selector.expr;
+	}
+	
+	public static IdentifierNode tryExtractIdentifier(Node node)
+	{
+		if (node instanceof MemberExpressionNode)
+		{
+			return tryExtractIdentifier((MemberExpressionNode)node);
+		}
+		
+		if (node instanceof SelectorNode)
+		{
+			return tryExtractIdentifier((SelectorNode)node);
+		}
+		
+		if (node instanceof IdentifierNode)
+		{
+			return (IdentifierNode) node;
+		}
+		
+		if (node instanceof ListNode)
+		{
+			ListNode listNode = (ListNode) node;
+			if (listNode.items != null && listNode.items.size() == 1)
+			{
+				return tryExtractIdentifier(listNode.items.get(0));
+			}
+		}
+		
+		return null;
+	}
+	
+	public static String tryExtractFunctionType(FunctionDefinitionNode node) 
+	{
+		AttributeListNode attrs = node.attrs;
+		if (attrs != null)
+		{
+			ObjectList<Node> items = attrs.items;
+			if (items != null)
+			{
+				for (Node item : items) 
+				{
+					IdentifierNode identifier = tryExtractIdentifier(item);
+					if (identifier != null)
+					{
+						String name = identifier.name;
+						if (name.equals("override") || name.equals("virtual"))
+						{
+							return name;
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 	
 	public static boolean isIntegralLiteralNode(Node node)

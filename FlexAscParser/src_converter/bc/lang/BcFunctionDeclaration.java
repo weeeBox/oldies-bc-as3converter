@@ -30,6 +30,11 @@ public class BcFunctionDeclaration extends BcDeclaration
 
 	private List<BcVariableDeclaration> declaredVars;
 	private ListWriteDestination body;
+
+	private static final int TYPE_REGULAR = 0;
+	private static final int TYPE_VIRTUAL = 1;
+	private static final int TYPE_OVERRIDE = 2;
+	private int type = TYPE_REGULAR;
 	
 	private static final int KIND_REGULAR = 0;
 	private static final int KIND_GETTER = 1;
@@ -142,6 +147,16 @@ public class BcFunctionDeclaration extends BcDeclaration
 		kind = KIND_GLOBAL;
 	}
 	
+	public void setOverride()
+	{
+		type = TYPE_OVERRIDE;
+	}
+	
+	public void setVirtual()
+	{
+		type = TYPE_VIRTUAL;
+	}
+	
 	public boolean isSetter()
 	{
 		return kind == KIND_SETTER;
@@ -155,6 +170,16 @@ public class BcFunctionDeclaration extends BcDeclaration
 	public boolean isGlobal()
 	{
 		return kind == KIND_GLOBAL;
+	}
+	
+	public boolean isVirtual()
+	{
+		return type == TYPE_VIRTUAL;
+	}
+	
+	public boolean isOverride()
+	{
+		return type == TYPE_OVERRIDE;
 	}
 	
 	public boolean isProperty()

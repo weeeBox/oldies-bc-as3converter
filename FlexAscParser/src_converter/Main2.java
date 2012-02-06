@@ -364,6 +364,19 @@ public class Main2
 		String name = BcCodeCs.identifier(functionNameNode.identifier);
 		BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);
 		
+		String typeString = BcNodeHelper.tryExtractFunctionType(functionDefinitionNode);
+		if (typeString != null)
+		{
+			if (typeString.equals("virtual"))
+			{
+				bcFunc.setVirtual();
+			}
+			else if (typeString.equals("override"))
+			{
+				bcFunc.setOverride();
+			}
+		}
+		
 		if (functionNameNode.kind == Tokens.GET_TOKEN)
 		{
 			bcFunc.setGetter();
@@ -462,7 +475,7 @@ public class Main2
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			process(bcFunc);
+			process(bcFunc, bcClass);
 		}
 		
 		lastBcClass = null;
@@ -2001,7 +2014,7 @@ public class Main2
 		dest.writelnf("%s(%s);", BcCodeCs.superCallMarker, argsDest);
 	}
 	
-	private static void process(BcFunctionDeclaration bcFunc)
+	private static void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> oldDeclaredVars = declaredVars;
 		lastBcFunction = bcFunc;
@@ -2283,6 +2296,10 @@ public class Main2
 				if (bcFunc.isStatic())
 				{
 					src.write("static ");
+				}
+				else if (bcFunc.isOverride())
+				{
+					src.write("override ");
 				}
 				else if (!bcFunc.isPrivate())
 				{

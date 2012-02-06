@@ -14,11 +14,11 @@ package flash.display
 
 		public function set align(value : String) : void { }
 
-		public function set alpha(value : Number) : void { }
+		/* public function set alpha(value : Number) : void { } */
 
-		public function set blendMode(value : String) : void { }
+		/* public function set blendMode(value : String) : void { } */
 
-		public function set cacheAsBitmap(value : Boolean) : void { }
+		/* public function set cacheAsBitmap(value : Boolean) : void { } */
 
 		/* [Version("10")] */
 		/* public function get colorCorrection() : String; */

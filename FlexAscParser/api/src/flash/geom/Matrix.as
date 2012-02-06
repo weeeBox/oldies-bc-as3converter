@@ -31,7 +31,7 @@ package flash.geom
 
 		public function scale(sx : Number, sy : Number) : void { }
 
-		public function toString() : String { return null; }
+		/* public function toString() : String { return null; } */
 
 		public function transformPoint(point : Point) : Point { return null; }
 
