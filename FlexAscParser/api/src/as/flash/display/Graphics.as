@@ -1,4 +1,4 @@
-package flash.display {
+package as.flash.display {
 	/**
 	 * @author weee
 	 */

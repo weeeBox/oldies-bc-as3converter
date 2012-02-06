@@ -1,5 +1,8 @@
-package flash.display 
+package as.flash.display 
 {
+	import as.flash.geom.ColorTransform;
+	import as.flash.geom.Matrix;
+	import as.flash.geom.Rectangle;
 	public class BitmapData extends Object 
 	{
 		function BitmapData(width : int, height : int, transparent : Boolean = true, fillColor : uint = 0xffffffff) : void { }

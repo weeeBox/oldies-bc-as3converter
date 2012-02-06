@@ -1,8 +1,10 @@
-package flash.display 
+package as.flash.display 
 {
-	import flash.geom.Transform;
-	import flash.events.EventDispatcher;
+	import as.flash.geom.Rectangle;
+
 	import flash.display.DisplayObjectContainer;
+	import flash.events.EventDispatcher;
+	import flash.geom.Transform;
 	
 	public class DisplayObject extends EventDispatcher implements IBitmapDrawable 
 	{

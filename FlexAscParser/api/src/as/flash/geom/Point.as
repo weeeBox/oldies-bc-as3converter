@@ -1,4 +1,4 @@
-package flash.geom 
+package as.flash.geom 
 {
 	public class Point extends Object 
 	{

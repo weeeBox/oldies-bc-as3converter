@@ -1,8 +1,5 @@
-package flash.display 
+package as.flash.display 
 {
-	import flash.Array;
-	import flash.display.Sprite;
-	
 	public dynamic class MovieClip extends Sprite 
 	{
 		/* [Inspectable(environment="none")] */

@@ -1,5 +1,7 @@
-package flash.display 
+package as.flash.display 
 {
+	import as.flash.media.SoundTransform;
+
 	import flash.display.DisplayObjectContainer;
 	
 	public class Sprite extends DisplayObjectContainer 

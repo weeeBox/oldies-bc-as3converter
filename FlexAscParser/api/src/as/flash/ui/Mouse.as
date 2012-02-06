@@ -1,4 +1,4 @@
-package flash.ui 
+package as.flash.ui 
 {
 	/**
 	 * @author weee

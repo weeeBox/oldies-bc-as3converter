@@ -1,4 +1,4 @@
-package flash.events 
+package as.flash.events 
 {
 	/**
 	 * @author weee

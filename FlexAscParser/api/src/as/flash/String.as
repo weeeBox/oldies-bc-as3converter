@@ -1,4 +1,4 @@
-package flash 
+package as.flash 
 {
 	public final class String extends Object 
 	{

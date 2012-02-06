@@ -1,4 +1,4 @@
-package flash 
+package as.flash 
 {
 	public dynamic class Array extends Object 
 	{

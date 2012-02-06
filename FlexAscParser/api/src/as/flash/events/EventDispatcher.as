@@ -1,4 +1,4 @@
-package flash.events 
+package as.flash.events 
 {
 	public class EventDispatcher extends Object /* implements IEventDispatcher, IEventDispatcher */ 
 	{

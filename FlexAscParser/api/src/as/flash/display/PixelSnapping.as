@@ -1,4 +1,4 @@
-package flash.display 
+package as.flash.display 
 {
 	public final class PixelSnapping extends Object 
 	{

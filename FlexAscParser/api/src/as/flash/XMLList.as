@@ -1,4 +1,4 @@
-package flash 
+package as.flash 
 {	
 	public dynamic final class XMLList extends Object 
 	{

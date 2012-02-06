@@ -1,8 +1,5 @@
-package flash 
+package as.flash 
 {
-	import flash.Object;
-	import flash.XMLList;
-	
 	public dynamic final class XML extends Object 
 	{
 		/* public static const length : uint = 1; */
