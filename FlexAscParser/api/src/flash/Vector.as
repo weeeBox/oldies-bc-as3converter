@@ -2,8 +2,8 @@ package flash
 {
 	public class Vector extends Object 
 	{
-		public var fixed : Boolean;
-		public var length : uint;
+		/* public var fixed : Boolean; */
+		/* public var length : uint; */
 
 		public function Vector(length : uint = 0, fixed : Boolean = false) {}
 
@@ -14,6 +14,10 @@ package flash
 		/* public function filter(callback : Function, thisObject : Object = null) : Vector { return null; } */
 
 		/* public function forEach(callback : Function, thisObject : Object = null) {} */
+		
+		public function get length() : uint { return 0; }
+		
+		public function set length(newLenght : uint) : void { }
 
 		public function indexOf(searchElement : Object, fromIndex : int = 0) : int { return -1; }
 
