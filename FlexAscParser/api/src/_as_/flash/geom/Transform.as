@@ -1,8 +1,6 @@
 package _as_.flash.geom 
 {
-	import flash.display.DisplayObject;
-	import flash.geom.ColorTransform;
-	import flash.geom.Matrix;
+	import _as_.flash.display.DisplayObject;
 	
 	public class Transform extends Object 
 	{
