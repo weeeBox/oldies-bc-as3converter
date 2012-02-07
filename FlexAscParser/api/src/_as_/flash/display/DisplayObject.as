@@ -153,6 +153,11 @@ package _as_.flash.display
 		{
 			return m_parent;
 		}
+		
+		function set parent(parent : DisplayObjectContainer) : void
+		{
+			m_parent = parent;
+		}
 
 		public function get root() : DisplayObject
 		{
