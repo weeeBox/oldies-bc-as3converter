@@ -1,6 +1,8 @@
-package _as_.flash.events 
+package _as_.flash.events
 {
-	public class Event extends Object 
+	import _as_.flash.Debug;
+
+	public class Event extends Object
 	{
 		public static const ACTIVATE : String = "activate";
 		public static const ADDED : String = "added";
@@ -35,33 +37,77 @@ package _as_.flash.events
 		public static const TAB_INDEX_CHANGE : String = "tabIndexChange";
 		public static const UNLOAD : String = "unload";
 		public static const FULLSCREEN : String = "fullScreen";
+		
+		private var m_type : String;
+		private var m_bubbles : Boolean;
+		private var m_cancelable : Boolean;
+		private var m_currentTarget : Object;
+		private var m_eventPhase : uint;
+		private var m_defaultPrevented : Boolean;
+		private var m_target : Object;
 
-		/* function Event(type : String, bubbles : Boolean = false, cancelable : Boolean = false) : void; */
+		function Event(type : String, bubbles : Boolean = false, cancelable : Boolean = false) : void
+		{
+			m_type = type;
+			m_bubbles = bubbles;
+			m_cancelable = cancelable;
+		}
 
-		/* public function get bubbles() : Boolean; */
+		public function get bubbles() : Boolean
+		{
+			return m_bubbles;
+		}
 
-		/* public function get cancelable() : Boolean; */
+		public function get cancelable() : Boolean
+		{
+			return m_cancelable;
+		}
 
-		/* public function clone() : Event; */
+		public function clone() : Event
+		{
+			return new Event(type, bubbles, cancelable);
+		}
 
-		/* public function get currentTarget() : Object; */
+		public function get currentTarget() : Object
+		{
+			return m_currentTarget;
+		}
 
-		/* public function get eventPhase() : uint; */
+		public function get eventPhase() : uint
+		{
+			return m_eventPhase;
+		}
 
 		/* public function formatToString(className : String, ...args : *) : String; */
 
-		/* public function isDefaultPrevented() : Boolean; */
+		public function isDefaultPrevented() : Boolean
+		{
+			return m_defaultPrevented;
+		}
 
-		/* public function preventDefault() : void; */
+		public function preventDefault() : void
+		{
+			m_defaultPrevented = true;
+		}
 
-		/* public function stopImmediatePropagation() : void; */
+		public function stopImmediatePropagation() : void
+		{
+			Debug.implementMe("stopImmediatePropagation");
+		}
 
-		/* public function stopPropagation() : void; */
+		public function stopPropagation() : void
+		{
+			Debug.implementMe("stopPropagation");
+		}
 
-		/* public function get target() : Object; */
+		public function get target() : Object
+		{
+			return m_target;
+		}
 
-		/* public function toString() : String; */
-
-		/* public function get type() : String; */
+		public function get type() : String
+		{
+			return m_type;
+		}
 	}
 }

@@ -1,5 +1,7 @@
 package _as_.flash.display
 {
+	import _as_.flash.Debug;
+	
 	public class InteractiveObject extends DisplayObject
 	{
 		private var m_mouseEnabled : Boolean;
@@ -23,11 +25,13 @@ package _as_.flash.display
 
 		public function get focusRect() : Object
 		{
+			Debug.implementMe("get focusRect");
 			return null;
 		}
 
 		public function set focusRect(focusRect : Boolean) : void
 		{
+			Debug.implementMe("set focusRect");
 		}
 
 		public function get mouseEnabled() : Boolean
