@@ -1,28 +1,45 @@
-package _as_.flash.display 
+package _as_.flash.display
 {
-	public class InteractiveObject extends DisplayObject 
+	public class InteractiveObject extends DisplayObject
 	{
+		private var m_mouseEnabled : Boolean;
+		private var m_doubleClickEnabled : Boolean;
+		
 		/* [Inspectable(environment="none")] */
 		/* public function get accessibilityImplementation() : AccessibilityImplementation; */
-
 		/* public function set accessibilityImplementation(value : AccessibilityImplementation) : void; */
-
 		/* public function get contextMenu() : ContextMenu; */
-
 		/* public function set contextMenu(cm : ContextMenu) : void; */
+		
+		public function get doubleClickEnabled() : Boolean
+		{
+			return m_doubleClickEnabled;
+		}
 
-		public function get doubleClickEnabled() : Boolean { return false; }
+		public function set doubleClickEnabled(enabled : Boolean) : void
+		{
+			m_doubleClickEnabled = enabled;
+		}
 
-		public function set doubleClickEnabled(enabled : Boolean) : void { }
+		public function get focusRect() : Object
+		{
+			return null;
+		}
 
-		public function get focusRect() : Object { return null; }
+		public function set focusRect(focusRect : Boolean) : void
+		{
+		}
 
-		public function set focusRect(focusRect : Boolean) : void { }
+		public function get mouseEnabled() : Boolean
+		{
+			return m_mouseEnabled;
+		}
 
-		public function get mouseEnabled() : Boolean { return false; }
-
-		public function set mouseEnabled(enabled : Boolean) : void { }
-
+		public function set mouseEnabled(enabled : Boolean) : void
+		{
+			m_mouseEnabled = enabled;	
+		}
+		
 		/* public function get tabEnabled() : Boolean; */
 
 		/* public function set tabEnabled(enabled : Boolean) : void; */

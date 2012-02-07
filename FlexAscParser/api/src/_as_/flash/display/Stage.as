@@ -1,7 +1,5 @@
 package _as_.flash.display 
 {
-	import flash.display.DisplayObjectContainer;
-	
 	public class Stage extends DisplayObjectContainer 
 	{
 		/* public function set accessibilityImplementation(value : AccessibilityImplementation) : void; */
