@@ -1,7 +1,5 @@
 package _as_.flash.events
 {
-	import _as_.flash.Debug;
-
 	public class Event extends Object
 	{
 		public static const ACTIVATE : String = "activate";
@@ -41,16 +39,40 @@ package _as_.flash.events
 		private var m_type : String;
 		private var m_bubbles : Boolean;
 		private var m_cancelable : Boolean;
-		private var m_currentTarget : Object;
 		private var m_eventPhase : uint;
 		private var m_defaultPrevented : Boolean;
-		private var m_target : Object;
+		
+		private var m_target : EventDispatcher;
+		private var m_currentTarget : EventDispatcher;
+		
+		private var m_stopImmediatePropagation : Boolean;
+		private var m_stopPropagation : Boolean;
 
 		function Event(type : String, bubbles : Boolean = false, cancelable : Boolean = false) : void
 		{
 			m_type = type;
 			m_bubbles = bubbles;
 			m_cancelable = cancelable;
+		}
+
+		public function get target() : EventDispatcher
+		{
+			return m_target;
+		}
+		
+		function set target(target : EventDispatcher) : void
+		{
+			m_target = target;
+		}
+		
+		public function get currentTarget() : EventDispatcher
+		{
+			return m_currentTarget;
+		}
+		
+		function set currentTarget(currentTarget : EventDispatcher) : void
+		{
+			m_currentTarget = currentTarget;
 		}
 
 		public function get bubbles() : Boolean
@@ -66,11 +88,6 @@ package _as_.flash.events
 		public function clone() : Event
 		{
 			return new Event(type, bubbles, cancelable);
-		}
-
-		public function get currentTarget() : Object
-		{
-			return m_currentTarget;
 		}
 
 		public function get eventPhase() : uint
@@ -92,17 +109,22 @@ package _as_.flash.events
 
 		public function stopImmediatePropagation() : void
 		{
-			Debug.implementMe("stopImmediatePropagation");
+			m_stopImmediatePropagation = true;
+		}
+		
+		public function get stopsImmediatePropagation() : Boolean
+		{
+			return m_stopImmediatePropagation;
 		}
 
 		public function stopPropagation() : void
 		{
-			Debug.implementMe("stopPropagation");
+			m_stopPropagation = true;
 		}
 
-		public function get target() : Object
+		public function get stopsPropagation() : Boolean
 		{
-			return m_target;
+			return m_stopPropagation;
 		}
 
 		public function get type() : String
