@@ -13,7 +13,7 @@ package _as_.flash.display
 		private var m_y : Number;
 		private var m_z : Number;
 		
-		private var m_visible : Boolean;
+		private var m_visible : Boolean = true;
 		
 		private var m_width : Number;
 		private var m_height : Number;
@@ -29,7 +29,7 @@ package _as_.flash.display
 		private var m_rotationY : Number;
 		private var m_rotationZ : Number;
 		
-		private var m_alpha : Number;		
+		private var m_alpha : Number = 1;		
 		
 		private var m_blendMode : String = BlendMode.NORMAL;
 				
