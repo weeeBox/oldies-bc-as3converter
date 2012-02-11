@@ -1,23 +1,38 @@
-package bc.flash.ui 
+package bc.flash.ui
 {
 	/**
 	 * @author weee
 	 */
-	public final class Mouse extends Object 
+	public final class Mouse extends Object
 	{
-		/* [Version("10")] */
-		/* public static function get cursor() : String; */
+		private static var mCursor : String;
+		private static var mHidden : Boolean;
 
 		/* [Version("10")] */
-		/* public static function set cursor(value : String) : void; */
+		public static function get cursor() : String
+		{
+			return mCursor;
+		}
 
-		public static function hide() : void;
+		/* [Version("10")] */
+		public static function set cursor(value : String) : void
+		{
+			mCursor = value;
+		}
+
+		public static function hide() : void
+		{
+			mHidden = true;
+		}
 
 		/* [API("670")] */
 		/* public static function registerCursor(name : String, cursor : MouseCursorData) : void; */
-
-		public static function show() : void;
-
+		
+		public static function show() : void
+		{
+			mHidden = false;
+		}
+		
 		/* [Version("10.1")] */
 		/* public static function get supportsCursor() : Boolean; */
 

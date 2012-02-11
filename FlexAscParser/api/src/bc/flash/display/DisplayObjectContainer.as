@@ -1,15 +1,13 @@
 package bc.flash.display
 {
-	import bc.flash.error.AbstractClassError;
-	import bc.flash.events.Event;
-	import bc.flash.geom.Matrix;
-	import bc.flash.geom.Point;
-	import bc.flash.geom.Rectangle;
-	import bc.flash.util.transformCoords;
+    import bc.flash.core.RenderSupport;
+    import bc.flash.events.Event;
+    import bc.flash.geom.Matrix;
+    import bc.flash.geom.Point;
+    import bc.flash.geom.Rectangle;
+    import bc.flash.util.transformCoords;
 
-	import flash.utils.getQualifiedClassName;
-	
-	public class DisplayObjectContainer extends DisplayObject
+    public class DisplayObjectContainer extends DisplayObject
     {
         // members
         
@@ -24,8 +22,11 @@ package bc.flash.display
         /** @private */
         public function DisplayObjectContainer()
         {
+            /*
+            // TODO: fix that 
             if (getQualifiedClassName(this) == "starling.display::DisplayObjectContainer")
-                throw new AbstractClassError();
+                throw new AbstractClassError();            
+            */
             
             mChildren = new Vector.<DisplayObject>();
         }

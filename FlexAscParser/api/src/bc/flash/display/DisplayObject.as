@@ -1,5 +1,6 @@
 package bc.flash.display
 {
+	import bc.flash.core.RenderSupport;
 	import bc.flash.error.AbstractClassError;
 	import bc.flash.error.AbstractMethodError;
 	import bc.flash.events.Event;
