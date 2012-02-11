@@ -1,7 +1,5 @@
 package bc.flash.display 
 {
-    import bc.flash.core.RenderSupport;
-    import bc.flash.events.Event;
     import bc.flash.events.TouchEvent;
     import bc.flash.ui.Mouse;
     import bc.flash.ui.MouseCursor;
@@ -26,7 +24,7 @@ package bc.flash.display
      */  
     public class Sprite extends DisplayObjectContainer
     {
-        private var mFlattenedContents:Vector.<QuadBatch>;
+        /* private var mFlattenedContents:Vector.<QuadBatch>; */
         private var mUseHandCursor:Boolean;
         
         /** Creates an empty sprite. */
@@ -38,7 +36,7 @@ package bc.flash.display
         /** @inheritDoc */
         public override function dispose():void
         {
-            unflatten();
+            /* unflatten(); */
             super.dispose();
         }
         
@@ -64,6 +62,7 @@ package bc.flash.display
         /** Optimizes the sprite for optimal rendering performance. Changes in the
          *  children of a flattened sprite will not be displayed any longer. For this to happen,
          *  either call <code>flatten</code> again, or <code>unflatten</code> the sprite. */
+        /*
         public function flatten():void
         {
             dispatchEventOnChildren(new Event(Event.FLATTEN));
@@ -76,9 +75,11 @@ package bc.flash.display
             
             QuadBatch.compile(this, mFlattenedContents);
         }
-        
+        */
+		
         /** Removes the rendering optimizations that were created when flattening the sprite.
-         *  Changes to the sprite's children will become immediately visible again. */ 
+         *  Changes to the sprite's children will become immediately visible again. */
+        /* 
         public function unflatten():void
         {
             if (mFlattenedContents)
@@ -92,7 +93,9 @@ package bc.flash.display
                 mFlattenedContents = null;
             }
         }
-        
+        */
+		
+        /*
         private function onContextCreated(event:Event):void
         {
             if (mFlattenedContents)
@@ -101,11 +104,15 @@ package bc.flash.display
                 flatten();
             }
         }
-        
+        */
+		
         /** Indicates if the sprite was flattened. */
+        /*
         public function get isFlattened():Boolean { return mFlattenedContents != null; }
+        */
         
         /** @inheritDoc */
+        /*
         public override function render(support:RenderSupport, alpha:Number):void
         {
             if (mFlattenedContents)
@@ -120,5 +127,6 @@ package bc.flash.display
             }
             else super.render(support, alpha);
         }
+        */
     }
 }

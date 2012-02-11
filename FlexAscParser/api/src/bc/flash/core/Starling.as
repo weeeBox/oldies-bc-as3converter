@@ -180,15 +180,19 @@ package bc.flash.core
             // mJuggler.advanceTime(passedTime); FIXME
             mTouchProcessor.advanceTime(passedTime);
             
+             /*
             RenderSupport.clear(mStage.color, 1.0);
             mSupport.setOrthographicProjection(mStage.stageWidth, mStage.stageHeight);
+             */
             
             mStage.render(mSupport, 1.0);
 
+             /*
             mSupport.finishQuadBatch();
-            mSupport.nextFrame();
+            mSupport.nextFrame();             
+            */
             
-			/* FIXME
+             /* FIXME
             mContext.present();
             */
         }

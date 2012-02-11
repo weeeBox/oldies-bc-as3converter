@@ -168,6 +168,7 @@ package bc.flash.core
         
         /** Adds a quad to the current batch of unrendered quads. If there is a state change,
          *  all previous quads are rendered at once, and the batch is reset. */
+        /*
         public function batchQuad(quad:Quad, alpha:Number, 
                                   texture:Texture=null, smoothing:String=null):void
         {
@@ -176,8 +177,10 @@ package bc.flash.core
             
             currentQuadBatch.addQuad(quad, alpha, texture, smoothing, mModelViewMatrix);
         }
+        */
         
         /** Renders the current quad batch and resets it. */
+        /*
         public function finishQuadBatch():void
         {
             currentQuadBatch.syncBuffers();
@@ -189,7 +192,8 @@ package bc.flash.core
             if (mQuadBatches.length <= mCurrentQuadBatchID)
                 mQuadBatches.push(new QuadBatch());
         }
-        
+        */
+		
         /** Resets the matrix stack and the quad batch index. */
         public function nextFrame():void
         {
@@ -197,14 +201,17 @@ package bc.flash.core
             mCurrentQuadBatchID = 0;
         }
         
+        /*
         private function get currentQuadBatch():QuadBatch
         {
             return mQuadBatches[mCurrentQuadBatchID];
         }
-        
+        */
+		
         // other helper methods
         
         /** Sets up the default blending factors, depending on the premultiplied alpha status. */
+        /*
         public static function setDefaultBlendFactors(premultipliedAlpha:Boolean):void
         {
             var destFactor:String = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
@@ -212,8 +219,10 @@ package bc.flash.core
                                                            Context3DBlendFactor.SOURCE_ALPHA;
             Starling.context.setBlendFactors(sourceFactor, destFactor);
         }
-        
+        */
+		
         /** Clears the render context with a certain color and alpha value. */
+        /*
         public static function clear(rgb:uint=0, alpha:Number=0.0):void
         {
             Starling.context.clear(
@@ -222,5 +231,6 @@ package bc.flash.core
                 Color.getBlue(rgb)  / 255.0,
                 alpha);
         }
+        */
     }
 }
