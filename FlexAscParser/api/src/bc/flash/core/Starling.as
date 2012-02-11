@@ -144,16 +144,16 @@ package bc.flash.core
             
             mRootClass = rootClass;
             mViewPort = viewPort;
-            mStage3D = stage3D;
+            // mStage3D = stage3D; FIXME
             mStage = new Stage(viewPort.width, viewPort.height, stage.color);
-            mNativeStage = stage;
+            // mNativeStage = stage; FIXME
             mTouchProcessor = new TouchProcessor(mStage);
-            mJuggler = new Juggler();
+            // mJuggler = new Juggler(); FIXME
             mAntiAliasing = 0;
             mSimulateMultitouch = false;
             mEnableErrorChecking = false;
             mLastFrameTimestamp = getTimer() / 1000.0;
-            mPrograms = new Dictionary();
+            // mPrograms = new Dictionary(); FIXME
             mSupport  = new RenderSupport();
             
             // register touch/mouse event handlers            
@@ -166,11 +166,13 @@ package bc.flash.core
             stage.addEventListener(KeyboardEvent.KEY_UP, onKey, false, 0, true);
             stage.addEventListener(Event.RESIZE, onResize, false, 0, true);
             
+			/* FIXME
             mStage3D.addEventListener(Event.CONTEXT3D_CREATE, onContextCreated, false, 1, true);
             mStage3D.addEventListener(ErrorEvent.ERROR, onStage3DError, false, 1, true);
             
             try { mStage3D.requestContext3D(renderMode); } 
             catch (e:Error) { showFatalError("Context3D error: " + e.message); }
+            */
         }
         
         /** Disposes Shader programs and render context. */
