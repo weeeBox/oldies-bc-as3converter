@@ -5,6 +5,7 @@ package _as_.flash.display
 	import _as_.flash.geom.Matrix;
 	import _as_.flash.geom.Point;
 	import _as_.flash.geom.Rectangle;
+	import _as_.flash.util.transformCoords;
 
 	import flash.utils.getQualifiedClassName;
 	
