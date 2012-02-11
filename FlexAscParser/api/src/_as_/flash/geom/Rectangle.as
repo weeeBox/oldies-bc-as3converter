@@ -1,7 +1,5 @@
 package _as_.flash.geom 
 {
-	import flash.geom.Point;
-	
 	public class Rectangle extends Object 
 	{
 		public var x : Number;

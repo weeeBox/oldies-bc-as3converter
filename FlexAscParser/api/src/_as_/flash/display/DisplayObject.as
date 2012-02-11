@@ -1,313 +1,360 @@
 package _as_.flash.display
 {
+	import _as_.flash.error.AbstractClassError;
+	import _as_.flash.error.AbstractMethodError;
+	import _as_.flash.events.Event;
 	import _as_.flash.events.EventDispatcher;
+	import _as_.flash.events.TouchEvent;
+	import _as_.flash.geom.Matrix;
+	import _as_.flash.geom.Point;
 	import _as_.flash.geom.Rectangle;
-	import _as_.flash.geom.Transform;
 
-	public class DisplayObject extends EventDispatcher implements IBitmapDrawable
-	{
-		private var m_name : String;
-		private var m_parent : DisplayObjectContainer;
-		
-		private var m_x : Number;
-		private var m_y : Number;
-		private var m_z : Number;
-		
-		private var m_visible : Boolean = true;
-		
-		private var m_width : Number;
-		private var m_height : Number;
-		
-		private var m_pivotX : Number;
-		private var m_pivotY : Number;
-		
-		private var m_scaleX : Number = 1;
-		private var m_scaleY : Number = 1;
-		private var m_scaleZ : Number = 1;
-		
-		private var m_rotationX : Number;
-		private var m_rotationY : Number;
-		private var m_rotationZ : Number;
-		
-		private var m_alpha : Number = 1;		
-		
-		private var m_blendMode : String = BlendMode.NORMAL;
-				
-		private var m_cacheAsBitmap : Boolean;
-		
-		/*
-		float mX;
-	    float mY;
-	    float mPivotX;
-	    float mPivotY;
-	    float mScaleX;
-	    float mScaleY;
-	    float mRotationZ;
-	    float mAlpha;
-	    BOOL mVisible;
-	    BOOL mTouchable;
-	    
-	    SPDisplayObjectContainer *mParent;    
-	    double mLastTouchTimestamp;
-	    NSString *mName;
-	    */
-		
-		/* public function get accessibilityProperties() : AccessibilityProperties; */
-		/* public function set accessibilityProperties(value : AccessibilityProperties) : void; */
-		
-		public function get alpha() : Number
-		{
-			return m_alpha;
-		}
-
-		public function set alpha(value : Number) : void
-		{
-			m_alpha = value;
-		}
-
-		public function get blendMode() : String
-		{
-			return m_blendMode;
-		}
-
-		public function set blendMode(value : String) : void
-		{
-			m_blendMode = value;
-		}
-
-		/* [Version("10")] */
-		/* public function set blendShader(value : Shader) : void; */
-		
-		public function get cacheAsBitmap() : Boolean
-		{
-			return m_cacheAsBitmap;
-		}
-
-		public function set cacheAsBitmap(value : Boolean) : void
-		{
-			m_cacheAsBitmap = value;
-		}
-
-		/* public function get filters() : Array; */
-		/* public function set filters(value : Array) : void; */
-		/* public function getBounds(targetCoordinateSpace : DisplayObject) : Rectangle; */
-		/* public function getRect(targetCoordinateSpace : DisplayObject) : Rectangle; */
-		/* public function globalToLocal(point : Point) : Point; */
-		
-		/* [Version("10")] */
-		/* public function globalToLocal3D(point : Point) : Vector3D; */
-		
-		public function get width() : Number
-		{
-			return m_width;
-		}
-
-		public function set width(value : Number) : void
-		{
-			m_width = value;
-		}
-		
-		
-		public function get height() : Number
-		{
-			return m_height;
-		}
-
-		public function set height(value : Number) : void
-		{
-			m_height = value;
-		}
-
-		/* public function hitTestObject(obj : DisplayObject) : Boolean; */
-		/* public function hitTestPoint(x : Number, y : Number, shapeFlag : Boolean = false) : Boolean; */
-		/* public function get loaderInfo() : LoaderInfo; */
-		
-		/* [Version("10")] */
-		/* public function local3DToGlobal(point3d : Vector3D) : Point; */
-		/* public function localToGlobal(point : Point) : Point; */
-		/* public function get mask() : DisplayObject; */
-		/* public function set mask(value : DisplayObject) : void; */
-		/* public function get mouseX() : Number; */
-		/* public function get mouseY() : Number; */
-		
-		public function get name() : String
-		{
-			return m_name;
-		}
-
-		public function set name(value : String) : void
-		{
-			m_name = value;
-		}
-
-		public function get opaqueBackground() : uint
-		{
-			return 0;
-		}
-
-		public function set opaqueBackground(value : uint) : void
-		{
-		}
-
-		public function get parent() : DisplayObjectContainer
-		{
-			return m_parent;
-		}
-		
-		function set parent(parent : DisplayObjectContainer) : void
-		{
-			m_parent = parent;
-		}
-
-		public function get root() : DisplayObject
-		{
-			return m_parent == null ? this : m_parent.root;
-		}
-
-		public function get rotation() : Number
-		{
-			return m_rotationZ;
-		}
-
-		public function set rotation(value : Number) : void
-		{
-			m_rotationZ = value;
-		}
-
-		/* [Version("10")]*/
-		public function get rotationX() : Number
-		{
-			return m_rotationX;
-		}
-
-		[Version("10")]
-		public function set rotationX(value : Number) : void
-		{
-			m_rotationX = value;
-		}
-
-		[Version("10")]
-		public function get rotationY() : Number
-		{
-			return m_rotationY;
-		}
-
-		[Version("10")]
-		public function set rotationY(value : Number) : void
-		{
-			m_rotationY = value;
-		}
-
-		[Version("10")]
-		public function get rotationZ() : Number
-		{
-			return rotation;
-		}
-
-		[Version("10")]
-		public function set rotationZ(value : Number) : void
-		{
-			rotation = value;
-		}
-
-		/* public function get scale9Grid() : Rectangle; */
-		/* public function set scale9Grid(innerRectangle : Rectangle) : void; */
-		
-		public function get scaleX() : Number
-		{
-			return m_scaleX;
-		}
-
-		public function set scaleX(value : Number) : void
-		{
-			m_scaleX = value;
-		}
-
-		public function get scaleY() : Number
-		{
-			return m_scaleY;
-		}
-
-		public function set scaleY(value : Number) : void
-		{
-			m_scaleY = value;
-		}
-
-		/* [Version("10")] */
-		public function get scaleZ() : Number
-		{
-			return m_scaleZ;
-		}
-
-		/* [Version("10")] */
-		public function set scaleZ(value : Number) : void
-		{
-			m_scaleZ = value;
-		}
-
-		public function get scrollRect() : Rectangle
-		{
-			return null;
-		}
-
-		public function set scrollRect(value : Rectangle) : void
-		{
-		}
-
-		public function get stage() : Stage
-		{
-			return null;
-		}
-
-		public function get transform() : Transform
-		{
-			return null;
-		}
-
-		public function set transform(value : Transform) : void
-		{
-		}
-
-		public function get visible() : Boolean
-		{
-			return m_visible;
-		}
-
-		public function set visible(value : Boolean) : void
-		{
-			m_visible = value;
-		}
-
-		public function get x() : Number
-		{
-			return m_x;
-		}
-
-		public function set x(value : Number) : void
-		{
-			m_x = value;
-		}
-
-		public function get y() : Number
-		{
-			return m_y;
-		}
-
-		public function set y(value : Number) : void
-		{
-			m_y = value;
-		}
-
-		/* [Version("10")] */
-		public function get z() : Number
-		{
-			return m_z;
-		}
-
-		/* [Version("10")] */
-		public function set z(value : Number) : void
-		{
-			m_z = value;
-		}
-	}
+	import flash.utils.getQualifiedClassName;
+	
+	public class DisplayObject extends EventDispatcher
+    {
+        // members
+        
+        private var mX:Number;
+        private var mY:Number;
+        private var mPivotX:Number;
+        private var mPivotY:Number;
+        private var mScaleX:Number;
+        private var mScaleY:Number;
+        private var mRotation:Number;
+        private var mAlpha:Number;
+        private var mVisible:Boolean;
+        private var mTouchable:Boolean;
+        
+        private var mName:String;
+        private var mLastTouchTimestamp:Number;
+        private var mParent:DisplayObjectContainer;        
+        
+        /** Helper objects. */
+        private static var sAncestors:Vector.<DisplayObject> = new Vector.<DisplayObject>();
+        private static var sHelperRect:Rectangle = new Rectangle();
+        private static var sHelperMatrix:Matrix  = new Matrix();
+        private static var sTargetMatrix:Matrix  = new Matrix();
+        
+        protected static var sRectCount:int = 0;
+        
+        /** @private */ 
+        public function DisplayObject()
+        {
+            if (getQualifiedClassName(this) == "starling.display::DisplayObject")
+                throw new AbstractClassError();
+            
+            mX = mY = mPivotX = mPivotY = mRotation = 0.0;
+            mScaleX = mScaleY = mAlpha = 1.0;            
+            mVisible = mTouchable = true;
+            mLastTouchTimestamp = -1;
+        }
+        
+        /** Disposes all resources of the display object. 
+          * GPU buffers are released, event listeners are removed. */
+        public function dispose():void
+        {
+            removeEventListeners();
+        }
+        
+        /** Removes the object from its parent, if it has one. */
+        public function removeFromParent(dispose:Boolean=false):void
+        {
+            if (mParent) mParent.removeChild(this);
+            if (dispose) this.dispose();
+        }
+        
+        /** Creates a matrix that represents the transformation from the local coordinate system 
+         *  to another. If you pass a 'resultMatrix', the result will be stored in this matrix
+         *  instead of creating a new object. */ 
+        public function getTransformationMatrix(targetSpace:DisplayObject, 
+                                                resultMatrix:Matrix=null):Matrix
+        {
+            if (resultMatrix) resultMatrix.identity();
+            else resultMatrix = new Matrix();
+            
+            if (targetSpace == this)
+            {
+                return resultMatrix;
+            }
+            else if (targetSpace == mParent || (targetSpace == null && mParent == null))
+            {
+                if (mPivotX != 0.0 || mPivotY != 0.0) resultMatrix.translate(-mPivotX, -mPivotY);
+                if (mScaleX != 1.0 || mScaleY != 1.0) resultMatrix.scale(mScaleX, mScaleY);
+                if (mRotation != 0.0)                 resultMatrix.rotate(mRotation);
+                if (mX != 0.0 || mY != 0.0)           resultMatrix.translate(mX, mY);
+                
+                return resultMatrix;
+            }
+            else if (targetSpace == null)
+            {
+                // targetCoordinateSpace 'null' represents the target space of the root object.
+                // -> move up from this to root
+                
+                currentObject = this;
+                while (currentObject)
+                {
+                    currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+                    resultMatrix.concat(sHelperMatrix);
+                    currentObject = currentObject.parent;
+                }
+                
+                return resultMatrix;
+            }
+            else if (targetSpace.mParent == this) // optimization
+            {
+                targetSpace.getTransformationMatrix(this, resultMatrix);
+                resultMatrix.invert();
+                
+                return resultMatrix;
+            }
+            
+            // 1. find a common parent of this and the target space
+            
+            sAncestors.length = 0;
+            
+            var commonParent:DisplayObject = null;
+            var currentObject:DisplayObject = this;            
+            while (currentObject)
+            {
+                sAncestors.push(currentObject);
+                currentObject = currentObject.parent;
+            }
+            
+            currentObject = targetSpace;
+            while (currentObject && sAncestors.indexOf(currentObject) == -1)
+                currentObject = currentObject.parent;
+            
+            if (currentObject == null)
+                throw new ArgumentError("Object not connected to target");
+            else
+                commonParent = currentObject;
+            
+            // 2. move up from this to common parent
+            
+            currentObject = this;
+            
+            while (currentObject != commonParent)
+            {
+                currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+                resultMatrix.concat(sHelperMatrix);
+                currentObject = currentObject.parent;
+            }
+            
+            // 3. now move up from target until we reach the common parent
+            
+            sTargetMatrix.identity();
+            currentObject = targetSpace;
+            while (currentObject != commonParent)
+            {
+                currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+                sTargetMatrix.concat(sHelperMatrix);
+                currentObject = currentObject.parent;
+            }
+            
+            // 4. now combine the two matrices
+            
+            sTargetMatrix.invert();
+            resultMatrix.concat(sTargetMatrix);
+            
+            return resultMatrix;
+        }        
+        
+        /** Returns a rectangle that completely encloses the object as it appears in another 
+         *  coordinate system. If you pass a 'resultRectangle', the result will be stored in this 
+         *  rectangle instead of creating a new object. */ 
+        public function getBounds(targetSpace:DisplayObject, resultRect:Rectangle=null):Rectangle
+        {
+            throw new AbstractMethodError("Method needs to be implemented in subclass");
+        }
+        
+        /** Returns the object that is found topmost beneath a point in local coordinates, or nil if 
+         *  the test fails. If "forTouch" is true, untouchable and invisible objects will cause
+         *  the test to fail. */
+        public function hitTest(localPoint:Point, forTouch:Boolean=false):DisplayObject
+        {
+            // on a touch test, invisible or untouchable objects cause the test to fail
+            if (forTouch && (!mVisible || !mTouchable)) return null;
+            
+            // otherwise, check bounding box
+            if (getBounds(this, sHelperRect).containsPoint(localPoint)) return this;
+            else return null;
+        }
+        
+        /** Transforms a point from the local coordinate system to global (stage) coordinates. */
+        public function localToGlobal(localPoint:Point):Point
+        {
+            // move up  until parent is null
+            sTargetMatrix.identity();
+            var currentObject:DisplayObject = this;
+            while (currentObject)
+            {
+                currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+                sTargetMatrix.concat(sHelperMatrix);
+                currentObject = currentObject.parent;
+            }            
+            return sTargetMatrix.transformPoint(localPoint);
+        }
+        
+        /** Transforms a point from global (stage) coordinates to the local coordinate system. */
+        public function globalToLocal(globalPoint:Point):Point
+        {
+            // move up until parent is null, then invert matrix
+            sTargetMatrix.identity();
+            var currentObject:DisplayObject = this;
+            while (currentObject)
+            {
+                currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+                sTargetMatrix.concat(sHelperMatrix);
+                currentObject = currentObject.parent;
+            }
+            sTargetMatrix.invert();
+            return sTargetMatrix.transformPoint(globalPoint);
+        }
+        
+        /** Renders the display object with the help of a support object. Never call this method
+         *  directly, except from within another render method.
+         *  @param support Provides utility functions for rendering.
+         *  @param alpha The accumulated alpha value from the object's parent up to the stage. */
+        public function render(support:RenderSupport, alpha:Number):void
+        {
+            throw new AbstractMethodError("Method needs to be implemented in subclass");
+        }
+        
+        /** @inheritDoc */
+        public override function dispatchEvent(event:Event):void
+        {
+            // on one given moment, there is only one set of touches -- thus, 
+            // we process only one touch event with a certain timestamp per frame
+            if (event is TouchEvent)
+            {
+                var touchEvent:TouchEvent = event as TouchEvent;
+                if (touchEvent.timestamp == mLastTouchTimestamp) return;
+                else mLastTouchTimestamp = touchEvent.timestamp;
+            }
+            
+            super.dispatchEvent(event);
+        }
+        
+        // internal methods
+        
+        /** @private */
+        internal function setParent(value:DisplayObjectContainer):void 
+        { 
+            mParent = value; 
+        }
+        
+        /** @private */
+        internal function dispatchEventOnChildren(event:Event):void 
+        { 
+            dispatchEvent(event); 
+        }
+        
+        // properties
+        
+        /** The transformation matrix of the object relative to its parent. */
+        public function get transformationMatrix():Matrix
+        {
+            return getTransformationMatrix(mParent); 
+        }
+        
+        /** The bounds of the object relative to the local coordinates of the parent. */
+        public function get bounds():Rectangle
+        {
+            return getBounds(mParent);
+        }
+        
+        /** The width of the object in pixels. */
+        public function get width():Number { return getBounds(mParent, sHelperRect).width; }
+        public function set width(value:Number):void
+        {
+            // this method calls 'this.scaleX' instead of changing mScaleX directly.
+            // that way, subclasses reacting on size changes need to override only the scaleX method.
+            
+            mScaleX = 1.0;
+            var actualWidth:Number = width;
+            if (actualWidth != 0.0) scaleX = value / actualWidth;
+            else                    scaleX = 1.0;
+        }
+        
+        /** The height of the object in pixels. */
+        public function get height():Number { return getBounds(mParent, sHelperRect).height; }
+        public function set height(value:Number):void
+        {
+            mScaleY = 1.0;
+            var actualHeight:Number = height;
+            if (actualHeight != 0.0) scaleY = value / actualHeight;
+            else                     scaleY = 1.0;
+        }
+        
+        /** The topmost object in the display tree the object is part of. */
+        public function get root():DisplayObject
+        {
+            var currentObject:DisplayObject = this;
+            while (currentObject.parent) currentObject = currentObject.parent;
+            return currentObject;
+        }
+        
+        /** The x coordinate of the object relative to the local coordinates of the parent. */
+        public function get x():Number { return mX; }
+        public function set x(value:Number):void { mX = value; }
+        
+        /** The y coordinate of the object relative to the local coordinates of the parent. */
+        public function get y():Number { return mY; }
+        public function set y(value:Number):void { mY = value; }
+        
+        /** The x coordinate of the object's origin in its own coordinate space (default: 0). */
+        public function get pivotX():Number { return mPivotX; }
+        public function set pivotX(value:Number):void { mPivotX = value; }
+        
+        /** The y coordinate of the object's origin in its own coordinate space (default: 0). */
+        public function get pivotY():Number { return mPivotY; }
+        public function set pivotY(value:Number):void { mPivotY = value; }
+        
+        /** The horizontal scale factor. '1' means no scale, negative values flip the object. */
+        public function get scaleX():Number { return mScaleX; }
+        public function set scaleX(value:Number):void { mScaleX = value; }
+        
+        /** The vertical scale factor. '1' means no scale, negative values flip the object. */
+        public function get scaleY():Number { return mScaleY; }
+        public function set scaleY(value:Number):void { mScaleY = value; }
+        
+        /** The rotation of the object in radians. (In Starling, all angles are measured 
+         *  in radians.) */
+        public function get rotation():Number { return mRotation; }
+        public function set rotation(value:Number):void 
+        { 
+            // move into range [-180 deg, +180 deg]
+            while (value < -Math.PI) value += Math.PI * 2.0;
+            while (value >  Math.PI) value -= Math.PI * 2.0;
+            mRotation = value;
+        }
+        
+        /** The opacity of the object. 0 = transparent, 1 = opaque. */
+        public function get alpha():Number { return mAlpha; }
+        public function set alpha(value:Number):void 
+        { 
+            mAlpha = value < 0.0 ? 0.0 : (value > 1.0 ? 1.0 : value); 
+        }
+        
+        /** The visibility of the object. An invisible object will be untouchable. */
+        public function get visible():Boolean { return mVisible; }
+        public function set visible(value:Boolean):void { mVisible = value; }
+        
+        /** Indicates if this object (and its children) will receive touch events. */
+        public function get touchable():Boolean { return mTouchable; }
+        public function set touchable(value:Boolean):void { mTouchable = value; }
+        
+        /** The name of the display object (default: null). Used by 'getChildByName()' of 
+         *  display object containers. */
+        public function get name():String { return mName; }
+        public function set name(value:String):void { mName = value; }        
+        
+        /** The display object container that contains this display object. */
+        public function get parent():DisplayObjectContainer { return mParent; }
+        
+        /** The stage the display object is connected to, or null if it is not connected 
+         *  to a stage. */
+        public function get stage():Stage { return this.root as Stage; }
+    }
 }
