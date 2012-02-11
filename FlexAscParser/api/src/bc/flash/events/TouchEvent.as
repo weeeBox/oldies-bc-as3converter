@@ -9,6 +9,22 @@ package bc.flash.events
     {
         /** Event type for touch or mouse input. */
         public static const TOUCH:String = "touch";
+		
+	public static const TOUCH_BEGIN : String = "touchBegin";
+	public static const TOUCH_END : String = "touchEnd";
+	public static const TOUCH_MOVE : String = "touchMove";
+	public static const TOUCH_OVER : String = "touchOver";
+	public static const TOUCH_OUT : String = "touchOut";
+	public static const TOUCH_ROLL_OVER : String = "touchRollOver";
+	public static const TOUCH_ROLL_OUT : String = "touchRollOut";
+	public static const TOUCH_TAP : String = "touchTap";
+	public static const PROXIMITY_BEGIN : String = "proximityBegin";
+	public static const PROXIMITY_END : String = "proximityEnd";
+	public static const PROXIMITY_MOVE : String = "proximityMove";
+	public static const PROXIMITY_OUT : String = "proximityOut";
+	public static const PROXIMITY_OVER : String = "proximityOver";
+	public static const PROXIMITY_ROLL_OUT : String = "proximityRollOut";
+	public static const PROXIMITY_ROLL_OVER : String = "proximityRollOver";
         
         private var mTouches:Vector.<Touch>;
         private var mShiftKey:Boolean;

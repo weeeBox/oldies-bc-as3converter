@@ -1,17 +1,33 @@
-package bc.flash.events
+package bc.flash.core.natives
 {
-	import bc.flash.display.DisplayObject;	
-	import bc.flash.Vector;
+	import bc.flash.events.KeyboardEvent;
+	import bc.flash.ui.Keyboard;
+	import bc.flash.events.EnterFrameEvent;
+	import bc.flash.events.Event;
 
 	import flash.utils.Dictionary;
-
-	public class EventDispatcher extends Object
+	
+	public class BcNativeStage
 	{
 		private var mEventListeners : Dictionary;
 
-		/** Creates an EventDispatcher. */
-		public function EventDispatcher()
+		private var mWidth : int;
+		private var mHeight : int;
+
+		public function BcNativeStage(width : int, height : int)
 		{
+			mWidth = width;
+			mHeight = height;
+		}
+		
+		public function get width() : int
+		{
+			return mWidth;
+		}
+		
+		public function get height() : int
+		{
+			return mHeight;
 		}
 
 		/** Registers an event listener at a certain object. */
@@ -73,56 +89,53 @@ package bc.flash.events
 		public function dispatchEvent(event : Event) : void
 		{
 			var listeners : Vector.<Function> = mEventListeners ? mEventListeners[event.type] : null;
-			if (listeners == null && !event.bubbles) return;
+			if (listeners == null) return;
 			// no need to do anything
 
-			// if the event already has a current target, it was re-dispatched by user -> we change
-			// the target to 'this' for now, but undo that later on (instead of creating a clone)
-
-			var previousTarget : EventDispatcher = event.target;
-			if (previousTarget == null || event.currentTarget != null) event.setTarget(this);
-
-			var stopImmediatePropagation : Boolean = false;
-			var numListeners : int = listeners == null ? 0 : listeners.length;
-
+			var numListeners : int = listeners.length;
 			if (numListeners != 0)
 			{
-				event.setCurrentTarget(this);
-
 				// we can enumerate directly over the vector, since "add"- and "removeEventListener"
 				// won't change it, but instead always create a new vector.
 
 				for (var i : int = 0; i < numListeners; ++i)
 				{
 					listeners[i](event);
-
-					if (event.stopsImmediatePropagation)
-					{
-						stopImmediatePropagation = true;
-						break;
-					}
 				}
 			}
-
-			if (!stopImmediatePropagation && event.bubbles && !event.stopsPropagation && this is DisplayObject)
-			{
-				var targetDisplayObject : DisplayObject = this as DisplayObject;
-				if (targetDisplayObject.parent != null)
-				{
-					event.setCurrentTarget(null);
-					// to find out later if the event was redispatched
-					targetDisplayObject.parent.dispatchEvent(event);
-				}
-			}
-
-			if (previousTarget)
-				event.setTarget(previousTarget);
 		}
 
 		/** Returns if there are listeners registered for a certain event type. */
 		public function hasEventListener(type : String) : Boolean
 		{
 			return mEventListeners != null && type in mEventListeners;
+		}
+		
+		public function tick(dt : Number) : void
+		{
+			dispatchEvent(new EnterFrameEvent(Event.ENTER_FRAME, dt));
+		}
+		
+		public function keyPressed(code : int) : void
+		{
+			dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_DOWN, code));
+		}
+		
+		public function keyReleased(code : int) : void
+		{
+			dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP, code));
+		}
+		
+		public function touchDown(x : Number, y : Number, touchId : int) : void
+		{	
+		}
+		
+		public function touchMove(x : Number, y : Number, touchId : int) : void
+		{
+		}
+		
+		public function touchUp(x : Number, y : Number, touchId : int) : void
+		{
 		}
 	}
 }

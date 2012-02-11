@@ -23,5 +23,8 @@ package bc.flash.events
         
         /** The time that has passed since the last frame (in seconds). */
         public function get passedTime():Number { return mPassedTime; }
+		
+        /** The time that has passed since the last frame (in seconds). */
+        public function set passedTime(value:Number) : void { mPassedTime = value; }
     }
 }
