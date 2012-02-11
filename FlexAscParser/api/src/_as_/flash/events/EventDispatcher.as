@@ -1,124 +1,128 @@
 package _as_.flash.events
 {
-	import _as_.flash.display.DisplayObject;
-	import _as_.flash.Debug;
+	import _as_.flash.display.DisplayObject;	
 	import _as_.flash.Vector;
 
 	import flash.utils.Dictionary;
 
-	public class EventDispatcher extends Object implements IEventDispatcher, IEventDispatcher
+	public class EventDispatcher extends Object
 	{
-		private static var EMPTY_EVENT_LISTENERS : Dictionary = new Dictionary();
-		private var m_eventListeners : Dictionary;
-		private var m_target : IEventDispatcher;
+		private var mEventListeners : Dictionary;
 
-		function EventDispatcher(target : IEventDispatcher = null) : void
+		/** Creates an EventDispatcher. */
+		public function EventDispatcher()
 		{
-			m_target = target;
 		}
 
-		public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
+		/** Registers an event listener at a certain object. */
+		public function addEventListener(type : String, listener : Function) : void
 		{
-			if (m_eventListeners == EMPTY_EVENT_LISTENERS)
-			{
-				m_eventListeners = new Dictionary();
-			}
+			if (mEventListeners == null)
+				mEventListeners = new Dictionary();
 
-			var listeners : Vector.<EventListener> = m_eventListeners[type];
+			var listeners : Vector.<Function> = mEventListeners[type];
 			if (listeners == null)
 			{
-				listeners = new Vector.<EventListener>();
-				m_eventListeners[type] = listeners;
+				listeners = new Vector.<Function>();
+				mEventListeners[type] = listeners;
 			}
 
-			listeners.push(new EventListener(listener, useCapture));
+			listeners.push(listener);
 		}
 
-		public function removeEventListener(type : String, listener : Function, useCapture : Boolean = false) : void
+		/** Removes an event listener from the object. */
+		public function removeEventListener(type : String, listener : Function) : void
 		{
-			var listeners : Vector.<EventListener> = m_eventListeners[type];
-			if (listeners != null)
+			if (mEventListeners)
 			{
-				var remainListeners : Vector.<EventListener> = new Vector.<EventListener>();
-				for each (var eventListener : EventListener in listeners)
+				var listeners : Vector.<Function> = mEventListeners[type];
+				if (listeners)
 				{
-					if (eventListener.listener != listener)
+					var remainListeners : Vector.<EventListener> = new Vector.<EventListener>();
+					for each (var eventListener : EventListener in listeners)
 					{
-						remainListeners.push(eventListener);
+						if (eventListener.listener != listener)
+						{
+							remainListeners.push(eventListener);
+						}
+					}
+
+					if (remainListeners.length > 0)
+					{
+						mEventListeners[type] = remainListeners;
+					}
+					else
+					{
+						delete mEventListeners[type];
 					}
 				}
-
-				if (remainListeners.length > 0)
-				{
-					m_eventListeners[type] = remainListeners;
-				}
-				else
-				{
-					delete m_eventListeners[type];
-				}
 			}
 		}
 
-		public function dispatchEvent(event : Event) : Boolean
+		/** Removes all event listeners with a certain type, or all of them if type is null. 
+		 *  Be careful when removing all event listeners: you never know who else was listening. */
+		public function removeEventListeners(type : String = null) : void
 		{
-			var listeners : Vector.<EventListener> = m_eventListeners[event.type];
+			if (type && mEventListeners)
+				delete mEventListeners[type];
+			else
+				mEventListeners = null;
+		}
 
-			if (!event.bubbles && !listeners) return;
-			// no need to do anything.
+		/** Dispatches an event to all objects that have registered for events of the same type. */
+		public function dispatchEvent(event : Event) : void
+		{
+			var listeners : Vector.<Function> = mEventListeners ? mEventListeners[event.type] : null;
+			if (listeners == null && !event.bubbles) return;
+			// no need to do anything
 
-			// if the event already has a current target, it was re-dispatched by user -> we change the
-			// target to 'self' for now, but undo that later on (instead of creating a copy, which could
-			// lead to the creation of a huge amount of objects).
+			// if the event already has a current target, it was re-dispatched by user -> we change
+			// the target to 'this' for now, but undo that later on (instead of creating a clone)
 
 			var previousTarget : EventDispatcher = event.target;
+			if (previousTarget == null || event.currentTarget != null) event.setTarget(this);
 
-			if (!event.target || event.currentTarget) event.target = this;
-			event.currentTarget = this;
+			var stopImmediatePropagation : Boolean = false;
+			var numListeners : int = listeners == null ? 0 : listeners.length;
 
-			var stopImmediatPropagation : Boolean = true;
-			if (listeners.length != 0)
+			if (numListeners != 0)
 			{
-				// we can enumerate directly over the array, since "add"- and "removeEventListener" won't
-				// change it, but instead always create a new array.
-				for each (var eventListener : EventListener in listeners)
+				event.setCurrentTarget(this);
+
+				// we can enumerate directly over the vector, since "add"- and "removeEventListener"
+				// won't change it, but instead always create a new vector.
+
+				for (var i : int = 0; i < numListeners; ++i)
 				{
-					eventListener.listener(event);
+					listeners[i](event);
+
 					if (event.stopsImmediatePropagation)
 					{
-						stopImmediatPropagation = true;
+						stopImmediatePropagation = true;
 						break;
 					}
 				}
 			}
 
-			if (!stopImmediatPropagation)
+			if (!stopImmediatePropagation && event.bubbles && !event.stopsPropagation && this is DisplayObject)
 			{
-				event.currentTarget = null;
-				// this is how we can find out later if the event was redispatched
-				if (event.bubbles && !event.stopsPropagation && this is DisplayObject)
+				var targetDisplayObject : DisplayObject = this as DisplayObject;
+				if (targetDisplayObject.parent != null)
 				{
-					var target : DisplayObject = DisplayObject(this);
-					if (target.parent != null)
-					{
-						target.parent.dispatchEvent(event);
-					}
+					event.setCurrentTarget(null);
+					// to find out later if the event was redispatched
+					targetDisplayObject.parent.dispatchEvent(event);
 				}
 			}
 
-			if (previousTarget) event.target = previousTarget;
-
-			return false;
+			if (previousTarget)
+				event.setTarget(previousTarget);
 		}
 
+		/** Returns if there are listeners registered for a certain event type. */
 		public function hasEventListener(type : String) : Boolean
 		{
-			return m_eventListeners[type] != null;
-		}
-
-		public function willTrigger(type : String) : Boolean
-		{
-			Debug.implementMe("willTrigger");
-			return false;
+			return mEventListeners != null && type in mEventListeners;
 		}
 	}
 }
