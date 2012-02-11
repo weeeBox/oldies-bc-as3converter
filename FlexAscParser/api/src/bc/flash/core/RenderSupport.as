@@ -23,7 +23,7 @@ package bc.flash.core
         private var mMatrixStack:Vector.<Matrix3D>;
         private var mMatrixStackSize:int;
         
-        private var mQuadBatches:Vector.<QuadBatch>;
+        // private var mQuadBatches:Vector.<QuadBatch>; FIXME
         private var mCurrentQuadBatchID:int;
         
         /** Helper object. */
@@ -41,7 +41,7 @@ package bc.flash.core
             mMatrixStackSize = 0;
             
             mCurrentQuadBatchID = 0;
-            mQuadBatches = new <QuadBatch>[new QuadBatch()];
+            // mQuadBatches = new <QuadBatch>[new QuadBatch()]; FIXME
             
             loadIdentity();
             setOrthographicProjection(400, 300);
@@ -52,15 +52,17 @@ package bc.flash.core
         /** Disposes all quad batches. */
         public function dispose():void
         {
+            /* FIXME
             for each (var quadBatch:QuadBatch in mQuadBatches)
                 quadBatch.dispose();
-            
+            */
+			
             Starling.current.removeEventListener(Event.CONTEXT3D_CREATE, onContextCreated);
         }
         
         private function onContextCreated(event:Event):void
         {
-            mQuadBatches = new <QuadBatch>[new QuadBatch()];
+            // mQuadBatches = new <QuadBatch>[new QuadBatch()]; FIXME
         }
         
         // matrix manipulation
@@ -69,6 +71,7 @@ package bc.flash.core
         public function setOrthographicProjection(width:Number, height:Number, 
                                                   near:Number=-1.0, far:Number=1.0):void
         {
+			/*
             sMatrixCoords[0] = 2.0 / width;
             sMatrixCoords[1] = sMatrixCoords[2] = sMatrixCoords[3] = sMatrixCoords[4] = 0.0;
             sMatrixCoords[5] = -2.0 / height;
@@ -81,6 +84,7 @@ package bc.flash.core
             sMatrixCoords[15] = 1.0;
             
             mProjectionMatrix.copyRawDataFrom(sMatrixCoords);
+            */
         }
         
         /** Changes the modelview matrix to the identity matrix. */
