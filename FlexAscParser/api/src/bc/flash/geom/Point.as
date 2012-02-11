@@ -1,8 +1,8 @@
-package _as_.flash.geom
+package bc.flash.geom
 {
 	import flash.geom.Point;
 
-	import _as_.flash.Math;
+	import bc.flash.Math;
 
 	public class Point extends Object
 	{

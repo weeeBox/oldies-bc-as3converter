@@ -1,6 +1,6 @@
-package _as_.flash.geom 
+package bc.flash.geom 
 {
-	import _as_.flash.display.DisplayObject;
+	import bc.flash.display.DisplayObject;
 	
 	public class Transform extends Object 
 	{

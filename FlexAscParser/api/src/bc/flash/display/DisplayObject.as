@@ -1,13 +1,13 @@
-package _as_.flash.display
+package bc.flash.display
 {
-	import _as_.flash.error.AbstractClassError;
-	import _as_.flash.error.AbstractMethodError;
-	import _as_.flash.events.Event;
-	import _as_.flash.events.EventDispatcher;
-	import _as_.flash.events.TouchEvent;
-	import _as_.flash.geom.Matrix;
-	import _as_.flash.geom.Point;
-	import _as_.flash.geom.Rectangle;
+	import bc.flash.error.AbstractClassError;
+	import bc.flash.error.AbstractMethodError;
+	import bc.flash.events.Event;
+	import bc.flash.events.EventDispatcher;
+	import bc.flash.events.TouchEvent;
+	import bc.flash.geom.Matrix;
+	import bc.flash.geom.Point;
+	import bc.flash.geom.Rectangle;
 
 	import flash.utils.getQualifiedClassName;
 	

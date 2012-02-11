@@ -1,7 +1,7 @@
-package _as_.flash.events
+package bc.flash.events
 {
-	import _as_.flash.display.DisplayObject;
-	import _as_.flash.display.DisplayObjectContainer;
+	import bc.flash.display.DisplayObject;
+	import bc.flash.display.DisplayObjectContainer;
 	/**
 	 * @author weee
 	 */

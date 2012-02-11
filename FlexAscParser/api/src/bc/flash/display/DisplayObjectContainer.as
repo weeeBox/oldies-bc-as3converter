@@ -1,11 +1,11 @@
-package _as_.flash.display
+package bc.flash.display
 {
-	import _as_.flash.error.AbstractClassError;
-	import _as_.flash.events.Event;
-	import _as_.flash.geom.Matrix;
-	import _as_.flash.geom.Point;
-	import _as_.flash.geom.Rectangle;
-	import _as_.flash.util.transformCoords;
+	import bc.flash.error.AbstractClassError;
+	import bc.flash.events.Event;
+	import bc.flash.geom.Matrix;
+	import bc.flash.geom.Point;
+	import bc.flash.geom.Rectangle;
+	import bc.flash.util.transformCoords;
 
 	import flash.utils.getQualifiedClassName;
 	

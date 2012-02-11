@@ -1,8 +1,8 @@
-package _as_.flash.display 
+package bc.flash.display 
 {
-	import _as_.flash.geom.ColorTransform;
-	import _as_.flash.geom.Matrix;
-	import _as_.flash.geom.Rectangle;
+	import bc.flash.geom.ColorTransform;
+	import bc.flash.geom.Matrix;
+	import bc.flash.geom.Rectangle;
 	
 	public class BitmapData extends Object 
 	{

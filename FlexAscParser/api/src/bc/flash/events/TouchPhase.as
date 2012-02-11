@@ -1,6 +1,6 @@
-package _as_.flash.events
+package bc.flash.events
 {
-	import _as_.flash.error.AbstractClassError;
+	import bc.flash.error.AbstractClassError;
 	/**
 	 * @author weee
 	 */

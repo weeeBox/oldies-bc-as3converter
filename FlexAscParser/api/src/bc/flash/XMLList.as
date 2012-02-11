@@ -1,4 +1,4 @@
-package _as_.flash 
+package bc.flash 
 {	
 	public dynamic final class XMLList extends Object 
 	{

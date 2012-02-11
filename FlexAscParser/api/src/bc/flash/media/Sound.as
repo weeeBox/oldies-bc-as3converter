@@ -1,4 +1,4 @@
-package _as_.flash.media 
+package bc.flash.media 
 {
 	import flash.media.SoundTransform;
 	import flash.media.SoundChannel;

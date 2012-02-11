@@ -1,4 +1,4 @@
-package _as_.flash.events
+package bc.flash.events
 {
 	/**
 	 * @author weee

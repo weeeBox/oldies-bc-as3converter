@@ -1,6 +1,6 @@
-package _as_.flash.display
+package bc.flash.display
 {
-	import _as_.flash.Debug;
+	import bc.flash.Debug;
 	
 	public class InteractiveObject extends DisplayObject
 	{

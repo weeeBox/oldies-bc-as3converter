@@ -1,6 +1,6 @@
-package _as_.flash.geom
+package bc.flash.geom
 {
-	import _as_.flash.Math;
+	import bc.flash.Math;
 	public class Matrix extends Object
 	{
 		private static const U : int = 0;

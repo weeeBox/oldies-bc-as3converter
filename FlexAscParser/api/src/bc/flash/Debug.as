@@ -1,6 +1,6 @@
-package _as_.flash
+package bc.flash
 {
-	import _as_.flash.error.Error;
+	import bc.flash.error.Error;
 	/**
 	 * @author weee
 	 */

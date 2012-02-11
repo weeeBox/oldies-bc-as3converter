@@ -1,4 +1,4 @@
-package _as_.flash.display 
+package bc.flash.display 
 {
 	public class Stage extends DisplayObjectContainer 
 	{

@@ -1,4 +1,4 @@
-package _as_.flash 
+package bc.flash 
 {
 	public class Vector extends Object 
 	{

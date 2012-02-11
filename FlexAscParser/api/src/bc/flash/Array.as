@@ -1,4 +1,4 @@
-package _as_.flash 
+package bc.flash 
 {
 	public dynamic class Array extends Object 
 	{

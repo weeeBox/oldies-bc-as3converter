@@ -1,4 +1,4 @@
-package _as_.flash.error
+package bc.flash.error
 {
 	/**
 	 * @author weee

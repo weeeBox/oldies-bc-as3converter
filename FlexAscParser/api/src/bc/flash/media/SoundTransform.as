@@ -1,4 +1,4 @@
-package _as_.flash.media 
+package bc.flash.media 
 {
 	public final class SoundTransform extends Object 
 	{

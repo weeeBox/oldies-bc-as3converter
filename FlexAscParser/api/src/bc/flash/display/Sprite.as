@@ -1,6 +1,6 @@
-package _as_.flash.display 
+package bc.flash.display 
 {
-	import _as_.flash.media.SoundTransform;
+	import bc.flash.media.SoundTransform;
 
 	public class Sprite extends DisplayObjectContainer 
 	{

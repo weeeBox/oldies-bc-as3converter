@@ -1,4 +1,4 @@
-package _as_.flash.geom 
+package bc.flash.geom 
 {
 	public class Rectangle extends Object 
 	{

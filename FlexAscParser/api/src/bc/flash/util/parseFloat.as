@@ -1,6 +1,6 @@
-package _as_.flash.util
+package bc.flash.util
 {
-	import _as_.flash.error.NotImplementedError;
+	import bc.flash.error.NotImplementedError;
 	/**
 	 * @author weee
 	 */

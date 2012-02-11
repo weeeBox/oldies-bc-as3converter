@@ -1,8 +1,8 @@
-package _as_.flash.events
+package bc.flash.events
 {
-	import _as_.flash.display.DisplayObject;
-	import _as_.flash.geom.Matrix;
-	import _as_.flash.geom.Point;
+	import bc.flash.display.DisplayObject;
+	import bc.flash.geom.Matrix;
+	import bc.flash.geom.Point;
 	public class Touch
     {
         private var mID:int;

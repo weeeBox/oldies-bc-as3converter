@@ -1,7 +1,7 @@
-package _as_.flash.util
+package bc.flash.util
 {
-	import _as_.flash.geom.Matrix;
-	import _as_.flash.geom.Point;
+	import bc.flash.geom.Matrix;
+	import bc.flash.geom.Point;
 	
 	/** Uses a matrix to transform 2D coordinates into a different space. If you pass a 
      *  'resultPoint', the result will be stored in this point instead of creating a new object.*/
