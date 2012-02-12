@@ -1,2 +1,3 @@
 /FlexAscParser/bin
-/FlexAscParser/platform/bin
+/FlexAscParser/bc-platform/bin
+/FlexAscParser/bc-api/bin
