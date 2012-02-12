@@ -1,7 +1,6 @@
 package bc.flash.util
 {
 	import bc.flash.error.NotImplementedError;
-	import bc.flash.Object;
 	/**
 	 * @author weee
 	 */

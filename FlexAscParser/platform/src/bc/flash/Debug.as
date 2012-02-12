@@ -1,6 +1,5 @@
 package bc.flash
 {
-	import bc.flash.error.Error;
 	/**
 	 * @author weee
 	 */
