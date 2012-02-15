@@ -1218,7 +1218,7 @@ public class Main2
 			if (type instanceof BcVectorTypeNode)
 			{
 				ObjectList<Node> args = node.args != null ? node.args.items : null;
-				writeNewLiteralVector(dest, (BcVectorTypeNode) type, args);
+				writeNewLiteralVector((BcVectorTypeNode) type, args);
 			}
 			else
 			{
@@ -1235,7 +1235,7 @@ public class Main2
 				LiteralArrayNode arrayNode = (LiteralArrayNode) argNode;
 				ArgumentListNode elementlist = arrayNode.elementlist;
 				
-				writeNewLiteralVector(dest, (BcVectorTypeNode) type, elementlist.items);
+				writeNewLiteralVector((BcVectorTypeNode) type, elementlist.items);
 			}
 			else
 			{
@@ -1529,7 +1529,7 @@ public class Main2
 		else if (node instanceof LiteralArrayNode)
 		{
 			LiteralArrayNode arrayNode = (LiteralArrayNode) node;
-			writeNewLiteralArray(dest, arrayNode.elementlist.items);			
+			writeNewLiteralArray(arrayNode.elementlist.items);			
 		}
 		else if (node instanceof LiteralVectorNode)
 		{
@@ -1537,7 +1537,7 @@ public class Main2
 			BcTypeNode bcType = extractBcType(vectorNode.type);
 			assert bcType instanceof BcVectorTypeNode : bcType.getClass();
 			
-			writeNewLiteralVector(dest, (BcVectorTypeNode) bcType, null);
+			writeNewLiteralVector((BcVectorTypeNode) bcType, null);
 		}
 		else if (node instanceof LiteralObjectNode)
 		{
@@ -3018,7 +3018,7 @@ public class Main2
 		return bcType;
 	}
 	
-	private static void writeNewLiteralArray(WriteDestination dest, ObjectList<Node> args)
+	private static void writeNewLiteralArray(ObjectList<Node> args)
 	{
 		WriteDestination elementDest = new ListWriteDestination();
 		pushDest(elementDest);
@@ -3028,7 +3028,7 @@ public class Main2
 			process(elementNode);
 			if (++elementIndex < args.size())
 			{
-				elementDest.write(", ");
+				dest.write(", ");
 			}
 		}
 		popDest();
@@ -3036,7 +3036,7 @@ public class Main2
 		dest.writef(BcCodeCs.construct(BcCodeCs.type(classArray), elementDest));		
 	}
 	
-	private static void writeNewLiteralVector(WriteDestination dest, BcVectorTypeNode vectorType, ObjectList<Node> args)
+	private static void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
 	{
 		if (args == null)
 		{
