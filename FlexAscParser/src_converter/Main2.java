@@ -3061,7 +3061,7 @@ public class Main2
 		}
 		popDest();
 		
-		dest.writef("new %s(%s)", BcCodeCs.type(classArray), elementDest);		
+		dest.writef(BcCodeCs.construct(BcCodeCs.type(classArray), elementDest));		
 	}
 	
 	private static void writeNewLiteralVector(WriteDestination dest, BcVectorTypeNode vectorType, ObjectList<Node> args)
