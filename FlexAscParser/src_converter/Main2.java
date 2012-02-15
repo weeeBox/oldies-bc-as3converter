@@ -109,8 +109,9 @@ public class Main2
 	
 	private static List<BcVariableDeclaration> declaredVars;
 	
-	private static List<BcClassDefinitionNode> bcClasses;
+	private static List<BcClassDefinitionNode> bcPlatformClasses;
 	private static List<BcClassDefinitionNode> bcApiClasses;
+	private static List<BcClassDefinitionNode> bcClasses;
 	private static List<BcFunctionDeclaration> bcGlobalFunctions;
 	
 	private static boolean needFieldsInitializer;
@@ -128,17 +129,17 @@ public class Main2
 		
 		try
 		{
-			bcClasses = new ArrayList<BcClassDefinitionNode>();
 			bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
-			collect(new File("bc-platform/src"));
-			bcApiClasses = bcClasses;
 			
-			bcClasses = new ArrayList<BcClassDefinitionNode>();
-			collect(new File("bc-api/src"));
-			collect(filenames);
+			bcPlatformClasses = collect("bc-platform/src");			
+			bcApiClasses = collect("bc-api/src");
+			bcClasses = collect(filenames);
+			
 			process();
-			write(outputDir, bcApiClasses);
-			write(outputDir, bcClasses);
+			
+			write(new File(outputDir, "Platform"), bcPlatformClasses);
+			write(new File(outputDir, "Api"), bcApiClasses);
+			write(new File(outputDir, "Converted"), bcClasses);
 		}
 		catch (IOException e)
 		{
@@ -146,12 +147,14 @@ public class Main2
 		}
 	}
 
-	private static void collect(String... filenames) throws IOException
+	private static List<BcClassDefinitionNode> collect(String... filenames) throws IOException
 	{		
+		bcClasses = new ArrayList<BcClassDefinitionNode>();
 		for (int i = 0; i < filenames.length; ++i)
 		{
 			collect(new File(filenames[i]));
 		}
+		return bcClasses;
 	}
 	
 	private static void collect(File file) throws IOException
@@ -180,6 +183,7 @@ public class Main2
 		{
 			collectSource(file);
 		}
+		
 	}
 	
 	private static void collectSource(File file) throws IOException
@@ -440,7 +444,8 @@ public class Main2
 			process(type);
 		}
 				
-		process(new ArrayList<BcClassDefinitionNode>(bcApiClasses));
+		process(new ArrayList<BcClassDefinitionNode>(bcPlatformClasses));
+		process(bcApiClasses);
 		process(bcClasses);
 	}
 
@@ -2082,8 +2087,13 @@ public class Main2
 	
 	private static BcClassDefinitionNode findClass(String name)
 	{
-		BcClassDefinitionNode bcClass = findClass(bcApiClasses, name);
-		if (bcClass != null)
+		BcClassDefinitionNode bcClass;
+		if ((bcClass = findClass(bcPlatformClasses, name)) != null)
+		{
+			return bcClass;
+		}
+		
+		if ((bcClass = findClass(bcApiClasses, name)) != null)
 		{
 			return bcClass;
 		}
@@ -3009,7 +3019,7 @@ public class Main2
 		{
 			BcClassDefinitionNode vectorGenericClass = findClass(classVector).clone();
 			vectorGenericClass.setClassType(bcType);
-			bcApiClasses.add(vectorGenericClass);
+			bcPlatformClasses.add(vectorGenericClass);
 			
 			bcType.setClassNode(vectorGenericClass);
 		}
