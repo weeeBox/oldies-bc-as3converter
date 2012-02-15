@@ -39,6 +39,7 @@ import macromedia.asc.parser.LiteralNumberNode;
 import macromedia.asc.parser.LiteralObjectNode;
 import macromedia.asc.parser.LiteralRegExpNode;
 import macromedia.asc.parser.LiteralStringNode;
+import macromedia.asc.parser.LiteralVectorNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.MetaDataNode;
 import macromedia.asc.parser.Node;
@@ -129,10 +130,11 @@ public class Main2
 		{
 			bcClasses = new ArrayList<BcClassDefinitionNode>();
 			bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
-			collect(new File("api/src")); // collect api classes
+			collect(new File("bc-platform/src"));
 			bcApiClasses = bcClasses;
 			
 			bcClasses = new ArrayList<BcClassDefinitionNode>();
+			collect(new File("bc-api/src"));
 			collect(filenames);
 			process();
 			write(outputDir, bcApiClasses);
@@ -542,7 +544,8 @@ public class Main2
 				node instanceof LiteralObjectNode ||
 				node instanceof LiteralStringNode ||
 				node instanceof LiteralRegExpNode ||
-				node instanceof LiteralArrayNode)
+				node instanceof LiteralArrayNode ||
+				node instanceof LiteralVectorNode)
 			processLiteral(node);
 		else if (node instanceof BinaryExpressionNode)
 			process((BinaryExpressionNode)node);
@@ -1228,7 +1231,7 @@ public class Main2
 			if (type instanceof BcVectorTypeNode)
 			{
 				ObjectList<Node> args = node.args != null ? node.args.items : null;
-				writeNewLiteralVector((BcVectorTypeNode) type, args);
+				writeNewLiteralVector(dest, (BcVectorTypeNode) type, args);
 			}
 			else
 			{
@@ -1245,7 +1248,7 @@ public class Main2
 				LiteralArrayNode arrayNode = (LiteralArrayNode) argNode;
 				ArgumentListNode elementlist = arrayNode.elementlist;
 				
-				writeNewLiteralVector((BcVectorTypeNode) type, elementlist.items);
+				writeNewLiteralVector(dest, (BcVectorTypeNode) type, elementlist.items);
 			}
 			else
 			{
@@ -1540,6 +1543,14 @@ public class Main2
 		{
 			LiteralArrayNode arrayNode = (LiteralArrayNode) node;
 			writeNewLiteralArray(dest, arrayNode.elementlist.items);			
+		}
+		else if (node instanceof LiteralVectorNode)
+		{
+			LiteralVectorNode vectorNode = (LiteralVectorNode) node;
+			BcTypeNode bcType = extractBcType(vectorNode.type);
+			assert bcType instanceof BcVectorTypeNode : bcType.getClass();
+			
+			writeNewLiteralVector(dest, (BcVectorTypeNode) bcType, null);
 		}
 		else if (node instanceof LiteralObjectNode)
 		{
@@ -1885,7 +1896,8 @@ public class Main2
 		}
 		else if (node.op == Tokens.AS_TOKEN)
 		{
-			assert false;
+			BcTypeNode castType = extractBcType(node.rhs);
+			dest.write(BcCodeCs.cast(lshString, castType));
 		}
 		else
 		{
@@ -2710,6 +2722,11 @@ public class Main2
 				return BcTypeNode.create(classBoolean);
 			}
 			
+			if (binaryNode.op == Tokens.AS_TOKEN)
+			{
+				return extractBcType(binaryNode.rhs);
+			}
+			
 			if (typeEquals(lhsType, classString) || typeEquals(rhsType, classString))
 			{
 				return BcTypeNode.create(classString);
@@ -2804,6 +2821,12 @@ public class Main2
 			}
 			
 			return BcTypeNode.create(classObject);
+		}
+		
+		if (node instanceof LiteralVectorNode)
+		{
+			LiteralVectorNode literalVector = (LiteralVectorNode) node;
+			return extractBcType(literalVector.type);
 		}
 		
 		assert false : node;
@@ -2998,7 +3021,7 @@ public class Main2
 		dest.writef("new %s(%s)", BcCodeCs.type(classArray), elementDest);		
 	}
 	
-	private static void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
+	private static void writeNewLiteralVector(WriteDestination dest, BcVectorTypeNode vectorType, ObjectList<Node> args)
 	{
 		if (args == null)
 		{

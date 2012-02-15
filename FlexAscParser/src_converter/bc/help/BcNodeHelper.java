@@ -72,32 +72,29 @@ public class BcNodeHelper
 			return BcTypeNode.create(identifier.name);
 		}
 		
-		MemberExpressionNode expr = null;
 		if (type instanceof TypeExpressionNode)
 		{
 			TypeExpressionNode typeNode = (TypeExpressionNode) type;
-			expr = (MemberExpressionNode) typeNode.expr;
-		}
-		else if (type instanceof MemberExpressionNode)
-		{
-			expr = (MemberExpressionNode) type;
-		}
-		else
-		{
-			assert false;
+			return extractBcType(typeNode.expr);
 		}
 		
-		if (expr.selector instanceof GetExpressionNode)
+		if (type instanceof MemberExpressionNode)
 		{
-			GetExpressionNode selector = (GetExpressionNode) expr.selector;
+			MemberExpressionNode expr = (MemberExpressionNode) type;
+			return extractBcType(expr.selector);
+		}
+		
+		if (type instanceof GetExpressionNode)
+		{
+			GetExpressionNode selector = (GetExpressionNode) type;
 			String name = ((IdentifierNode)selector.expr).name;
 			
 			return BcTypeNode.create(name);
 		}
 		
-		if (expr.selector instanceof ApplyTypeExprNode)
+		if (type instanceof ApplyTypeExprNode)
 		{
-			ApplyTypeExprNode selector = (ApplyTypeExprNode) expr.selector;
+			ApplyTypeExprNode selector = (ApplyTypeExprNode) type;
 			String typeName = ((IdentifierNode)selector.expr).name;
 			
 			ListNode typeArgs = selector.typeArgs;
@@ -107,7 +104,7 @@ public class BcNodeHelper
 			return new BcVectorTypeNode(typeName, genericType);
 		}
 		
-		assert false : expr.selector.getClass();
+		assert false : type.getClass();
 		return null;
 	}
 		
