@@ -73,7 +73,10 @@ package bc.flash.display
         {
             if (resultMatrix) resultMatrix.identity();
             else resultMatrix = new Matrix();
-            
+         
+            var commonParent:DisplayObject;
+            var currentObject:DisplayObject;
+		    
             if (targetSpace == this)
             {
                 return resultMatrix;
@@ -114,8 +117,8 @@ package bc.flash.display
             
             sAncestors.length = 0;
             
-            var commonParent:DisplayObject = null;
-            var currentObject:DisplayObject = this;            
+            commonParent = null;
+            currentObject = this;            
             while (currentObject)
             {
                 sAncestors.push(currentObject);
