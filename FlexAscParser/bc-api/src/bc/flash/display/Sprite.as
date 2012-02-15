@@ -1,5 +1,6 @@
 package bc.flash.display 
 {
+    import bc.flash.error.NotImplementedError;
     import bc.flash.events.TouchEvent;
     import bc.flash.ui.Mouse;
     import bc.flash.ui.MouseCursor;
@@ -54,6 +55,11 @@ package bc.flash.display
                 removeEventListener(TouchEvent.TOUCH, onTouch);
         }
         
+        public function get graphics() : Graphics 
+        { 
+            throw new NotImplementedError(); 
+        }
+		
         private function onTouch(event:TouchEvent):void
         {
             Mouse.cursor = event.interactsWith(this) ? MouseCursor.BUTTON : MouseCursor.AUTO;

@@ -1,5 +1,7 @@
 package bc.flash.display
 {
+	import bc.flash.geom.Transform;
+	import bc.flash.error.NotImplementedError;
 	import bc.flash.core.RenderSupport;
 	import bc.flash.error.AbstractClassError;
 	import bc.flash.error.AbstractMethodError;
@@ -360,5 +362,11 @@ package bc.flash.display
         /** The stage the display object is connected to, or null if it is not connected 
          *  to a stage. */
         public function get stage():Stage { return this.root as Stage; }
+		
+        /** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
+        public function get transform() : Transform { throw new NotImplementedError(); }
+
+        /** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
+        public function set transform(value : Transform) : void { throw new NotImplementedError(); }
     }
 }

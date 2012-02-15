@@ -206,8 +206,10 @@ package bc.flash.display
             }
             else
             {
-                var minX:Number = Number.MAX_VALUE, maxX:Number = -Number.MAX_VALUE;
-                var minY:Number = Number.MAX_VALUE, maxY:Number = -Number.MAX_VALUE;
+                var minX:Number = 1000000; 
+                var maxX:Number = -1000000;
+                var minY:Number = 1000000; 
+                var maxY:Number = -1000000;
                 
                 for (var i:int=0; i<numChildren; ++i)
                 {

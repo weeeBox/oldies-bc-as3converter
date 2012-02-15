@@ -7,7 +7,7 @@ package bc.flash
 
 		public function Vector(length : uint = 0, fixed : Boolean = false) {}
 
-		/* public function concat(...args : *) : Vector { return null; } */
+		public function concat(obj : Object = null) : Vector { return null; }
 
 		/* public function every(callback : Function, thisObject : Object = null) : Boolean { return false; } */
 
@@ -41,12 +41,12 @@ package bc.flash
 
 		public function sort(compareFunction : Function) : Vector { return null; }
 
-		public function splice(startIndex : int, deleteCount : uint) : Vector { return null; }
+		public function splice(startIndex : int, deleteCount : uint, item : Object = null) : Vector { return null; }
 
 		/* public function toLocaleString() : String; */
 
 		public function toString() : String { return null; }
 
-		/* public function unshift(...args : *) : uint; */
+		public function unshift(arg : Object) : uint { return 0; }
 	}
 }

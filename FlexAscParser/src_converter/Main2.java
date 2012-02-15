@@ -1897,7 +1897,7 @@ public class Main2
 		else if (node.op == Tokens.AS_TOKEN)
 		{
 			BcTypeNode castType = extractBcType(node.rhs);
-			dest.write(BcCodeCs.cast(lshString, castType));
+			dest.writef("(%s)", BcCodeCs.cast(lshString, castType));
 		}
 		else
 		{
@@ -2862,13 +2862,29 @@ public class Main2
 				ListNode list = (ListNode) node.base;
 				assert list.size() == 1 : list.size();
 				
-				assert list.items.get(0) instanceof MemberExpressionNode;
-				BcTypeNode baseType = evaluateMemberExpression((MemberExpressionNode) list.items.get(0));
-				
-				assert baseType != null;
-				baseClass = baseType.getClassNode();
-
-				assert baseClass != null;
+				Node firstItem = list.items.get(0);
+				if (firstItem instanceof MemberExpressionNode)
+				{
+					BcTypeNode baseType = evaluateMemberExpression((MemberExpressionNode) firstItem);
+					
+					assert baseType != null;
+					baseClass = baseType.getClassNode();
+	
+					assert baseClass != null;
+				}
+				else if (firstItem instanceof BinaryExpressionNode)
+				{
+					BcTypeNode baseType = evaluateType(firstItem);
+					
+					assert baseType != null;
+					baseClass = baseType.getClassNode();
+	
+					assert baseClass != null;
+				}
+				else 
+				{
+					assert false;
+				}
 			}
 			else
 			{

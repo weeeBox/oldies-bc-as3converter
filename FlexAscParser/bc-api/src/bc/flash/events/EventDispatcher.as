@@ -94,7 +94,8 @@ package bc.flash.events
 
 				for (var i : int = 0; i < numListeners; ++i)
 				{
-					listeners[i](event);
+					var listener : Function = listeners[i];
+					listener(event);
 
 					if (event.stopsImmediatePropagation)
 					{

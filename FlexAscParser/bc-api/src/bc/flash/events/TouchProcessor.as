@@ -24,7 +24,7 @@ package bc.flash.events
         
         /** Helper objects. */
         private static var sProcessedTouchIDs:Vector.<int> = new <int>[];
-        private static var sHoveringTouchData:Vector.<Object> = new <Object>[];
+        private static var sHoveringTouchData:Vector.<TouchData> = new <TouchData>[];
         
         public function TouchProcessor(stage:Stage)
         {
@@ -84,15 +84,15 @@ package bc.flash.events
                     
                     // hovering touches need special handling (see below)
                     if (touch && touch.phase == TouchPhase.HOVER && touch.target)
-                        sHoveringTouchData.push({ touch: touch, target: touch.target });
+                        sHoveringTouchData.push(new TouchData(touch, touch.target));
                     
-                    processTouch.apply(this, touchArgs);
+                    // processTouch.apply(this, touchArgs); FIXME!!!
                     sProcessedTouchIDs.push(touchID);
                 }
                 
                 // if the target of a hovering touch changed, we dispatch an event to the previous
                 // target to notify it that it's no longer being hovered over.
-                for each (var touchData:Object in sHoveringTouchData)
+                for each (var touchData:TouchData in sHoveringTouchData)
                     if (touchData.touch.target != touchData.target)
                         touchData.target.dispatchEvent(new TouchEvent(
                             TouchEvent.TOUCH, mCurrentTouches, mShiftDown, mCtrlDown));
@@ -119,9 +119,9 @@ package bc.flash.events
         
         public function enqueue(touchID:int, phase:String, globalX:Number, globalY:Number):void
         {
+            /* FIXME
             mQueue.unshift(arguments);
             
-			/* FIXME
             // multitouch simulation (only with mouse)
             if (mCtrlDown && simulateMultitouch && touchID == 0) 
             {
