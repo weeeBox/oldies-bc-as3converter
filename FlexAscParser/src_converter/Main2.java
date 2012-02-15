@@ -693,44 +693,41 @@ public class Main2
 	{
 		bcMembersTypesStack.push(lastBcMemberType);
 		lastBcMemberType = null;
+		BcTypeNode baseType = null;
 		
 		Node base = node.base;
 		SelectorNode selector = node.selector;
 		
-		ListWriteDestination memberDest = new ListWriteDestination();
-		pushDest(memberDest);
-		
+		// base expression
+		ListWriteDestination baseDest = new ListWriteDestination();
 		if (base != null)
 		{
-			ListWriteDestination baseExpr = new ListWriteDestination();
-			pushDest(baseExpr);
-			process(base);
-			popDest();
+			pushDest(baseDest);
 			
 			lastBcMemberType = evaluateType(base);
 			assert lastBcMemberType != null;
 			
-			boolean staticCall = false;
+			baseType = lastBcMemberType;
 			
-			if (base instanceof MemberExpressionNode)
+			IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier(base);
+			if (identifierNode != null && canBeClass(identifierNode.name)) // is static call?
 			{
-				IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)base);
-				staticCall = identifierNode != null && canBeClass(identifierNode.name);
-			}
-			
-			if (staticCall)
-			{
+				ListWriteDestination baseExpr = new ListWriteDestination();
+				pushDest(baseExpr);
+				process(base);
+				popDest();
+				
 				dest.write(BcCodeCs.type(baseExpr.toString()));
 			}
 			else
 			{
-				dest.write(baseExpr);
+				process(base);
 			}
+			
+			popDest();
 		}
-		
-		
-		BcTypeNode baseType = lastBcMemberType;
-		
+
+		// selector expression
 		ListWriteDestination selectorDest = new ListWriteDestination();
 		if (selector != null)
 		{
@@ -741,36 +738,19 @@ public class Main2
 		
 		boolean stringCall = false;
 		boolean objectAsDictionaryCall = false;
-		boolean needDot = true;
-		if (base != null && typeEquals(baseType, classString))
-		{
-			String selectorCode = selectorDest.toString();
-			stringCall = !selectorCode.equals("ToString()") && !selectorCode.equals("Length");
-			needDot = !stringCall;
-		}
 		
-		if (base != null && needDot)
+		if (base != null)
 		{
-			if (selector instanceof GetExpressionNode || 
-				selector instanceof CallExpressionNode || 
-				selector instanceof SetExpressionNode ||
-				selector instanceof DeleteExpressionNode ||
-				selector instanceof IncrementNode)
+			if (selector.getMode() == Tokens.LEFTBRACKET_TOKEN)
 			{
-				if (selector.getMode() == Tokens.LEFTBRACKET_TOKEN)
-				{
-					objectAsDictionaryCall = !typeOneOf(baseType, classVector, classDictionary, classArray, classString, classXMLList);
-				}
-				
-				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN || selector instanceof DeleteExpressionNode || objectAsDictionaryCall)
-				{
-					dest.write(".");
-				}
+				objectAsDictionaryCall = !typeOneOf(baseType, classVector, classDictionary, classArray, classString, classXMLList);				
 			}
-			else
+			
+			if (typeEquals(baseType, classString))
 			{
-				assert false;
-			}
+				String selectorCode = selectorDest.toString();
+				stringCall = !selectorCode.equals("ToString()") && !selectorCode.equals("Length");
+			}			
 		}
 		
 		if (objectAsDictionaryCall)
@@ -784,25 +764,18 @@ public class Main2
 			{
 				SetExpressionNode setExpr = (SetExpressionNode) selector;
 				
-				assert setExpr.args != null;
-				
+				assert setExpr.args != null;				
 				
 				ListWriteDestination argsDest = new ListWriteDestination();
 				pushDest(argsDest);
 				process(setExpr.args);
 				popDest();
 				
-				dest.writef("setOwnProperty(%s, %s)", exprDest, argsDest);
-				popDest(); // member dest
-				
-				dest.write(memberDest);
+				dest.writef("%s.setOwnProperty(%s, %s)", baseDest, exprDest, argsDest);
 			}
 			else if (selector instanceof GetExpressionNode)
 			{
-				dest.writef("getOwnProperty(%s)", exprDest);
-				popDest(); // member dest
-				
-				dest.write(memberDest);
+				dest.writef("%s.getOwnProperty(%s)", baseDest, exprDest);
 			}
 			else
 			{
@@ -811,8 +784,6 @@ public class Main2
 		}
 		else if (stringCall)	
 		{
-			popDest(); // member dest
-
 			assert selector instanceof CallExpressionNode;
 			CallExpressionNode callExpr = (CallExpressionNode) selector;
 			
@@ -828,26 +799,27 @@ public class Main2
 			assert funcIndentifierNode != null;
 			
 			String funcName = BcCodeCs.identifier(funcIndentifierNode);
-//			if (funcName.equals("charAt"))
-//			{
-//				dest.writef("%s[%s]", memberDest, argsDest);
-//			}
 			if (callExpr.args != null)
 			{
-				dest.writef("AsString.%s(%s, %s)", funcName, memberDest, argsDest);
+				dest.writef("AsString.%s(%s, %s)", funcName, baseDest, argsDest);
 			}
 			else
 			{
-				dest.writef("AsString.%s(%s)", funcName, memberDest);
+				dest.writef("AsString.%s(%s)", funcName, baseDest);
 			}
 		}
 		else
 		{
+			if (base != null)
+			{
+				dest.write(baseDest);
+				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
+				{
+					dest.write(".");
+				}
+			}
 			dest.write(selectorDest);
-			popDest(); // member dest
-			dest.write(memberDest);
 		}
-		
 		
 		lastBcMemberType = bcMembersTypesStack.pop();
 	}
