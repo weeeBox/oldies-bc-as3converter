@@ -109,7 +109,7 @@ package bc.flash.core.natives
 		/** Returns if there are listeners registered for a certain event type. */
 		public function hasEventListener(type : String) : Boolean
 		{
-			return mEventListeners != null && type in mEventListeners;
+			return mEventListeners != null && mEventListeners[type] != null;
 		}
 		
 		public function tick(dt : Number) : void
@@ -117,12 +117,12 @@ package bc.flash.core.natives
 			dispatchEvent(new EnterFrameEvent(Event.ENTER_FRAME, dt));
 		}
 		
-		public function keyPressed(code : int) : void
+		public function keyPressed(code : uint) : void
 		{
 			dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_DOWN, code));
 		}
 		
-		public function keyReleased(code : int) : void
+		public function keyReleased(code : uint) : void
 		{
 			dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP, code));
 		}
