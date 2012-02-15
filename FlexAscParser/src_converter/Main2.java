@@ -850,7 +850,7 @@ public class Main2
 		popDest();
 		
 		assert node.getMode() == Tokens.LEFTBRACKET_TOKEN;
-		dest.writef("remove(%s)", expr);
+		dest.writef(".remove(%s)", expr);
 	}
 	
 	private static void process(GetExpressionNode node)
@@ -1598,6 +1598,11 @@ public class Main2
 		assert listNode.size() == 1 : listNode.size();
 		Node condition = listNode.items.get(0);
 		
+		return createSafeConditionString(condString, condition);		
+	}
+
+	private static String createSafeConditionString(String condString, Node condition) 
+	{
 		BcTypeNode conditionType = evaluateType(condition);
 		if (!typeEquals(conditionType, classBoolean))
 		{
@@ -1610,7 +1615,7 @@ public class Main2
 		else
 		{
 			return String.format("%s", condString);
-		}		
+		}
 	}
 	
 	private static void process(ConditionalExpressionNode node)
@@ -1619,6 +1624,9 @@ public class Main2
 		pushDest(condDest);
 		process(node.condition);
 		popDest();
+		
+		String condString = condDest.toString();		
+		condString = createSafeConditionString(condString, node.condition);
 		
 		ListWriteDestination thenDest = new ListWriteDestination();
 		pushDest(thenDest);
@@ -1630,7 +1638,7 @@ public class Main2
 		process(node.elseexpr);
 		popDest();
 		
-		dest.writef("((%s) ? (%s) : (%s))", condDest, thenDest, elseDest);
+		dest.writef("((%s) ? (%s) : (%s))", condString, thenDest, elseDest);
 	}
 	
 	private static void process(WhileStatementNode node)
