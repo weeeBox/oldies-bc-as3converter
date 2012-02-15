@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import macromedia.asc.parser.ApplyTypeExprNode;
@@ -17,6 +19,7 @@ import macromedia.asc.parser.CaseLabelNode;
 import macromedia.asc.parser.ClassDefinitionNode;
 import macromedia.asc.parser.CoerceNode;
 import macromedia.asc.parser.ConditionalExpressionNode;
+import macromedia.asc.parser.DefinitionNode;
 import macromedia.asc.parser.DeleteExpressionNode;
 import macromedia.asc.parser.DoStatementNode;
 import macromedia.asc.parser.ExpressionStatementNode;
@@ -77,6 +80,7 @@ import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcInterfaceDefinitionNode;
+import bc.lang.BcMetadata;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -94,7 +98,6 @@ public class Main2
 	private static BcFunctionDeclaration lastBcFunction;
 	
 	private static final String internalFieldInitializer = "__internalInitializeFields";
-	private static final String API_PACKAGE_PREFIX = "_as_.";
 	
 	private static final String classObject = "Object";
 	private static final String classString = "String";
@@ -114,13 +117,14 @@ public class Main2
 	private static List<BcClassDefinitionNode> bcClasses;
 	private static List<BcFunctionDeclaration> bcGlobalFunctions;
 	
+	private static Map<DefinitionNode, BcMetadata> bcMetadataMap;
+	
 	private static boolean needFieldsInitializer;
 	
 	public static void main(String[] args)
 	{
 		BcFunctionDeclaration.thisCallMarker = BcCodeCs.thisCallMarker;
 		BcFunctionDeclaration.superCallMarker = BcCodeCs.superCallMarker;
-		
 		
 		File outputDir = new File(args[0]);
 
@@ -130,6 +134,7 @@ public class Main2
 		try
 		{
 			bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
+			bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
 			
 			bcPlatformClasses = collect("bc-platform/src");			
 			bcApiClasses = collect("bc-api/src");
@@ -209,11 +214,13 @@ public class Main2
 			if (node instanceof InterfaceDefinitionNode)
 			{
 				BcInterfaceDefinitionNode bcInterface = collect((InterfaceDefinitionNode) node);
+				bcInterface.setMetadata(bcMetadataMap.get(node));
 				bcClasses.add(bcInterface);
 			}
 			else if (node instanceof ClassDefinitionNode)
 			{
 				BcClassDefinitionNode bcClass = collect((ClassDefinitionNode) node);
+				bcClass.setMetadata(bcMetadataMap.get(node));
 				bcClasses.add(bcClass);
 			}
 			else if (node instanceof PackageDefinitionNode)
@@ -221,18 +228,21 @@ public class Main2
 				if (packageName == null)
 				{
 					PackageDefinitionNode packageNode = (PackageDefinitionNode) node;
-					String packageNameString = packageNode.name.id.pkg_part;
-					if (packageNameString.length() > 0)
-					{
-						if (packageNameString.startsWith(API_PACKAGE_PREFIX))
-						{
-							packageNameString = packageNameString.substring(API_PACKAGE_PREFIX.length());
-						}
-						packageName = packageNameString;
-					}
+					packageName = packageNode.name.id.pkg_part;
 				}
 			}
-			else if (node instanceof MetaDataNode || node instanceof ImportDirectiveNode)
+			else if (node instanceof MetaDataNode)
+			{
+				MetaDataNode metadata = (MetaDataNode) node;
+				if (metadata.def != null)
+				{
+					BcMetadata bcMetadata = BcNodeHelper.extractBcMetadata(metadata);
+					assert bcMetadata != null;
+					
+					bcMetadataMap.put(metadata.def, bcMetadata);
+				}
+			}
+			else if (node instanceof ImportDirectiveNode)
 			{
 				// nothing
 			}
@@ -2118,6 +2128,13 @@ public class Main2
 	{
 		for (BcClassDefinitionNode bcClass : classes)
 		{
+			BcMetadata metadata = bcClass.getMetadata();
+			if (metadata != null && metadata.contains("NoConversion"))
+			{
+				System.out.println("No conversion: " + bcClass.getName());
+				continue;
+			}
+			
 			writeClassDefinition(bcClass, outputDir);
 		}
 	}

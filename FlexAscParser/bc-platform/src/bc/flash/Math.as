@@ -1,8 +1,6 @@
 package bc.flash 
 {
-	/**
-	 * @author weee
-	 */
+	[NoConversion]
 	public class Math extends Object 
 	{
 		public static const E : Number = 2.718281828459045;

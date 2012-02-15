@@ -1,5 +1,6 @@
 package bc.flash
 {
+	[NoConversion]
 	public class Object
 	{
 		private var properties : Dictionary;

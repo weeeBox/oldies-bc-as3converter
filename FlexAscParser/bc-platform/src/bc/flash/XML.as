@@ -1,5 +1,6 @@
 package bc.flash 
 {
+	[NoConversion]
 	public dynamic final class XML extends Object 
 	{
 		/* public static const length : uint = 1; */

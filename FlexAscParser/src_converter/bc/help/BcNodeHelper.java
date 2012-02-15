@@ -4,20 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import macromedia.asc.parser.ApplyTypeExprNode;
+import macromedia.asc.parser.ArgumentListNode;
 import macromedia.asc.parser.AttributeListNode;
 import macromedia.asc.parser.FunctionDefinitionNode;
 import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.IdentifierNode;
 import macromedia.asc.parser.ListNode;
+import macromedia.asc.parser.LiteralArrayNode;
 import macromedia.asc.parser.LiteralBooleanNode;
 import macromedia.asc.parser.LiteralNumberNode;
 import macromedia.asc.parser.MemberExpressionNode;
+import macromedia.asc.parser.MetaDataNode;
 import macromedia.asc.parser.Node;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
 import macromedia.asc.parser.TypeExpressionNode;
 import macromedia.asc.util.ObjectList;
 import bc.lang.BcFunctionTypeNode;
+import bc.lang.BcMetadata;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
 import bc.lang.BcWildcardTypeNode;
@@ -58,6 +62,28 @@ public class BcNodeHelper
 		return modifiers;
 	}
 
+	public static BcMetadata extractBcMetadata(MetaDataNode metadata)
+	{
+		LiteralArrayNode data = metadata.data;
+		if (data != null && data.elementlist != null)
+		{
+			BcMetadata bcMetadata = new BcMetadata();
+			
+			ArgumentListNode elementlist = data.elementlist;
+			for (Node arg : elementlist.items)
+			{
+				IdentifierNode identifier = tryExtractIdentifier(arg);
+				if (identifier != null)
+				{
+					bcMetadata.add(identifier.name);
+				}
+			}
+			
+			return bcMetadata;
+		}
+		return null;
+	}
+	
 	public static BcTypeNode extractBcType(Node type)
 	{
 		if (type == null)

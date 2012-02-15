@@ -1,5 +1,6 @@
 package bc.flash 
 {
+	[NoConversion]
 	public class Class extends Object 
 	{
 		/* public static const length : int = 1; */

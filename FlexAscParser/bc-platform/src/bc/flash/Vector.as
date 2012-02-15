@@ -1,5 +1,6 @@
 package bc.flash 
 {
+	[NoConversion]
 	public class Vector extends Object 
 	{
 		/* public var fixed : Boolean; */

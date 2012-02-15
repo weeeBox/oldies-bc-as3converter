@@ -7,6 +7,17 @@ public class BcDeclaration extends BcNode
 	protected List<String> modifiers;
 	
 	protected boolean constant;
+	protected BcMetadata metadata;
+	
+	public void setMetadata(BcMetadata metadata) 
+	{
+		this.metadata = metadata;
+	}
+	
+	public BcMetadata getMetadata() 
+	{
+		return metadata;
+	}
 	
 	public void setModifiers(List<String> modifiers)
 	{

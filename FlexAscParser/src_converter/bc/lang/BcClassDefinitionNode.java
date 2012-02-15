@@ -7,7 +7,7 @@ import bc.help.BcCodeCpp;
 
 import macromedia.asc.parser.Node;
 
-public class BcClassDefinitionNode extends BcNode
+public class BcClassDefinitionNode extends BcDeclaration
 {
 	private BcTypeNode classType;
 	
@@ -329,6 +329,7 @@ public class BcClassDefinitionNode extends BcNode
 		bcClass.declaredVars = declaredVars;
 		bcClass.interfaces = interfaces;
 		bcClass.statements = statements;
+		bcClass.metadata = metadata;
 		
 		return bcClass;
 	}

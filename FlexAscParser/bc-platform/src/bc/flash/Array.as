@@ -1,7 +1,8 @@
 package bc.flash 
-{
+{	
+	[NoConversion]
 	public dynamic class Array extends Object 
-	{
+	{		
 		public static const CASEINSENSITIVE : uint = 1;
 		public static const DESCENDING : uint = 2;
 		public static const UNIQUESORT : uint = 4;
