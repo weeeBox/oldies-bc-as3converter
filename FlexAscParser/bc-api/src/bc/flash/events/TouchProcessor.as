@@ -64,7 +64,8 @@ package bc.flash.events
             
             while (mQueue.length > 0)
             {
-                sProcessedTouchIDs.length = sHoveringTouchData.length = 0;
+                sProcessedTouchIDs.length = 0; 
+		sHoveringTouchData.length = 0;
                 
                 // update existing touches
                 for each (var currentTouch:Touch in mCurrentTouches)
@@ -153,8 +154,10 @@ package bc.flash.events
                 processTap(touch);
         }
         
-        private function onKey(event:KeyboardEvent):void
-        {
+        private function onKey(evt:Event):void
+	{
+            var event : KeyboardEvent = KeyboardEvent(evt);
+			
             if (event.keyCode == 17 || event.keyCode == 15) // ctrl or cmd key
             {
                 var wasCtrlDown:Boolean = mCtrlDown;
