@@ -284,8 +284,10 @@ package bc.flash.core
             if (mStarted) render();           
         }
         
-        private function onKey(event:KeyboardEvent):void
-        {
+        private function onKey(evt:Event):void
+	{
+            var event : KeyboardEvent = KeyboardEvent(evt);
+			
             makeCurrent();
             
             mStage.dispatchEvent(event);
@@ -329,16 +331,13 @@ package bc.flash.core
             }
             
             // figure out touch phase
-            switch (event.type)
-            {
-                case TouchEvent.TOUCH_BEGIN: phase = TouchPhase.BEGAN; break;
-                case TouchEvent.TOUCH_MOVE:  phase = TouchPhase.MOVED; break;
-                case TouchEvent.TOUCH_END:   phase = TouchPhase.ENDED; break;
-                case MouseEvent.MOUSE_DOWN:  phase = TouchPhase.BEGAN; break;
-                case MouseEvent.MOUSE_UP:    phase = TouchPhase.ENDED; break;
-                case MouseEvent.MOUSE_MOVE: 
-                    phase = (mLeftMouseDown ? TouchPhase.MOVED : TouchPhase.HOVER); break;
-            }
+			if (event.type == TouchEvent.TOUCH_BEGIN) phase = TouchPhase.BEGAN;
+			else if (event.type == TouchEvent.TOUCH_MOVE) phase = TouchPhase.MOVED;
+			else if (event.type == TouchEvent.TOUCH_END) phase = TouchPhase.ENDED;
+			else if (event.type == MouseEvent.MOUSE_DOWN) phase = TouchPhase.BEGAN;
+			else if (event.type == MouseEvent.MOUSE_UP) phase = TouchPhase.ENDED;
+			else if (event.type == MouseEvent.MOUSE_MOVE)
+				phase = (mLeftMouseDown ? TouchPhase.MOVED : TouchPhase.HOVER);
             
             // move position into viewport bounds
             globalX = mStage.stageWidth  * (globalX - mViewPort.x) / mViewPort.width;

@@ -5,5 +5,9 @@ package bc.flash.error
 	 */
 	public class ArgumentError extends Error
 	{
+		public function ArgumentError(message : String = "")
+		{
+			super(message);
+		}
 	}
 }

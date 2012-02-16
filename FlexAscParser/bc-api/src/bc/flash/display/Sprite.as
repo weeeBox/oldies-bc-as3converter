@@ -1,5 +1,6 @@
 package bc.flash.display 
 {
+    import bc.flash.events.Event;
     import bc.flash.error.NotImplementedError;
     import bc.flash.events.TouchEvent;
     import bc.flash.ui.Mouse;
@@ -60,10 +61,20 @@ package bc.flash.display
             throw new NotImplementedError(); 
         }
 		
-        private function onTouch(event:TouchEvent):void
-        {
+        private function onTouch(evt:Event):void
+	{
+			var event : TouchEvent = TouchEvent(evt);
             Mouse.cursor = event.interactsWith(this) ? MouseCursor.BUTTON : MouseCursor.AUTO;
         }
+		
+	public function get mouseChildren() : Boolean { throw new NotImplementedError(); }
+
+	public function set mouseChildren(enable : Boolean) : void { throw new NotImplementedError(); }
+		
+	public function get tabChildren() : Boolean { throw new NotImplementedError(); }
+
+	public function set tabChildren(enable : Boolean) : void { throw new NotImplementedError(); }
+		
         
         /** Optimizes the sprite for optimal rendering performance. Changes in the
          *  children of a flattened sprite will not be displayed any longer. For this to happen,

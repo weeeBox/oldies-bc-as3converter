@@ -7,7 +7,7 @@ package bc.flash.display
     import bc.flash.geom.Rectangle;
     import bc.flash.util.transformCoords;
 
-    public class DisplayObjectContainer extends DisplayObject
+    public class DisplayObjectContainer extends InteractiveObject
     {
         // members
         

@@ -1859,11 +1859,14 @@ public class Main2
 	
 	private static void process(TryStatementNode node)
 	{
+		assert false;
 	}
 	
 	private static void process(ThrowStatementNode node)
 	{
-		
+		dest.write("throw ");
+		process(node.expr);
+		dest.writeln(";");
 	}
 	
 	private static void process(BinaryExpressionNode node)

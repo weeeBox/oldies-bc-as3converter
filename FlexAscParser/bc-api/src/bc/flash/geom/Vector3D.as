@@ -125,6 +125,8 @@ package bc.flash.geom
 			x *= lenInv;
 			y *= lenInv;
 			z *= lenInv;
+			
+			throw new NotImplementedError();
 		}
 
 		public function project() : void

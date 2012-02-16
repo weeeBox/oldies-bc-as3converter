@@ -5,5 +5,9 @@ package bc.flash.error
 	 */
 	public class AbstractClassError extends Error
 	{
+		public function AbstractClassError(message : String = "")
+		{
+			super(message);
+		}		
 	}
 }

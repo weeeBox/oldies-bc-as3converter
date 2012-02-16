@@ -1,7 +1,5 @@
 package bc.flash.events 
 {
-	import flash.events.Event;
-	
 	public class MouseEvent extends Event 
 	{
 		public static const CLICK : String = "click";
@@ -14,6 +12,11 @@ package bc.flash.events
 		public static const MOUSE_WHEEL : String = "mouseWheel";
 		public static const ROLL_OUT : String = "rollOut";
 		public static const ROLL_OVER : String = "rollOver";
+
+		public function MouseEvent(type:String, bubbles:Boolean=false)
+		{
+			super(type, bubbles);
+		}
 
 		/* function MouseEvent(type : String, bubbles : Boolean = true, cancelable : Boolean = false, localX : Number = undefined, localY : Number = undefined, relatedObject : InteractiveObject = null, ctrlKey : Boolean = false, altKey : Boolean = false, shiftKey : Boolean = false, buttonDown : Boolean = false, delta : int = 0) : void; */
 

@@ -14,7 +14,7 @@ package bc.flash.display
 
 	import flash.utils.getQualifiedClassName;
 	
-	public class DisplayObject extends EventDispatcher
+	public class DisplayObject extends EventDispatcher implements IBitmapDrawable
     {
         // members
         
@@ -368,5 +368,13 @@ package bc.flash.display
 
         /** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
         public function set transform(value : Transform) : void { throw new NotImplementedError(); }
+		
+	public function get scrollRect() : Rectangle { throw new NotImplementedError(); }
+
+	public function set scrollRect(value : Rectangle) : void { throw new NotImplementedError(); }
+		
+	public function get opaqueBackground() : uint { throw new NotImplementedError(); }
+
+	public function set opaqueBackground(value : uint) : void { throw new NotImplementedError(); }
     }
 }

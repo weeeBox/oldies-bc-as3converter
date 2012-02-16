@@ -47,8 +47,7 @@ package bc.flash.events
         
         public function advanceTime(passedTime:Number):void
         {
-            var i:int;
-            var touchID:int;
+            var i:int;            
             var touch:Touch;
             
             mElapsedTime += passedTime;
@@ -65,7 +64,7 @@ package bc.flash.events
             while (mQueue.length > 0)
             {
                 sProcessedTouchIDs.length = 0; 
-		sHoveringTouchData.length = 0;
+				sHoveringTouchData.length = 0;
                 
                 // update existing touches
                 for each (var currentTouch:Touch in mCurrentTouches)
@@ -75,21 +74,20 @@ package bc.flash.events
                         currentTouch.setPhase(TouchPhase.STATIONARY);
                 }
                 
-                // process new touches, but each ID only once
-                while (mQueue.length > 0 && 
-                    sProcessedTouchIDs.indexOf(mQueue[mQueue.length-1][0]) == -1)
-                {
-                    var touchArgs:Array = mQueue.pop();
-                    touchID = touchArgs[0] as int;
-                    touch = getCurrentTouch(touchID);
-                    
-                    // hovering touches need special handling (see below)
-                    if (touch && touch.phase == TouchPhase.HOVER && touch.target)
-                        sHoveringTouchData.push(new TouchData(touch, touch.target));
-                    
-                    // processTouch.apply(this, touchArgs); FIXME!!!
-                    sProcessedTouchIDs.push(touchID);
-                }
+//                // process new touches, but each ID only once
+//                while (mQueue.length > 0 && sProcessedTouchIDs.indexOf(mQueue[mQueue.length-1][0]) == -1)
+//                {
+//                    var touchArgs:Array = mQueue.pop();
+//                    touchID = touchArgs[0] as int;
+//                    touch = getCurrentTouch(touchID);
+//                    
+//                    // hovering touches need special handling (see below)
+//                    if (touch && touch.phase == TouchPhase.HOVER && touch.target)
+//                        sHoveringTouchData.push(new TouchData(touch, touch.target));
+//                    
+//                    // processTouch.apply(this, touchArgs); FIXME!!!
+//                    sProcessedTouchIDs.push(touchID);
+//                }
                 
                 // if the target of a hovering touch changed, we dispatch an event to the previous
                 // target to notify it that it's no longer being hovered over.
@@ -99,7 +97,7 @@ package bc.flash.events
                             TouchEvent.TOUCH, mCurrentTouches, mShiftDown, mCtrlDown));
                 
                 // dispatch events
-                for each (touchID in sProcessedTouchIDs)
+                for each (var touchID:int in sProcessedTouchIDs)
                 {
                     touch = getCurrentTouch(touchID);
                     
