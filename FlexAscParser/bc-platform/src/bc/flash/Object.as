@@ -3,7 +3,7 @@ package bc.flash
 	[NoConversion]
 	public class Object
 	{
-		private var properties : Dictionary;
+		private var mProperties : Dictionary;
 		
 		/* public static var prototype : Object; */
 		/* public var constructor : Object; */
@@ -16,9 +16,9 @@ package bc.flash
 		
 		public function hasOwnProperty(name : String) : Boolean
 		{
-			if (properties != null)
+			if (mProperties != null)
 			{
-				return properties[name] != null;
+				return mProperties[name] != null;
 			}
 			return false;
 		}
@@ -27,25 +27,25 @@ package bc.flash
         {
             if (hasOwnProperty(name))
 			{
-				return properties[name];
+				return mProperties[name];
 			}
 			return null;
         }
 
         public function setOwnProperty(name : String, value : Object) : void
         {
-            if (properties == null)
+            if (mProperties == null)
 			{
-				properties = new Dictionary();
+				mProperties = new Dictionary();
 			}
-			properties[name] = value;
+			mProperties[name] = value;
         }
 
         public function deleteOwnProperty(name : String) : void
         {
-            if (properties != null)
+            if (mProperties != null)
 			{
-				delete properties[name];
+				delete mProperties[name];
 			}
         }
 
