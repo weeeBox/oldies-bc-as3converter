@@ -88,6 +88,7 @@ package bc.flash.core.natives
 		}
 
 		/** Dispatches an event to all objects that have registered for events of the same type. */
+		[FunctionType(callback="EventListenerCallback")]
 		public function dispatchEvent(event : Event) : void
 		{
 			var listeners : Vector.<Function> = mEventListeners ? mEventListeners[event.type] : null;

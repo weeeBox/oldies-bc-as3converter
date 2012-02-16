@@ -15,6 +15,7 @@ package bc.flash.events
 		}
 
 		/** Registers an event listener at a certain object. */
+		[FunctionType(name="listener", callback="EventListenerCallback", param(name="event", type="Event"))]
 		public function addEventListener(type : String, listener : Function) : void
 		{
 			if (mEventListeners == null)
@@ -31,6 +32,7 @@ package bc.flash.events
 		}
 
 		/** Removes an event listener from the object. */
+		[FunctionType(name="listener", callback="EventListenerCallback")]
 		public function removeEventListener(type : String, listener : Function) : void
 		{
 			if (mEventListeners)
@@ -70,6 +72,7 @@ package bc.flash.events
 		}
 
 		/** Dispatches an event to all objects that have registered for events of the same type. */
+		[FunctionType(callback="EventListenerCallback")]
 		public function dispatchEvent(event : Event) : void
 		{
 			var listeners : Vector.<Function> = mEventListeners ? mEventListeners[event.type] : null;
@@ -83,7 +86,7 @@ package bc.flash.events
 			if (previousTarget == null || event.currentTarget != null) event.setTarget(this);
 
 			var stopImmediatePropagation : Boolean = false;
-			var numListeners : int = listeners == null ? 0 : listeners.length;
+			var numListeners : uint = listeners == null ? 0 : listeners.length;
 
 			if (numListeners != 0)
 			{
@@ -123,7 +126,7 @@ package bc.flash.events
 		/** Returns if there are listeners registered for a certain event type. */
 		public function hasEventListener(type : String) : Boolean
 		{
-			return mEventListeners != null && type in mEventListeners;
+			return mEventListeners != null && mEventListeners[type] != null;
 		}
 	}
 }

@@ -98,6 +98,7 @@ public class Main2
 	private static String packageName;
 	private static BcClassDefinitionNode lastBcClass;
 	private static BcFunctionDeclaration lastBcFunction;
+	private static BcFunctionTypeNode lastBcFunctionType;
 	
 	private static final String internalFieldInitializer = "__internalInitializeFields";
 	
@@ -263,7 +264,7 @@ public class Main2
 		
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
-		BcTypeNode interfaceType = BcTypeNode.create(interfaceDeclaredName);
+		BcTypeNode interfaceType = createBcType(interfaceDeclaredName);
 		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);
 		bcInterface.setPackageName(packageName);
 		bcInterface.setDeclaredVars(declaredVars);
@@ -298,7 +299,7 @@ public class Main2
 		String classDeclaredName = BcCodeCs.identifier(classDefinitionNode.name);
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
-		BcTypeNode classType = BcTypeNode.create(classDeclaredName);
+		BcTypeNode classType = createBcType(classDeclaredName);
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.setPackageName(packageName);
 		bcClass.setDeclaredVars(declaredVars);
@@ -309,7 +310,7 @@ public class Main2
 		Node baseclass = classDefinitionNode.baseclass;
 		if (baseclass == null)
 		{
-			BcTypeNode typeObject = BcTypeNode.create(classObject);
+			BcTypeNode typeObject = createBcType(classObject);
 			if (classType != typeObject)
 			{
 				bcClass.setExtendsType(typeObject);
@@ -523,7 +524,7 @@ public class Main2
 		BcTypeNode varType = bcVar.getType();
 		String varId = bcVar.getIdentifier();
 		
-		dest.writef("%s %s", BcCodeCs.type(varType), BcCodeCs.identifier(varId));
+		dest.writef("%s %s", type(varType), BcCodeCs.identifier(varId));
 		
 		Node initializer = bcVar.getInitializerNode();
 		if (initializer != null)
@@ -664,7 +665,7 @@ public class Main2
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
 		
-		dest.writef("%s %s", BcCodeCs.type(varType), BcCodeCs.identifier(bcIdentifier));
+		dest.writef("%s %s", type(varType), BcCodeCs.identifier(bcIdentifier));
 		
 		if (varBindNode.initializer != null)
 		{
@@ -731,7 +732,7 @@ public class Main2
 				process(base);
 				popDest();
 				
-				dest.write(BcCodeCs.type(baseExpr.toString()));
+				dest.write(type(baseExpr.toString()));
 			}
 			else
 			{
@@ -947,18 +948,18 @@ public class Main2
 							if (bcFunction != null)
 							{
 								System.err.println("Warning! Function type: " + identifier);
-								lastBcMemberType = BcTypeNode.create(classFunction);
+								lastBcMemberType = createBcType(classFunction);
 							}
 							else if (classEquals(bcClass, classXML) || classEquals(bcClass, classXMLList))
 							{
 								IdentifierNode identifierNode = (IdentifierNode) node.expr;
 								if (identifierNode.isAttr())
 								{
-									lastBcMemberType = BcTypeNode.create(classString);
+									lastBcMemberType = createBcType(classString);
 								}
 								else
 								{
-									lastBcMemberType = BcTypeNode.create(classXMLList);
+									lastBcMemberType = createBcType(classXMLList);
 									accessingDynamicXMLList = true;
 									System.err.println("Warning! Dynamic XMLList: " + identifier);
 								}
@@ -988,11 +989,11 @@ public class Main2
 			}
 			else if (typeEquals(lastBcMemberType, classXMLList))
 			{
-				lastBcMemberType = BcTypeNode.create(classXML);
+				lastBcMemberType = createBcType(classXML);
 			}
 			else
 			{
-				lastBcMemberType = BcTypeNode.create(classObject);
+				lastBcMemberType = createBcType(classObject);
 			}
 		}
 		else
@@ -1344,14 +1345,14 @@ public class Main2
 					if (bcFunction != null)
 					{
 						System.err.println("Warning! Function type: " + identifier);
-						lastBcMemberType = BcTypeNode.create(classFunction);
+						lastBcMemberType = createBcType(classFunction);
 					}
 					else if (classEquals(bcClass, classXML))
 					{
 						IdentifierNode identifierNode = (IdentifierNode) node.expr;
 						if (identifierNode.isAttribute())
 						{
-							lastBcMemberType = BcTypeNode.create(classString);
+							lastBcMemberType = createBcType(classString);
 						}
 						else
 						{
@@ -1376,7 +1377,7 @@ public class Main2
 			}
 			else
 			{
-				lastBcMemberType = BcTypeNode.create(classObject);
+				lastBcMemberType = createBcType(classObject);
 			}
 		}
 		else
@@ -1461,7 +1462,7 @@ public class Main2
 			for (Node genericTypeNode : typeArgs.items)
 			{
 				BcTypeNode genericType = extractBcType(genericTypeNode);
-				typeBuffer.append(BcCodeCs.type(genericType));
+				typeBuffer.append(type(genericType));
 				if (++genericIndex < genericCount)
 				{
 					typeBuffer.append(",");
@@ -1736,7 +1737,7 @@ public class Main2
 			BcVariableDeclaration loopVar = findDeclaredVar(loopVarName);
 			assert loopVar != null : loopVarName;
 			
-			String loopVarString = String.format("%s %s", BcCodeCs.type(loopVar.getType()), loopVarName);
+			String loopVarString = String.format("%s %s", type(loopVar.getType()), loopVarName);
 			String loopVarStringGenerated = loopVarString + " = " + typeDefault(loopVar.getType()) + ";";
 			
 			ListWriteDestination listDest = (ListWriteDestination) dest;
@@ -2044,6 +2045,7 @@ public class Main2
 	{
 		List<BcVariableDeclaration> oldDeclaredVars = declaredVars;
 		lastBcFunction = bcFunc;
+		lastBcFunctionType = null;
 		declaredVars = bcFunc.getDeclaredVars();
 
 		// metadata
@@ -2074,14 +2076,10 @@ public class Main2
 	private static void process(BcMetadata bcMetadata, BcClassDefinitionNode bcClass, BcFunctionDeclaration bcFunc) 
 	{
 		List<BcMetadataNode> functions = bcMetadata.children("FunctionType");
+		assert functions.size() <= 1;
+		
 		for (BcMetadataNode funcTypeMetadata : functions) 
 		{
-			String name = funcTypeMetadata.attribute("name");
-			assert name != null;
-			
-			BcFuncParam param = bcFunc.findParam(name);
-			assert param != null;
-			
 			String callbackName = funcTypeMetadata.attribute("callback");
 			assert callbackName != null;
 
@@ -2092,7 +2090,18 @@ public class Main2
 				process(funcType, funcTypeMetadata);
 				bcClass.addFunctionType(funcType);
 			}
-			param.setType(funcType);
+			
+			String name = funcTypeMetadata.attribute("name");
+			if (name != null)
+			{
+				BcFuncParam param = bcFunc.findParam(name);
+				assert param != null;
+				
+				param.setType(funcType);
+			}
+			
+			assert lastBcFunctionType == null;
+			lastBcFunctionType = funcType;
 		}
 	}
 	
@@ -2101,7 +2110,7 @@ public class Main2
 		String returnTypeString = typeMetadata.attribute("returnType");
 		if (returnTypeString != null)
 		{
-			BcTypeNode returnType = BcTypeNode.create(returnTypeString);
+			BcTypeNode returnType = createBcType(returnTypeString);
 			funcType.setReturnType(returnType);
 		}
 		
@@ -2114,7 +2123,7 @@ public class Main2
 			String type = paramMetadata.attribute("type");
 			assert type != null;
 			
-			funcType.addParam(new BcFuncParam(BcTypeNode.create(type), BcCodeCs.identifier(name)));
+			funcType.addParam(new BcFuncParam(createBcType(type), BcCodeCs.identifier(name)));
 		}
 	}
 
@@ -2219,7 +2228,7 @@ public class Main2
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = BcCodeCs.type(bcParam.getType());
+				String paramType = type(bcParam.getType());
 				String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(paramName);
@@ -2289,7 +2298,7 @@ public class Main2
 			
 			if (hasExtendsType)
 			{
-				src.write(BcCodeCs.type(bcClass.getExtendsType()));
+				src.write(type(bcClass.getExtendsType()));
 				if (hasInterfaces)
 				{
 					src.write(", ");
@@ -2302,7 +2311,7 @@ public class Main2
 				int interfaceIndex= 0;
 				for (BcTypeNode bcInterface : interfaces) 
 				{					
-					String interfaceType = BcCodeCs.type(bcInterface);
+					String interfaceType = type(bcInterface);
 					src.write(++interfaceIndex == interfaces.size() ? interfaceType : (interfaceType + ", "));
 				}
 			}
@@ -2339,10 +2348,10 @@ public class Main2
 
 	private static void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
 	{
-		String type = funcType.hasReturnType() ? BcCodeCs.type(funcType.getReturnType()) : "void";
+		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
 		String name = BcCodeCs.identifier(funcType.getName());			
 		
-		src.writelnf("public delegate %s %s(%s);", type, BcCodeCs.type(name), paramsString(funcType.getParams()));
+		src.writelnf("public delegate %s %s(%s);", type, type(name), paramsString(funcType.getParams()));
 	}
 
 	private static void writeFields(BcClassDefinitionNode bcClass)
@@ -2351,7 +2360,7 @@ public class Main2
 		
 		for (BcVariableDeclaration bcField : fields)
 		{
-			String type = BcCodeCs.type(bcField.getType());
+			String type = type(bcField.getType());
 			String name = BcCodeCs.identifier(bcField.getIdentifier());
 						
 			src.write(bcField.getVisiblity() + " ");
@@ -2420,7 +2429,7 @@ public class Main2
 					src.write("virtual ");
 				}
 				
-				String type = bcFunc.hasReturnType() ? BcCodeCs.type(bcFunc.getReturnType()) : "void";
+				String type = bcFunc.hasReturnType() ? type(bcFunc.getReturnType()) : "void";
 				String name = BcCodeCs.identifier(bcFunc.getName());			
 				
 				if (bcFunc.isGetter())
@@ -2454,7 +2463,7 @@ public class Main2
 		int paramIndex = 0;
 		for (BcFuncParam bcParam : params)
 		{
-			String paramType = BcCodeCs.type(bcParam.getType());
+			String paramType = type(bcParam.getType());
 			String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
 			paramsDest.writef("%s %s", paramType, paramName);
 			if (++paramIndex < params.size())
@@ -2733,7 +2742,7 @@ public class Main2
 	
 	private static String getClassName(BcClassDefinitionNode bcClass)
 	{
-		return BcCodeCs.type(bcClass.getName());
+		return type(bcClass.getName());
 	}
 	
 	public static BcTypeNode evaluateType(Node node)
@@ -2752,22 +2761,22 @@ public class Main2
 		if (node instanceof LiteralNumberNode)
 		{
 			LiteralNumberNode numberNode = (LiteralNumberNode) node;
-			return numberNode.value.indexOf('.') != -1 ? BcTypeNode.create("float") : BcTypeNode.create("int");			
+			return numberNode.value.indexOf('.') != -1 ? createBcType("float") : createBcType("int");			
 		}
 		
 		if (node instanceof LiteralStringNode)
 		{
-			return BcTypeNode.create(classString);
+			return createBcType(classString);
 		}
 		
 		if (node instanceof LiteralBooleanNode)
 		{
-			return BcTypeNode.create("BOOL");
+			return createBcType("BOOL");
 		}
 		
 		if (node instanceof LiteralNullNode)
 		{
-			return BcTypeNode.create("null");
+			return createBcType("null");
 		}
 		
 		if (node instanceof ListNode)
@@ -2821,7 +2830,7 @@ public class Main2
 				binaryNode.op == Tokens.LESSTHANOREQUALS_TOKEN ||
 				binaryNode.op == Tokens.IS_TOKEN)
 			{
-				return BcTypeNode.create(classBoolean);
+				return createBcType(classBoolean);
 			}
 			
 			if (binaryNode.op == Tokens.AS_TOKEN)
@@ -2831,38 +2840,38 @@ public class Main2
 			
 			if (typeEquals(lhsType, classString) || typeEquals(rhsType, classString))
 			{
-				return BcTypeNode.create(classString);
+				return createBcType(classString);
 			}
 			
 			if (typeEquals(lhsType, "Number") || typeEquals(rhsType, "Number"))
 			{
-				return BcTypeNode.create("Number");
+				return createBcType("Number");
 			}
 
 			if (typeEquals(lhsType, "float") || typeEquals(rhsType, "float"))
 			{
-				return BcTypeNode.create("float");
+				return createBcType("float");
 			}
 			
 			if (typeEquals(lhsType, "long") || typeEquals(rhsType, "long"))
 			{
-				return BcTypeNode.create("long");
+				return createBcType("long");
 			}
 			
 			if (typeEquals(lhsType, "int") && typeEquals(rhsType, "int"))
 			{
-				return BcTypeNode.create("int");
+				return createBcType("int");
 			}
 			
 			if (typeEquals(lhsType, "uint") && typeEquals(rhsType, "uint"))
 			{
-				return BcTypeNode.create("uint");
+				return createBcType("uint");
 			}
 			
 			if (typeEquals(lhsType, "uint") && typeEquals(rhsType, "int") || 
 				typeEquals(lhsType, "int") && typeEquals(rhsType, "uint"))
 			{
-				return BcTypeNode.create("long");
+				return createBcType("long");
 			}
 			
 			assert false;
@@ -2875,7 +2884,7 @@ public class Main2
 			{
 				if (unary.op == Tokens.NOT_TOKEN)
 				{
-					return BcTypeNode.create(classBoolean);
+					return createBcType(classBoolean);
 				}				
 				return evaluateMemberExpression((MemberExpressionNode) unary.expr);
 			}
@@ -2900,7 +2909,7 @@ public class Main2
 		
 		if (node instanceof LiteralArrayNode)
 		{
-			return BcTypeNode.create(classArray);
+			return createBcType(classArray);
 		}
 		
 		if (node instanceof ConditionalExpressionNode)
@@ -2922,7 +2931,7 @@ public class Main2
 				return elseType;
 			}
 			
-			return BcTypeNode.create(classObject);
+			return createBcType(classObject);
 		}
 		
 		if (node instanceof LiteralVectorNode)
@@ -3012,10 +3021,10 @@ public class Main2
 					{
 						if (identifier.isAttr())
 						{
-							return BcTypeNode.create(classString);
+							return createBcType(classString);
 						}
 						
-						return BcTypeNode.create(classXMLList); // dirty hack
+						return createBcType(classXMLList); // dirty hack
 					}
 					else if (BcCodeCs.identifier(identifier).equals(BcCodeCs.thisCallMarker))
 					{
@@ -3023,7 +3032,7 @@ public class Main2
 					}
 					else if (classEquals(baseClass, classObject))
 					{
-						return BcTypeNode.create(classObject);
+						return createBcType(classObject);
 					}
 				}
 			}
@@ -3037,11 +3046,11 @@ public class Main2
 				}
 				else if (typeEquals(baseClassType, classXMLList))
 				{
-					return BcTypeNode.create(classXMLList);
+					return createBcType(classXMLList);
 				}
 				else 
 				{
-					return BcTypeNode.create(classObject); // no generics
+					return createBcType(classObject); // no generics
 				}
 			}
 			else
@@ -3061,7 +3070,7 @@ public class Main2
 	{
 		if (identifier.isAttr())
 		{
-			return BcTypeNode.create(classString); // hack
+			return createBcType(classString); // hack
 		}
 		
 		String name = BcCodeCs.identifier(identifier);
@@ -3075,7 +3084,7 @@ public class Main2
 		
 		if (BcCodeCs.isBasicType(name))
 		{			
-			return BcTypeNode.create(name);
+			return createBcType(name);
 		}
 		
 		// search for local variable
@@ -3092,7 +3101,7 @@ public class Main2
 			{
 				return bcFunc.getReturnType();
 			}
-			return BcTypeNode.create("void");
+			return createBcType("void");
 		}
 		// search for field
 		BcVariableDeclaration bcField = baseClass.findField(name);
@@ -3109,11 +3118,18 @@ public class Main2
 		BcTypeNode bcType = BcNodeHelper.extractBcType(node);
 		if (bcType instanceof BcVectorTypeNode)
 		{
+			BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
+			
 			BcClassDefinitionNode vectorGenericClass = findClass(classVector).clone();
 			vectorGenericClass.setClassType(bcType);
 			bcPlatformClasses.add(vectorGenericClass);
 			
-			bcType.setClassNode(vectorGenericClass);
+			vectorType.setClassNode(vectorGenericClass);
+			BcTypeNode genericType = vectorType.getGeneric();
+			if (genericType instanceof BcFunctionTypeNode && lastBcFunctionType != null)
+			{
+				vectorType.setGeneric(lastBcFunctionType);
+			}
 		}
 		
 		BcTypeNode.add(bcType.getNameEx(), bcType);
@@ -3136,7 +3152,7 @@ public class Main2
 		}
 		popDest();
 		
-		dest.writef(BcCodeCs.construct(BcCodeCs.type(classArray), elementDest));		
+		dest.writef(BcCodeCs.construct(type(classArray), elementDest));		
 	}
 	
 	private static void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
@@ -3167,7 +3183,7 @@ public class Main2
 					BcTypeNode argType = evaluateType(elementNode);
 					if (argType != genericType)
 					{
-						dest.writef("%s(%s)", BcCodeCs.type(genericType), argDest);
+						dest.writef("%s(%s)", type(genericType), argDest);
 					}
 					else
 					{
@@ -3201,6 +3217,26 @@ public class Main2
 		}
 	}
 	
+	private static String type(BcTypeNode type) 
+	{
+		if (type instanceof BcFunctionTypeNode)
+		{
+			type = lastBcFunctionType != null ? lastBcFunctionType : type;
+		}
+		
+		return BcCodeCs.type(type);
+	}
+	
+	private static String type(String type) 
+	{
+		if (type.equals(classFunction))
+		{
+			type = lastBcFunctionType != null ? lastBcFunctionType.getName() : type;
+		}
+		
+		return BcCodeCs.type(type);
+	}
+
 	private static boolean classEquals(BcClassDefinitionNode classNode, String name)
 	{
 		return typeEquals(classNode.getClassType(), name);
@@ -3225,7 +3261,18 @@ public class Main2
 			return true;
 		}
 		
-		return type == BcTypeNode.create(name);
+		return type == createBcType(name);
+	}
+
+	private static BcTypeNode createBcType(String name) 
+	{
+		BcTypeNode type = BcTypeNode.create(name);
+		if (type instanceof BcFunctionTypeNode)
+		{
+			return lastBcFunctionType != null ? lastBcMemberType : type;
+		}
+		
+		return type;
 	}
 
 	private static boolean canBeClass(String name) 

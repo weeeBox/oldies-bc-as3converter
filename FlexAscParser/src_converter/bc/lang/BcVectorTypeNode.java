@@ -10,6 +10,11 @@ public class BcVectorTypeNode extends BcTypeNode
 		this.generic = generic;
 	}
 	
+	public void setGeneric(BcTypeNode generic) 
+	{
+		this.generic = generic;
+	}
+	
 	public BcTypeNode getGeneric()
 	{
 		return generic;
