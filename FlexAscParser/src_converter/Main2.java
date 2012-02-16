@@ -335,14 +335,26 @@ public class Main2
 		{
 			if (node instanceof FunctionDefinitionNode)
 			{
-				bcClass.add(collect((FunctionDefinitionNode) node));
+				BcFunctionDeclaration bcFunc = collect((FunctionDefinitionNode) node);
+				bcFunc.setMetadata(bcMetadataMap.get(node));
+				bcClass.add(bcFunc);
 			}
 			else if (node instanceof VariableDefinitionNode)
 			{
-				bcClass.add(collect((VariableDefinitionNode)node));
+				BcVariableDeclaration bcVar = collect((VariableDefinitionNode)node);
+				bcVar.setMetadata(bcMetadataMap.get(node));
+				bcClass.add(bcVar);
 			}
 			else if (node instanceof MetaDataNode)
 			{
+				MetaDataNode metadata = (MetaDataNode) node;
+				if (metadata.def != null)
+				{
+					BcMetadata bcMetadata = BcNodeHelper.extractBcMetadata(metadata);
+					assert bcMetadata != null;
+					
+					bcMetadataMap.put(metadata.def, bcMetadata);
+				}
 			}
 			else if (node instanceof ExpressionStatementNode)
 			{

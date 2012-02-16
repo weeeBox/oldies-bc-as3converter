@@ -1,6 +1,6 @@
-#Fri Jan 27 17:21:38 MAGT 2012
+#Fri Feb 17 00:01:34 MAGT 2012
 com.powerflasher.fdt.core.CompatiblePlayers=External_SWF_Viewer\:Browser\:Standalone_Flash_Player
-com.powerflasher.fdt.core.CompilerArguments=-target-player\={playerVersion}\n-library-path+\="{flexSDK}/frameworks/locale/en_US"\n-default-size\=550,400
+com.powerflasher.fdt.core.CompilerArguments=-target-player\={playerVersion}\n-library-path+\="{flexSDK}/frameworks/locale/en_US"\n-default-size\=550,400\n-keep-as3-metadata+\=FunctionType
 com.powerflasher.fdt.core.DefaultOutputFolder=bin
 com.powerflasher.fdt.core.DefaultPlayer=External_SWF_Viewer
 com.powerflasher.fdt.core.Language=AS3
