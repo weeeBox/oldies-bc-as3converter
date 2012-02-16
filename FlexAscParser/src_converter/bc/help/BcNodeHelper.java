@@ -22,13 +22,8 @@ import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
 import macromedia.asc.parser.TypeExpressionNode;
 import macromedia.asc.util.ObjectList;
-import bc.lang.BcFunctionTypeNode;
-import bc.lang.BcMemberExpressionNode;
 import bc.lang.BcMetadata;
-import bc.lang.BcMetadataCompositeNode;
 import bc.lang.BcMetadataNode;
-import bc.lang.BcMetadataAttributeNode;
-import bc.lang.BcMetadataIdentifierNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
 import bc.lang.BcWildcardTypeNode;
@@ -79,7 +74,7 @@ public class BcNodeHelper
 			ArgumentListNode elementlist = data.elementlist;
 			for (Node arg : elementlist.items)
 			{
-				bcMetadata.add(extractBcMetadataNode(arg));
+				extractBcMetadataNode(arg, bcMetadata.getRootNode());
 			}
 				
 			return bcMetadata;
@@ -87,7 +82,7 @@ public class BcNodeHelper
 		return null;
 	}
 	
-	private static BcMetadataNode extractBcMetadataNode(Node node) 
+	private static void extractBcMetadataNode(Node node, BcMetadataNode parentNode) 
 	{		
 		if (node instanceof MemberExpressionNode)
 		{
@@ -97,7 +92,7 @@ public class BcNodeHelper
 				IdentifierNode identifier = tryExtractIdentifier(memberNode.selector);
 				assert identifier != null;
 				
-				return new BcMetadataIdentifierNode(identifier.name);
+				parentNode.add(new BcMetadataNode(identifier.name));
 			}
 			else if (memberNode.selector instanceof SetExpressionNode)
 			{
@@ -112,16 +107,15 @@ public class BcNodeHelper
 				Node item = args.items.get(0);
 				assert item instanceof LiteralStringNode : item.getClass();
 				
-				LiteralStringNode literalString = (LiteralStringNode) item;
-				
-				return new BcMetadataAttributeNode(identifier.name, literalString.value);
+				LiteralStringNode literalString = (LiteralStringNode) item;				
+				parentNode.setAttribute(identifier.name, literalString.value);
 			}
 			else if (memberNode.selector instanceof CallExpressionNode)
 			{
 				IdentifierNode identifier = tryExtractIdentifier(memberNode.selector);
 				assert identifier != null;
 				
-				BcMetadataCompositeNode metadata = new BcMetadataCompositeNode(identifier.name);
+				BcMetadataNode metadata = new BcMetadataNode(identifier.name);
 				
 				CallExpressionNode callNode = (CallExpressionNode) memberNode.selector;
 				if (callNode.args != null)
@@ -129,20 +123,21 @@ public class BcNodeHelper
 					ArgumentListNode args = callNode.args;
 					for (Node arg : args.items) 
 					{
-						metadata.addChild(extractBcMetadataNode(arg));
+						extractBcMetadataNode(arg, metadata);
 					}
 				}
 				
-				return metadata;
+				parentNode.add(metadata);
 			}
 			else
 			{
 				assert false;
 			}
 		}
-		
-		assert false;
-		return null;
+		else
+		{
+			assert false;
+		}
 	}
 
 	public static BcTypeNode extractBcType(Node type)

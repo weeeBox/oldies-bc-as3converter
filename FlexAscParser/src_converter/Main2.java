@@ -79,8 +79,10 @@ import bc.help.BcNodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
+import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcMetadata;
+import bc.lang.BcMetadataNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -2044,6 +2046,48 @@ public class Main2
 		lastBcFunction = bcFunc;
 		declaredVars = bcFunc.getDeclaredVars();
 
+		// metadata
+		BcMetadata bcMetadata = bcFunc.getMetadata();
+		if (bcMetadata != null)
+		{
+			List<BcMetadataNode> functions = bcMetadata.children("FunctionType");
+			if (functions.size() > 0)
+			{
+				List<BcFuncParam> params = bcFunc.getParams();
+				for (BcFuncParam param : params) 
+				{
+					BcTypeNode type = param.getType();
+					if (type instanceof BcFunctionTypeNode)
+					{
+						String name = param.getIdentifier();
+						for (BcMetadataNode bcFunctionMetadata : functions) 
+						{
+							String paramName = bcFunctionMetadata.attribute("name");
+							assert paramName != null;
+							
+							if (paramName.equals(name))
+							{
+								String callbackName = bcFunctionMetadata.attribute("callback");
+								assert callbackName != null;
+							
+								BcFunctionTypeNode newType = new BcFunctionTypeNode();
+								param.setType(newType);
+								
+								newType.setName(callbackName);
+								
+								String returns = bcFunctionMetadata.attribute("returns");
+								if (returns != null)
+								{
+									BcTypeNode returnType = BcTypeNode.create(returns);
+									newType.setReturnType(returnType);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
 		// get function statements
 		ListWriteDestination body = new ListWriteDestination();
 		pushDest(body);

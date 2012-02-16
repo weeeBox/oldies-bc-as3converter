@@ -33,6 +33,11 @@ public class BcVariableDeclaration extends BcDeclaration
 		return type;
 	}
 	
+	public void setType(BcTypeNode type)
+	{
+		this.type = type;
+	}
+	
 	public String getIdentifier()
 	{
 		return identifier;

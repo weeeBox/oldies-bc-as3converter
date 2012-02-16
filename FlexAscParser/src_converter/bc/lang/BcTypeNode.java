@@ -47,6 +47,11 @@ public class BcTypeNode extends BcNode
 		integral = BcCodeCpp.isBasicType(name);
 	}
 	
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	
 	public String getName()
 	{
 		return name;

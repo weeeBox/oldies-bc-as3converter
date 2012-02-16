@@ -5,25 +5,25 @@ import java.util.List;
 
 public class BcFunctionTypeNode extends BcTypeNode
 {
-	private List<BcTypeNode> args;
+	private List<BcFuncParam> params;
 	private BcTypeNode returnType;
 
 	public BcFunctionTypeNode()
 	{
 		super("Function");
-		args = new ArrayList<BcTypeNode>();
+		params = new ArrayList<BcFuncParam>();
 	}
 
-	public void add(BcTypeNode arg)
+	public void addParam(BcFuncParam param)
 	{
-		args.add(arg);
+		params.add(param);
 	}
 	
-	public List<BcTypeNode> getArgs()
+	public List<BcFuncParam> getParams() 
 	{
-		return args;
+		return params;
 	}
-
+	
 	public void setReturnType(BcTypeNode returnType)
 	{
 		this.returnType = returnType;
