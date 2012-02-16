@@ -26,6 +26,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private List<BcTypeNode> interfaces;
 
 	private List<Node> statements;
+	private List<BcFunctionTypeNode> functionTypes;
 	
 	public BcClassDefinitionNode(BcTypeNode classType)
 	{
@@ -36,6 +37,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 		statements = new ArrayList<Node>();
 		interfaces = new ArrayList<BcTypeNode>();
 		additionalImports = new ArrayList<BcTypeNode>();
+		functionTypes = new ArrayList<BcFunctionTypeNode>();
 	}
 	
 	public void addStatement(Node statement)
@@ -86,6 +88,28 @@ public class BcClassDefinitionNode extends BcDeclaration
 	public boolean hasExtendsType()
 	{
 		return extendsType != null;
+	}
+	
+	public void addFunctionType(BcFunctionTypeNode node)
+	{
+		functionTypes.add(node);
+	}
+	
+	public BcFunctionTypeNode findFunctionType(String name)
+	{
+		for (BcFunctionTypeNode funcType : functionTypes) 
+		{
+			if (funcType.getName().equals(name))
+			{
+				return funcType;
+			}
+		}
+		return extendsType != null ? extendsType.getClassNode().findFunctionType(name) : null;
+	}
+	
+	public List<BcFunctionTypeNode> getFunctionTypes() 
+	{
+		return functionTypes;
 	}
 	
 	public void addInterface(BcTypeNode interfaceType)

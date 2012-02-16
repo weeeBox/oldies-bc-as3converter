@@ -31,7 +31,7 @@ package bc.flash.core.natives
 		}
 
 		/** Registers an event listener at a certain object. */
-		[FunctionType(name="listener", callback="EventListenerCallback", Param(name="event", type="Event"))]
+		[FunctionType(name="listener", callback="EventListenerCallback", param(name="event", type="Event"))]
 		public function addEventListener(type : String, listener : Function) : void
 		{
 			if (mEventListeners == null)
@@ -48,6 +48,7 @@ package bc.flash.core.natives
 		}
 
 		/** Removes an event listener from the object. */
+		[FunctionType(name="listener", callback="EventListenerCallback")]
 		public function removeEventListener(type : String, listener : Function) : void
 		{
 			if (mEventListeners)

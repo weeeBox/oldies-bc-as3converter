@@ -2050,42 +2050,7 @@ public class Main2
 		BcMetadata bcMetadata = bcFunc.getMetadata();
 		if (bcMetadata != null)
 		{
-			List<BcMetadataNode> functions = bcMetadata.children("FunctionType");
-			if (functions.size() > 0)
-			{
-				List<BcFuncParam> params = bcFunc.getParams();
-				for (BcFuncParam param : params) 
-				{
-					BcTypeNode type = param.getType();
-					if (type instanceof BcFunctionTypeNode)
-					{
-						String name = param.getIdentifier();
-						for (BcMetadataNode bcFunctionMetadata : functions) 
-						{
-							String paramName = bcFunctionMetadata.attribute("name");
-							assert paramName != null;
-							
-							if (paramName.equals(name))
-							{
-								String callbackName = bcFunctionMetadata.attribute("callback");
-								assert callbackName != null;
-							
-								BcFunctionTypeNode newType = new BcFunctionTypeNode();
-								param.setType(newType);
-								
-								newType.setName(callbackName);
-								
-								String returns = bcFunctionMetadata.attribute("returns");
-								if (returns != null)
-								{
-									BcTypeNode returnType = BcTypeNode.create(returns);
-									newType.setReturnType(returnType);
-								}
-							}
-						}
-					}
-				}
-			}
+			process(bcMetadata, bcClass, bcFunc);
 		}
 		
 		// get function statements
@@ -2105,7 +2070,53 @@ public class Main2
 		declaredVars = oldDeclaredVars;
 		lastBcFunction = null;
 	}
+
+	private static void process(BcMetadata bcMetadata, BcClassDefinitionNode bcClass, BcFunctionDeclaration bcFunc) 
+	{
+		List<BcMetadataNode> functions = bcMetadata.children("FunctionType");
+		for (BcMetadataNode funcTypeMetadata : functions) 
+		{
+			String name = funcTypeMetadata.attribute("name");
+			assert name != null;
+			
+			BcFuncParam param = bcFunc.findParam(name);
+			assert param != null;
+			
+			String callbackName = funcTypeMetadata.attribute("callback");
+			assert callbackName != null;
+
+			BcFunctionTypeNode funcType = bcClass.findFunctionType(callbackName);
+			if (funcType == null)
+			{
+				funcType = new BcFunctionTypeNode(callbackName);
+				process(funcType, funcTypeMetadata);
+			}
+			param.setType(funcType);
+		}
+	}
 	
+	private static void process(BcFunctionTypeNode funcType, BcMetadataNode typeMetadata) 
+	{
+		String returnTypeString = typeMetadata.attribute("returnType");
+		if (returnTypeString != null)
+		{
+			BcTypeNode returnType = BcTypeNode.create(returnTypeString);
+			funcType.setReturnType(returnType);
+		}
+		
+		List<BcMetadataNode> params = typeMetadata.childs("param");
+		for (BcMetadataNode paramMetadata : params) 
+		{
+			String name = paramMetadata.attribute("name");
+			assert name != null;
+			
+			String type = paramMetadata.attribute("type");
+			assert type != null;
+			
+			funcType.addParam(new BcFuncParam(BcTypeNode.create(type), BcCodeCs.identifier(name)));
+		}
+	}
+
 	private static void process(ExpressionStatementNode node)
 	{
 		process(node.expr);

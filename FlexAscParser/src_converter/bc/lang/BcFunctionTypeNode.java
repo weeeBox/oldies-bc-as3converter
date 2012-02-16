@@ -10,7 +10,12 @@ public class BcFunctionTypeNode extends BcTypeNode
 
 	public BcFunctionTypeNode()
 	{
-		super("Function");
+		this("Function");		
+	}
+	
+	public BcFunctionTypeNode(String name)
+	{
+		super(name);
 		params = new ArrayList<BcFuncParam>();
 	}
 

@@ -26,7 +26,13 @@ public class BcMetadataNode
 	
 	public String attribute(String name)
 	{
-		return attributes.get(name);
+		return attribute(name, null);
+	}
+	
+	public String attribute(String name, String defaultValue)
+	{
+		String value = attributes.get(name);
+		return value != null ? value : defaultValue;
 	}
 	
 	public void add(BcMetadataNode node) 

@@ -74,6 +74,18 @@ public class BcFunctionDeclaration extends BcDeclaration
 		}
 	}
 
+	public BcFuncParam findParam(String name)
+	{
+		for (BcFuncParam param : params) 
+		{
+			if (param.getIdentifier().equals(name))
+			{
+				return param;
+			}
+		}
+		return null;
+	}
+	
 	public void setReturnType(BcTypeNode returnType)
 	{
 		this.returnType = returnType;
