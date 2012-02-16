@@ -2090,6 +2090,7 @@ public class Main2
 			{
 				funcType = new BcFunctionTypeNode(callbackName);
 				process(funcType, funcTypeMetadata);
+				bcClass.addFunctionType(funcType);
 			}
 			param.setType(funcType);
 		}
@@ -2262,6 +2263,11 @@ public class Main2
 		src.writeln("namespace " + BcCodeCs.namespace(bcClass.getPackageName()));
 		writeBlockOpen(src);
 		
+		if (bcClass.hasFunctionTypes())
+		{
+			writeFunctionTypes(bcClass);
+		}
+		
 		if (isInterface)
 		{
 			src.writelnf("public interface %s", className);
@@ -2320,6 +2326,23 @@ public class Main2
 		writeBlockClose(src);
 		
 		src.close();
+	}
+
+	private static void writeFunctionTypes(BcClassDefinitionNode bcClass) 
+	{
+		List<BcFunctionTypeNode> functionTypes = bcClass.getFunctionTypes();
+		for (BcFunctionTypeNode funcType : functionTypes) 
+		{
+			writeFunctionType(bcClass, funcType);
+		}
+	}
+
+	private static void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
+	{
+		String type = funcType.hasReturnType() ? BcCodeCs.type(funcType.getReturnType()) : "void";
+		String name = BcCodeCs.identifier(funcType.getName());			
+		
+		src.writelnf("public delegate %s %s(%s);", type, BcCodeCs.type(name), paramsString(funcType.getParams()));
 	}
 
 	private static void writeFields(BcClassDefinitionNode bcClass)
@@ -2411,20 +2434,7 @@ public class Main2
 				src.writef("%s %s", type, name);
 			}
 			
-			StringBuilder paramsBuffer = new StringBuilder();
-			List<BcFuncParam> params = bcFunc.getParams();
-			int paramIndex = 0;
-			for (BcFuncParam bcParam : params)
-			{
-				String paramType = BcCodeCs.type(bcParam.getType());
-				String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
-				paramsBuffer.append(String.format("%s %s", paramType, paramName));
-				if (++paramIndex < params.size())
-				{
-					paramsBuffer.append(", ");
-				}
-			}
-			src.writelnf("(%s)", paramsBuffer);
+			src.writelnf("(%s)", paramsString(bcFunc.getParams()));
 			
 			ListWriteDestination body = bcFunc.getBody();
 			if (bcFunc.isConstructor())
@@ -2436,6 +2446,24 @@ public class Main2
 				src.writeln(body);
 			}
 		}
+	}
+
+	private static String paramsString(List<BcFuncParam> params) 
+	{
+		ListWriteDestination paramsDest = new ListWriteDestination();
+		int paramIndex = 0;
+		for (BcFuncParam bcParam : params)
+		{
+			String paramType = BcCodeCs.type(bcParam.getType());
+			String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
+			paramsDest.writef("%s %s", paramType, paramName);
+			if (++paramIndex < params.size())
+			{
+				paramsDest.write(", ");
+			}
+		}
+		
+		return paramsDest.toString();
 	}
 
 	private static void writeConstructorBody(ListWriteDestination body) 
