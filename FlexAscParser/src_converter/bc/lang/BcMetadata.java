@@ -1,24 +1,26 @@
 package bc.lang;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BcMetadata 
 {
-	private List<String> items;
+	private BcMetadataCompositeNode rootNode;
 
 	public BcMetadata() 
 	{
-		items = new ArrayList<String>();
+		rootNode = new BcMetadataCompositeNode(null);
 	}
 	
-	public void add(String name) 
+	public void add(BcMetadataNode node) 
 	{
-		items.add(name);
+		rootNode.addChild(node);
 	}
 	
-	public boolean contains(String name)
+	public BcMetadataCompositeNode getRootNode() 
 	{
-		return items.contains(name);
+		return rootNode;
+	}
+
+	public boolean contains(String name) 
+	{
+		return rootNode.containNode(name);
 	}
 }
