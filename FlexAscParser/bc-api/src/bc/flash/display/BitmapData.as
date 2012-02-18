@@ -7,7 +7,26 @@ package bc.flash.display
 	
 	public class BitmapData extends Object implements IBitmapDrawable
 	{
-		function BitmapData(width : int, height : int, transparent : Boolean = true, fillColor : uint = 0xffffffff) : void { throw new NotImplementedError(); }
+		private var mWidth : int;
+		private var mHeight : int;
+		private var mTransparent : Boolean;
+		private var mFillColor : uint;
+		
+		public function BitmapData(width : int, height : int, transparent : Boolean = true, fillColor : uint = 0xffffffff) : void 
+		{ 
+			mWidth = width;
+			mHeight = height;
+			mTransparent = transparent;
+			mFillColor = fillColor;
+		}
+
+		public function draw(source : IBitmapDrawable, matrix : Matrix = null, colorTransform : ColorTransform = null, blendMode : String = null, clipRect : Rectangle = null, smoothing : Boolean = false) : void { throw new NotImplementedError(); }
+		
+		public function dispose() : void { throw new NotImplementedError(); }
+		
+		public function get width() : int { return mWidth; }
+		
+		public function get height() : int { return mHeight; }
 
 		/* public function applyFilter(sourceBitmapData : BitmapData, sourceRect : Rectangle, destPoint : Point, filter : BitmapFilter) : void; */
 
@@ -20,10 +39,6 @@ package bc.flash.display
 		/* public function copyChannel(sourceBitmapData : BitmapData, sourceRect : Rectangle, destPoint : Point, sourceChannel : uint, destChannel : uint) :  : void { throw new NotImplementedError(); }
 
 		/* public function copyPixels(sourceBitmapData : BitmapData, sourceRect : Rectangle, destPoint : Point, alphaBitmapData : BitmapData = null, alphaPoint : Point = null, mergeAlpha : Boolean = false) : void; */
-
-		public function dispose() : void { throw new NotImplementedError(); }
-
-		public function draw(source : IBitmapDrawable, matrix : Matrix = null, colorTransform : ColorTransform = null, blendMode : String = null, clipRect : Rectangle = null, smoothing : Boolean = false) : void { throw new NotImplementedError(); }
 
 		/* public function fillRect(rect : Rectangle, color : uint) : void { throw new NotImplementedError(); } */
 
@@ -41,8 +56,6 @@ package bc.flash.display
 
 		/* [Version("10")] */
 		/* public function getVector(rect : Rectangle) : Vector.<uint>; */
-
-		public function get height() : int { throw new NotImplementedError(); }
 
 		/* [Version("10")] */
 		/* public function histogram(hRect : Rectangle = null) : Vector.<Vector.<Number>>; */
@@ -79,7 +92,5 @@ package bc.flash.display
 		/* public function get transparent() : Boolean; */
 
 		/* public function unlock(changeRect : Rectangle = null) : void; */
-
-		public function get width() : int { throw new NotImplementedError(); }
 	}
 }

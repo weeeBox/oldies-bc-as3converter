@@ -1,7 +1,5 @@
 package bc.flash.core
 {
-	import bc.flash.ui.MultitouchInputMode;
-	import bc.flash.ui.Multitouch;
 	import bc.flash.core.natives.BcNativeStage;
 	import bc.flash.display.DisplayObject;
 	import bc.flash.display.Stage;
@@ -14,7 +12,9 @@ package bc.flash.core
 	import bc.flash.events.TouchPhase;
 	import bc.flash.events.TouchProcessor;
 	import bc.flash.geom.Rectangle;
-	import bc.flash.util.getTimer;
+	import bc.flash.ui.Multitouch;
+	import bc.flash.ui.MultitouchInputMode;
+	import bc.flash.utils.getTimer;
 
     public class Starling extends EventDispatcher
     {

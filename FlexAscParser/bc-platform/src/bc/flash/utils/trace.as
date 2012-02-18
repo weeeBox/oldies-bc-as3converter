@@ -1,10 +1,11 @@
-package bc.flash.util
+package bc.flash.utils
 {
 	import bc.flash.error.NotImplementedError;
+	
 	/**
 	 * @author weee
 	 */
-	public function parseFloat(str : String) : Number
+	public function trace(str : String) : void
 	{
 		throw new NotImplementedError();
 	}

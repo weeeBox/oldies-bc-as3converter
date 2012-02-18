@@ -1,10 +1,10 @@
-package bc.flash.util
+package bc.flash.utils
 {
 	import bc.flash.error.NotImplementedError;
 	/**
 	 * @author weee
 	 */
-	public function getTimer() : int
+	public function getQualifiedClassName(value : Object) : String
 	{
 		throw new NotImplementedError();
 	}

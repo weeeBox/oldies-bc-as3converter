@@ -5,7 +5,7 @@ package bc.flash.display
     import bc.flash.geom.Matrix;
     import bc.flash.geom.Point;
     import bc.flash.geom.Rectangle;
-    import bc.flash.util.transformCoords;
+    import bc.flash.utils.transformCoords;
 
     public class DisplayObjectContainer extends InteractiveObject
     {

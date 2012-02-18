@@ -1,4 +1,4 @@
-package bc.flash.util
+package bc.flash.utils
 {
 	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Point;

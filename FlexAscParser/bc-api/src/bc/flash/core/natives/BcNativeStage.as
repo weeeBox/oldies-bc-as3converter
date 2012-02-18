@@ -1,7 +1,6 @@
 package bc.flash.core.natives
 {
 	import bc.flash.events.KeyboardEvent;
-	import bc.flash.ui.Keyboard;
 	import bc.flash.events.EnterFrameEvent;
 	import bc.flash.events.Event;
 
