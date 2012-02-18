@@ -3,6 +3,7 @@ package bc.flash.xml
 	/**
 	 * @author weee
 	 */
+	[ConvertOnce]
 	public class XMLElement extends bc.flash.xml.XML
 	{
 		private var mAttributes : bc.flash.xml.XMLList;

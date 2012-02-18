@@ -2,7 +2,7 @@ package bc.flash
 {
 	import bc.flash.error.NotImplementedError;
 	
-	[NoConversion]
+	[ConvertOnce]
 	public class Math extends Object 
 	{
 		public static const E : Number = 2.718281828459045;

@@ -3,7 +3,7 @@ package bc.flash.error
 	/**
 	 * @author weee
 	 */
-	[NoConversion]
+	[ConvertOnce]
 	public class Error
 	{
 		public var message : String;

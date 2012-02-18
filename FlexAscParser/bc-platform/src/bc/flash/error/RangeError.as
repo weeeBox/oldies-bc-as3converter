@@ -3,7 +3,7 @@ package bc.flash.error
 	/**
 	 * @author weee
 	 */
-	[NoConversion]
+	[ConvertOnce]
 	public class RangeError extends Error
 	{
 		public function RangeError(message : String = "")

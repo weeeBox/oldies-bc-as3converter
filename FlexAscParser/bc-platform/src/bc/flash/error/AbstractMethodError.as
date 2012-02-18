@@ -3,7 +3,7 @@ package bc.flash.error
 	/**
 	 * @author weee
 	 */
-	[NoConversion]
+	[ConvertOnce]
 	public class AbstractMethodError extends Error
 	{
 		public function AbstractMethodError(message : String = "")

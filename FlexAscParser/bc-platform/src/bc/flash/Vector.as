@@ -2,7 +2,7 @@ package bc.flash
 {
 	import bc.flash.error.NotImplementedError;
 	
-	[NoConversion]
+	[ConvertOnce]
 	public class Vector extends Object 
 	{
 		/* public var fixed : Boolean; */

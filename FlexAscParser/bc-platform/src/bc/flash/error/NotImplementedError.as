@@ -3,7 +3,7 @@ package bc.flash.error
 	/**
 	 * @author weee
 	 */
-	[NoConversion]
+	[ConvertOnce]
 	public class NotImplementedError extends Error
 	{
 		public function NotImplementedError(message : String = "")

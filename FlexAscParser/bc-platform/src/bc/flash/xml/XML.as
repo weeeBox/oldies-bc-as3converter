@@ -3,7 +3,7 @@ package bc.flash.xml
 	import bc.flash.error.NotImplementedError;
 	import bc.flash.error.AbstractClassError;
 
-	[NoConversion]
+	[ConvertOnce]
 	public class XML extends Object
 	{
 		private var mParent : XML;

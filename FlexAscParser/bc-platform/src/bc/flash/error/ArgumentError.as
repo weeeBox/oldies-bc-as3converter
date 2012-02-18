@@ -3,7 +3,7 @@ package bc.flash.error
 	/**
 	 * @author weee
 	 */
-	[NoConversion]
+	[ConvertOnce]
 	public class ArgumentError extends Error
 	{
 		public function ArgumentError(message : String = "")

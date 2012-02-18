@@ -1,6 +1,6 @@
 package bc.flash
 {
-	[NoConversion]
+	[ConvertOnce]
 	public class Dictionary 
 	{
 	}

@@ -3,7 +3,7 @@ package bc.flash.error
 	/**
 	 * @author weee
 	 */
-	[NoConversion]
+	[ConvertOnce]
 	public class IllegalOperationError extends Error
 	{
 		public function IllegalOperationError(message : String)

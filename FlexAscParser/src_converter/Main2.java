@@ -2260,13 +2260,6 @@ public class Main2
 	{
 		for (BcClassDefinitionNode bcClass : classes)
 		{
-			BcMetadata metadata = bcClass.getMetadata();
-			if (metadata != null && metadata.contains("NoConversion"))
-			{
-				System.out.println("No conversion: " + bcClass.getName());
-				continue;
-			}
-			
 			writeClassDefinition(bcClass, outputDir);
 		}
 	}
@@ -2335,7 +2328,28 @@ public class Main2
 			assert successed : srcFileDir.getAbsolutePath();
 		}
 		
-		src = new FileWriteDestination(new File(srcFileDir, className + ".cs"));		
+		File outputFile = new File(srcFileDir, className + ".cs");
+		
+		BcMetadata metadata = bcClass.getMetadata();
+		if (metadata != null)
+		{
+			if (metadata.contains("NoConversion"))
+			{
+				System.out.println("No conversion: " + bcClass.getName());
+				return;
+			}
+			
+			if (metadata.contains("ConvertOnce"))
+			{
+				if (outputFile.exists())
+				{
+					System.out.println("Convert once: " + bcClass.getName());
+					return;
+				}
+			}			
+		}
+		
+		src = new FileWriteDestination(outputFile);		
 		impl = new ListWriteDestination();
 		
 		src.writeln("using System;");

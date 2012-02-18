@@ -2,7 +2,7 @@ package bc.flash
 {	
 	import bc.flash.error.NotImplementedError;
 	
-	[NoConversion]
+	[ConvertOnce]
 	public dynamic class Array extends Object 
 	{		
 		public static const CASEINSENSITIVE : uint = 1;

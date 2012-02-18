@@ -3,7 +3,7 @@ package bc.flash.system
 	/**
 	 * @author weee
 	 */
-	[NoConversion]
+	[ConvertOnce]
 	public class LoaderContext
 	{
 	}

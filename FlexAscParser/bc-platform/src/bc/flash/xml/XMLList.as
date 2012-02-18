@@ -2,7 +2,7 @@ package bc.flash.xml
 {
 	import bc.flash.error.NotImplementedError;
 
-	[NoConversion]
+	[ConvertOnce]
 	public class XMLList
 	{
 		/* public static const length : uint = 1; */
