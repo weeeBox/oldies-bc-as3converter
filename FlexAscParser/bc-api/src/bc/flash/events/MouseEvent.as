@@ -1,5 +1,6 @@
 package bc.flash.events 
 {
+	import bc.flash.error.NotImplementedError;
 	public class MouseEvent extends Event 
 	{
 		public static const CLICK : String = "click";
@@ -60,9 +61,9 @@ package bc.flash.events
 
 		/* public function set shiftKey(value : Boolean) : void; */
 
-		public function get stageX() : Number { return 0; }
+		public function get stageX() : Number { throw new NotImplementedError(); }
 
-		public function get stageY() : Number { return 0; }
+		public function get stageY() : Number { throw new NotImplementedError(); }
 
 		/* public function toString() : String; */
 

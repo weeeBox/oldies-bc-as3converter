@@ -22,11 +22,11 @@ package bc.flash.media
 
 		/* public function get isURLInaccessible() : Boolean; */
 
-		public function get length() : Number { return 0; }
+		public function get length() : Number { throw new NotImplementedError(); }
 
 		public function load(stream : URLRequest, context : SoundLoaderContext = null) : void { throw new NotImplementedError(); }
 
-		public function play(startTime : Number = 0, loops : int = 0, sndTransform : SoundTransform = null) : SoundChannel { return null; }
+		public function play(startTime : Number = 0, loops : int = 0, sndTransform : SoundTransform = null) : SoundChannel { throw new NotImplementedError(); }
 
 		public function get url() : String { throw new NotImplementedError(); }
 	}
