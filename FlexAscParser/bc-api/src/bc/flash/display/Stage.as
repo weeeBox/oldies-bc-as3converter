@@ -36,6 +36,7 @@ package bc.flash.display
         private var mWidth:int;
         private var mHeight:int;
         private var mColor:uint;
+        private var mStageQuality : String;
         
         /** @private */
         public function Stage(width:int, height:int, color:uint=0)
@@ -119,5 +120,8 @@ package bc.flash.display
          *  to the <code>viewPort</code> property of the Starling object. */
         public function get stageHeight():int { return mHeight; }
         public function set stageHeight(value:int):void { mHeight = value; }
+		
+        public function get quality() : String { return mStageQuality; }
+        public function set quality(value : String) : void { mStageQuality = value; }
     }
 }

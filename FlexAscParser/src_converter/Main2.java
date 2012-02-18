@@ -16,6 +16,7 @@ import macromedia.asc.parser.BinaryExpressionNode;
 import macromedia.asc.parser.BreakStatementNode;
 import macromedia.asc.parser.CallExpressionNode;
 import macromedia.asc.parser.CaseLabelNode;
+import macromedia.asc.parser.CatchClauseNode;
 import macromedia.asc.parser.ClassDefinitionNode;
 import macromedia.asc.parser.CoerceNode;
 import macromedia.asc.parser.ConditionalExpressionNode;
@@ -23,6 +24,7 @@ import macromedia.asc.parser.DefinitionNode;
 import macromedia.asc.parser.DeleteExpressionNode;
 import macromedia.asc.parser.DoStatementNode;
 import macromedia.asc.parser.ExpressionStatementNode;
+import macromedia.asc.parser.FinallyClauseNode;
 import macromedia.asc.parser.ForStatementNode;
 import macromedia.asc.parser.FunctionCommonNode;
 import macromedia.asc.parser.FunctionDefinitionNode;
@@ -595,6 +597,12 @@ public class Main2
 			process((SwitchStatementNode)node);		
 		else if (node instanceof TryStatementNode)
 			process((TryStatementNode)node);
+		else if (node instanceof CatchClauseNode)
+			process((CatchClauseNode)node);
+		else if (node instanceof FinallyClauseNode)
+			process((FinallyClauseNode)node);
+		else if (node instanceof ParameterNode)
+			process((ParameterNode)node);
 		else if (node instanceof ReturnStatementNode)
 			process((ReturnStatementNode)node);
 		else if (node instanceof BreakStatementNode)
@@ -1858,6 +1866,55 @@ public class Main2
 	}
 	
 	private static void process(TryStatementNode node)
+	{
+		dest.writeln("try");
+
+		if (node.tryblock != null)
+		{
+			process(node.tryblock);
+		}
+		else
+		{
+			writeEmptyBlock();
+		}
+		
+		if (node.catchlist != null)
+		{
+			ObjectList<Node> items = node.catchlist.items;
+			for (Node item : items)
+			{
+				process(item);
+			}
+		}
+		
+		if (node.finallyblock != null)
+		{
+			process(node.finallyblock);
+		}
+	}
+	
+	private static void process(CatchClauseNode node)
+	{
+		ListWriteDestination paramDest = new ListWriteDestination();
+		if (node.parameter != null)
+		{
+			pushDest(paramDest);
+			process(node.parameter);
+			popDest();
+		}
+		
+		dest.writelnf("catch (%s)", paramDest);
+		process(node.statements);
+	}
+	
+	private static void process(ParameterNode node)
+	{
+		BcTypeNode type = BcNodeHelper.extractBcType(node.type);
+		
+		dest.writef("%s %s", BcCodeCs.type(type), BcCodeCs.identifier(node.identifier));
+	}
+	
+	private static void process(FinallyClauseNode node)
 	{
 		assert false;
 	}

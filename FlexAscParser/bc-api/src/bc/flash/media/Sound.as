@@ -1,19 +1,19 @@
 package bc.flash.media 
 {
-	import flash.media.SoundTransform;
-	import flash.media.SoundChannel;
-	
-	public class Sound /* extends EventDispatcher */ 
+	import bc.flash.error.NotImplementedError;
+	import bc.flash.events.EventDispatcher;
+	import bc.flash.net.URLRequest;
+
+	public class Sound extends EventDispatcher 
 	{
-		/* function Sound(stream : URLRequest = null, context : SoundLoaderContext = null) : void; */
+		public function Sound(stream : URLRequest = null, context : SoundLoaderContext = null) : void { throw new NotImplementedError(); }
 
-		/* public function get bytesLoaded() : uint; */
+		public function get bytesLoaded() : uint { throw new NotImplementedError(); }
 
-		/* public function get bytesTotal() : int; */
+		public function get bytesTotal() : int { throw new NotImplementedError(); }
 
-		public function close() : void;
+		public function close() : void { throw new NotImplementedError(); }
 
-		/* [Version("10")] */
 		/* public function extract(target : ByteArray, length : Number, startPosition : Number = -1) : Number; */
 
 		/* public function get id3() : ID3Info; */
@@ -24,10 +24,10 @@ package bc.flash.media
 
 		public function get length() : Number { return 0; }
 
-		/* public function load(stream : URLRequest, context : SoundLoaderContext = null) : void; */
+		public function load(stream : URLRequest, context : SoundLoaderContext = null) : void { throw new NotImplementedError(); }
 
 		public function play(startTime : Number = 0, loops : int = 0, sndTransform : SoundTransform = null) : SoundChannel { return null; }
 
-		/* public function get url() : String; */
+		public function get url() : String { throw new NotImplementedError(); }
 	}
 }

@@ -16,7 +16,7 @@ package bc.flash.events
 
 		/** Registers an event listener at a certain object. */
 		[FunctionType(name="listener", callback="EventListenerCallback", param(name="event", type="Event"))]
-		public function addEventListener(type : String, listener : Function) : void
+		public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
 		{
 			if (mEventListeners == null)
 				mEventListeners = new Dictionary();

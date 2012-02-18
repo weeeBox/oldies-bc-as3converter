@@ -138,6 +138,10 @@ package bc.flash.core.natives
 		{
 		}
 		
+		public function touchDragged(x : Number, y : Number, touchId : int) : void
+		{
+		}
+		
 		public function touchUp(x : Number, y : Number, touchId : int) : void
 		{
 		}
