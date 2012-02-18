@@ -1,5 +1,6 @@
 package bc.flash.display 
 {
+    import bc.flash.geom.Rectangle;
     import bc.flash.error.IllegalOperationError;
     import bc.flash.events.EnterFrameEvent;
     import bc.flash.events.Event;
@@ -36,7 +37,14 @@ package bc.flash.display
         private var mWidth:int;
         private var mHeight:int;
         private var mColor:uint;
-        private var mStageQuality : String;
+		
+	private var mStageQuality : String;
+	private var mFrameRate : Number;
+	private var mAlign : String;
+	private var mScaleMode : String;
+	private var mFullScreenSourceRect : Rectangle;
+	private var mStageFocusRect : Boolean;
+        private var mTabChildren : Boolean;
         
         /** @private */
         public function Stage(width:int, height:int, color:uint=0)
@@ -123,5 +131,23 @@ package bc.flash.display
 		
         public function get quality() : String { return mStageQuality; }
         public function set quality(value : String) : void { mStageQuality = value; }
+		
+	public function get frameRate() : Number { return mFrameRate; }
+	public function set frameRate(value : Number) : void { mFrameRate = value; }
+		
+	public function get align() : String { return mAlign; }
+	public function set align(value : String) : void { mAlign = value; }
+		
+	public function get scaleMode() : String { return mScaleMode; }
+	public function set scaleMode(value : String) : void { mScaleMode = value; }
+		
+	public function get fullScreenSourceRect() : Rectangle { return mFullScreenSourceRect; }
+	public function set fullScreenSourceRect(value : Rectangle) : void { mFullScreenSourceRect = value; }
+		
+	public function get stageFocusRect() : Boolean { return mStageFocusRect; }
+	public function set stageFocusRect(on : Boolean) : void { mStageFocusRect = on; }
+		
+	public function get tabChildren() : Boolean { return mTabChildren; }
+	public function set tabChildren(value : Boolean) : void { mTabChildren = value; }
     }
 }

@@ -4,7 +4,7 @@ package bc.flash.display
 	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Rectangle;
 	
-	public class BitmapData extends Object 
+	public class BitmapData extends Object implements IBitmapDrawable
 	{
 		function BitmapData(width : int, height : int, transparent : Boolean = true, fillColor : uint = 0xffffffff) : void { }
 

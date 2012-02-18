@@ -1910,6 +1910,7 @@ public class Main2
 	private static void process(ParameterNode node)
 	{
 		BcTypeNode type = BcNodeHelper.extractBcType(node.type);
+		addToImport(type);
 		
 		dest.writef("%s %s", BcCodeCs.type(type), BcCodeCs.identifier(node.identifier));
 	}
