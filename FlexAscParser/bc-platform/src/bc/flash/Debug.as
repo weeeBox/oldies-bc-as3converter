@@ -3,6 +3,7 @@ package bc.flash
 	/**
 	 * @author weee
 	 */
+	[NoConversion]
 	public class Debug
 	{
 		public static function assert(condition : Boolean, message : String = "") : void

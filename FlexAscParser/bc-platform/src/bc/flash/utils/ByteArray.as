@@ -4,6 +4,7 @@ package bc.flash.utils
 	/**
 	 * @author weee
 	 */
+	[NoConversion]
 	public class ByteArray
 	{
 		public function get bytesAvailable() : uint { throw new NotImplementedError(); }
