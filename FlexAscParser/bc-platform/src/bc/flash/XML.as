@@ -1,5 +1,7 @@
 package bc.flash 
 {
+	import bc.flash.error.NotImplementedError;
+	
 	[NoConversion]
 	public dynamic final class XML extends Object 
 	{
@@ -19,13 +21,13 @@ package bc.flash
 
 		public function child(propertyName : String) : XMLList { throw new NotImplementedError(); }
 
-		public function childIndex() : int { return -1; }
+		public function childIndex() : int { throw new NotImplementedError(); }
 
 		public function children() : XMLList { throw new NotImplementedError(); }
 
 		public function comments() : XMLList { throw new NotImplementedError(); }
 
-		public function contains(value : String) : Boolean { return false; }
+		public function contains(value : String) : Boolean { throw new NotImplementedError(); }
 
 		public function copy() : XML { throw new NotImplementedError(); }
 
@@ -37,7 +39,7 @@ package bc.flash
 
 		/* public function hasComplexContent() : Boolean; */
 
-		/* public function hasOwnProperty(name : String) : Boolean { return false; } */
+		/* public function hasOwnProperty(name : String) : Boolean { throw new NotImplementedError(); } */
 
 		/* public function hasSimpleContent() : Boolean; */
 
@@ -59,7 +61,7 @@ package bc.flash
 
 		/* public function insertChildBefore(child1 : *, child2 : *) : *; */
 
-		public function length() : int { return -1; }
+		public function length() : int { throw new NotImplementedError(); }
 
 		/* public function localName() : *; */
 

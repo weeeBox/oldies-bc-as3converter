@@ -1,11 +1,13 @@
 package bc.flash 
 {
+	import bc.flash.error.NotImplementedError;
+	
 	[NoConversion]
 	public final class String extends Object 
 	{
 		/* public static const length : int = 1; */
 
-		function String(value : String = "") : void {}
+		public function String(value : String = "") : void { throw new NotImplementedError(); }
 
 		public function charAt(i : uint) : String { throw new NotImplementedError(); }
 
@@ -15,11 +17,11 @@ package bc.flash
 
 		/* static public function fromCharCode(...args : *) : String; */
 
-		public function indexOf(s : String, i : uint = 0) : int { return 0; }
+		public function indexOf(s : String, i : uint = 0) : int { throw new NotImplementedError(); }
 
-		public function lastIndexOf(s : String, i : uint = 2147483647) : int { return 0; }
+		public function lastIndexOf(s : String, i : uint = 2147483647) : int { throw new NotImplementedError(); }
 
-		public function get length() : int { return 0; }
+		public function get length() : int { throw new NotImplementedError(); }
 
 		/* public function localeCompare(other : * = undefined) : int; */
 

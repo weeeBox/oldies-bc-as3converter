@@ -1,36 +1,38 @@
 package bc.flash 
 {
+	import bc.flash.error.NotImplementedError;
+	
 	[NoConversion]
 	public class Vector extends Object 
 	{
 		/* public var fixed : Boolean; */
 		/* public var length : uint; */
 
-		public function Vector(length : uint = 0, fixed : Boolean = false) {}
+		public function Vector(length : uint = 0, fixed : Boolean = false) { throw new NotImplementedError(); }
 
 		public function concat(obj : Object = null) : Vector { throw new NotImplementedError(); }
 
-		/* public function every(callback : Function, thisObject : Object = null) : Boolean { return false; } */
+		/* public function every(callback : Function, thisObject : Object = null) : Boolean { throw new NotImplementedError(); } */
 
 		/* public function filter(callback : Function, thisObject : Object = null) : Vector { throw new NotImplementedError(); } */
 
 		/* public function forEach(callback : Function, thisObject : Object = null) {} */
 		
-		public function get length() : uint { return 0; }
+		public function get length() : uint { throw new NotImplementedError(); }
 		
-		public function set length(newLenght : uint) : void { }
+		public function set length(newLenght : uint) : void { throw new NotImplementedError(); }
 
-		public function indexOf(searchElement : Object, fromIndex : int = 0) : int { return -1; }
+		public function indexOf(searchElement : Object, fromIndex : int = 0) : int { throw new NotImplementedError(); }
 
 		public function join(sep : String = ",") : String { throw new NotImplementedError(); }
 
-		public function lastIndexOf(searchElement : Object, fromIndex : int = 0x7fffffff) : int { return -1; }
+		public function lastIndexOf(searchElement : Object, fromIndex : int = 0x7fffffff) : int { throw new NotImplementedError(); }
 
 		/* public function map(callback : Function, thisObject : Object = null) : Vector { throw new NotImplementedError(); } */
 
-		public function pop() : Object {return null; }
+		public function pop() : Object { throw new NotImplementedError(); }
 
-		public function push(arg : Object) : uint { return -1; }
+		public function push(arg : Object) : uint { throw new NotImplementedError(); }
 
 		public function reverse() : Vector { throw new NotImplementedError(); }
 
@@ -48,6 +50,6 @@ package bc.flash
 
 		public function toString() : String { throw new NotImplementedError(); }
 
-		public function unshift(arg : Object) : uint { return 0; }
+		public function unshift(arg : Object) : uint { throw new NotImplementedError(); }
 	}
 }

@@ -10,7 +10,8 @@ package bc.flash.error
 		public var name : String;
 
 		public function Error(message : String = "") : void
-		{			
+		{
+			this.message = message;		
 		}		
 	}
 }

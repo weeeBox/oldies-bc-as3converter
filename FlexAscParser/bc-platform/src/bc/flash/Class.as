@@ -1,5 +1,7 @@
 package bc.flash 
 {
+	import bc.flash.error.NotImplementedError;
+	
 	[NoConversion]
 	public class Class extends Object 
 	{
