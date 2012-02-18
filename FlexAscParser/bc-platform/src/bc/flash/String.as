@@ -7,7 +7,7 @@ package bc.flash
 
 		function String(value : String = "") : void {}
 
-		public function charAt(i : uint) : String { return null; }
+		public function charAt(i : uint) : String { throw new NotImplementedError(); }
 
 		/* public function charCodeAt(i : uint) : Number; */
 
@@ -25,28 +25,28 @@ package bc.flash
 
 		/* public function match(p : * = undefined) : Array; */
 
-		public function replace(p : String, repl : String) : String { return null; }
+		public function replace(p : String, repl : String) : String { throw new NotImplementedError(); }
 
 		/* public function search(p : * = undefined) : int; */
 
-		public function slice(start : uint, end : uint = 2147483647) : String { return null; }
+		public function slice(start : uint, end : uint = 2147483647) : String { throw new NotImplementedError(); }
 
-		public function split(delim : String) : Array { return null; }
+		public function split(delim : String) : Array { throw new NotImplementedError(); }
 
-		public function substr(start : uint, len : uint = 2147483647) : String { return null; }
+		public function substr(start : uint, len : uint = 2147483647) : String { throw new NotImplementedError(); }
 
-		public function substring(start : uint, end : uint = 2147483647) : String { return null; }
+		public function substring(start : uint, end : uint = 2147483647) : String { throw new NotImplementedError(); }
 
-		public function toLocaleLowerCase() : String { return null; }
+		public function toLocaleLowerCase() : String { throw new NotImplementedError(); }
 
-		public function toLocaleUpperCase() : String { return null; }
+		public function toLocaleUpperCase() : String { throw new NotImplementedError(); }
 
-		public function toLowerCase() : String { return null; }
+		public function toLowerCase() : String { throw new NotImplementedError(); }
 
-		public function toString() : String { return null; }
+		public function toString() : String { throw new NotImplementedError(); }
 
-		public function toUpperCase() : String { return null; }
+		public function toUpperCase() : String { throw new NotImplementedError(); }
 
-		public function valueOf() : String { return null; }
+		public function valueOf() : String { throw new NotImplementedError(); }
 	}
 }

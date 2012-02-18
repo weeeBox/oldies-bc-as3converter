@@ -11,29 +11,29 @@ package bc.flash
 
 		/* public function appendChild(child : *) : XML; */
 
-		public function attributeValue(arg : String) : String { return null; }
+		public function attributeValue(arg : String) : String { throw new NotImplementedError(); }
 
-		public function attribute(arg : String) : XMLList { return null; }
+		public function attribute(arg : String) : XMLList { throw new NotImplementedError(); }
 
-		public function attributes() : XMLList { return null; }
+		public function attributes() : XMLList { throw new NotImplementedError(); }
 
-		public function child(propertyName : String) : XMLList { return null; }
+		public function child(propertyName : String) : XMLList { throw new NotImplementedError(); }
 
 		public function childIndex() : int { return -1; }
 
-		public function children() : XMLList { return null; }
+		public function children() : XMLList { throw new NotImplementedError(); }
 
-		public function comments() : XMLList { return null; }
+		public function comments() : XMLList { throw new NotImplementedError(); }
 
 		public function contains(value : String) : Boolean { return false; }
 
-		public function copy() : XML { return null; }
+		public function copy() : XML { throw new NotImplementedError(); }
 
 		/* static public function defaultSettings() : Object; */
 
 		/* public function descendants(name : * = "*") : XMLList; */
 
-		public function elements(name : String = "*") : XMLList { return null; }
+		public function elements(name : String = "*") : XMLList { throw new NotImplementedError(); }
 
 		/* public function hasComplexContent() : Boolean; */
 
@@ -63,19 +63,19 @@ package bc.flash
 
 		/* public function localName() : *; */
 
-		public function name() : String { return null; }
+		public function name() : String { throw new NotImplementedError(); }
 
 		/* public function namespace(prefix : * = null) : *; */
 
 		/* public function namespaceDeclarations() : Array; */
 
-		public function nodeKind() : String { return null; }
+		public function nodeKind() : String { throw new NotImplementedError(); }
 
 		/* public function normalize() : XML; */
 
 		/* public function notification() : Function; */
 
-		public function parent() : Object { return null; }
+		public function parent() : Object { throw new NotImplementedError(); }
 
 		/* public function prependChild(value : *) : XML; */
 
@@ -109,7 +109,7 @@ package bc.flash
 
 		/* static public function settings() : Object; */
 
-		public function text() : XMLList { return null; }
+		public function text() : XMLList { throw new NotImplementedError(); }
 
 		/* public function toString() : String; */
 

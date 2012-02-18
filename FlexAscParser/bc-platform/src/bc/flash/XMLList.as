@@ -11,21 +11,21 @@ package bc.flash
 
 		/* public function appendChild(child : *) : XML; */
 
-		public function attribute(arg : String) : XMLList { return null; }
+		public function attribute(arg : String) : XMLList { throw new NotImplementedError(); }
 
-		public function attributes() : XMLList { return null; }
+		public function attributes() : XMLList { throw new NotImplementedError(); }
 
-		public function child(propertyName : String) : XMLList { return null; }
+		public function child(propertyName : String) : XMLList { throw new NotImplementedError(); }
 
 		public function childIndex() : int { return 0; }
 
-		public function children() : XMLList { return null; }
+		public function children() : XMLList { throw new NotImplementedError(); }
 
 		/* public function comments() : XMLList; */
 
 		/* public function contains(value : *) : Boolean; */
 
-		public function copy() : XMLList { return null; }
+		public function copy() : XMLList { throw new NotImplementedError(); }
 
 		/* public function descendants(name : * = "*") : XMLList; */
 
@@ -53,7 +53,7 @@ package bc.flash
 
 		/* public function namespaceDeclarations() : Array; */
 
-		public function nodeKind() : String { return null; }
+		public function nodeKind() : String { throw new NotImplementedError(); }
 
 		/* public function normalize() : XMLList; */
 
