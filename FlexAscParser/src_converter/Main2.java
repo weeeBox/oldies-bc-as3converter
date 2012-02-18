@@ -1951,12 +1951,26 @@ public class Main2
 			
 			if (!typeEquals(lshType, classBoolean))
 			{
-				lshString = String.format("(%s != null)", lshString);
+				if (canBeClass(lshType))
+				{
+					lshString = String.format("(%s != null)", lshString);
+				}
+				else
+				{
+					lshString = String.format("(%s != 0)", lshString);
+				}
 			}
 			
 			if (!typeEquals(rshType, classBoolean))
 			{
-				rshString = String.format("(%s != null)", rshString);
+				if (canBeClass(rshType))
+				{
+					rshString = String.format("(%s != null)", rshString);
+				}
+				else
+				{
+					rshString = String.format("(%s != 0)", rshString);
+				}
 			}
 			
 			dest.writef("(%s %s %s)", lshString, Tokens.tokenToString[-node.op], rshString);

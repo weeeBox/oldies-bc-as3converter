@@ -1,6 +1,6 @@
 package bc.flash.display 
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.error.AbstractClassError;
 	import bc.flash.geom.ColorTransform;
 	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Rectangle;
@@ -20,9 +20,15 @@ package bc.flash.display
 			mFillColor = fillColor;
 		}
 
-		public function draw(source : IBitmapDrawable, matrix : Matrix = null, colorTransform : ColorTransform = null, blendMode : String = null, clipRect : Rectangle = null, smoothing : Boolean = false) : void { throw new NotImplementedError(); }
+		public function draw(source : IBitmapDrawable, matrix : Matrix = null, colorTransform : ColorTransform = null, blendMode : String = null, clipRect : Rectangle = null, smoothing : Boolean = false) : void 
+		{ 
+			throw new AbstractClassError(); 
+		}
 		
-		public function dispose() : void { throw new NotImplementedError(); }
+		public function dispose() : void 
+		{ 
+			throw new AbstractClassError(); 
+		}
 		
 		public function get width() : int { return mWidth; }
 		
