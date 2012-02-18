@@ -9,9 +9,6 @@ package bc.flash.events
      */ 
     public class EnterFrameEvent extends Event
     {
-        /** Event type for a display object that is entering a new frame. */
-        public static const ENTER_FRAME:String = "enterFrame";
-        
         private var mPassedTime:Number;
         
         /** Creates an enter frame event with the passed time. */
