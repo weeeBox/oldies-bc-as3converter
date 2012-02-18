@@ -12,7 +12,7 @@ package bc.flash.geom
 		public var blueOffset : Number;
 		public var alphaOffset : Number;
 
-		function ColorTransform(redMultiplier : Number = 1.0, greenMultiplier : Number = 1.0, blueMultiplier : Number = 1.0, alphaMultiplier : Number = 1.0, redOffset : Number = 0, greenOffset : Number = 0, blueOffset : Number = 0, alphaOffset : Number = 0) : void {}
+		public function ColorTransform(redMultiplier : Number = 1.0, greenMultiplier : Number = 1.0, blueMultiplier : Number = 1.0, alphaMultiplier : Number = 1.0, redOffset : Number = 0, greenOffset : Number = 0, blueOffset : Number = 0, alphaOffset : Number = 0) : void { throw new NotImplementedError(); }
 
 		public function get color() : uint { throw new NotImplementedError(); }
 
