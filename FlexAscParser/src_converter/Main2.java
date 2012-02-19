@@ -1,7 +1,11 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -91,8 +95,7 @@ import bc.lang.BcVectorTypeNode;
 
 public class Main2
 {
-	private static FileWriteDestination src;
-	private static ListWriteDestination impl;
+	private static ListWriteDestination src;
 	
 	private static WriteDestination dest;
 	private static Stack<WriteDestination> destStack;
@@ -2352,8 +2355,7 @@ public class Main2
 			}			
 		}
 		
-		src = new FileWriteDestination(outputFile);		
-		impl = new ListWriteDestination();
+		src = new ListWriteDestination();		
 		
 		src.writeln("using System;");
 		writeBlankLine(src);
@@ -2426,7 +2428,7 @@ public class Main2
 		
 		writeBlockClose(src);
 		
-		src.close();
+		writeDestToFile(src, outputFile);
 	}
 
 	private static void writeFunctionTypes(BcClassDefinitionNode bcClass) 
@@ -2627,13 +2629,91 @@ public class Main2
 	private static void writeBlankLine()
 	{
 		src.writeln();
-		impl.writeln();
 	}
 	
 	private static void writeEmptyBlock(WriteDestination dest)
 	{
 		writeBlockOpen(dest);
 		writeBlockClose(dest);
+	}
+	
+	private static void writeDestToFile(ListWriteDestination src, File file) throws IOException 
+	{
+		if (needUpldateFile(file, src))
+		{
+			writeFile(file, src);
+		}
+	}
+	
+	private static boolean needUpldateFile(File file, ListWriteDestination src) throws IOException
+	{
+		if (file.exists())
+		{
+			List<String> oldLines = readFile(file);			
+			List<String> newLines = src.getLines();
+			
+			if (oldLines.size() != newLines.size())
+			{
+				return true;
+			}
+			
+			for (int i = 0; i < oldLines.size(); ++i)
+			{
+				if (!oldLines.get(i).equals(newLines.get(i)))
+				{
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+
+	private static List<String> readFile(File file) throws IOException 
+	{
+		BufferedReader reader = null;
+		try 
+		{
+			reader = new BufferedReader(new FileReader(file));
+			List<String> lines = new ArrayList<String>();
+			
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				lines.add(line);
+			}
+			return lines;
+		} 
+		finally 
+		{
+			if (reader != null)
+			{
+				reader.close();
+			}
+		}
+	}
+	
+	private static void writeFile(File file, ListWriteDestination src) throws IOException 
+	{
+		PrintStream stream = null;
+		try 
+		{
+			stream = new PrintStream(file);
+			List<String> lines = src.getLines();
+			{
+				for (String line : lines) 
+				{
+					stream.println(line);
+				}
+			}
+		} 
+		finally 
+		{
+			if (stream != null)
+			{
+				stream.close();
+			}
+		}
 	}
 	
 	private static void pushDest(WriteDestination newDest)
