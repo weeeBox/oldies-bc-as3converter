@@ -16,9 +16,14 @@ package bc.flash.xml
 			mChildren = new bc.flash.xml.XMLList();			 
 		}
 		
-		override public function appendChild(child : XML) : XML
+		override public function appendChild(child : bc.flash.xml.XML) : bc.flash.xml.XML
 		{
 			return mChildren.appendChild(child);
+		}	
+		
+		public function appendAttribute(name : String, value : String) : bc.flash.xml.XML
+		{
+			return mAttributes.appendChild(new XMLAttribute(name, value));
 		}
 		
 		override public function attributeValue(arg : String) : String
@@ -42,7 +47,7 @@ package bc.flash.xml
 		{
 			var result : bc.flash.xml.XMLList = new bc.flash.xml.XMLList();
 			
-			for each (var child : XML in mChildren.list())
+			for each (var child : bc.flash.xml.XML in mChildren.list())
 			{
 				if (child.name() == name)
 				{
@@ -79,7 +84,7 @@ package bc.flash.xml
 			
 			var result : bc.flash.xml.XMLList = new bc.flash.xml.XMLList();
 			
-			for each (var child : XML in mChildren.list())
+			for each (var child : bc.flash.xml.XML in mChildren.list())
 			{
 				if (child.name() == name && child.nodeKind() == nodeKind())
 				{

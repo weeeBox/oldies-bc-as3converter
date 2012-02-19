@@ -6,7 +6,7 @@ package bc.flash.error
 	[ConvertOnce]
 	public class IllegalOperationError extends Error
 	{
-		public function IllegalOperationError(message : String)
+		public function IllegalOperationError(message : String = null)
 		{
 			super(message);
 		}

@@ -6,7 +6,7 @@ package bc.flash.xml
 	[ConvertOnce]
 	public class XML extends Object
 	{
-		private var mParent : XML;
+		private var mParent : bc.flash.xml.XML;
 		private var mName : String;
 		
 		/* public static const length : uint = 1; */
@@ -17,7 +17,7 @@ package bc.flash.xml
 		}
 		
 		/* public function addNamespace(ns : *) : XML; */
-		public function appendChild(child : XML) : XML
+		public function appendChild(child : bc.flash.xml.XML) : bc.flash.xml.XML
 		{		
 			return child;	
 		}
@@ -32,12 +32,12 @@ package bc.flash.xml
 			return attributeValue(name);
 		}
 
-		public function attributes() : XMLList
+		public function attributes() : bc.flash.xml.XMLList
 		{
 			return null;
 		}
 
-		public function child(propertyName : String) : XMLList
+		public function child(propertyName : String) : bc.flash.xml.XMLList
 		{
 			return null;
 		}
@@ -47,12 +47,12 @@ package bc.flash.xml
 			throw new NotImplementedError();
 		}
 
-		public function children() : XMLList
+		public function children() : bc.flash.xml.XMLList
 		{
 			return null;			 
 		}
 
-		public function comments() : XMLList
+		public function comments() : bc.flash.xml.XMLList
 		{
 			throw new NotImplementedError();
 		}
@@ -62,7 +62,7 @@ package bc.flash.xml
 			return false;
 		}
 
-		public function copy() : XML
+		public function copy() : bc.flash.xml.XML
 		{
 			throw new NotImplementedError();
 		}
@@ -70,7 +70,7 @@ package bc.flash.xml
 		/* static public function defaultSettings() : Object; */
 		/* public function descendants(name : * = "*") : XMLList; */
 		
-		public function elements(name : String = "*") : XMLList
+		public function elements(name : String = "*") : bc.flash.xml.XMLList
 		{
 			return null;
 		}
@@ -107,7 +107,7 @@ package bc.flash.xml
 
 		/* public function normalize() : XML; */
 		/* public function notification() : Function; */
-		public function parent() : XML
+		public function parent() : bc.flash.xml.XML
 		{
 			return mParent;
 		}

@@ -1912,7 +1912,10 @@ public class Main2
 		BcTypeNode type = BcNodeHelper.extractBcType(node.type);
 		addToImport(type);
 		
-		dest.writef("%s %s", BcCodeCs.type(type), BcCodeCs.identifier(node.identifier));
+		String identifier = BcCodeCs.identifier(node.identifier);
+		
+		declaredVars.add(new BcVariableDeclaration(type, identifier));		
+		dest.writef("%s %s", BcCodeCs.type(type), identifier);
 	}
 	
 	private static void process(FinallyClauseNode node)

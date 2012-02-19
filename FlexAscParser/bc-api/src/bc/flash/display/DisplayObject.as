@@ -364,17 +364,17 @@ package bc.flash.display
         public function get stage():Stage { return this.root as Stage; }
 		
         /** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
-        public function get transform() : Transform { throw new NotImplementedError(); }
+        public function get transform() : Transform { implementMe(); }
 
         /** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
-        public function set transform(value : Transform) : void { throw new NotImplementedError(); }
+        public function set transform(value : Transform) : void { implementMe(); }
 		
-	public function get scrollRect() : Rectangle { throw new NotImplementedError(); }
+	public function get scrollRect() : Rectangle { implementMe(); }
 
-	public function set scrollRect(value : Rectangle) : void { throw new NotImplementedError(); }
+	public function set scrollRect(value : Rectangle) : void { implementMe(); }
 		
-	public function get opaqueBackground() : uint { throw new NotImplementedError(); }
+	public function get opaqueBackground() : uint { implementMe(); }
 
-	public function set opaqueBackground(value : uint) : void { throw new NotImplementedError(); }
+	public function set opaqueBackground(value : uint) : void { implementMe(); }
     }
 }

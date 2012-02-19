@@ -31,7 +31,7 @@ package bc.flash.geom
 
 		public static function angleBetween(a : Vector3D, b : Vector3D) : Number
 		{
-			throw new NotImplementedError();
+			implementMe();
 		}
 
 		public function clone() : Vector3D
@@ -50,7 +50,7 @@ package bc.flash.geom
 
 		public function crossProduct(a : Vector3D) : Vector3D
 		{
-			throw new NotImplementedError();
+			implementMe();
 		}
 
 		public function decrementBy(a : Vector3D) : void
@@ -126,12 +126,12 @@ package bc.flash.geom
 			y *= lenInv;
 			z *= lenInv;
 			
-			throw new NotImplementedError();
+			implementMe();
 		}
 
 		public function project() : void
 		{
-			throw new NotImplementedError();
+			implementMe();
 		}
 
 		public function scaleBy(s : Number) : void

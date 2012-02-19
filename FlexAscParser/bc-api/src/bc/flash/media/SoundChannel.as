@@ -6,16 +6,16 @@ package bc.flash.media
 	
 	public final class SoundChannel /* extends EventDispatcher */ 
 	{
-		public function get leftPeak() : Number { throw new NotImplementedError(); }
+		public function get leftPeak() : Number { implementMe(); }
 
-		public function get position() : Number { throw new NotImplementedError(); }
+		public function get position() : Number { implementMe(); }
 
-		public function get rightPeak() : Number { throw new NotImplementedError(); }
+		public function get rightPeak() : Number { implementMe(); }
 
-		public function get soundTransform() : SoundTransform { throw new NotImplementedError(); }
+		public function get soundTransform() : SoundTransform { implementMe(); }
 
-		public function set soundTransform(sndTransform : SoundTransform) : void { throw new NotImplementedError(); }
+		public function set soundTransform(sndTransform : SoundTransform) : void { implementMe(); }
 
-		public function stop() : void { throw new NotImplementedError(); }
+		public function stop() : void { implementMe(); }
 	}
 }

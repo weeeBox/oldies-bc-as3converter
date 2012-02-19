@@ -9,7 +9,7 @@ package bc.flash.xml
 		/* function XMLList(value : * = undefined) : void; */
 		/* public function addNamespace(ns : *) : XML; */
 		
-		public function appendChild(child : XML) : XML
+		public function appendChild(child : bc.flash.xml.XML) : bc.flash.xml.XML
 		{
 			throw new NotImplementedError();
 		}
@@ -19,7 +19,7 @@ package bc.flash.xml
 			throw new NotImplementedError();
 		}
 
-		public function attribute(arg : String) : XMLList
+		public function attribute(arg : String) : bc.flash.xml.XMLList
 		{
 			throw new NotImplementedError();
 		}
@@ -29,7 +29,7 @@ package bc.flash.xml
 			throw new NotImplementedError();
 		}
 
-		public function child(propertyName : String) : XMLList
+		public function child(propertyName : String) : bc.flash.xml.XMLList
 		{
 			throw new NotImplementedError();
 		}
@@ -39,7 +39,7 @@ package bc.flash.xml
 			throw new NotImplementedError();
 		}
 
-		public function children() : XMLList
+		public function children() : bc.flash.xml.XMLList
 		{
 			throw new NotImplementedError();
 		}
@@ -47,7 +47,7 @@ package bc.flash.xml
 		/* public function comments() : XMLList; */
 		/* public function contains(value : *) : Boolean; */
 		
-		public function copy() : XMLList
+		public function copy() : bc.flash.xml.XMLList
 		{
 			throw new NotImplementedError();
 		}

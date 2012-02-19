@@ -95,7 +95,7 @@ package bc.flash.geom
 			ty += dy;
 		}
 
-		/* public function toString() : String { throw new NotImplementedError(); } */
+		/* public function toString() : String { implementMe(); } */
 		public function transformPoint(point : Point) : Point
 		{
 			return new Point(a * point.x + c * point.y + tx, b * point.x + d * point.y + ty);
