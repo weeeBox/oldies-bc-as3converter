@@ -58,7 +58,7 @@ package bc.flash.display
         
         public function get graphics() : Graphics 
         { 
-            implementMe(); 
+            throw new NotImplementedError(); 
         }
 		
         private function onTouch(evt:Event):void
@@ -67,13 +67,13 @@ package bc.flash.display
             Mouse.cursor = event.interactsWith(this) ? MouseCursor.BUTTON : MouseCursor.AUTO;
         }
 		
-	public function get mouseChildren() : Boolean { implementMe(); }
+	public function get mouseChildren() : Boolean { throw new NotImplementedError(); }
 
-	public function set mouseChildren(enable : Boolean) : void { implementMe(); }
+	public function set mouseChildren(enable : Boolean) : void { throw new NotImplementedError(); }
 		
-	public function get tabChildren() : Boolean { implementMe(); }
+	public function get tabChildren() : Boolean { throw new NotImplementedError(); }
 
-	public function set tabChildren(enable : Boolean) : void { implementMe(); }
+	public function set tabChildren(enable : Boolean) : void { throw new NotImplementedError(); }
 		
         
         /** Optimizes the sprite for optimal rendering performance. Changes in the

@@ -15,17 +15,17 @@ package bc.flash.net
 
 		public function URLLoader(request : URLRequest = null) : void
 		{
-			implementMe();
+			throw new NotImplementedError();
 		}
 
 		public function close() : void
 		{
-			implementMe();
+			throw new NotImplementedError();
 		}
 
 		public function load(request : URLRequest) : void
 		{
-			implementMe();	
+			throw new NotImplementedError();	
 		}
 	}
 }

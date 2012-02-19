@@ -8,48 +8,48 @@ package bc.flash.display
 	 */
 	public class LoaderInfo extends EventDispatcher
 	{
-		public function get actionScriptVersion() : uint { implementMe(); }
+		public function get actionScriptVersion() : uint { throw new NotImplementedError(); }
 
 		/* public function get applicationDomain() : ApplicationDomain; */
 
-		public function get bytes() : ByteArray { implementMe(); }
+		public function get bytes() : ByteArray { throw new NotImplementedError(); }
 
-		public function get bytesLoaded() : uint { implementMe(); }
+		public function get bytesLoaded() : uint { throw new NotImplementedError(); }
 
-		public function get bytesTotal() : uint { implementMe(); }
+		public function get bytesTotal() : uint { throw new NotImplementedError(); }
 
-		public function get childAllowsParent() : Boolean { implementMe(); }
+		public function get childAllowsParent() : Boolean { throw new NotImplementedError(); }
 
-		public function get content() : DisplayObject { implementMe(); }
+		public function get content() : DisplayObject { throw new NotImplementedError(); }
 
-		public function get contentType() : String { implementMe(); }
+		public function get contentType() : String { throw new NotImplementedError(); }
 
-		public function get frameRate() : Number { implementMe(); }
+		public function get frameRate() : Number { throw new NotImplementedError(); }
 
 		/* public static function getLoaderInfoByDefinition(object : Object) : LoaderInfo; */
 
-		public function get height() : int { implementMe(); }
+		public function get height() : int { throw new NotImplementedError(); }
 
-		public function get isURLInaccessible() : Boolean { implementMe(); }
+		public function get isURLInaccessible() : Boolean { throw new NotImplementedError(); }
 
-		public function get loader() : Loader { implementMe(); }
+		public function get loader() : Loader { throw new NotImplementedError(); }
 
-		public function get loaderURL() : String { implementMe(); }
+		public function get loaderURL() : String { throw new NotImplementedError(); }
 
-		public function get parameters() : Object { implementMe(); }
+		public function get parameters() : Object { throw new NotImplementedError(); }
 
-		public function get parentAllowsChild() : Boolean { implementMe(); }
+		public function get parentAllowsChild() : Boolean { throw new NotImplementedError(); }
 
-		public function get sameDomain() : Boolean { implementMe(); }
+		public function get sameDomain() : Boolean { throw new NotImplementedError(); }
 
-		public function get sharedEvents() : EventDispatcher { implementMe(); }
+		public function get sharedEvents() : EventDispatcher { throw new NotImplementedError(); }
 
-		public function get swfVersion() : uint { implementMe(); }
+		public function get swfVersion() : uint { throw new NotImplementedError(); }
 
 		/* public function get uncaughtErrorEvents() : UncaughtErrorEvents; */
 
-		public function get url() : String { implementMe(); }
+		public function get url() : String { throw new NotImplementedError(); }
 
-		public function get width() : int { implementMe(); }
+		public function get width() : int { throw new NotImplementedError(); }
 	}
 }

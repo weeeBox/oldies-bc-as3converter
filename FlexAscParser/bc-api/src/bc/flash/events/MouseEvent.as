@@ -61,9 +61,9 @@ package bc.flash.events
 
 		/* public function set shiftKey(value : Boolean) : void; */
 
-		public function get stageX() : Number { implementMe(); }
+		public function get stageX() : Number { throw new NotImplementedError(); }
 
-		public function get stageY() : Number { implementMe(); }
+		public function get stageY() : Number { throw new NotImplementedError(); }
 
 		/* public function toString() : String; */
 

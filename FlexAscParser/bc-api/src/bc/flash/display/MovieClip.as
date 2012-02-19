@@ -5,42 +5,42 @@ package bc.flash.display
 		/* [Inspectable(environment="none")] */
 		/* public function addFrameScript(...args : *) : void; */
 
-		public function get currentFrame() : int { implementMe(); }
+		public function get currentFrame() : int { throw new NotImplementedError(); }
 
 		/* [Version("10")] */
-		public function get currentFrameLabel() : String { implementMe(); }
+		public function get currentFrameLabel() : String { throw new NotImplementedError(); }
 
-		public function get currentLabel() : String { implementMe(); }
+		public function get currentLabel() : String { throw new NotImplementedError(); }
 
-		public function get currentLabels() : Array { implementMe(); }
+		public function get currentLabels() : Array { throw new NotImplementedError(); }
 
-		/* public function get currentScene() : Scene { implementMe(); } */
+		/* public function get currentScene() : Scene { throw new NotImplementedError(); } */
 
-		public function get enabled() : Boolean { implementMe(); }
+		public function get enabled() : Boolean { throw new NotImplementedError(); }
 
-		public function set enabled(value : Boolean) : void { implementMe(); }
+		public function set enabled(value : Boolean) : void { throw new NotImplementedError(); }
 
-		public function get framesLoaded() : int { implementMe(); }
+		public function get framesLoaded() : int { throw new NotImplementedError(); }
 
-		public function gotoAndPlay(frame : Object, scene : String = null) : void { implementMe(); }
+		public function gotoAndPlay(frame : Object, scene : String = null) : void { throw new NotImplementedError(); }
 
-		public function gotoAndStop(frame : Object, scene : String = null) : void { implementMe(); }
+		public function gotoAndStop(frame : Object, scene : String = null) : void { throw new NotImplementedError(); }
 
-		public function nextFrame() : void { implementMe(); }
+		public function nextFrame() : void { throw new NotImplementedError(); }
 
-		/* public function nextScene() : void { implementMe(); } */
+		/* public function nextScene() : void { throw new NotImplementedError(); } */
 
-		public function play() : void { implementMe(); }
+		public function play() : void { throw new NotImplementedError(); }
 
-		public function prevFrame() : void { implementMe(); }
+		public function prevFrame() : void { throw new NotImplementedError(); }
 
-		public function prevScene() : void { implementMe(); }
+		public function prevScene() : void { throw new NotImplementedError(); }
 
-		/* public function get scenes() : Array { implementMe(); } */
+		/* public function get scenes() : Array { throw new NotImplementedError(); } */
 
-		public function stop() : void { implementMe(); }
+		public function stop() : void { throw new NotImplementedError(); }
 
-		public function get totalFrames() : int { implementMe(); }
+		public function get totalFrames() : int { throw new NotImplementedError(); }
 
 		/* public function get trackAsMenu() : Boolean; */
 

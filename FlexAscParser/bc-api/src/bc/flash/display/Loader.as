@@ -10,21 +10,21 @@ package bc.flash.display
 	 */
 	public class Loader extends DisplayObjectContainer
 	{
-		public function close() : void { implementMe(); }
+		public function close() : void { throw new NotImplementedError(); }
 
-		public function get content() : DisplayObject { implementMe(); }
+		public function get content() : DisplayObject { throw new NotImplementedError(); }
 
-		public function get contentLoaderInfo() : LoaderInfo { implementMe(); }
+		public function get contentLoaderInfo() : LoaderInfo { throw new NotImplementedError(); }
 
-		public function load(request : URLRequest, context : LoaderContext = null) : void { implementMe(); }
+		public function load(request : URLRequest, context : LoaderContext = null) : void { throw new NotImplementedError(); }
 
-		public function loadBytes(bytes : ByteArray, context : LoaderContext = null) : void { implementMe(); }
+		public function loadBytes(bytes : ByteArray, context : LoaderContext = null) : void { throw new NotImplementedError(); }
 
 		/* public function get uncaughtErrorEvents() : UncaughtErrorEvents; */
 
-		public function unload() : void { implementMe(); }
+		public function unload() : void { throw new NotImplementedError(); }
 
-		/* public function unloadAndStop(gc : Boolean = true) : void { implementMe(); } */
+		/* public function unloadAndStop(gc : Boolean = true) : void { throw new NotImplementedError(); } */
 		
 		override public function addChild(child:DisplayObject):void
         {
