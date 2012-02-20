@@ -2643,6 +2643,10 @@ public class Main2
 		{
 			writeFile(file, src);
 		}
+		else
+		{
+			System.out.println("Up to data: " + file.getName());
+		}
 	}
 	
 	private static boolean needUpldateFile(File file, ListWriteDestination src) throws IOException
@@ -2664,9 +2668,11 @@ public class Main2
 					return true;
 				}
 			}
+			
+			return false;
 		}
 		
-		return false;
+		return true;
 	}
 
 	private static List<String> readFile(File file) throws IOException 

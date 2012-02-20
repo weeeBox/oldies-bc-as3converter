@@ -249,15 +249,10 @@ public class BcFunctionDeclaration extends BcDeclaration
 		ArgumentListNode args = new ArgumentListNode(null, 0);
 		args.items.clear(); // this is more like a hack. The first element is added from the constructor and we don't need it
 		counter = 0;
-		int defaultParamsStartIndex = params.size() - defaultParamsCount;
 		
 		for (BcFuncParam param : params)
 		{
-			if (counter == lastParamIndex + 1)
-			{
-				break;
-			}
-			if (counter < defaultParamsStartIndex)
+			if (counter < lastParamIndex)
 			{
 				args.items.add(new MemberExpressionNode(null, new GetExpressionNode(new IdentifierNode(param.getIdentifier(), 0)), 0));
 			}
