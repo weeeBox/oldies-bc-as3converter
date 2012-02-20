@@ -5,6 +5,7 @@ package bc.flash.display
 	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Rectangle;
 	
+	[ConvertOnce]
 	public class BitmapData extends Object implements IBitmapDrawable
 	{
 		private var mWidth : int;
