@@ -56,6 +56,34 @@ package bc.flash.display
 
 		public function lineTo(x : Number, y : Number) : void { throw new AbstractClassError(); }
 
-		public function moveTo(x : Number, y : Number) : void { throw new AbstractClassError(); }
+		public function moveTo(x : Number, y : Number) : void
+		{
+			throw new AbstractClassError();
+		}
+
+		public function scale(scaleX : Number, scaleY : Number) : void
+		{
+			throw new AbstractClassError();
+		}
+
+		public function rotate(a : Number) : void
+		{
+			throw new AbstractClassError();
+		}
+
+		public function translate(x : Number, y : Number) : void
+		{
+			throw new AbstractClassError();
+		}
+
+		public function pushMatrix() : void
+		{
+			throw new AbstractClassError();
+		}
+
+		public function popMatrix() : void
+		{
+			throw new AbstractClassError();
+		}
 	}
 }

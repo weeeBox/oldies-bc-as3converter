@@ -2,7 +2,6 @@ package bc.flash.display
 {
 	import bc.flash.geom.Transform;
 	import bc.flash.error.NotImplementedError;
-	import bc.flash.core.RenderSupport;
 	import bc.flash.error.AbstractClassError;
 	import bc.flash.error.AbstractMethodError;
 	import bc.flash.events.Event;
@@ -39,7 +38,8 @@ package bc.flash.display
         private static var sHelperMatrix:Matrix  = new Matrix();
         private static var sTargetMatrix:Matrix  = new Matrix();
         
-        protected static var sRectCount:int = 0;
+        protected static var sRectCount : int = 0;
+        private var mScrollRect : Rectangle;
         
         /** @private */ 
         public function DisplayObject()
@@ -218,15 +218,98 @@ package bc.flash.display
             return sTargetMatrix.transformPoint(globalPoint);
         }
         
-        /** Renders the display object with the help of a support object. Never call this method
-         *  directly, except from within another render method.
-         *  @param support Provides utility functions for rendering.
-         *  @param alpha The accumulated alpha value from the object's parent up to the stage. */
-        public function render(support:RenderSupport, alpha:Number):void
+        public function draw(g : Graphics) : void
         {
-            throw new AbstractMethodError("Method needs to be implemented in subclass");
+            preDraw(g);
+            postDraw(g);			
         }
         
+        protected function preDraw(g : Graphics) : void
+        {
+            applyDrawState(g);
+        }
+		
+        protected function postDraw(g : Graphics) : void
+        {
+            restoreDrawState(g);
+        }
+		
+        protected function applyDrawState(g : Graphics) : void
+        {            
+            applyTransformations(g);
+            applyEffect();
+            g.translate(x, y);
+        }
+
+        protected function applyTransformations(g : Graphics) : void
+        {
+            var changeScale : Boolean = (scaleX != 1.0 || scaleY != 1.0);
+            var changeRotation : Boolean = (rotation != 0.0);            
+
+            if (changeScale || changeRotation)
+            {
+                g.pushMatrix();
+
+                if (changeScale || changeRotation)
+                {
+                    var rotationOffsetX : Number = x + 0.5 * width;
+                    var rotationOffsetY : Number = y + 0.5 * height;
+
+                    g.translate(rotationOffsetX, rotationOffsetY);
+
+                    if (changeRotation)
+                    {
+                        g.rotate(rotation);
+                    }
+
+                    if (changeScale)
+                    {
+                        g.scale(scaleX, scaleY);
+                    }
+                    g.translate(-rotationOffsetX, -rotationOffsetY);
+                }
+			}
+        }
+
+        private function applyEffect() : void
+        {            
+//            if (!ctForm.Equals(ColorTransform.NONE))
+//            {
+//                BaseElementEffect baseEffect = EmbededRes.baseElementEffect;
+//                baseEffect.SetCtForm(ref ctForm);
+//                effect = baseEffect;
+//            }
+//
+//            if (effect != null)
+//            {
+//                AppGraphics.SetEffect(effect);
+//            }
+        }
+
+        protected function restoreDrawState(g : Graphics) : void
+        {            
+            g.translate(-x, -y);
+            restoreEffect();
+            restoreTransformations(g);            
+        }
+
+        protected function restoreTransformations(g : Graphics) : void
+        {
+            // if any transformation
+            if (rotation != 0.0 || scaleX != 1.0 || scaleY != 1.0)
+            {
+                g.popMatrix();
+            }
+        }
+
+        private function restoreEffect() : void
+        {
+//            if (effect != null)
+//            {
+//                AppGraphics.SetEffect(null);
+//            }
+        }
+		
         /** @inheritDoc */
         public override function dispatchEvent(event:Event):void
         {
@@ -369,12 +452,12 @@ package bc.flash.display
         /** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
         public function set transform(value : Transform) : void { throw new NotImplementedError(); }
 		
-	public function get scrollRect() : Rectangle { throw new NotImplementedError(); }
+	public function get scrollRect() : Rectangle { return mScrollRect; }
 
-	public function set scrollRect(value : Rectangle) : void { throw new NotImplementedError(); }
+	public function set scrollRect(value : Rectangle) : void { mScrollRect = value; }
 		
-	public function get opaqueBackground() : uint { throw new NotImplementedError(); }
+	public function get opaqueBackground() : uint { return 0xffffffff; }
 
-	public function set opaqueBackground(value : uint) : void { throw new NotImplementedError(); }
+	public function set opaqueBackground(value : uint) : void { }
     }
 }

@@ -1,6 +1,5 @@
 package bc.flash.display
 {
-    import bc.flash.core.RenderSupport;
     import bc.flash.events.Event;
     import bc.flash.geom.Matrix;
     import bc.flash.geom.Point;
@@ -246,23 +245,17 @@ package bc.flash.display
             return null;
         }
         
-        /** @inheritDoc */
-        public override function render(support:RenderSupport, alpha:Number):void
+        protected override function postDraw(g : Graphics) : void
         {
-            alpha *= this.alpha;
-            var numChildren:int = mChildren.length;
-            
-            for (var i:int=0; i<numChildren; ++i)
+            for each (var child : DisplayObject in mChildren)
             {
-                var child:DisplayObject = mChildren[i];
                 if (child.alpha != 0.0 && child.visible && child.scaleX != 0.0 && child.scaleY != 0.0)
                 {
-                    support.pushMatrix();
-                    support.transformMatrix(child);
-                    child.render(support, alpha);
-                    support.popMatrix();
+                    child.draw(g);
                 }
             }
+
+            restoreDrawState(g);
         }
         
         /** Dispatches an event on all children (recursively). The event must not bubble. */
