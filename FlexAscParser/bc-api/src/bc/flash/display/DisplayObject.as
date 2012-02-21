@@ -444,7 +444,7 @@ package bc.flash.display
         
         /** The stage the display object is connected to, or null if it is not connected 
          *  to a stage. */
-        public function get stage():Stage { return this.root as Stage; }
+        public function get stage():Stage { return Stage.getInstance(); }
 		
         /** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
         public function get transform() : Transform { throw new NotImplementedError(); }
@@ -452,12 +452,23 @@ package bc.flash.display
         /** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
         public function set transform(value : Transform) : void { throw new NotImplementedError(); }
 		
-	public function get scrollRect() : Rectangle { return mScrollRect; }
+		public function get scrollRect() : Rectangle
+		{
+			return mScrollRect;
+		}
 
-	public function set scrollRect(value : Rectangle) : void { mScrollRect = value; }
-		
-	public function get opaqueBackground() : uint { return 0xffffffff; }
+		public function set scrollRect(value : Rectangle) : void
+		{
+			mScrollRect = value;
+		}
 
-	public function set opaqueBackground(value : uint) : void { }
+		public function get opaqueBackground() : uint
+		{
+			return 0xffffffff;
+		}
+
+		public function set opaqueBackground(value : uint) : void
+		{
+		}
     }
 }

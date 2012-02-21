@@ -27,7 +27,8 @@ package bc.flash.display
     public class Sprite extends DisplayObjectContainer
     {
         /* private var mFlattenedContents:Vector.<QuadBatch>; */
-        private var mUseHandCursor:Boolean;
+		private var mUseHandCursor : Boolean;
+		private var mMouseChildren : Boolean;
         
         /** Creates an empty sprite. */
         public function Sprite()
@@ -61,20 +62,30 @@ package bc.flash.display
             throw new NotImplementedError(); 
         }
 		
-        private function onTouch(evt:Event):void
-	{
+		private function onTouch(evt : Event) : void
+		{
 			var event : TouchEvent = TouchEvent(evt);
-            Mouse.cursor = event.interactsWith(this) ? MouseCursor.BUTTON : MouseCursor.AUTO;
-        }
-		
-	public function get mouseChildren() : Boolean { throw new NotImplementedError(); }
+			Mouse.cursor = event.interactsWith(this) ? MouseCursor.BUTTON : MouseCursor.AUTO;
+		}
 
-	public function set mouseChildren(enable : Boolean) : void { throw new NotImplementedError(); }
-		
-	public function get tabChildren() : Boolean { throw new NotImplementedError(); }
+		public function get mouseChildren() : Boolean
+		{
+			return mMouseChildren;
+		}
 
-	public function set tabChildren(enable : Boolean) : void { throw new NotImplementedError(); }
-		
+		public function set mouseChildren(enable : Boolean) : void
+		{
+			mMouseChildren = enable;
+		}
+
+		public function get tabChildren() : Boolean
+		{
+			return false;
+		}
+
+		public function set tabChildren(enable : Boolean) : void
+		{			
+		}		
         
         /** Optimizes the sprite for optimal rendering performance. Changes in the
          *  children of a flattened sprite will not be displayed any longer. For this to happen,

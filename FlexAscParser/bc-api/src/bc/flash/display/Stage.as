@@ -45,6 +45,8 @@ package bc.flash.display
 		private var mFullScreenSourceRect : Rectangle;
 		private var mStageFocusRect : Boolean;
 		private var mTabChildren : Boolean;
+		
+		private static var mCurrentStage : Stage;
 
 		/** @private */
 		public function Stage(width : int, height : int, color : uint = 0)
@@ -52,6 +54,13 @@ package bc.flash.display
 			mWidth = width;
 			mHeight = height;
 			mColor = color;
+			
+			mCurrentStage = this;
+		}
+
+		public static function getInstance() : Stage
+		{
+			return mCurrentStage;
 		}
 
 		public function tick(dt : Number) : void

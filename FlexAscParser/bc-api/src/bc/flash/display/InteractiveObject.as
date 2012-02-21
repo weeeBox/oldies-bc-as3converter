@@ -1,11 +1,10 @@
 package bc.flash.display
 {
-	import bc.flash.Debug;
-	
 	public class InteractiveObject extends DisplayObject
 	{
 		private var m_mouseEnabled : Boolean;
 		private var m_doubleClickEnabled : Boolean;
+		private var mFocusRect : Boolean;
 		
 		/* [Inspectable(environment="none")] */
 		/* public function get accessibilityImplementation() : AccessibilityImplementation; */
@@ -23,15 +22,14 @@ package bc.flash.display
 			m_doubleClickEnabled = enabled;
 		}
 
-		public function get focusRect() : Object
+		public function get focusRect() : Boolean
 		{
-			Debug.implementMe("get focusRect");
-			return null;
+			return mFocusRect;
 		}
 
 		public function set focusRect(focusRect : Boolean) : void
 		{
-			Debug.implementMe("set focusRect");
+			mFocusRect = focusRect;
 		}
 
 		public function get mouseEnabled() : Boolean
