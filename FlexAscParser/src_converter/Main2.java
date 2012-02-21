@@ -1230,6 +1230,16 @@ public class Main2
 						dest.write(", ");
 					}
 				}
+				
+				if (calledFunction.getName().equals("hasOwnProperty") && args.size() == 1)
+				{
+					String argsString = argsDest.toString();
+					if (argsString.startsWith("\"@"))
+					{
+						argsDest = new ListWriteDestination();
+						argsDest.writef("\"%s", argsString.substring(2));
+					}
+				}
 			}
 			else
 			{
