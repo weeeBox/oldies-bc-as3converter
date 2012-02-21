@@ -57,8 +57,9 @@ package bc.flash.display
                 child.removeFromParent();
                 mChildren.splice(index, 0, child);
                 child.setParent(this);                
-                child.dispatchEvent(new Event(Event.ADDED, true));
-                if (stage) child.dispatchEventOnChildren(new Event(Event.ADDED_TO_STAGE));
+// FIXME				
+//                child.dispatchEvent(new Event(Event.ADDED, true));
+//                if (stage) child.dispatchEventOnChildren(new Event(Event.ADDED_TO_STAGE));
             }
             else
             {

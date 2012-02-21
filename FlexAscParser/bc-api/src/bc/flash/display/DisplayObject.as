@@ -36,6 +36,7 @@ package bc.flash.display
 		private static var sTargetMatrix : Matrix = new Matrix();
 		protected static var sRectCount : int = 0;
 		private var mScrollRect : Rectangle;
+		private var mTransform : Transform;
 
 		/** @private */
 		public function DisplayObject()
@@ -47,6 +48,8 @@ package bc.flash.display
 			mScaleX = mScaleY = mAlpha = 1.0;
 			mVisible = mTouchable = true;
 			mLastTouchTimestamp = -1;
+			
+			mTransform = new Transform(this);
 		}
 
 		/** Disposes all resources of the display object. 
@@ -527,13 +530,13 @@ package bc.flash.display
 		/** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
 		public function get transform() : Transform
 		{
-			throw new NotImplementedError();
+			return mTransform;
 		}
 
 		/** An object with properties pertaining to a display object's matrix, color transform, and pixel bounds. */
 		public function set transform(value : Transform) : void
 		{
-			throw new NotImplementedError();
+			mTransform = value;
 		}
 
 		public function get scrollRect() : Rectangle
