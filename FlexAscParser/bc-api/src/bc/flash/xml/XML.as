@@ -134,6 +134,11 @@ package bc.flash.xml
 			return null;
 		}
 		
+		public function hasOwnProperty(name : String) : Boolean
+		{
+			return false;
+		}
+		
 		/* public function toString() : String; */
 
 		/* public function toXMLString() : String; */

@@ -3,7 +3,6 @@ package bc.flash.xml
 	/**
 	 * @author weee
 	 */
-	[ConvertOnce]
 	public class XMLElement extends bc.flash.xml.XML
 	{
 		private var mAttributes : bc.flash.xml.XMLList;
@@ -24,6 +23,11 @@ package bc.flash.xml
 		public function appendAttribute(name : String, value : String) : bc.flash.xml.XML
 		{
 			return mAttributes.appendChild(new XMLAttribute(name, value));
+		}
+		
+		override public function hasOwnProperty(name : String) : Boolean
+		{
+			return mAttributes.containsChild(name);
 		}
 		
 		override public function attributeValue(arg : String) : String

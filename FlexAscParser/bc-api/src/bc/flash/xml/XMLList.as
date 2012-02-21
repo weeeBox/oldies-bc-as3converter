@@ -1,22 +1,43 @@
 package bc.flash.xml
 {
+	import bc.flash.Vector;
 	import bc.flash.error.NotImplementedError;
 
 	[ConvertOnce]
 	public class XMLList
 	{
+		private var mElements : Vector.<bc.flash.xml.XML>;
+		
 		/* public static const length : uint = 1; */
 		/* function XMLList(value : * = undefined) : void; */
 		/* public function addNamespace(ns : *) : XML; */
 		
-		public function appendChild(child : bc.flash.xml.XML) : bc.flash.xml.XML
+		public function XMLList()
 		{
-			throw new NotImplementedError();
+			mElements = new Vector.<XML>(0);				 
 		}
 		
-		public function list() : Object
+		public function appendChild(child : bc.flash.xml.XML) : bc.flash.xml.XML
 		{
-			throw new NotImplementedError();
+			mElements.push(child);
+			return child;
+		}
+		
+		public function containsChild(name : String) : Boolean
+		{
+			for each (var element : XML in mElements)
+			{
+				if (name == element.name())
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		public function list() : Vector.<bc.flash.xml.XML>
+		{
+			return mElements;
 		}
 
 		public function attribute(arg : String) : bc.flash.xml.XMLList
@@ -68,7 +89,7 @@ package bc.flash.xml
 		
 		public function length() : int
 		{
-			throw new NotImplementedError();
+			return mElements.length;
 		}
 
 		/* public function localName() : Object; */
