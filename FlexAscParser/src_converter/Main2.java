@@ -1998,7 +1998,7 @@ public class Main2
 		else if (node.op == Tokens.AS_TOKEN)
 		{
 			BcTypeNode castType = extractBcType(node.rhs);
-			dest.writef("(%s)", BcCodeCs.cast(lshString, castType));
+			dest.writef("((%s) ? (%s) : %s)", BcCodeCs.operatorIs(ldest, rdest), BcCodeCs.cast(lshString, castType), BcCodeCs.NULL);
 		}
 		else
 		{
