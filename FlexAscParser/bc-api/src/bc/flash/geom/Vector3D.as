@@ -8,9 +8,9 @@ package bc.flash.geom
 	 */
 	public class Vector3D extends Object
 	{
-		public static const X_AXIS : Vector3D;
-		public static const Y_AXIS : Vector3D;
-		public static const Z_AXIS : Vector3D;
+		public static const X_AXIS : Vector3D = new Vector3D(1, 0, 0);
+		public static const Y_AXIS : Vector3D = new Vector3D(0, 1, 0);
+		public static const Z_AXIS : Vector3D = new Vector3D(0, 0, 1);
 		public var x : Number;
 		public var y : Number;
 		public var z : Number;

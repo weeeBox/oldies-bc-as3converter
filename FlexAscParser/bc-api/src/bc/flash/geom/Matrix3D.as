@@ -2,8 +2,6 @@ package bc.flash.geom
 {
 	import bc.flash.error.NotImplementedError;
 
-	import flash.geom.Vector3D;
-
 	/**
 	 * @author weee
 	 */

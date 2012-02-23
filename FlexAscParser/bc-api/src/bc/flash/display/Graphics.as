@@ -1,17 +1,14 @@
 package bc.flash.display
 {
-	import bc.flash.error.AbstractClassError;
-
 	/**
 	 * @author weee
 	 */
-	[ConvertOnce]
 	public final class Graphics extends Object
 	{
 		/* public function beginBitmapFill(bitmap : BitmapData, matrix : Matrix = null, repeat : Boolean = true, smooth : Boolean = false) : void { throw new AbstractClassError(); } */
 		public function beginFill(color : uint, alpha : Number = 1.0) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.beginFill(color, alpha);
 		}
 
 		/* public function beginGradientFill(type : String, colors : Array, alphas : Array, ratios : Array, matrix : Matrix = null, spreadMethod : String = "pad", interpolationMethod : String = "rgb", focalPointRatio : Number = 0) : void { throw new AbstractClassError(); } */
@@ -19,92 +16,104 @@ package bc.flash.display
 		/* public function beginShaderFill(shader : Shader, matrix : Matrix = null) : void { throw new AbstractClassError(); } */
 		public function clear() : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.clear();
 		}
 
 		/* [Version("10")] */
 		/* public function copyFrom(sourceGraphics : Graphics) : void { throw new AbstractClassError(); } */
 		public function curveTo(controlX : Number, controlY : Number, anchorX : Number, anchorY : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.curveTo(controlX, controlY, anchorX, anchorY);
 		}
 
 		public function drawCircle(x : Number, y : Number, radius : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.drawCircle(x, y, radius);
 		}
 
 		public function drawEllipse(x : Number, y : Number, width : Number, height : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.drawEllipse(x, y, width, height);
 		}
 
 		/* [Version("10")] */
 		/* public function drawGraphicsData(graphicsData : Vector.<IGraphicsData>) : void { throw new AbstractClassError(); } */
+		
 		/* [Version("10")] */
 		/* public function drawPath(commands : Vector.<int>, data : Vector.<Number>, winding : String = "evenOdd") : void { throw new AbstractClassError(); } */
+		
 		public function drawRect(x : Number, y : Number, width : Number, height : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.drawRect(x, y, width, height);
 		}
 
 		public function drawRoundRect(x : Number, y : Number, width : Number, height : Number, ellipseWidth : Number, ellipseHeight : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.drawRoundRect(x, y, width, height, ellipseWidth, ellipseHeight);
+		}
+		
+		public function drawBitmap(bitmap : BitmapData, x : Number, y : Number) : void
+		{
+			BcRenderSupport.drawBitmap(bitmap, x, y);
 		}
 
 		/* [Inspectable(environment="none")] */
 		/* public function drawRoundRectComplex(x : Number, y : Number, width : Number, height : Number, topLeftRadius : Number, topRightRadius : Number, bottomLeftRadius : Number, bottomRightRadius : Number) : void { throw new AbstractClassError(); } */
+		
 		/* [Version("10")] */
 		/* public function drawTriangles(vertices : Vector.<Number>, indices : Vector.<int> = null, uvtData : Vector.<Number> = null, culling : String = "none") : void { throw new AbstractClassError(); } */
+		
 		public function endFill() : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.endFill();
 		}
 
 		/* [Version("10")] */
 		/* public function lineBitmapStyle(bitmap : BitmapData, matrix : Matrix = null, repeat : Boolean = true, smooth : Boolean = false) : void { throw new AbstractClassError(); } */
+		
 		/* public function lineGradientStyle(type : String, colors : Array, alphas : Array, ratios : Array, matrix : Matrix = null, spreadMethod : String = "pad", interpolationMethod : String = "rgb", focalPointRatio : Number = 0) : void { throw new AbstractClassError(); } */
+		
 		/* [Version("10")] */
 		/* public function lineShaderStyle(shader : Shader, matrix : Matrix = null) : void { throw new AbstractClassError(); } */
+		
 		public function lineStyle(thickness : Number = 0, color : uint = 0, alpha : Number = 1.0, pixelHinting : Boolean = false, scaleMode : String = "normal", caps : String = null, joints : String = null, miterLimit : Number = 3) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.lineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
 		}
 
 		public function lineTo(x : Number, y : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.lineTo(x, y);
 		}
 
 		public function moveTo(x : Number, y : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.moveTo(x, y);
 		}
 
 		public function scale(scaleX : Number, scaleY : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.scale(scaleX, scaleY);
 		}
 
 		public function rotate(a : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.rotate(a);
 		}
 
 		public function translate(x : Number, y : Number) : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.translate(x, y);
 		}
 
 		public function pushMatrix() : void
 		{
-			throw new AbstractClassError();
+			BcRenderSupport.pushMatrix();
 		}
 
 		public function popMatrix() : void
 		{
-			throw new AbstractClassError();
-		}
+			BcRenderSupport.popMatrix();
+		}		
 	}
 }

@@ -1,5 +1,8 @@
 package bc.flash.display
 {
+    import bc.flash.core.RenderSupport;
+    import bc.flash.error.AbstractClassError;
+    import bc.flash.utils.getQualifiedClassName;
     import bc.flash.events.Event;
     import bc.flash.geom.Matrix;
     import bc.flash.geom.Point;
@@ -21,11 +24,8 @@ package bc.flash.display
         /** @private */
         public function DisplayObjectContainer()
         {
-            /*
-            // TODO: fix that 
-            if (getQualifiedClassName(this) == "starling.display::DisplayObjectContainer")
+            if (getQualifiedClassName(this) == "DisplayObjectContainer")
                 throw new AbstractClassError();            
-            */
             
             mChildren = new Vector.<DisplayObject>();
         }
@@ -245,17 +245,23 @@ package bc.flash.display
             return null;
         }
         
-        protected override function postDraw(g : Graphics) : void
+        /** @inheritDoc */
+        public override function render(support:RenderSupport, alpha:Number):void
         {
-            for each (var child : DisplayObject in mChildren)
+            alpha *= this.alpha;
+            var numChildren:int = mChildren.length;
+            
+            for (var i:int=0; i<numChildren; ++i)
             {
+                var child:DisplayObject = mChildren[i];
                 if (child.alpha != 0.0 && child.visible && child.scaleX != 0.0 && child.scaleY != 0.0)
                 {
-                    child.draw(g);
+                    support.pushMatrix();
+                    support.transformMatrix(child);
+                    child.render(support, alpha);
+                    support.popMatrix();
                 }
             }
-
-            restoreDrawState(g);
         }
         
         /** Dispatches an event on all children (recursively). The event must not bubble. */

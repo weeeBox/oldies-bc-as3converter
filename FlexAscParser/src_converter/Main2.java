@@ -2015,7 +2015,7 @@ public class Main2
 	}
 	
 	private static void process(UnaryExpressionNode node)
-	{
+	{	
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
 		process(node.expr);
@@ -3075,6 +3075,10 @@ public class Main2
 					return createBcType(classBoolean);
 				}				
 				return evaluateMemberExpression((MemberExpressionNode) unary.expr);
+			}
+			else if (unary.expr instanceof ListNode)
+			{
+				return evaluateType(unary.expr);
 			}
 			else
 			{

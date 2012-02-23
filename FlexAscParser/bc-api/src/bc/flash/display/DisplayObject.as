@@ -1,7 +1,7 @@
 package bc.flash.display
 {
+	import bc.flash.core.RenderSupport;
 	import bc.flash.geom.Transform;
-	import bc.flash.error.NotImplementedError;
 	import bc.flash.error.AbstractClassError;
 	import bc.flash.error.AbstractMethodError;
 	import bc.flash.events.Event;
@@ -48,7 +48,7 @@ package bc.flash.display
 			mScaleX = mScaleY = mAlpha = 1.0;
 			mVisible = mTouchable = true;
 			mLastTouchTimestamp = -1;
-			
+
 			mTransform = new Transform(this);
 		}
 
@@ -216,96 +216,13 @@ package bc.flash.display
 			return sTargetMatrix.transformPoint(globalPoint);
 		}
 
-		public function draw(g : Graphics) : void
+		/** Renders the display object with the help of a support object. Never call this method
+		 *  directly, except from within another render method.
+		 *  @param support Provides utility functions for rendering.
+		 *  @param alpha The accumulated alpha value from the object's parent up to the stage. */
+		public function render(support : RenderSupport, alpha : Number) : void
 		{
-			preDraw(g);
-			postDraw(g);
-		}
-
-		protected function preDraw(g : Graphics) : void
-		{
-			applyDrawState(g);
-		}
-
-		protected function postDraw(g : Graphics) : void
-		{
-			restoreDrawState(g);
-		}
-
-		protected function applyDrawState(g : Graphics) : void
-		{
-			applyTransformations(g);
-			applyEffect();
-			g.translate(x, y);
-		}
-
-		protected function applyTransformations(g : Graphics) : void
-		{
-			var changeScale : Boolean = (scaleX != 1.0 || scaleY != 1.0);
-			var changeRotation : Boolean = (rotation != 0.0);
-
-			if (changeScale || changeRotation)
-			{
-				g.pushMatrix();
-
-				if (changeScale || changeRotation)
-				{
-					var rotationOffsetX : Number = x + 0.5 * width;
-					var rotationOffsetY : Number = y + 0.5 * height;
-
-					g.translate(rotationOffsetX, rotationOffsetY);
-
-					if (changeRotation)
-					{
-						g.rotate(rotation);
-					}
-
-					if (changeScale)
-					{
-						g.scale(scaleX, scaleY);
-					}
-					g.translate(-rotationOffsetX, -rotationOffsetY);
-				}
-			}
-		}
-
-		private function applyEffect() : void
-		{            
-			// if (!ctForm.Equals(ColorTransform.NONE))
-			// {
-			// BaseElementEffect baseEffect = EmbededRes.baseElementEffect;
-			// baseEffect.SetCtForm(ref ctForm);
-			// effect = baseEffect;
-			// }
-			//
-			// if (effect != null)
-			// {
-			// AppGraphics.SetEffect(effect);
-			// }
-		}
-
-		protected function restoreDrawState(g : Graphics) : void
-		{
-			g.translate(-x, -y);
-			restoreEffect();
-			restoreTransformations(g);
-		}
-
-		protected function restoreTransformations(g : Graphics) : void
-		{
-			// if any transformation
-			if (rotation != 0.0 || scaleX != 1.0 || scaleY != 1.0)
-			{
-				g.popMatrix();
-			}
-		}
-
-		private function restoreEffect() : void
-		{
-			// if (effect != null)
-			// {
-			// AppGraphics.SetEffect(null);
-			// }
+			throw new AbstractMethodError("Method needs to be implemented in subclass");
 		}
 
 		/** @inheritDoc */
