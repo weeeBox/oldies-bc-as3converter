@@ -5,6 +5,7 @@ package bc.flash.geom
 	/**
 	 * @author weee
 	 */
+	[ConvertOnce]
 	public class Matrix3D extends Object
 	{
 		public var n11 : Number;
