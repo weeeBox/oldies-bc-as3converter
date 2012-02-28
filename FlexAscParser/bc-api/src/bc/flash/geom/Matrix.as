@@ -1,7 +1,6 @@
 package bc.flash.geom
 {
 	import bc.flash.error.NotImplementedError;
-	import bc.flash.Math;
 
 	[ConvertOnce]
 	public class Matrix extends Object

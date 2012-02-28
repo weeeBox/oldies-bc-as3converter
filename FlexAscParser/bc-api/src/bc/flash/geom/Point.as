@@ -1,9 +1,5 @@
 package bc.flash.geom
 {
-	import flash.geom.Point;
-
-	import bc.flash.Math;
-
 	public class Point extends Object
 	{
 		public var x : Number;

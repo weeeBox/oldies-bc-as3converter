@@ -1,8 +1,8 @@
 package bc.flash.display
 {
+	import flash.utils.ByteArray;
 	import bc.flash.error.NotImplementedError;
 	import bc.flash.events.EventDispatcher;
-	import bc.flash.utils.ByteArray;
 
 	/**
 	 * @author weee

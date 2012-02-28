@@ -1,6 +1,6 @@
 package bc.flash.display
 {
-	import bc.flash.error.IllegalOperationError;
+	import flash.errors.IllegalOperationError;
 	import bc.flash.events.EnterFrameEvent;
 	import bc.flash.events.Event;
 	import bc.flash.events.KeyboardEvent;

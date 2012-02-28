@@ -1,6 +1,5 @@
 package bc.flash.xml
 {
-	import bc.flash.Vector;
 	import bc.flash.error.NotImplementedError;
 
 	[ConvertOnce]
@@ -14,7 +13,7 @@ package bc.flash.xml
 		
 		public function XMLList()
 		{
-			mElements = new Vector.<XML>(0);				 
+			mElements = new Vector.<bc.flash.xml.XML>(0);				 
 		}
 		
 		public function appendChild(child : bc.flash.xml.XML) : bc.flash.xml.XML

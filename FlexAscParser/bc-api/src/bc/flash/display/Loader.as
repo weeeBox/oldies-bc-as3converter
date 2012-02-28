@@ -1,8 +1,8 @@
 package bc.flash.display
 {
-	import bc.flash.error.IllegalOperationError;
-	import bc.flash.system.LoaderContext;
-	import bc.flash.utils.ByteArray;
+	import flash.errors.IllegalOperationError;
+	import flash.utils.ByteArray;
+	import flash.system.LoaderContext;
 	import bc.flash.net.URLRequest;
 	import bc.flash.error.NotImplementedError;
 
