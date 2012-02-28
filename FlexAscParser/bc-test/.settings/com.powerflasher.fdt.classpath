@@ -18,4 +18,5 @@
     <AS3Classpath generateProblems="false" inclusion="complete" sdkBased="false" type="project" useAsSharedCode="false">bc-api</AS3Classpath>
     <AS3Classpath generateProblems="false" inclusion="complete" sdkBased="false" type="project" useAsSharedCode="false">bc-platform</AS3Classpath>
     <AS3Classpath generateProblems="true" sdkBased="false" type="source" useAsSharedCode="false">src_asunit</AS3Classpath>
+    <AS3Classpath generateProblems="false" sdkBased="true" type="lib" useAsSharedCode="false">frameworks/libs/air/airframework.swc</AS3Classpath>
 </AS3Classpath>

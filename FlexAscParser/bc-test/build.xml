@@ -9,6 +9,8 @@
 	<property name="dir.parser" value=".."/>
 	
 	<property name="dir.src" value="src" />	
+	<property name="dir.src.asunit" value="${src_asunit}" />
+	
 	<property name="dir.src.api" value="${dir.parser}/bc-api/src" />	
 	<property name="dir.src.platform" value="${dir.parser}/bc-platform/src" />	
 	
@@ -34,6 +36,7 @@
 			<!--<classpath refid="flexLibs" />-->
 			<!-- As3 source path -->
 			<source-path path-element="${dir.src}" />
+			<source-path path-element="${dir.src.asunit}" />
 			<source-path path-element="${dir.src.api}" />
 			<source-path path-element="${dir.src.platform}" />
 
