@@ -15,8 +15,20 @@ package bc.tests
 		
 		public function testTranslate() : void
 		{
+			bMatrix.identity();
+			fMatrix.identity();
 			bMatrix.appendTranslation(100, 200, 300);
 			fMatrix.appendTranslation(100, 200, 300);
+			
+			assertEquals(matrisesEquals(), true);
+		}
+		
+		public function testScale() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			bMatrix.appendScale(1.0, 2.0, 3.0);
+			fMatrix.appendScale(1.0, 2.0, 3.0);			
 			
 			assertEquals(matrisesEquals(), true);
 		}

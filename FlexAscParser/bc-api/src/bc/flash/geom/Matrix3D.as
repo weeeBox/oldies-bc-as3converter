@@ -167,6 +167,13 @@ package bc.flash.geom
 			return m;
 		}
 		
+		public function identity():void
+		{
+			m12 = m13 = m21 = m23 = m31 = m32 = 0.0;
+			m11 = m22 = m33 = 1.0;
+			t.x = t.y = t.z = 0.0;
+		}
+		
 		public function get determinant() : Number
 		{
 			return mDeterminant;
