@@ -1,3 +1,5 @@
 /FlexAscParser/bin
 /FlexAscParser/bc-platform/bin
 /FlexAscParser/bc-api/bin
+/FlexAscParser/bc-test/bin
+/FlexAscParser/bc-test/out
