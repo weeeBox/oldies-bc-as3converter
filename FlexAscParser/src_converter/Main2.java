@@ -2205,16 +2205,23 @@ public class Main2
 			funcType.setReturnType(returnType);
 		}
 		
-		List<BcMetadataNode> params = typeMetadata.childs("param");
-		for (BcMetadataNode paramMetadata : params) 
+		String paramsString = typeMetadata.attribute("params");
+		if (paramsString != null)
 		{
-			String name = paramMetadata.attribute("name");
-			assert name != null;
-			
-			String type = paramMetadata.attribute("type");
-			assert type != null;
-			
-			funcType.addParam(new BcFuncParam(createBcType(type), BcCodeCs.identifier(name)));
+			String[] tokens = paramsString.split(" ");
+			for (String token : tokens) 
+			{
+				int index = token.indexOf(":");
+				assert index != -1;
+				
+				String name = token.substring(0, index);
+				assert name != null;
+				
+				String type = token.substring(index + 1);
+				assert type != null;
+				
+				funcType.addParam(new BcFuncParam(createBcType(type), BcCodeCs.identifier(name)));
+			}
 		}
 	}
 

@@ -1,7 +1,6 @@
 package bc.flash.events
 {
 	import bc.flash.display.DisplayObject;	
-	import bc.flash.Vector;
 
 	import flash.utils.Dictionary;
 
@@ -15,7 +14,7 @@ package bc.flash.events
 		}
 
 		/** Registers an event listener at a certain object. */
-		[FunctionType(name="listener", callback="EventListenerCallback", param(name="event", type="Event"))]
+		[FunctionType(name="listener", callback="EventListenerCallback", params="event:Event")]
 		public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
 		{
 			if (mEventListeners == null)
