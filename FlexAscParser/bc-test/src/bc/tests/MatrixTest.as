@@ -7,8 +7,8 @@ package bc.tests
 	
 	public class MatrixTest extends TestCase
 	{
-		private var bcMatrix : bc.flash.geom.Matrix = new bc.flash.geom.Matrix();
-		private var flashMatrix : flash.geom.Matrix = new flash.geom.Matrix();
+		private var bMatrix : bc.flash.geom.Matrix = new bc.flash.geom.Matrix();
+		private var fMatrix : flash.geom.Matrix = new flash.geom.Matrix();
 			
 		public function testInit() : void
 		{
@@ -17,35 +17,35 @@ package bc.tests
 			
 		public function testRotate() : void
 		{
-			bcMatrix.rotate(73);
-			flashMatrix.rotate(73);
+			bMatrix.rotate(73);
+			fMatrix.rotate(73);
 			assertEquals(matrisesEquals(), true);
 		}
 		
 		public function testScale() : void
 		{
-			bcMatrix.scale(1.5, 0.7);
-			flashMatrix.scale(1.5, 0.7);
+			bMatrix.scale(1.5, 0.7);
+			fMatrix.scale(1.5, 0.7);
 			assertEquals(matrisesEquals(), true);
 		}
 		
 		public function testTranslate() : void
 		{
-			bcMatrix.translate(20, -10);
-			flashMatrix.translate(20, -10);
+			bMatrix.translate(20, -10);
+			fMatrix.translate(20, -10);
 			assertEquals(matrisesEquals(), true);
 		}
 		
 		public function testBox() : void
 		{
-			bcMatrix.createBox(1.5, 0.7, 30, 20, -30);
-			flashMatrix.createBox(1.5, 0.7, 30, 20, -30);
+			bMatrix.createBox(1.5, 0.7, 30, 20, -30);
+			fMatrix.createBox(1.5, 0.7, 30, 20, -30);
 			assertEquals(matrisesEquals(), true);
 		}
 		
 		private function matrisesEquals() : Boolean
 		{
-			return bcMatrix.a == flashMatrix.a && bcMatrix.b == flashMatrix.b && bcMatrix.c == flashMatrix.c && bcMatrix.d == flashMatrix.d && bcMatrix.tx == flashMatrix.tx && bcMatrix.ty == flashMatrix.ty;
+			return bMatrix.a == fMatrix.a && bMatrix.b == fMatrix.b && bMatrix.c == fMatrix.c && bMatrix.d == fMatrix.d && bMatrix.tx == fMatrix.tx && bMatrix.ty == fMatrix.ty;
 		}
 	}
 }
