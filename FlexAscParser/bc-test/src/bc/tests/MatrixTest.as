@@ -50,8 +50,6 @@ package bc.tests
 			
 			bMatrix.concat(bMatrix);
 			fMatrix.concat(fMatrix);
-			trace(bMatrix.a + " " + bMatrix.b + " " + bMatrix.c + " " + bMatrix.d + " " + bMatrix.tx + " " + bMatrix.ty);
-			trace(fMatrix.a + " " + fMatrix.b + " " + fMatrix.c + " " + fMatrix.d + " " + fMatrix.tx + " " + fMatrix.ty);
 			assertEquals(matrisesEquals(), true);
 		}
 		

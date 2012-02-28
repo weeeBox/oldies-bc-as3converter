@@ -1,7 +1,5 @@
 package bc.flash.geom
 {
-	import bc.flash.Vector;
-	import bc.flash.error.NotImplementedError;
 	/**
 	 * @author weee
 	 */
@@ -29,22 +27,24 @@ package bc.flash.geom
 			if (v != null)
 			{
 				m11 = v[0];								
-				m12 = v[1];								
-				m13 = v[2];
-				t.x = v[3];
+				m21 = v[1];								
+				m31 = v[2];				
 										
-				m21 = v[4];								
+				m12 = v[4];								
 				m22 = v[5];								
-				m23 = v[6];
-				t.y = v[7];
+				m32 = v[6];				
 												
-				m31 = v[8];								
-				m32 = v[9];								
+				m13 = v[8];								
+				m23 = v[9];								
 				m33 = v[10];
-				t.z = v[11];								
+				
+				t.x = v[12];								
+				t.y = v[13];								
+				t.z = v[14];								
 			}
 			else
 			{
+				m12 = m13 = m21 = m23 = m31 = m32 = 0.0;
 				m11 = m22 = m33 = 1.0;
 			}
 		}
@@ -179,7 +179,7 @@ package bc.flash.geom
 		
 		public function get rawData() : Vector.<Number>
 		{
-			throw new NotImplementedError();
+			return Vector.<Number>([m11, m21, m31, 0, m12, m22, m32, 0, m13, m23, m33, 0, t.x, t.y, t.z, 1]);
 		}
 	}
 }
