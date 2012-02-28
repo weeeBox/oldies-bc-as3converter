@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="tool.properties">
+	<property file="${dir.builder}/.properties" />
+	<property name="flex.player.exe" value="${FLEX_HOME}\runtimes\player\11.1\win\FlashPlayerDebugger.exe" />
+</project>

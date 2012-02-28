@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="prepare">
+	<!-- Global properties -->
+	<property name="dir.builder" value="." />
+	<property name="dir.buildsystem" value="${dir.builder}/tmp" />
+
+	<!-- Import files -->
+	<import file="${dir.builder}/build-common-properties.xml" />
+
+	<path id="libs">
+		<fileset dir="${FLEX_HOME}/ant/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<!-- Compile the builder and prepare tasks -->
+	<target name="compile_buildsystem">
+		
+	    <mkdir dir="${dir.buildsystem}" />
+
+	    <javac destdir="${dir.buildsystem}" debug="true" encoding="UTF-8">
+	      <src path="${dir.builder}/src" />
+	      <classpath refid="libs" />
+	    </javac>
+		
+		<taskdef name="mxmlc" classname="flex.ant.MxmlcTask">
+			<classpath refid="libs" />
+		</taskdef>
+
+		<taskdef name="compc" classname="flex.ant.CompcTask">
+			<classpath refid="libs" />
+		</taskdef>
+
+	</target>
+
+</project>

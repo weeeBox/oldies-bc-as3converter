@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="bc-test" default="debug">
+
+	<property name="playerVersion" value="11.1" />
+	<property name="project.name" value="${ant.project.name}" />
+
+	<!-- Source set -->
+	<property name="dir.parser" value=".."/>
+	
+	<property name="dir.src" value="src" />	
+	<property name="dir.src.api" value="${dir.parser}/bc-api/src" />	
+	<property name="dir.src.platform" value="${dir.parser}/bc-platform/src" />	
+	
+	<property name="dir.build" value="out" />
+
+	<property name="project.main.class" value="TestBed" />
+
+	<import file="prepare_build.xml" />
+
+	<!-- Targets for use -->
+
+	<target name="prepare_build">
+	</target>
+
+	<target name="clean" depends="compile_buildsystem">
+		<delete dir="${dir.build}" />
+	</target>
+
+	<target name="compile" depends="compile_buildsystem">
+		<mkdir dir="${dir.build}" />
+
+		<mxmlc file="${dir.scr}/${project.main.class}.as" output="${dir.build}/${project.name}.swf" fork="false" static-link-runtime-shared-libraries="true" actionscript-file-encoding="UTF-8">
+			<!--<classpath refid="flexLibs" />-->
+			<!-- As3 source path -->
+			<source-path path-element="${dir.src}" />
+			<source-path path-element="${dir.src.api}" />
+			<source-path path-element="${dir.src.platform}" />
+
+			<!-- System libraries -->
+			<library-path dir="${FLEX_HOME}/frameworks" append="true">
+				<include name="libs/player/${playerVersion}/playerglobal.swc" />
+				<include name="libs/flex.swc" />
+				<include name="libs/framework.swc" />
+				<include name="libs/air/airframework.swc" />
+				<include name="libs/air/airglobal.swc" />
+				<include name="locale/en_US" />
+			</library-path>
+
+			<!-- Runtime params -->
+			<debug>true</debug>
+			<use-network>false</use-network>
+			<target-player>10.1</target-player>
+			<default-frame-rate>24</default-frame-rate>
+			<default-size width="640" height="480" />
+			<optimize>true</optimize>
+			<locale>en_US</locale>
+
+		</mxmlc>
+	</target>
+
+	<target name="run" depends="prepare_build, compile">
+		<exec executable="${flex.player.exe}">
+			<arg value="${dir.build}/${project.name}.swf" />
+		</exec>
+	</target>
+
+	<target name="debug">
+		<mkdir dir="${dir.build}"/>
+		
+		<fdt.launch.application 
+			debug="true" 
+			mainclass="${dir.src}/${project.main.class}.as" 
+			startswf="false" 
+			target="${dir.build}/${project.name}.swf" 
+			projectname="${project.name}" 
+			compilerarguments="-static-link-runtime-shared-libraries=true -strict=true -optimize=true -debug=true -use-network=false" 
+		/>
+		<fdt.startDebugger projectname="${project.name}" />
+		<exec executable="${flex.player.exe}" spawn="false">
+			<arg line="'${dir.build}/${project.name}.swf'" />
+		</exec>
+
+	</target>
+
+</project>
