@@ -639,14 +639,14 @@ package bc.flash.geom
 				throw new ArgumentError();
 			}
 			
-			for (var i : int = 0; i < len;)
+			for (var i : int = 0; i < len; i += 3)
 			{			
 				var x : Number = vin[i];
 				var y : Number = vin[i + 1];
 				var z : Number = vin[i + 2];
-				vout[i++] = m11 * x + m12 * y + m13 * z + t.x;
-				vout[i++] = m21 * x + m22 * y + m23 * z + t.y;
-				vout[i++] = m31 * x + m32 * y + m33 * z + t.z;
+				vout[i] = m11 * x + m12 * y + m13 * z + t.x;
+				vout[i + 1] = m21 * x + m22 * y + m23 * z + t.y;
+				vout[i + 2] = m31 * x + m32 * y + m33 * z + t.z;
 			}			
 		}
 		
