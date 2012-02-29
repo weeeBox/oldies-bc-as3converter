@@ -89,6 +89,18 @@ public abstract class WriteDestination
 		writeln("");
 	}
 
+	public void writeBlockOpen()
+	{
+		writeln("{");
+		incTab();
+	}
+	
+	public void writeBlockClose()
+	{
+		decTab();
+		writeln("}");
+	}
+	
 	public void incTab()
 	{
 		tabs.append(tab);
