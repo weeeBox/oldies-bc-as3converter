@@ -65,6 +65,56 @@ package bc.tests
 			assertEquals(matrisesEquals(), true);
 		}
 		
+		public function prependTranslate() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			bMatrix.prependTranslation(100, 200, 300);
+			fMatrix.prependTranslation(100, 200, 300);
+			
+			assertEquals(matrisesEquals(), true);
+		}
+		
+		public function prependScale() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			bMatrix.prependScale(1.0, 2.0, 3.0);
+			fMatrix.prependScale(1.0, 2.0, 3.0);			
+			
+			assertEquals(matrisesEquals(), true);
+		}
+		
+		public function testPrependRotateX() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			bMatrix.prependRotation(30, bc.flash.geom.Vector3D.X_AXIS);
+			fMatrix.prependRotation(30, flash.geom.Vector3D.X_AXIS);
+			
+			assertEquals(matrisesEquals(), true);
+		}
+		
+		public function testPrependRotateY() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			bMatrix.prependRotation(30, bc.flash.geom.Vector3D.Y_AXIS);
+			fMatrix.prependRotation(30, flash.geom.Vector3D.Y_AXIS);
+
+			assertEquals(matrisesEquals(), true);
+		}
+		
+		public function testPrependRotateZ() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			bMatrix.prependRotation(30, bc.flash.geom.Vector3D.Z_AXIS);
+			fMatrix.prependRotation(30, flash.geom.Vector3D.Z_AXIS);
+			
+			assertEquals(matrisesEquals(), true);
+		}
+		
 //		public function testRotateArbitary() : void
 //		{
 //			bMatrix.identity();
