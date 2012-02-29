@@ -1,5 +1,6 @@
 package bc.flash.geom
 {
+	import bc.flash.error.NotImplementedError;
 	/**
 	 * @author weee
 	 */
@@ -51,20 +52,35 @@ package bc.flash.geom
 		
 		private function appendValues(m11 : Number, m12 : Number, m13 : Number, tx : Number, m21 : Number, m22 : Number, m23 : Number, ty : Number, m31 : Number, m32 : Number, m33 : Number, tz : Number) : void
 		{
-			this.m11 = m11 * this.m11 + m12 * this.m21 + m13 * this.m31;						
-			this.m12 = m11 * this.m12 + m12 * this.m22 + m13 * this.m32;						
-			this.m13 = m11 * this.m13 + m12 * this.m23 + m13 * this.m33;
-			this.t.x = m11 * this.t.x + m12 * this.t.y + m13 * this.t.z + tx;
-			
-			this.m21 = m21 * this.m11 + m22 * this.m21 + m23 * this.m31;						
-			this.m22 = m21 * this.m12 + m22 * this.m22 + m23 * this.m32;						
-			this.m23 = m21 * this.m13 + m22 * this.m23 + m23 * this.m33;						
-			this.t.y = m21 * this.t.x + m22 * this.t.y + m23 * this.t.z + ty;
-									
-			this.m31 = m31 * this.m11 + m32 * this.m21 + m33 * this.m31;						
-			this.m32 = m31 * this.m12 + m32 * this.m22 + m33 * this.m32;						
-			this.m33 = m31 * this.m13 + m32 * this.m23 + m33 * this.m33;						
-			this.t.z = m31 * this.t.x + m32 * this.t.y + m33 * this.t.z + tz;						
+			var o11 : Number = this.m11;
+			var o12 : Number = this.m12;
+			var o13 : Number = this.m13;
+			var x : Number = this.t.x;
+
+			var o21 : Number = this.m21;
+			var o22 : Number = this.m22;
+			var o23 : Number = this.m23;
+			var y : Number = this.t.y;
+
+			var o31 : Number = this.m31;
+			var o32 : Number = this.m32;
+			var o33 : Number = this.m33;
+			var z : Number = this.t.z;
+
+			this.m11 = m11 * o11 + m12 * o21 + m13 * o31;
+			this.m12 = m11 * o12 + m12 * o22 + m13 * o32;
+			this.m13 = m11 * o13 + m12 * o23 + m13 * o33;
+			this.t.x = m11 * x + m12 * y + m13 * z + tx;
+
+			this.m21 = m21 * o11 + m22 * o21 + m23 * o31;
+			this.m22 = m21 * o12 + m22 * o22 + m23 * o32;
+			this.m23 = m21 * o13 + m22 * o23 + m23 * o33;
+			this.t.y = m21 * x + m22 * y + m23 * z + ty;
+
+			this.m31 = m31 * o11 + m32 * o21 + m33 * o31;
+			this.m32 = m31 * o12 + m32 * o22 + m33 * o32;
+			this.m33 = m31 * o13 + m32 * o23 + m33 * o33;
+			this.t.z = m31 * x + m32 * y + m33 * z + tz;						
 		}
 		
 		public function append(lhs:Matrix3D) : void
@@ -80,52 +96,55 @@ package bc.flash.geom
 				appendTranslation(pivotPoint.x, pivotPoint.y, pivotPoint.z);
 			}
 			
+			var cosA : Number = Math.cos(0.0055555555555556 * degrees * Math.PI);
+			var sinA : Number = Math.sin(0.0055555555555556 * degrees * Math.PI);
+			
 			var ax : Number = axis.x;
 			var ay : Number = axis.y;
 			var az : Number = axis.z;
+			
 			if (ax == 0.0 && ay == 0.0 && az == 1.0)
 			{
-				
+				appendValues(cosA, -sinA, 0, 0, sinA, cosA, 0, 0, 0, 0, 1, 0);				
 			}
-			else if (ax == 0.0 && ay == 0.1 && az == 0.0)
+			else if (ax == 0.0 && ay == 1.0 && az == 0.0)
 			{
-				
+				appendValues(cosA, 0, sinA, 0, 0, 1, 0, 0, -sinA, 0, cosA, 0);
 			}
-			else if (ax == 0.1 && ay == 0.0 && az == 0.0)
+			else if (ax == 1.0 && ay == 0.0 && az == 0.0)
 			{
-				
+				appendValues(1, 0, 0, 0, 0, cosA, -sinA, 0, 0, sinA, cosA, 0);
 			}
 			else
 			{
-				var cosA : Number = Math.cos(degrees);
-				var sinA : Number = Math.sin(degrees);
-				var oneMinusCosA : Number = 1 - cosA;
-				var axay : Number = ax * ay;
-				var ayaz : Number = ay * az;
-				var axaz : Number = ax * az;
-				var ax2 : Number = ax * ax;
-				var ay2 : Number = ay * ay;
-				var az2 : Number = az * az;
-				var axSinA : Number = ax * sinA;
-				var aySinA : Number = ay * sinA;
-				var azSinA : Number = az * sinA;
-				var axayOneMinusCosA : Number = axay * oneMinusCosA;
-				var ayazOneMinusCosA : Number = ayaz * oneMinusCosA;
-				var axazOneMinusCosA : Number = axaz * oneMinusCosA;
-				
-				var m11 : Number = ax2 * oneMinusCosA + cosA;
-				var m12 : Number = axayOneMinusCosA - azSinA;
-				var m13 : Number = axazOneMinusCosA + aySinA;
-				
-				var m21 : Number = axayOneMinusCosA + azSinA;
-				var m22 : Number = ay2 * oneMinusCosA + cosA;
-				var m23 : Number = ayazOneMinusCosA - axSinA;
-				
-				var m31 : Number = axazOneMinusCosA - aySinA;
-				var m32 : Number = ayazOneMinusCosA + axSinA;
-				var m33 : Number = az2 * oneMinusCosA + cosA;
-				
-				appendValues(m11, m12, m13, 0, m21, m22, m23, 0, m31, m32, m33, 0); 
+//				var oneMinusCosA : Number = 1 - cosA;
+//				var axay : Number = ax * ay;
+//				var ayaz : Number = ay * az;
+//				var axaz : Number = ax * az;
+//				var ax2 : Number = ax * ax;
+//				var ay2 : Number = ay * ay;
+//				var az2 : Number = az * az;
+//				var axSinA : Number = ax * sinA;
+//				var aySinA : Number = ay * sinA;
+//				var azSinA : Number = az * sinA;
+//				var axayOneMinusCosA : Number = axay * oneMinusCosA;
+//				var ayazOneMinusCosA : Number = ayaz * oneMinusCosA;
+//				var axazOneMinusCosA : Number = axaz * oneMinusCosA;
+//				
+//				var m11 : Number = ax2 * oneMinusCosA + cosA;
+//				var m12 : Number = axayOneMinusCosA - azSinA;
+//				var m13 : Number = axazOneMinusCosA + aySinA;
+//				
+//				var m21 : Number = axayOneMinusCosA + azSinA;
+//				var m22 : Number = ay2 * oneMinusCosA + cosA;
+//				var m23 : Number = ayazOneMinusCosA - axSinA;
+//				
+//				var m31 : Number = axazOneMinusCosA - aySinA;
+//				var m32 : Number = ayazOneMinusCosA + axSinA;
+//				var m33 : Number = az2 * oneMinusCosA + cosA;
+//
+//				appendValues(m11, m12, m13, 0, m21, m22, m23, 0, m31, m32, m33, 0);
+				throw new NotImplementedError(); 
 			}
 			
 			if (hasPivot)

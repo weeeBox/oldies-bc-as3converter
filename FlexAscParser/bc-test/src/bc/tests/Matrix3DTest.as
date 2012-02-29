@@ -2,7 +2,9 @@ package bc.tests
 {
 	import asunit.framework.TestCase;
 
+	import bc.flash.geom.Vector3D;
 	import bc.flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 	import flash.geom.Matrix3D;
 	
 	/**
@@ -32,6 +34,49 @@ package bc.tests
 			
 			assertEquals(matrisesEquals(), true);
 		}
+		
+		public function testRotateX() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.X_AXIS);
+			fMatrix.appendRotation(30, flash.geom.Vector3D.X_AXIS);
+			
+			assertEquals(matrisesEquals(), true);
+		}
+		
+		public function testRotateY() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.Y_AXIS);
+			fMatrix.appendRotation(30, flash.geom.Vector3D.Y_AXIS);
+
+			assertEquals(matrisesEquals(), true);
+		}
+		
+		public function testRotateZ() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.Z_AXIS);
+			fMatrix.appendRotation(30, flash.geom.Vector3D.Z_AXIS);
+			
+			assertEquals(matrisesEquals(), true);
+		}
+		
+//		public function testRotateArbitary() : void
+//		{
+//			bMatrix.identity();
+//			fMatrix.identity();
+//			bMatrix.appendRotation(20, new bc.flash.geom.Vector3D(10, 7, -1.5));
+//			fMatrix.appendRotation(20, new flash.geom.Vector3D(10, 7, -1.5));
+//			
+//			trace(fMatrix.rawData);
+//			trace(bMatrix.rawData);
+//			
+//			assertEquals(matrisesEquals(), true);
+//		}
 		
 		private function matrisesEquals() : Boolean
 		{
