@@ -137,7 +137,7 @@ package bc.flash.geom
 		public function normalize() : Number
 		{
 			var len : Number = length;
-			if (len == 0)
+			if (epsilonEquals(len, 0.0))
 			{
 				throw new IllegalOperationError("Unable to normalize vector with zero lenght");
 			}
@@ -151,7 +151,13 @@ package bc.flash.geom
 
 		public function project() : void
 		{
-			throw new NotImplementedError();
+			if (w != 0 && w != 1)
+			{
+				 var invW : Number = 1.0 / w;
+				 x *= invW;
+				 y *= invW;
+				 z *= invW;
+			}
 		}
 
 		public function scaleBy(s : Number) : void
