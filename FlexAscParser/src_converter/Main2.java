@@ -2399,7 +2399,14 @@ public class Main2
 		}
 		else
 		{
-			src.writef("public class %s", className);
+			if (bcClass.isFinal())
+			{
+				src.writef("public sealed class %s", className);
+			}
+			else
+			{
+				src.writef("public class %s", className);
+			}
 			
 			boolean hasExtendsType = bcClass.hasExtendsType();
 			boolean hasInterfaces = bcClass.hasInterfaces();
