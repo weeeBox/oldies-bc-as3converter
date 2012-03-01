@@ -75,9 +75,29 @@ package bc.tests
 			assertEquals(vectorsEquals(), true);
 		}
 		
+		public function testDecrementBy() : void
+		{
+			fVector.decrementBy(new flash.geom.Vector3D(0.47, 1.25, 8.43, 0));
+			bVector.decrementBy(new bc.flash.geom.Vector3D(0.47, 1.25, 8.43, 0));
+			
+			assertEquals(vectorsEquals(), true);
+		}
+		
+		public function testDistance() : void
+		{
+			fVector.x = bVector.x = 0.1;
+			fVector.y = bVector.y = -0.07;
+			fVector.z = bVector.z = 2;
+			
+			var fa : Number = flash.geom.Vector3D.distance(fVector, new flash.geom.Vector3D(0.17, 15, 0));
+			var ba : Number = bc.flash.geom.Vector3D.distance(bVector, new bc.flash.geom.Vector3D(0.17, 15, 0));
+			
+			assertEquals(equalsEpsilon(fa, ba), true);
+		}
+		
 		private function vectorsEquals() : Boolean
 		{
-			var areEqual : Boolean = equalsEpsilon(fVector.x, bVector.x) && equalsEpsilon(fVector.y, bVector.y) && equalsEpsilon(fVector.z, bVector.z) && equalsEpsilon(fVector.w, bVector.w)
+			var areEqual : Boolean = equalsEpsilon(fVector.x, bVector.x) && equalsEpsilon(fVector.y, bVector.y) && equalsEpsilon(fVector.z, bVector.z) && equalsEpsilon(fVector.w, bVector.w);
 			
 			if (!areEqual)
 			{
