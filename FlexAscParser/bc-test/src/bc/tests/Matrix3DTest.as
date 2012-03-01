@@ -39,8 +39,8 @@ package bc.tests
 		{
 			bMatrix.identity();
 			fMatrix.identity();
-			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.X_AXIS);
-			fMatrix.appendRotation(30, flash.geom.Vector3D.X_AXIS);
+			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.X_AXIS, new bc.flash.geom.Vector3D(0, 20, 30));
+			fMatrix.appendRotation(30, flash.geom.Vector3D.X_AXIS, new flash.geom.Vector3D(0, 20, 30));
 			
 			assertEquals(matrisesEquals(), true);
 		}
@@ -133,9 +133,11 @@ package bc.tests
 			var bRaw : Vector.<Number> = bMatrix.rawData;
 			var fRaw : Vector.<Number> = fMatrix.rawData;
 			
-			for (var i : int = 0; i < 12; ++i)
+			for (var i : int = 0; i < 16; ++i)
 			{
-				if (!equalsEpsilon(bRaw[i], fRaw[i]))
+				var b : Number = bRaw[i];
+				var f : Number = fRaw[i];
+				if (!equalsEpsilon(b, f))
 				{
 					return false;
 				}
@@ -146,7 +148,7 @@ package bc.tests
 		
 		private function equalsEpsilon(a : Number, b : Number) : Boolean
 		{
-			return Math.abs(a - b) < 0.0000001;
+			return Math.abs(a - b) < 0.00001;
 		}
 	}
 }

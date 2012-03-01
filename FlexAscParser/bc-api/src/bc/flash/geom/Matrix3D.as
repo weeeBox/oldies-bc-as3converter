@@ -123,10 +123,10 @@ package bc.flash.geom
 		
 		public function appendRotation(degrees:Number, axis:Vector3D, pivotPoint:Vector3D = null) : void
 		{
-			var hasPivot : Boolean = pivotPoint != null && pivotPoint.x != 0.0 && pivotPoint.y != 0.0 && pivotPoint.z != 0.0;
+			var hasPivot : Boolean = pivotPoint != null && (pivotPoint.x != 0.0 || pivotPoint.y != 0.0 || pivotPoint.z != 0.0);
 			if (hasPivot)
 			{
-				appendTranslation(pivotPoint.x, pivotPoint.y, pivotPoint.z);
+				appendTranslation(-pivotPoint.x, -pivotPoint.y, -pivotPoint.z);
 			}
 			
 			var cosA : Number = Math.cos(0.0055555555555556 * degrees * Math.PI);
@@ -182,7 +182,7 @@ package bc.flash.geom
 			
 			if (hasPivot)
 			{
-				appendTranslation(-pivotPoint.x, -pivotPoint.y, -pivotPoint.z);
+				appendTranslation(pivotPoint.x, pivotPoint.y, pivotPoint.z);
 			}
 		}
 		
@@ -537,10 +537,10 @@ package bc.flash.geom
 		
 		public function prependRotation(degrees:Number, axis:Vector3D, pivotPoint:Vector3D = null) : void
 		{
-			var hasPivot : Boolean = pivotPoint != null && pivotPoint.x != 0.0 && pivotPoint.y != 0.0 && pivotPoint.z != 0.0;
+			var hasPivot : Boolean = pivotPoint != null && (pivotPoint.x != 0.0 || pivotPoint.y != 0.0 || pivotPoint.z != 0.0);
 			if (hasPivot)
 			{
-				prependTranslation(pivotPoint.x, pivotPoint.y, pivotPoint.z);
+				prependTranslation(-pivotPoint.x, -pivotPoint.y, -pivotPoint.z);
 			}
 			
 			var cosA : Number = Math.cos(0.0055555555555556 * degrees * Math.PI);
@@ -596,7 +596,7 @@ package bc.flash.geom
 			
 			if (hasPivot)
 			{
-				prependTranslation(-pivotPoint.x, -pivotPoint.y, -pivotPoint.z);
+				prependTranslation(pivotPoint.x, pivotPoint.y, pivotPoint.z);
 			}
 		}
 		
