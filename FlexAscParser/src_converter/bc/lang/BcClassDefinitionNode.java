@@ -15,6 +15,8 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	private String packageName;
 	
+	private boolean isFinal;
+	
 	private List<BcVariableDeclaration> fields;
 	private List<BcFunctionDeclaration> functions;
 	private List<BcFunctionDeclaration> constructors;
@@ -38,6 +40,16 @@ public class BcClassDefinitionNode extends BcDeclaration
 		interfaces = new ArrayList<BcTypeNode>();
 		additionalImports = new ArrayList<BcTypeNode>();
 		functionTypes = new ArrayList<BcFunctionTypeNode>();
+	}
+	
+	public boolean isFinal()
+	{
+		return isFinal;
+	}
+	
+	public void setFinal(boolean isFinal)
+	{
+		this.isFinal = isFinal;
 	}
 	
 	public void addStatement(Node statement)

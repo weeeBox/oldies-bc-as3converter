@@ -306,6 +306,8 @@ public class Main2
 		
 		BcTypeNode classType = createBcType(classDeclaredName);
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
+		bcClass.setFinal(BcNodeHelper.isFinal(classDefinitionNode));
+		
 		bcClass.setPackageName(packageName);
 		bcClass.setDeclaredVars(declaredVars);
 		
@@ -2535,7 +2537,7 @@ public class Main2
 				{
 					src.write("override ");
 				}
-				else if (!bcFunc.isPrivate())
+				else if (!bcFunc.isPrivate() && !bcClass.isFinal())
 				{
 					src.write("virtual ");
 				}

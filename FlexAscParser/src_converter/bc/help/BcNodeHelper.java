@@ -7,6 +7,7 @@ import macromedia.asc.parser.ApplyTypeExprNode;
 import macromedia.asc.parser.ArgumentListNode;
 import macromedia.asc.parser.AttributeListNode;
 import macromedia.asc.parser.CallExpressionNode;
+import macromedia.asc.parser.ClassDefinitionNode;
 import macromedia.asc.parser.FunctionDefinitionNode;
 import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.IdentifierNode;
@@ -298,5 +299,29 @@ public class BcNodeHelper
 		
 		MemberExpressionNode memberNode = (MemberExpressionNode) itemNode;
 		return memberNode.selector instanceof SetExpressionNode;
+	}
+	
+	public static boolean isFinal(ClassDefinitionNode classNode)
+	{
+		AttributeListNode attrs = classNode.attrs;
+		if (attrs == null)
+		{
+			return false;
+		}
+		
+		for (Node attr : attrs.items)
+		{
+			IdentifierNode identifier = tryExtractIdentifier(attr);
+			if (identifier == null)
+			{
+				continue;
+			}
+			
+			if (identifier.name.equals("final"))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }
