@@ -1,11 +1,12 @@
 package bc.tests
 {
 	import asunit.framework.TestCase;
-
-	import bc.flash.geom.Vector3D;
 	import bc.flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import bc.flash.geom.Vector3D;
+	import bc.flash.utils.MathHelper;
 	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+
 	
 	/**
 	 * @author weee
@@ -148,7 +149,7 @@ package bc.tests
 		
 		private function equalsEpsilon(a : Number, b : Number) : Boolean
 		{
-			return Math.abs(a - b) < 0.00001;
+			return MathHelper.epsilonEquals(a, b);
 		}
 	}
 }

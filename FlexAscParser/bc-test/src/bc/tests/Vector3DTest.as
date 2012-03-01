@@ -1,9 +1,10 @@
 package bc.tests
 {
 	import asunit.framework.TestCase;
-
 	import bc.flash.geom.Vector3D;
+	import bc.flash.utils.MathHelper;
 	import flash.geom.Vector3D;
+
 	
 	/**
 	 * @author weee
@@ -15,13 +16,17 @@ package bc.tests
 		
 		public function testInit() : void
 		{
+			fVector = new flash.geom.Vector3D(4, 3, 2, 1);
+			bVector = new bc.flash.geom.Vector3D(4, 3, 2, 1);
+			
 			assertEquals(vectorsEquals(), true);
 		}
 		
 		public function testAdd() : void
 		{
-			fVector.add(new flash.geom.Vector3D(10, 20, 30, 1));
-			bVector.add(new bc.flash.geom.Vector3D(10, 20, 30, 1));
+			fVector = fVector.add(new flash.geom.Vector3D(10, 20, 30, 1));
+			bVector = bVector.add(new bc.flash.geom.Vector3D(10, 20, 30, 1));
+			
 			assertEquals(vectorsEquals(), true);
 		}
 		
@@ -49,14 +54,43 @@ package bc.tests
 			assertEquals(equalsEpsilon(fa, ba), true);
 		}
 		
+		public function testClone() : void
+		{
+			fVector = fVector.clone();
+			bVector = bVector.clone();
+			
+			assertEquals(vectorsEquals(), true);
+		}
+		
+		public function testCross() : void
+		{
+			fVector.x = bVector.x = 0.1;
+			fVector.y = bVector.y = -0.07;
+			fVector.z = bVector.z = 2;
+			fVector.w = bVector.w = 1;
+			
+			fVector = fVector.crossProduct(new flash.geom.Vector3D(0.47, 1.25, 8.43, 1));
+			bVector = bVector.crossProduct(new bc.flash.geom.Vector3D(0.47, 1.25, 8.43, 1));
+			
+			assertEquals(vectorsEquals(), true);
+		}
+		
 		private function vectorsEquals() : Boolean
 		{
-			return equalsEpsilon(fVector.x, bVector.x) && equalsEpsilon(fVector.y, bVector.y) && equalsEpsilon(fVector.z, bVector.z); 
+			var areEqual : Boolean = equalsEpsilon(fVector.x, bVector.x) && equalsEpsilon(fVector.y, bVector.y) && equalsEpsilon(fVector.z, bVector.z) && equalsEpsilon(fVector.w, bVector.w)
+			
+			if (!areEqual)
+			{
+				trace(fVector.x + " " + fVector.y + " " + fVector.z + " " + fVector.w);
+				trace(bVector.x + " " + bVector.y + " " + bVector.z + " " + bVector.w);
+			}
+			
+			return areEqual; 
 		}
 		
 		private function equalsEpsilon(a : Number, b : Number) : Boolean
 		{
-			return Math.abs(a - b) < 0.0000001;
+			return MathHelper.epsilonEquals(a, b);
 		}
 	}
 }

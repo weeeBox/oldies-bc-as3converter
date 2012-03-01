@@ -1,7 +1,8 @@
 package bc.flash.geom
 {
-	import flash.errors.IllegalOperationError;
 	import bc.flash.error.NotImplementedError;
+	import bc.flash.utils.MathHelper;
+	import flash.errors.IllegalOperationError;
 
 	/**
 	 * @author weee
@@ -26,7 +27,7 @@ package bc.flash.geom
 		}
 
 		public function add(a : Vector3D) : Vector3D
-		{
+		{			
 			return new Vector3D(x + a.x, y + a.y, z + a.z);
 		}
 
@@ -69,7 +70,7 @@ package bc.flash.geom
 
 		public function crossProduct(a : Vector3D) : Vector3D
 		{
-			throw new NotImplementedError();
+			return new Vector3D(y * a.z - z * a.y, z * a.x - x * a.z, x * a.y - y * a.x, 1);
 		}
 
 		public function decrementBy(a : Vector3D) : void
@@ -180,7 +181,7 @@ package bc.flash.geom
 		
 		private static function epsilonEquals(a : Number, b : Number) : Boolean
 		{
-			return Math.abs(a - b) < 0.00001;
+			return MathHelper.epsilonEquals(a, b);
 		}
 	}
 }

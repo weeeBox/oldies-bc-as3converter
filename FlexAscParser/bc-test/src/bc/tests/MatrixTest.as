@@ -1,9 +1,10 @@
 package bc.tests
 {
+	import asunit.framework.TestCase;
 	import bc.flash.geom.Matrix;
+	import bc.flash.utils.MathHelper;
 	import flash.geom.Matrix;
 	
-	import asunit.framework.TestCase;
 	
 	public class MatrixTest extends TestCase
 	{
@@ -65,7 +66,7 @@ package bc.tests
 		
 		private function equalsEpsilon(a : Number, b : Number) : Boolean
 		{
-			return Math.abs(a - b) < 0.0000001;
+			return MathHelper.epsilonEquals(a, b);
 		}
 	}
 }
