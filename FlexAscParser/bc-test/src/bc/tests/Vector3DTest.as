@@ -62,6 +62,14 @@ package bc.tests
 			assertEquals(vectorsEquals(), true);
 		}
 		
+		public function testCopyFrom() : void
+		{
+			fVector.copyFrom(fVector);
+			bVector.copyFrom(bVector);
+			
+			assertEquals(vectorsEquals(), true);
+		}
+		
 		public function testCross() : void
 		{
 			fVector.x = bVector.x = 0.1;
@@ -91,6 +99,42 @@ package bc.tests
 			
 			var fa : Number = flash.geom.Vector3D.distance(fVector, new flash.geom.Vector3D(0.17, 15, 0));
 			var ba : Number = bc.flash.geom.Vector3D.distance(bVector, new bc.flash.geom.Vector3D(0.17, 15, 0));
+			
+			assertEquals(equalsEpsilon(fa, ba), true);
+		}
+		
+		public function testDot() : void
+		{
+			fVector.x = bVector.x = 0.1;
+			fVector.y = bVector.y = -0.07;
+			fVector.z = bVector.z = 2;
+			
+			var fa : Number = fVector.dotProduct(new flash.geom.Vector3D(0.17, 15, 0));
+			var ba : Number = bVector.dotProduct(new bc.flash.geom.Vector3D(0.17, 15, 0));
+			
+			assertEquals(equalsEpsilon(fa, ba), true);
+		}
+		
+		public function testLenght() : void
+		{
+			fVector.x = bVector.x = 0.1;
+			fVector.y = bVector.y = -0.07;
+			fVector.z = bVector.z = 2;
+			
+			var fa : Number = fVector.length;
+			var ba : Number = bVector.length;
+			
+			assertEquals(equalsEpsilon(fa, ba), true);
+		}
+		
+		public function testLenghtSquared() : void
+		{
+			fVector.x = bVector.x = 0.1;
+			fVector.y = bVector.y = -0.07;
+			fVector.z = bVector.z = 2;
+			
+			var fa : Number = fVector.lengthSquared;
+			var ba : Number = bVector.lengthSquared;
 			
 			assertEquals(equalsEpsilon(fa, ba), true);
 		}
