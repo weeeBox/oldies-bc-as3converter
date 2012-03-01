@@ -3,7 +3,7 @@ package bc.flash.geom
 	import bc.flash.error.NotImplementedError;
 
 	[ConvertOnce]
-	public class Matrix extends Object
+	public final class Matrix extends Object
 	{
 		/** The value that affects the positioning of pixels along the x axis when scaling or rotating an image. */
 		public var a : Number;
