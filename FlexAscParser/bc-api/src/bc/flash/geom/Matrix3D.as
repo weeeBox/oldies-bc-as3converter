@@ -129,8 +129,9 @@ package bc.flash.geom
 				appendTranslation(-pivotPoint.x, -pivotPoint.y, -pivotPoint.z);
 			}
 			
-			var cosA : Number = Math.cos(0.0055555555555556 * degrees * Math.PI);
-			var sinA : Number = Math.sin(0.0055555555555556 * degrees * Math.PI);
+			var radians : Number = 0.0055555555555556 * degrees * Math.PI;
+			var cosA : Number = Math.cos(radians);
+			var sinA : Number = Math.sin(radians);
 			
 			var ax : Number = axis.x;
 			var ay : Number = axis.y;
@@ -543,8 +544,9 @@ package bc.flash.geom
 				prependTranslation(-pivotPoint.x, -pivotPoint.y, -pivotPoint.z);
 			}
 			
-			var cosA : Number = Math.cos(0.0055555555555556 * degrees * Math.PI);
-			var sinA : Number = Math.sin(0.0055555555555556 * degrees * Math.PI);
+			var radians : Number = 0.0055555555555556 * degrees * Math.PI;
+			var cosA : Number = Math.cos(radians);
+			var sinA : Number = Math.sin(radians);
 			
 			var ax : Number = axis.x;
 			var ay : Number = axis.y;

@@ -11,6 +11,7 @@ package bc.flash.geom
 		public static const X_AXIS : Vector3D = new Vector3D(1, 0, 0);
 		public static const Y_AXIS : Vector3D = new Vector3D(0, 1, 0);
 		public static const Z_AXIS : Vector3D = new Vector3D(0, 0, 1);
+		
 		public var x : Number;
 		public var y : Number;
 		public var z : Number;
@@ -31,7 +32,25 @@ package bc.flash.geom
 
 		public static function angleBetween(a : Vector3D, b : Vector3D) : Number
 		{
-			throw new NotImplementedError();
+			var aLen : Number = a.length;
+			if (epsilonEquals(aLen, 0))
+			{
+				throw new ArgumentError();
+			}
+			
+			var bLen : Number = b.length;
+			if (epsilonEquals(bLen, 0))
+			{
+				throw new ArgumentError();
+			}
+			
+			var dotProd : Number = a.x * b.x + a.y * b.y + a.z * b.z;
+			if (epsilonEquals(dotProd, 0))
+			{
+				return 0.5 * Math.PI;
+			}
+			
+			return Math.acos(dotProd / aLen / bLen); 			
 		}
 
 		public function clone() : Vector3D
@@ -126,7 +145,7 @@ package bc.flash.geom
 			y *= lenInv;
 			z *= lenInv;
 			
-			throw new NotImplementedError();
+			return length;
 		}
 
 		public function project() : void
@@ -157,6 +176,11 @@ package bc.flash.geom
 		public function toString() : String
 		{
 			return "[" + x + ", " + y + ", " + z + "]";
+		}
+		
+		private static function epsilonEquals(a : Number, b : Number) : Boolean
+		{
+			return Math.abs(a - b) < 0.00001;
 		}
 	}
 }

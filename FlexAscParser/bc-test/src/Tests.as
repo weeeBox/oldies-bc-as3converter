@@ -1,5 +1,6 @@
 package
 {
+	import bc.tests.Vector3DTest;
 	import bc.tests.Matrix3DTest;
 	import bc.tests.MatrixTest;
 	import asunit.framework.TestSuite;
@@ -8,6 +9,7 @@ package
 	{
 		public function Tests()
 		{
+			addTest(new Vector3DTest());
 			addTest(new MatrixTest());
 			addTest(new Matrix3DTest());
 		}
