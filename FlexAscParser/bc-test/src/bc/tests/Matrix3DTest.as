@@ -39,8 +39,8 @@ package bc.tests
 		{
 			bMatrix.identity();
 			fMatrix.identity();
-			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.X_AXIS, new bc.flash.geom.Vector3D(0, 20, 30));
-			fMatrix.appendRotation(30, flash.geom.Vector3D.X_AXIS, new flash.geom.Vector3D(0, 20, 30));
+			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.X_AXIS, new bc.flash.geom.Vector3D(10, 20, 30));
+			fMatrix.appendRotation(30, flash.geom.Vector3D.X_AXIS, new flash.geom.Vector3D(10, 20, 30));			
 			
 			assertEquals(matrisesEquals(), true);
 		}
@@ -49,8 +49,8 @@ package bc.tests
 		{
 			bMatrix.identity();
 			fMatrix.identity();
-			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.Y_AXIS);
-			fMatrix.appendRotation(30, flash.geom.Vector3D.Y_AXIS);
+			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.Y_AXIS, new bc.flash.geom.Vector3D(10, 20, 30));
+			fMatrix.appendRotation(30, flash.geom.Vector3D.Y_AXIS, new flash.geom.Vector3D(10, 20, 30));
 
 			assertEquals(matrisesEquals(), true);
 		}
@@ -59,8 +59,8 @@ package bc.tests
 		{
 			bMatrix.identity();
 			fMatrix.identity();
-			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.Z_AXIS);
-			fMatrix.appendRotation(30, flash.geom.Vector3D.Z_AXIS);
+			bMatrix.appendRotation(30, bc.flash.geom.Vector3D.Z_AXIS, new bc.flash.geom.Vector3D(10, 20, 30));
+			fMatrix.appendRotation(30, flash.geom.Vector3D.Z_AXIS, new flash.geom.Vector3D(10, 20, 30));
 			
 			assertEquals(matrisesEquals(), true);
 		}
