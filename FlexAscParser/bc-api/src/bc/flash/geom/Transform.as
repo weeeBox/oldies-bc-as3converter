@@ -8,10 +8,14 @@ package bc.flash.geom
 		private var mDisplayObject : DisplayObject;
 		private var mColorTransform : ColorTransform;
 		
+		private var mMatrix : Matrix;
+		private var mMatrix3D : Matrix3D;
+		
 		public function Transform(displayObject : DisplayObject) : void
 		{
 			mDisplayObject = displayObject;
 			mColorTransform = new ColorTransform();
+			mMatrix = new Matrix();
 		}
 
 		public function get colorTransform() : ColorTransform
@@ -39,19 +43,24 @@ package bc.flash.geom
 		
 		public function get matrix() : Matrix
 		{
-			throw new NotImplementedError();
+			return mMatrix;
 		}
 
 		public function set matrix(value : Matrix) : void
 		{
-			throw new NotImplementedError();
+			mMatrix = value;
 		}
 		
-		/* [Version("10")] */
-		/* public function get matrix3D() : Matrix3D; */
+		public function get matrix3D() : Matrix3D
+		{
+			return mMatrix3D;
+		}
 
 		/* [Version("10")] */
-		/* public function set matrix3D(m : Matrix3D) : *; */
+		public function set matrix3D(m : Matrix3D) : void
+		{
+			mMatrix3D = m;
+		}
 
 		/* [Version("10")] */
 		/* public function get perspectiveProjection() : PerspectiveProjection; */

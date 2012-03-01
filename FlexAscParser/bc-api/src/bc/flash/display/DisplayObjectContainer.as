@@ -1,25 +1,18 @@
 package bc.flash.display
 {
+    import bc.flash.error.NotImplementedError;
     import bc.flash.core.RenderSupport;
     import bc.flash.error.AbstractClassError;
     import bc.flash.utils.getQualifiedClassName;
     import bc.flash.events.Event;
-    import bc.flash.geom.Matrix;
     import bc.flash.geom.Point;
     import bc.flash.geom.Rectangle;
-    import bc.flash.utils.transformCoords;
 
     public class DisplayObjectContainer extends InteractiveObject
     {
         // members
         
         private var mChildren:Vector.<DisplayObject>;
-        
-        /** Helper objects. */
-        private static var sHelperMatrix:Matrix = new Matrix();
-        private static var sHelperPoint:Point = new Point();
-        
-        // construction
         
         /** @private */
         public function DisplayObjectContainer()
@@ -177,72 +170,13 @@ package bc.flash.display
         /** @inheritDoc */ 
         public override function getBounds(targetSpace:DisplayObject, resultRect:Rectangle=null):Rectangle
         {
-            if (resultRect == null) resultRect = new Rectangle();
-            
-            var numChildren:int = mChildren.length;
-            
-            if (numChildren == 0)
-            {
-                getTransformationMatrix(targetSpace, sHelperMatrix);
-                transformCoords(sHelperMatrix, 0.0, 0.0, sHelperPoint);
-                
-                resultRect.x = sHelperPoint.x;
-                resultRect.y = sHelperPoint.y;
-                resultRect.width = resultRect.height = 0;
-                
-                return resultRect;
-            }
-            else if (numChildren == 1)
-            {
-                return mChildren[0].getBounds(targetSpace, resultRect);
-            }
-            else
-            {
-                var minX:Number = 1000000; 
-                var maxX:Number = -1000000;
-                var minY:Number = 1000000; 
-                var maxY:Number = -1000000;
-                
-                for (var i:int=0; i<numChildren; ++i)
-                {
-                    mChildren[i].getBounds(targetSpace, resultRect);
-                    minX = minX < resultRect.x ? minX : resultRect.x;
-                    maxX = maxX > resultRect.right ? maxX : resultRect.right;
-                    minY = minY < resultRect.y ? minY : resultRect.y;
-                    maxY = maxY > resultRect.bottom ? maxY : resultRect.bottom;
-                }
-                
-                resultRect.x = minX;
-                resultRect.y = minY;
-                resultRect.width  = maxX - minX;
-                resultRect.height = maxY - minY;
-                
-                return resultRect;
-            }                
+            throw new NotImplementedError();                
         }
         
         /** @inheritDoc */
         public override function hitTest(localPoint:Point, forTouch:Boolean=false):DisplayObject
         {
-            if (forTouch && (!visible || !touchable))
-                return null;
-            
-            var localX:Number = localPoint.x;
-            var localY:Number = localPoint.y;
-            
-            var numChildren:int = mChildren.length;
-            for (var i:int=numChildren-1; i>=0; --i) // front to back!
-            {
-                var child:DisplayObject = mChildren[i];
-                getTransformationMatrix(child, sHelperMatrix);
-                
-                transformCoords(sHelperMatrix, localX, localY, sHelperPoint);
-                var target:DisplayObject = child.hitTest(sHelperPoint, forTouch);
-                
-                if (target) return target;
-            }
-            
-            return null;
+            throw new NotImplementedError();
         }
         
         /** @inheritDoc */
@@ -257,7 +191,7 @@ package bc.flash.display
                 if (child.alpha != 0.0 && child.visible && child.scaleX != 0.0 && child.scaleY != 0.0)
                 {
                     support.pushMatrix();
-                    support.transformMatrix(child);
+                    support.transform(child.transform.matrix);
                     child.render(support, alpha);
                     support.popMatrix();
                 }

@@ -1,5 +1,6 @@
 package bc.flash.events
 {
+	import bc.flash.error.NotImplementedError;
 	import bc.flash.display.DisplayObject;
 	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Point;
@@ -14,9 +15,6 @@ package bc.flash.events
         private var mPhase:String;
         private var mTarget:DisplayObject;
         private var mTimestamp:Number;
-        
-        /** Helper object. */
-        private static var sHelperMatrix:Matrix = new Matrix();
         
         /** Creates a new Touch object. */
         public function Touch(id:int, globalX:Number, globalY:Number, phase:String, target:DisplayObject)
@@ -33,18 +31,14 @@ package bc.flash.events
          *  object. */
         public function getLocation(space:DisplayObject):Point
         {
-            var point:Point = new Point(mGlobalX, mGlobalY);
-            mTarget.root.getTransformationMatrix(space, sHelperMatrix);
-            return sHelperMatrix.transformPoint(point);
+            throw new NotImplementedError();
         }
         
         /** Converts the previous location of a touch to the local coordinate system of a display 
          *  object. */
         public function getPreviousLocation(space:DisplayObject):Point
         {
-            var point:Point = new Point(mPreviousGlobalX, mPreviousGlobalY);
-            mTarget.root.getTransformationMatrix(space, sHelperMatrix);
-            return sHelperMatrix.transformPoint(point);
+            throw new NotImplementedError();
         }
         
         /** Creates a clone of the Touch object. */

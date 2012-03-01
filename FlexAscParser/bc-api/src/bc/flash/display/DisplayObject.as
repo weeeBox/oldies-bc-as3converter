@@ -1,5 +1,6 @@
 package bc.flash.display
 {
+	import bc.flash.error.NotImplementedError;
 	import bc.flash.core.RenderSupport;
 	import bc.flash.geom.Transform;
 	import bc.flash.error.AbstractClassError;
@@ -7,7 +8,6 @@ package bc.flash.display
 	import bc.flash.events.Event;
 	import bc.flash.events.EventDispatcher;
 	import bc.flash.events.TouchEvent;
-	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Point;
 	import bc.flash.geom.Rectangle;
 
@@ -18,8 +18,6 @@ package bc.flash.display
 		// members
 		private var mX : Number;
 		private var mY : Number;
-		private var mPivotX : Number;
-		private var mPivotY : Number;
 		private var mScaleX : Number;
 		private var mScaleY : Number;
 		private var mRotation : Number;
@@ -29,12 +27,8 @@ package bc.flash.display
 		private var mName : String;
 		private var mLastTouchTimestamp : Number;
 		private var mParent : DisplayObjectContainer;
+		
 		/** Helper objects. */
-		private static var sAncestors : Vector.<DisplayObject> = new Vector.<DisplayObject>();
-		private static var sHelperRect : Rectangle = new Rectangle();
-		private static var sHelperMatrix : Matrix = new Matrix();
-		private static var sTargetMatrix : Matrix = new Matrix();
-		protected static var sRectCount : int = 0;
 		private var mScrollRect : Rectangle;
 		private var mTransform : Transform;
 
@@ -44,7 +38,7 @@ package bc.flash.display
 			if (getQualifiedClassName(this) == "starling.display::DisplayObject")
 				throw new AbstractClassError();
 
-			mX = mY = mPivotX = mPivotY = mRotation = 0.0;
+			mX = mY = mRotation = 0.0;
 			mScaleX = mScaleY = mAlpha = 1.0;
 			mVisible = mTouchable = true;
 			mLastTouchTimestamp = -1;
@@ -66,104 +60,6 @@ package bc.flash.display
 			if (dispose) this.dispose();
 		}
 
-		/** Creates a matrix that represents the transformation from the local coordinate system 
-		 *  to another. If you pass a 'resultMatrix', the result will be stored in this matrix
-		 *  instead of creating a new object. */
-		public function getTransformationMatrix(targetSpace : DisplayObject, resultMatrix : Matrix = null) : Matrix
-		{
-			if (resultMatrix) resultMatrix.identity();
-			else resultMatrix = new Matrix();
-
-			var commonParent : DisplayObject;
-			var currentObject : DisplayObject;
-
-			if (targetSpace == this)
-			{
-				return resultMatrix;
-			}
-			else if (targetSpace == mParent || (targetSpace == null && mParent == null))
-			{
-				if (mPivotX != 0.0 || mPivotY != 0.0) resultMatrix.translate(-mPivotX, -mPivotY);
-				if (mScaleX != 1.0 || mScaleY != 1.0) resultMatrix.scale(mScaleX, mScaleY);
-				if (mRotation != 0.0) resultMatrix.rotate(mRotation);
-				if (mX != 0.0 || mY != 0.0) resultMatrix.translate(mX, mY);
-
-				return resultMatrix;
-			}
-			else if (targetSpace == null)
-			{
-				// targetCoordinateSpace 'null' represents the target space of the root object.
-				// -> move up from this to root
-
-				currentObject = this;
-				while (currentObject)
-				{
-					currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
-					resultMatrix.concat(sHelperMatrix);
-					currentObject = currentObject.parent;
-				}
-
-				return resultMatrix;
-			}
-			else if (targetSpace.mParent == this) // optimization
-			{
-				targetSpace.getTransformationMatrix(this, resultMatrix);
-				resultMatrix.invert();
-
-				return resultMatrix;
-			}
-
-			// 1. find a common parent of this and the target space
-
-			sAncestors.length = 0;
-
-			commonParent = null;
-			currentObject = this;
-			while (currentObject)
-			{
-				sAncestors.push(currentObject);
-				currentObject = currentObject.parent;
-			}
-
-			currentObject = targetSpace;
-			while (currentObject && sAncestors.indexOf(currentObject) == -1)
-				currentObject = currentObject.parent;
-
-			if (currentObject == null)
-				throw new ArgumentError("Object not connected to target");
-			else
-				commonParent = currentObject;
-
-			// 2. move up from this to common parent
-
-			currentObject = this;
-
-			while (currentObject != commonParent)
-			{
-				currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
-				resultMatrix.concat(sHelperMatrix);
-				currentObject = currentObject.parent;
-			}
-
-			// 3. now move up from target until we reach the common parent
-
-			sTargetMatrix.identity();
-			currentObject = targetSpace;
-			while (currentObject != commonParent)
-			{
-				currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
-				sTargetMatrix.concat(sHelperMatrix);
-				currentObject = currentObject.parent;
-			}
-
-			// 4. now combine the two matrices
-
-			sTargetMatrix.invert();
-			resultMatrix.concat(sTargetMatrix);
-
-			return resultMatrix;
-		}
-
 		/** Returns a rectangle that completely encloses the object as it appears in another 
 		 *  coordinate system. If you pass a 'resultRectangle', the result will be stored in this 
 		 *  rectangle instead of creating a new object. */
@@ -177,43 +73,19 @@ package bc.flash.display
 		 *  the test to fail. */
 		public function hitTest(localPoint : Point, forTouch : Boolean = false) : DisplayObject
 		{
-			// on a touch test, invisible or untouchable objects cause the test to fail
-			if (forTouch && (!mVisible || !mTouchable)) return null;
-
-			// otherwise, check bounding box
-			if (getBounds(this, sHelperRect).containsPoint(localPoint)) return this;
-			else return null;
+			throw new NotImplementedError();
 		}
 
 		/** Transforms a point from the local coordinate system to global (stage) coordinates. */
 		public function localToGlobal(localPoint : Point) : Point
 		{
-			// move up  until parent is null
-			sTargetMatrix.identity();
-			var currentObject : DisplayObject = this;
-			while (currentObject)
-			{
-				currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
-				sTargetMatrix.concat(sHelperMatrix);
-				currentObject = currentObject.parent;
-			}
-			return sTargetMatrix.transformPoint(localPoint);
+			throw new NotImplementedError();
 		}
 
 		/** Transforms a point from global (stage) coordinates to the local coordinate system. */
 		public function globalToLocal(globalPoint : Point) : Point
 		{
-			// move up until parent is null, then invert matrix
-			sTargetMatrix.identity();
-			var currentObject : DisplayObject = this;
-			while (currentObject)
-			{
-				currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
-				sTargetMatrix.concat(sHelperMatrix);
-				currentObject = currentObject.parent;
-			}
-			sTargetMatrix.invert();
-			return sTargetMatrix.transformPoint(globalPoint);
+			throw new NotImplementedError();
 		}
 
 		/** Renders the display object with the help of a support object. Never call this method
@@ -253,23 +125,10 @@ package bc.flash.display
 			dispatchEvent(event);
 		}
 
-		// properties
-		/** The transformation matrix of the object relative to its parent. */
-		public function get transformationMatrix() : Matrix
-		{
-			return getTransformationMatrix(mParent);
-		}
-
-		/** The bounds of the object relative to the local coordinates of the parent. */
-		public function get bounds() : Rectangle
-		{
-			return getBounds(mParent);
-		}
-
 		/** The width of the object in pixels. */
 		public function get width() : Number
 		{
-			return getBounds(mParent, sHelperRect).width;
+			throw new NotImplementedError();
 		}
 
 		public function set width(value : Number) : void
@@ -286,7 +145,7 @@ package bc.flash.display
 		/** The height of the object in pixels. */
 		public function get height() : Number
 		{
-			return getBounds(mParent, sHelperRect).height;
+			throw new NotImplementedError();
 		}
 
 		public function set height(value : Number) : void
@@ -325,28 +184,6 @@ package bc.flash.display
 		public function set y(value : Number) : void
 		{
 			mY = value;
-		}
-
-		/** The x coordinate of the object's origin in its own coordinate space (default: 0). */
-		public function get pivotX() : Number
-		{
-			return mPivotX;
-		}
-
-		public function set pivotX(value : Number) : void
-		{
-			mPivotX = value;
-		}
-
-		/** The y coordinate of the object's origin in its own coordinate space (default: 0). */
-		public function get pivotY() : Number
-		{
-			return mPivotY;
-		}
-
-		public function set pivotY(value : Number) : void
-		{
-			mPivotY = value;
 		}
 
 		/** The horizontal scale factor. '1' means no scale, negative values flip the object. */
