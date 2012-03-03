@@ -159,5 +159,10 @@ package bc.flash.geom
 		{
 			throw new NotImplementedError();
 		}
+		
+		public function toString() : String 
+		{
+			return "(x=" + x + ", y=" + y + ", w=" + width + ", h=" + height + ")";
+		}
 	}
 }

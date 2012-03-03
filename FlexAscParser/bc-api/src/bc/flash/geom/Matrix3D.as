@@ -1,5 +1,6 @@
 package bc.flash.geom
 {
+	import bc.flash.utils.MathHelper;
 	import bc.flash.error.NotImplementedError;
 	/**
 	 * @author weee
@@ -129,7 +130,7 @@ package bc.flash.geom
 				appendTranslation(-pivotPoint.x, -pivotPoint.y, -pivotPoint.z);
 			}
 			
-			var radians : Number = 0.0055555555555556 * degrees * Math.PI;
+			var radians : Number = MathHelper.toRadians(degrees);
 			var cosA : Number = Math.cos(radians);
 			var sinA : Number = Math.sin(radians);
 			
@@ -544,7 +545,7 @@ package bc.flash.geom
 				prependTranslation(-pivotPoint.x, -pivotPoint.y, -pivotPoint.z);
 			}
 			
-			var radians : Number = 0.0055555555555556 * degrees * Math.PI;
+			var radians : Number = MathHelper.toRadians(degrees);
 			var cosA : Number = Math.cos(radians);
 			var sinA : Number = Math.sin(radians);
 			

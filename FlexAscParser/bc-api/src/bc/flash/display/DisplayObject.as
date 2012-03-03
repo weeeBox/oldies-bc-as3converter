@@ -1,5 +1,6 @@
 package bc.flash.display
 {
+	import bc.flash.utils.MathHelper;
 	import bc.flash.geom.Matrix;
 	import bc.flash.error.NotImplementedError;
 	import bc.flash.core.RenderSupport;
@@ -46,7 +47,7 @@ package bc.flash.display
 			if (getQualifiedClassName(this) == "starling.display::DisplayObject")
 				throw new AbstractClassError();
 
-			mX = mY = mRotation = 0.0;
+			mX = mY = mPivotX = mPivotY = mRotation = 0.0;
 			mScaleX = mScaleY = mAlpha = 1.0;
 			mVisible = mTouchable = true;
 			mLastTouchTimestamp = -1;
@@ -103,9 +104,9 @@ package bc.flash.display
 			} 
 			else if (targetSpace == mParent || (targetSpace == null && mParent == null)) 
 			{
-				if (mPivotX != 1.0 || mPivotY != 1.0) resultMatrix.translate(-mPivotX, -mPivotY);
+				if (mPivotX != 0.0 || mPivotY != 0.0) resultMatrix.translate(-mPivotX, -mPivotY);
 				if (mScaleX != 1.0 || mScaleY != 1.0) resultMatrix.scale(mScaleX, mScaleY);
-				if (mRotation != 0.0) resultMatrix.rotate(mRotation);
+				if (mRotation != 0.0) resultMatrix.rotate(MathHelper.toRadians(mRotation));
 				if (mX != 0.0 || mY != 0.0) resultMatrix.translate(mX, mY);
 
 				return resultMatrix;
@@ -313,6 +314,26 @@ package bc.flash.display
 			mY = value;
 		}
 
+		public function get pivotX() : Number
+		{
+			return mPivotX;
+		}
+		
+		public function set pivotX(value : Number) : void
+		{
+			mPivotX = value;
+		}
+		
+		public function get pivotY() : Number
+		{
+			return mPivotY;
+		}
+		
+		public function set pivotY(value : Number) : void
+		{
+			mPivotY = value;
+		}
+
 		/** The horizontal scale factor. '1' means no scale, negative values flip the object. */
 		public function get scaleX() : Number
 		{
@@ -345,8 +366,8 @@ package bc.flash.display
 		public function set rotation(value : Number) : void
 		{
 			// move into range [-180 deg, +180 deg]
-			while (value < -Math.PI) value += Math.PI * 2.0;
-			while (value > Math.PI) value -= Math.PI * 2.0;
+			while (value < -180) value += 360;
+			while (value > 180) value -= 360;
 			mRotation = value;
 		}
 

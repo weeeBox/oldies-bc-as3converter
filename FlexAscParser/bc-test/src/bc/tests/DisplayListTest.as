@@ -63,6 +63,43 @@ package bc.tests
 			assertEquals(rectanglesEquals(flashBounds, bcBounds), true);
 		}
 		
+		public function testTrasformedParentBounds() : void
+		{
+			var flashSprite : flash.display.Sprite = new flash.display.Sprite();
+			var bcSprite : bc.flash.display.Sprite = new bc.flash.display.Sprite();
+
+			var flashBitmap : flash.display.Bitmap = new flash.display.Bitmap(bitmapData);
+			var bcBitmap : bc.flash.display.Bitmap = new bc.flash.display.Bitmap(bitmapData);
+
+			flashSprite.addChild(flashBitmap);
+			bcSprite.addChild(bcBitmap);
+
+			var flashBounds : flash.geom.Rectangle = flashSprite.getBounds(flashSprite.parent);
+			var bcBounds : bc.flash.geom.Rectangle = bcSprite.getBounds(bcSprite.parent);
+
+			assertEquals(rectanglesEquals(flashBounds, bcBounds), true);
+		}
+        
+		public function testTransforms() : void
+		{
+			var flashSprite : flash.display.Sprite = new flash.display.Sprite();
+			var bcSprite : bc.flash.display.Sprite = new bc.flash.display.Sprite();
+
+			flashSprite.rotation = 30;
+			bcSprite.rotation = 30;
+
+			flashSprite.scaleX = flashSprite.scaleY = 1.5;
+			bcSprite.scaleX = bcSprite.scaleY = 1.5;
+
+			var flashBitmap : flash.display.Bitmap = new flash.display.Bitmap(bitmapData);
+			var bcBitmap : bc.flash.display.Bitmap = new bc.flash.display.Bitmap(bitmapData);
+
+			flashSprite.addChild(flashBitmap);
+			bcSprite.addChild(bcBitmap);			
+			
+			assertEquals(matrisesEquals(bcSprite.transform.matrix, flashSprite.transform.matrix), true);
+		}
+		
 		private function rectanglesEquals(fRect : flash.geom.Rectangle, bRect : bc.flash.geom.Rectangle) : Boolean
 		{
 			return equalsEpsilon(fRect.x, bRect.x) &&
