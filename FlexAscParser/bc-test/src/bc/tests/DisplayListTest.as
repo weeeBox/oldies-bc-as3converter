@@ -88,8 +88,10 @@ package bc.tests
 			flashSprite.rotation = 30;
 			bcSprite.rotation = 30;
 
-			flashSprite.scaleX = flashSprite.scaleY = 1.5;
-			bcSprite.scaleX = bcSprite.scaleY = 1.5;
+			flashSprite.scaleX = -2.0; 
+			flashSprite.scaleY = 1.5;
+			bcSprite.scaleX = -2.0; 
+			bcSprite.scaleY = 1.5;
 
 			var flashBitmap : flash.display.Bitmap = new flash.display.Bitmap(bitmapData);
 			var bcBitmap : bc.flash.display.Bitmap = new bc.flash.display.Bitmap(bitmapData);
