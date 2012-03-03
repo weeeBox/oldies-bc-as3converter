@@ -154,6 +154,11 @@ package bc.flash.geom
 		public function translate(dx : Number, dy : Number) : void
 		{
 			concatValues(1, 0, 0, 1, dx, dy);			
+		}
+		
+		public function toString() : String 
+		{
+			return "(a=" + a + ", b=" + b + ", c=" + c + ", d=" + d + ", tx=" + tx + ", ty=" + ty + ")";
 		}		
 	}
 }
