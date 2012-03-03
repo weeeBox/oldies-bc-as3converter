@@ -1,5 +1,6 @@
 package bc.flash.display
 {
+	import bc.flash.geom.Matrix;
 	import bc.flash.error.NotImplementedError;
 	import bc.flash.core.RenderSupport;
 	import bc.flash.geom.Transform;
@@ -16,6 +17,8 @@ package bc.flash.display
 	public class DisplayObject extends EventDispatcher implements IBitmapDrawable
 	{
 		// members
+		private var mPivotX : Number;
+		private var mPivotY : Number;
 		private var mX : Number;
 		private var mY : Number;
 		private var mScaleX : Number;
@@ -28,9 +31,14 @@ package bc.flash.display
 		private var mLastTouchTimestamp : Number;
 		private var mParent : DisplayObjectContainer;
 		
-		/** Helper objects. */
 		private var mScrollRect : Rectangle;
 		private var mTransform : Transform;
+		
+		/** Helper objects. */
+		private static var sAncestors : Vector.<DisplayObject> = new <DisplayObject>[];
+		private static var sHelperRect : Rectangle = new Rectangle();
+		private static var sHelperMatrix : Matrix = new Matrix();
+		private static var sTargetMatrix : Matrix = new Matrix();		
 
 		/** @private */
 		public function DisplayObject()
@@ -71,21 +79,140 @@ package bc.flash.display
 		/** Returns the object that is found topmost beneath a point in local coordinates, or nil if 
 		 *  the test fails. If "forTouch" is true, untouchable and invisible objects will cause
 		 *  the test to fail. */
-		public function hitTest(localPoint : Point, forTouch : Boolean = false) : DisplayObject
+		public function hitTest(localPoint : Point, forTouch : Boolean = false) : DisplayObject 
 		{
-			throw new NotImplementedError();
+			// on a touch test, invisible or untouchable objects cause the test to fail
+			if (forTouch && (!mVisible || !mTouchable)) return null;
+
+			// otherwise, check bounding box
+			if (getBounds(this, sHelperRect).containsPoint(localPoint)) return this;
+			else return null;
+		}
+
+		/** Creates a matrix that represents the transformation from the local coordinate system 
+		 *  to another. If you pass a 'resultMatrix', the result will be stored in this matrix
+		 *  instead of creating a new object. */
+		public function getTransformationMatrix(targetSpace : DisplayObject, resultMatrix : Matrix = null) : Matrix 
+		{
+			if (resultMatrix) resultMatrix.identity();
+			else resultMatrix = new Matrix();
+
+			if (targetSpace == this) 
+			{
+				return resultMatrix;
+			} 
+			else if (targetSpace == mParent || (targetSpace == null && mParent == null)) 
+			{
+				if (mPivotX != 1.0 || mPivotY != 1.0) resultMatrix.translate(-mPivotX, -mPivotY);
+				if (mScaleX != 1.0 || mScaleY != 1.0) resultMatrix.scale(mScaleX, mScaleY);
+				if (mRotation != 0.0) resultMatrix.rotate(mRotation);
+				if (mX != 0.0 || mY != 0.0) resultMatrix.translate(mX, mY);
+
+				return resultMatrix;
+			} 
+			else if (targetSpace == null) 
+			{
+				// targetCoordinateSpace 'null' represents the target space of the root object.
+				// -> move up from this to root
+
+				currentObject = this;
+				while (currentObject) 
+				{
+					currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+					resultMatrix.concat(sHelperMatrix);
+					currentObject = currentObject.parent;
+				}
+
+				return resultMatrix;
+			} 
+			else if (targetSpace.mParent == this) // optimization
+			{
+				targetSpace.getTransformationMatrix(this, resultMatrix);
+				resultMatrix.invert();
+
+				return resultMatrix;
+			}
+
+			// 1. find a common parent of this and the target space
+
+			sAncestors.length = 0;
+
+			var commonParent : DisplayObject = null;
+			var currentObject : DisplayObject = this;
+			while (currentObject) 
+			{
+				sAncestors.push(currentObject);
+				currentObject = currentObject.parent;
+			}
+
+			currentObject = targetSpace;
+			while (currentObject && sAncestors.indexOf(currentObject) == -1)
+				currentObject = currentObject.parent;
+
+			if (currentObject == null)
+				throw new ArgumentError("Object not connected to target");
+			else
+				commonParent = currentObject;
+
+			// 2. move up from this to common parent
+
+			currentObject = this;
+
+			while (currentObject != commonParent) 
+			{
+				currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+				resultMatrix.concat(sHelperMatrix);
+				currentObject = currentObject.parent;
+			}
+
+			// 3. now move up from target until we reach the common parent
+
+			sTargetMatrix.identity();
+			currentObject = targetSpace;
+			while (currentObject != commonParent) 
+			{
+				currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+				sTargetMatrix.concat(sHelperMatrix);
+				currentObject = currentObject.parent;
+			}
+
+			// 4. now combine the two matrices
+
+			sTargetMatrix.invert();
+			resultMatrix.concat(sTargetMatrix);
+
+			return resultMatrix;
 		}
 
 		/** Transforms a point from the local coordinate system to global (stage) coordinates. */
-		public function localToGlobal(localPoint : Point) : Point
+		public function localToGlobal(localPoint : Point) : Point 
 		{
-			throw new NotImplementedError();
+			// move up  until parent is null
+			sTargetMatrix.identity();
+			var currentObject : DisplayObject = this;
+			while (currentObject) 
+			{
+				currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+				sTargetMatrix.concat(sHelperMatrix);
+				currentObject = currentObject.parent;
+			}
+			return sTargetMatrix.transformPoint(localPoint);
 		}
 
 		/** Transforms a point from global (stage) coordinates to the local coordinate system. */
-		public function globalToLocal(globalPoint : Point) : Point
+		public function globalToLocal(globalPoint : Point) : Point 
 		{
-			throw new NotImplementedError();
+			// move up until parent is null, then invert matrix
+			sTargetMatrix.identity();
+			var currentObject : DisplayObject = this;
+			while (currentObject) 
+			{
+				currentObject.getTransformationMatrix(currentObject.mParent, sHelperMatrix);
+				sTargetMatrix.concat(sHelperMatrix);
+				currentObject = currentObject.parent;
+			}
+			sTargetMatrix.invert();
+			return sTargetMatrix.transformPoint(globalPoint);
 		}
 
 		/** Renders the display object with the help of a support object. Never call this method
@@ -126,12 +253,12 @@ package bc.flash.display
 		}
 
 		/** The width of the object in pixels. */
-		public function get width() : Number
+		public function get width() : Number 
 		{
-			throw new NotImplementedError();
+			return getBounds(mParent, sHelperRect).width;
 		}
-
-		public function set width(value : Number) : void
+		
+		public function set width(value : Number) : void 
 		{
 			// this method calls 'this.scaleX' instead of changing mScaleX directly.
 			// that way, subclasses reacting on size changes need to override only the scaleX method.
@@ -141,23 +268,23 @@ package bc.flash.display
 			if (actualWidth != 0.0) scaleX = value / actualWidth;
 			else scaleX = 1.0;
 		}
-
+        
 		/** The height of the object in pixels. */
-		public function get height() : Number
+		public function get height() : Number 
 		{
-			throw new NotImplementedError();
+			return getBounds(mParent, sHelperRect).height;
 		}
 
-		public function set height(value : Number) : void
+		public function set height(value : Number) : void 
 		{
 			mScaleY = 1.0;
 			var actualHeight : Number = height;
 			if (actualHeight != 0.0) scaleY = value / actualHeight;
 			else scaleY = 1.0;
 		}
-
+        
 		/** The topmost object in the display tree the object is part of. */
-		public function get root() : DisplayObject
+		public function get root() : DisplayObject 
 		{
 			var currentObject : DisplayObject = this;
 			while (currentObject.parent) currentObject = currentObject.parent;

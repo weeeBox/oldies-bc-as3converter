@@ -1,5 +1,7 @@
 package bc.tests
 {
+	import flash.geom.Rectangle;
+	import bc.flash.utils.MathHelper;
 	import flash.geom.Matrix;
 	import bc.flash.geom.Matrix;
 	import flash.display.Bitmap;
@@ -23,18 +25,28 @@ package bc.tests
 			var flashBitmap : flash.display.Bitmap = new flash.display.Bitmap(bitmapData);
 			var bcBitmap : bc.flash.display.Bitmap = new bc.flash.display.Bitmap(bitmapData);
 			
-			assertEquals(matrisesEquals(bcBitmap.transform.matrix, flashBitmap.transform.matrix));
+			trace(flashBitmap.transform.matrix);
+			trace(bcBitmap.transform.matrix);
+			assertEquals(matrisesEquals(bcBitmap.transform.matrix, flashBitmap.transform.matrix), true);
 		}
 		
-		public function testTransformRotation() : void
+		public function testUntrasformedBounds() : void
 		{		
 			var flashBitmap : flash.display.Bitmap = new flash.display.Bitmap(bitmapData);
 			var bcBitmap : bc.flash.display.Bitmap = new bc.flash.display.Bitmap(bitmapData);
 			
-			flashBitmap.rotation = 30;
-			bcBitmap.rotation = 30;
+			var flashBounds : flash.geom.Rectangle = flashBitmap.getBounds(flashBitmap);
+			var bcBounds : bc.flash.geom.Rectangle = bcBitmap.getBounds(bcBitmap);
 			
-			assertEquals(matrisesEquals(bcBitmap.transform.matrix, flashBitmap.transform.matrix));
+			assertEquals(rectanglesEquals(flashBounds, bcBounds), true);
+		}
+		
+		private function rectanglesEquals(fRect : flash.geom.Rectangle, bRect : bc.flash.geom.Rectangle) : Boolean
+		{
+			return equalsEpsilon(fRect.x, bRect.x) &&
+				equalsEpsilon(fRect.y, bRect.y) &&
+				equalsEpsilon(fRect.width, bRect.width) &&
+				equalsEpsilon(fRect.height, bRect.height);
 		}
 		
 		private function matrisesEquals(bcMatrix : bc.flash.geom.Matrix, flashMatrix : flash.geom.Matrix) : Boolean

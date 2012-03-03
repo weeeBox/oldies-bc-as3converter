@@ -43,6 +43,7 @@ package bc.flash.geom
 		
 		public function get matrix() : Matrix
 		{
+			mMatrix = mDisplayObject.getTransformationMatrix(mDisplayObject);
 			return mMatrix;
 		}
 
