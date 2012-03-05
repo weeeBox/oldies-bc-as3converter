@@ -71,8 +71,19 @@ package bc.tests
 			bMatrix.concat(bBox);
 			fMatrix.concat(fBox);
 			
-			trace(fMatrix);
-			trace(bMatrix);
+			assertEquals(matrisesEquals(), true);
+		}
+		
+		public function testConcat2() : void
+		{
+			bMatrix.identity();
+			fMatrix.identity();
+			
+			bMatrix.createBox(1.5, 0.7, 30, 20, -30);
+			fMatrix.createBox(1.5, 0.7, 30, 20, -30);
+			
+			bMatrix.concat(bMatrix);
+			fMatrix.concat(fMatrix);
 			
 			assertEquals(matrisesEquals(), true);
 		}
