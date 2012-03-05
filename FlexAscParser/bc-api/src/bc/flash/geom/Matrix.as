@@ -1,5 +1,7 @@
 package bc.flash.geom
 {
+	import bc.flash.error.IllegalOperationError;
+	import bc.flash.utils.MathHelper;
 	import bc.flash.error.NotImplementedError;
 
 	[ConvertOnce]
@@ -47,8 +49,8 @@ package bc.flash.geom
 					  this.a * b + this.b * d, // b
 					  this.c * a + this.d * c, // c
 					  this.c * b + this.d * d, // d
-					  this.tx * a + this.ty * c + tx, // tx 
-					  this.tx * b + this.ty * d + ty); // ty
+					  this.tx * a + this.ty * b + tx, // tx 
+					  this.tx * c + this.ty * d + ty); // ty
 		}
 		
 		/** Copies a Vector3D object into specific column of the calling Matrix3D object. */
@@ -116,7 +118,14 @@ package bc.flash.geom
 		 * matrix to an object to undo the transformation performed when applying the original matrix. */
 		public function invert() : void
 		{
-			throw new NotImplementedError();
+			var det : Number = a * d - b * c;
+			if (MathHelper.epsilonZero(det))
+			{
+				throw new IllegalOperationError();
+			}
+			
+			var detInv : Number = 1.0 / det;
+			setTo(detInv * d, -detInv * b, -detInv * c, detInv * a, detInv * (b * ty - d * tx), -detInv * (a * ty - c * tx));
 		}
 		
 		/** Applies a rotation transformation to the Matrix object. */

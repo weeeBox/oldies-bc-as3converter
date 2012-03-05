@@ -18,6 +18,11 @@ package bc.flash.utils
 			return 57.2957795130823209 * radians;
 		}
 		
+		public static function epsilonZero(a : Number) : Boolean
+		{
+			return Math.abs(a) < epsilon;
+		}
+		
 		public static function epsilonEquals(a : Number, b : Number) : Boolean
 		{
 			return Math.abs(a - b) < epsilon;		
