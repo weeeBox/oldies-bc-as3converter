@@ -46,11 +46,11 @@ package bc.flash.geom
 		public function concatValues(a : Number, b : Number, c : Number, d : Number, tx : Number, ty : Number) : void
 		{
 			setTo(this.a * a + this.b * c, // a 
-					  this.a * b + this.b * d, // b
-					  this.c * a + this.d * c, // c
-					  this.c * b + this.d * d, // d
-					  this.tx * a + this.ty * b + tx, // tx 
-					  this.tx * c + this.ty * d + ty); // ty
+				this.a * b + this.b * d, // b 
+				this.c * a + this.d * c, // c 
+				this.c * b + this.d * d, // d 
+				this.tx * a + this.ty * c + tx, // tx 
+				this.tx * b + this.ty * d + ty); // ty
 		}
 		
 		/** Copies a Vector3D object into specific column of the calling Matrix3D object. */
@@ -118,14 +118,14 @@ package bc.flash.geom
 		 * matrix to an object to undo the transformation performed when applying the original matrix. */
 		public function invert() : void
 		{
-			var det : Number = a * d - b * c;
+			var det : Number = a * d - c * b;
 			if (MathHelper.epsilonZero(det))
 			{
 				throw new IllegalOperationError();
 			}
 			
 			var detInv : Number = 1.0 / det;
-			setTo(detInv * d, -detInv * b, -detInv * c, detInv * a, detInv * (b * ty - d * tx), -detInv * (a * ty - c * tx));
+			setTo(detInv * d, -detInv * b, -detInv * c, detInv * a, detInv * (c * ty - d * tx), -detInv * (a * ty - b * tx));
 		}
 		
 		/** Applies a rotation transformation to the Matrix object. */

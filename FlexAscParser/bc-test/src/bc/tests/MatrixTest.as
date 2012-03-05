@@ -48,95 +48,60 @@ package bc.tests
 		
 		public function testBox() : void
 		{
-			bMatrix.identity();
-			fMatrix.identity();
-			
-			bMatrix.scale(1.5, 0.7);
-			fMatrix.scale(1.5, 0.7);
+			bMatrix.createBox(1.5, 0.7, 30, 20, -30);
+			fMatrix.createBox(1.5, 0.7, 30, 20, -30);
 			
 			assertEquals(matrisesEquals(), true);
 		}
 		
-		public function testBox1() : void
+		public function testConcat() : void
 		{
+			var bBox : bc.flash.geom.Matrix = new bc.flash.geom.Matrix();
+			var fBox : flash.geom.Matrix = new flash.geom.Matrix();
+			
+			bBox.createBox(1.5, 0.7, 30, 20, -30);
+			fBox.createBox(1.5, 0.7, 30, 20, -30);
+			
 			bMatrix.identity();
 			fMatrix.identity();
 			
-			bMatrix.scale(1.5, 0.7);
-			fMatrix.scale(1.5, 0.7);
+			bMatrix.translate(-10, -20);
+			fMatrix.translate(-10, -20);
 			
-			trace("scale");
-			trace(bMatrix);
+			bMatrix.concat(bBox);
+			fMatrix.concat(fBox);
+			
 			trace(fMatrix);
-			
-			bMatrix.rotate(30);
-			fMatrix.rotate(30);
-			
-			trace("rotate");
 			trace(bMatrix);
-			trace(fMatrix);
 			
 			assertEquals(matrisesEquals(), true);
 		}
-		
-		public function testBox2() : void
-		{
-			bMatrix.identity();
-			fMatrix.identity();
-			
-			bMatrix.scale(1.5, 0.7);
-			fMatrix.scale(1.5, 0.7);
-			
-			bMatrix.rotate(30);
-			fMatrix.rotate(30);
-			
-			bMatrix.translate(20, -30);
-			fMatrix.translate(20, -30);
-			
-			assertEquals(matrisesEquals(), true);
-		}
-		
-//		public function testConcat() : void
-//		{
-//			bMatrix.createBox(1.5, 0.7, 30, 20, -30);
-//			fMatrix.createBox(1.5, 0.7, 30, 20, -30);
-//			
-//			bMatrix.concat(bMatrix);
-//			fMatrix.concat(fMatrix);
-//			assertEquals(matrisesEquals(), true);
-//		}
 		
 		public function testInvert() : void
 		{
-//			fMatrix.identity();
-//			bMatrix.identity();
-//			
-//			fMatrix.translate(-12, -45);
-//			fMatrix.scale(1.1, -0.5);
-//			fMatrix.rotate(30);
-//			fMatrix.translate(50, -14);
-//			
-//			bMatrix.translate(-12, -45);
-//			bMatrix.scale(1.1, -0.5);
-//			bMatrix.rotate(30);
-//			bMatrix.translate(50, -14);
-//			
-//			var bOrig : bc.flash.geom.Matrix = bMatrix.clone();
-//			var fOrig : flash.geom.Matrix = fMatrix.clone();
-//			
-//			trace(bOrig);
-//			trace(fOrig);
-//			
-//			bOrig.invert();
-//			fOrig.invert();
-//			
-//			bMatrix.concat(bOrig);
-//			fMatrix.concat(fOrig);
-//			
-//			trace(fMatrix);
-//			trace(bMatrix);
-//			
-//			assertEquals(matrisesEquals(), true);
+			fMatrix.identity();
+			bMatrix.identity();
+			
+			fMatrix.translate(-12, -45);
+			fMatrix.scale(1.1, -0.5);
+			fMatrix.rotate(30);
+			fMatrix.translate(50, -14);
+			
+			bMatrix.translate(-12, -45);
+			bMatrix.scale(1.1, -0.5);
+			bMatrix.rotate(30);
+			bMatrix.translate(50, -14);
+			
+			var bOrig : bc.flash.geom.Matrix = bMatrix.clone();
+			var fOrig : flash.geom.Matrix = fMatrix.clone();
+			
+			bOrig.invert();
+			fOrig.invert();
+			
+			bMatrix.concat(bOrig);
+			fMatrix.concat(fOrig);
+			
+			assertEquals(matrisesEquals(), true);
 		}
 		
 		public function testInvert2() : void
