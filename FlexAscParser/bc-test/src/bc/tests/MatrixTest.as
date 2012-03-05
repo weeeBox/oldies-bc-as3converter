@@ -1,5 +1,6 @@
 package bc.tests
 {
+	import bc.flash.geom.Point;
 	import asunit.framework.TestCase;
 	import bc.flash.geom.Matrix;
 	import bc.flash.utils.MathHelper;
@@ -138,6 +139,39 @@ package bc.tests
 			fMatrix.concat(fOrig);
 			
 			assertEquals(matrisesEquals(), true);
+		}
+		
+		public function testPointTransform() : void
+		{
+			fMatrix.createBox(1.1, 0.7, 30, -10.4, 1.4);
+			bMatrix.createBox(1.1, 0.7, 30, -10.4, 1.4);
+			
+			var bPoint : bc.flash.geom.Point = new bc.flash.geom.Point(1.4, -78);
+			var fPoint : flash.geom.Point = new flash.geom.Point(1.4, -78);
+			
+			var fTransformed : flash.geom.Point = fMatrix.transformPoint(fPoint);
+			var bTransformed : bc.flash.geom.Point = bMatrix.transformPoint(bPoint);
+			
+			assertEquals(pointsEquals(bTransformed, fTransformed), true);
+		}
+		
+		public function testDeltaPointTransform() : void
+		{
+			fMatrix.createBox(1.1, 0.7, 30, -10.4, 1.4);
+			bMatrix.createBox(1.1, 0.7, 30, -10.4, 1.4);
+			
+			var bPoint : bc.flash.geom.Point = new bc.flash.geom.Point(1.4, -78);
+			var fPoint : flash.geom.Point = new flash.geom.Point(1.4, -78);
+			
+			var fTransformed : flash.geom.Point = fMatrix.deltaTransformPoint(fPoint);
+			var bTransformed : bc.flash.geom.Point = bMatrix.deltaTransformPoint(bPoint);
+			
+			assertEquals(pointsEquals(bTransformed, fTransformed), true);
+		}
+		
+		private function pointsEquals(bPoint : bc.flash.geom.Point, fPoint : flash.geom.Point) : Boolean
+		{
+			return equalsEpsilon(fPoint.x, bPoint.x) && equalsEpsilon(fPoint.y, bPoint.y);
 		}
 		
 		private function matrisesEquals() : Boolean
