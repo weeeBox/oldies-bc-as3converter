@@ -1,5 +1,6 @@
 package bc.flash.display 
 {
+	import bc.flash.utils.MathHelper;
 	import bc.flash.core.RenderSupport;
 	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Point;
@@ -45,8 +46,10 @@ package bc.flash.display
 				return resultRect;
 			}
 
-			var minX : Number = Number.MAX_VALUE, maxX : Number = -Number.MAX_VALUE;
-			var minY : Number = Number.MAX_VALUE, maxY : Number = -Number.MAX_VALUE;
+			var minX : Number = MathHelper.MAX_NUMBER;
+			var maxX : Number = -MathHelper.MAX_NUMBER;
+			var minY : Number = MathHelper.MAX_NUMBER;
+			var maxY : Number = -MathHelper.MAX_NUMBER;
 
 			getTransformationMatrix(targetSpace, sHelperMatrix);
 

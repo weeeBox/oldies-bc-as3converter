@@ -1,5 +1,6 @@
 package bc.flash.display
 {
+    import bc.flash.utils.MathHelper;
     import flash.utils.getQualifiedClassName;
     import bc.flash.geom.Matrix;
     import bc.flash.utils.transformCoords;
@@ -194,8 +195,10 @@ package bc.flash.display
             }
             else
             {
-                var minX:Number = Number.MAX_VALUE, maxX:Number = -Number.MAX_VALUE;
-                var minY:Number = Number.MAX_VALUE, maxY:Number = -Number.MAX_VALUE;
+                var minX:Number = MathHelper.MAX_NUMBER;
+		var maxX:Number = -MathHelper.MAX_NUMBER;
+                var minY:Number = MathHelper.MAX_NUMBER;
+		var maxY:Number = -MathHelper.MAX_NUMBER;
                 
                 for (var i:int=0; i<numChildren; ++i)
                 {
