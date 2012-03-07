@@ -10,9 +10,7 @@ package bc.flash.utils
     {
         if (resultPoint == null) resultPoint = new Point();   
         
-        resultPoint.x = matrix.a * x + matrix.c * y + matrix.tx;
-        resultPoint.y = matrix.d * y + matrix.b * x + matrix.ty;
-        
+	matrix.transformPointCords(x, y, resultPoint);
         return resultPoint;
     }
 }

@@ -8,7 +8,7 @@ package bc.flash.utils
 	{
 		private static const epsilon : Number = 0.00001;
 		
-		public static const MAX_NUMBER : Number = 1.7976931348623157E308;
+		public static const MAX_NUMBER : Number = 0x7fffffff;
 		
 		public static function toRadians(degrees : Number) : Number
 		{

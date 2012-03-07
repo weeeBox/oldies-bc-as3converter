@@ -159,6 +159,12 @@ package bc.flash.geom
 			return new Point(a * point.x + c * point.y + tx, b * point.x + d * point.y + ty);
 		}
 		
+		public function transformPointCords(x : Number, y : Number, point : Point) : void
+		{
+			point.x = a * x + c * y + tx;
+			point.y = b * x + d * y + ty;
+		}
+		
 		/** Translates the matrix along the x and y axes, as specified by the dx and dy parameters. */
 		public function translate(dx : Number, dy : Number) : void
 		{
