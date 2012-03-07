@@ -13,10 +13,14 @@ package bc.flash.events
 		public static const MOUSE_WHEEL : String = "mouseWheel";
 		public static const ROLL_OUT : String = "rollOut";
 		public static const ROLL_OVER : String = "rollOver";
+		private var mX : Number;
+		private var mY : Number;
 
-		public function MouseEvent(type:String, bubbles:Boolean=false)
+		public function MouseEvent(type:String, x : Number, y : Number, bubbles:Boolean=false)
 		{
 			super(type, bubbles);
+			mX = x;
+			mY = y;
 		}
 
 		/* function MouseEvent(type : String, bubbles : Boolean = true, cancelable : Boolean = false, localX : Number = undefined, localY : Number = undefined, relatedObject : InteractiveObject = null, ctrlKey : Boolean = false, altKey : Boolean = false, shiftKey : Boolean = false, buttonDown : Boolean = false, delta : int = 0) : void; */
@@ -61,9 +65,15 @@ package bc.flash.events
 
 		/* public function set shiftKey(value : Boolean) : void; */
 
-		public function get stageX() : Number { throw new NotImplementedError(); }
+		public function get stageX() : Number 
+		{
+			return mX; 
+		}
 
-		public function get stageY() : Number { throw new NotImplementedError(); }
+		public function get stageY() : Number 
+		{ 
+			return mY; 
+		}
 
 		/* public function toString() : String; */
 

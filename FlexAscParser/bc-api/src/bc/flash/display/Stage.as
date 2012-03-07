@@ -1,5 +1,6 @@
 package bc.flash.display
 {
+	import bc.flash.events.MouseEvent;
 	import flash.errors.IllegalOperationError;
 	import bc.flash.events.EnterFrameEvent;
 	import bc.flash.events.Event;
@@ -239,19 +240,23 @@ package bc.flash.display
 		}
 		
 		public function touchDown(x : Number, y : Number, touchId : int) : void
-		{	
+		{
+			dispatchEvent(new MouseEvent(MouseEvent.MOUSE_DOWN, x, y));	
 		}
 		
 		public function touchMove(x : Number, y : Number, touchId : int) : void
 		{
+			dispatchEvent(new MouseEvent(MouseEvent.MOUSE_MOVE, x, y));	
 		}
 		
 		public function touchDragged(x : Number, y : Number, touchId : int) : void
 		{
+			dispatchEvent(new MouseEvent(MouseEvent.MOUSE_MOVE, x, y));
 		}
 		
 		public function touchUp(x : Number, y : Number, touchId : int) : void
 		{
+			dispatchEvent(new MouseEvent(MouseEvent.MOUSE_UP, x, y));
 		}
 	}
 }

@@ -9,6 +9,7 @@ package bc.flash.display
 
 	import flash.display.BitmapData;
 	
+	[ConvertOnce]
 	public class Bitmap extends DisplayObject 
 	{
 		private var mBitmapData : flash.display.BitmapData;
