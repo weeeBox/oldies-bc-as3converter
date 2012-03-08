@@ -1770,7 +1770,11 @@ public class Main2
 			}
 			
 			// get loop body
-			dest.writelnf("foreach (%s in %s)", loopVarString, collection);
+			final String collectionTemp = "__" + loopVarName + "s_";
+			dest.writelnf("%s %s = %s;", BcCodeCs.type(collectionType), collectionTemp, collection);
+			dest.writelnf("if (%s != null)", collectionTemp);
+			dest.writeBlockOpen();
+			dest.writelnf("foreach (%s in %s)", loopVarString, collectionTemp);
 			Node bodyNode = statements.items.get(1);
 			if (bodyNode != null)
 			{
@@ -1791,6 +1795,7 @@ public class Main2
 			{
 				writeEmptyBlock();
 			}
+			dest.writeBlockClose();
 		}
 		else
 		{
