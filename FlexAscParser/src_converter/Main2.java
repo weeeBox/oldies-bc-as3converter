@@ -1344,23 +1344,32 @@ public class Main2
 				bcClass = lastBcClass;
 			}
 			
-			BcFunctionDeclaration bcFunc = bcClass.findSetterFunction(identifier);
-			if (bcFunc != null)
+			BcVariableDeclaration bcVar = null;
+			if (lastBcMemberType == null)
 			{
-				List<BcFuncParam> funcParams = bcFunc.getParams();
-				BcTypeNode setterType = funcParams.get(0).getType();
-				setterCalled = true;
-				
-				identifier = BcCodeCs.setter(identifier);
-				lastBcMemberType = setterType;
+				bcVar = findVariable(bcClass, identifier);
 			}
 			else
 			{
-				BcVariableDeclaration bcVar = findVariable(bcClass, identifier);
-				if (bcVar != null)
+				bcVar = bcClass.findField(identifier);
+			}
+			
+			if (bcVar != null)
+			{
+				lastBcMemberType = bcVar.getType();
+				assert lastBcMemberType != null;
+			}
+			else
+			{
+				BcFunctionDeclaration bcFunc = bcClass.findSetterFunction(identifier);
+				if (bcFunc != null)
 				{
-					lastBcMemberType = bcVar.getType();
-					assert lastBcMemberType != null;
+					List<BcFuncParam> funcParams = bcFunc.getParams();
+					BcTypeNode setterType = funcParams.get(0).getType();
+					setterCalled = true;
+					
+					identifier = BcCodeCs.setter(identifier);
+					lastBcMemberType = setterType;
 				}
 				else
 				{
