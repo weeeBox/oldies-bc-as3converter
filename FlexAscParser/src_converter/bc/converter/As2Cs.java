@@ -543,7 +543,7 @@ public class As2Cs
 		BcTypeNode varType = bcVar.getType();
 		String varId = bcVar.getIdentifier();
 		
-		dest.writef("%s %s", type(varType), codeHelper.identifier(varId));
+		dest.write(codeHelper.varDecl(varType, varId));
 		
 		Node initializer = bcVar.getInitializerNode();
 		if (initializer != null)
@@ -552,6 +552,7 @@ public class As2Cs
 			pushDest(initializerDest);
 			process(initializer);
 			popDest();
+			
 			bcVar.setInitializer(initializerDest);
 			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(initializer));
 			
@@ -1251,7 +1252,7 @@ public class As2Cs
 					if (argsString.startsWith("\"@"))
 					{
 						argsDest = new ListWriteDestination();
-						argsDest.writef("\"%s", argsString.substring(2));
+						argsDest.write(codeHelper.literalString(argsString.substring(2, argsString.length() - 1)));
 					}
 				}
 			}
@@ -1939,7 +1940,7 @@ public class As2Cs
 			popDest();
 		}
 		
-		dest.writelnf("catch (%s)", paramDest);
+		dest.writeln(codeHelper.catchClause(paramDest));
 		process(node.statements);
 	}
 	
@@ -1951,7 +1952,7 @@ public class As2Cs
 		String identifier = codeHelper.identifier(node.identifier);
 		
 		declaredVars.add(new BcVariableDeclaration(type, identifier));		
-		dest.writef("%s %s", codeHelper.type(type), identifier);
+		dest.write(codeHelper.paramDecl(type, identifier));
 	}
 	
 	private void process(FinallyClauseNode node)
@@ -1961,9 +1962,12 @@ public class As2Cs
 	
 	private void process(ThrowStatementNode node)
 	{
-		dest.write("throw ");
+		ListWriteDestination throwDest = new ListWriteDestination();
+		pushDest(throwDest);
 		process(node.expr);
-		dest.writeln(";");
+		popDest();
+		
+		dest.writelnf("%s;", codeHelper.throwStatment(throwDest));
 	}
 	
 	private void process(BinaryExpressionNode node)
@@ -1992,11 +1996,11 @@ public class As2Cs
 			{
 				if (canBeClass(lshType))
 				{
-					lshString = String.format("(%s != null)", lshString);
+					lshString = String.format("(%s)", codeHelper.notNull(lshString));
 				}
 				else
 				{
-					lshString = String.format("(%s != 0)", lshString);
+					lshString = String.format("(%s)", codeHelper.notZero(lshString));
 				}
 			}
 			
@@ -2004,11 +2008,11 @@ public class As2Cs
 			{
 				if (canBeClass(rshType))
 				{
-					rshString = String.format("(%s != null)", rshString);
+					rshString = String.format("(%s)", codeHelper.notNull(rshString));
 				}
 				else
 				{
-					rshString = String.format("(%s != 0)", rshString);
+					rshString = String.format("(%s)", codeHelper.notZero(rshString));
 				}
 			}
 			
@@ -2054,7 +2058,7 @@ public class As2Cs
 				BcTypeNode memberType = evaluateMemberExpression(memberNode);
 				if (!typeEquals(memberType, classBoolean))
 				{
-					dest.writef("(%s == null)", expr);
+					dest.writef("(%s)", codeHelper.isNull(expr));
 				}
 				else
 				{
@@ -2121,12 +2125,12 @@ public class As2Cs
 		dest.writeln(";");
 	}
 	
-	private void process(ThisExpressionNode node)
+	protected void process(ThisExpressionNode node)
 	{
 		dest.write("this");
 	}
 	
-	private void process(SuperExpressionNode node)
+	protected void process(SuperExpressionNode node)
 	{
 		dest.write("base");
 	}

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import macromedia.asc.parser.IdentifierNode;
+import bc.code.ListWriteDestination;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
 
@@ -160,6 +161,15 @@ public abstract class BcCodeHelper
 		return staticCall("AsString", "parse" + typeString, expr);
 	}
 	
+	public String varDecl(BcTypeNode type, String identifier)
+	{
+		return String.format("%s %s", type(type), identifier(identifier));
+	}
+	
+	public String paramDecl(BcTypeNode type, String identifier)
+	{
+		return varDecl(type, identifier);
+	}
 	
 	public String cast(Object expr, BcTypeNode type)
 	{
@@ -194,5 +204,35 @@ public abstract class BcCodeHelper
 	public String literalString(String value)
 	{
 		return String.format("\"%s\"", BcStringUtils.replaceEscapes(value));
+	}
+	
+	public String isNull(Object value)
+	{
+		return String.format("%s == %s", value, literalNull());
+	}
+	
+	public String notNull(Object value)
+	{
+		return String.format("%s != %s", value, literalNull());
+	}
+	
+	public String isZero(Object value)
+	{
+		return String.format("%s == 0", value);
+	}
+	
+	public String notZero(Object value)
+	{
+		return String.format("%s != 0", value);
+	}
+	
+	public String catchClause(ListWriteDestination paramDest)
+	{
+		return String.format("catch (%s)", paramDest);
+	}
+	
+	public String throwStatment(Object expr)
+	{
+		return "throw " + expr;
 	}
 }
