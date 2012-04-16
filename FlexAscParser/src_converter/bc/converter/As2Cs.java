@@ -225,9 +225,6 @@ public class As2Cs
 		
 		for (Node node : programNode.statements.items)
 		{
-			dest = new ListWriteDestination();
-			destStack = new Stack<WriteDestination>();
-			
 			if (node instanceof InterfaceDefinitionNode)
 			{
 				BcInterfaceDefinitionNode bcInterface = collect((InterfaceDefinitionNode) node);
@@ -495,6 +492,8 @@ public class As2Cs
 		for (BcClassDefinitionNode bcClass : classes)
 		{
 			bcMembersTypesStack = new Stack<BcTypeNode>();
+			dest = new ListWriteDestination();
+			destStack = new Stack<WriteDestination>();
 			
 			if (bcClass.isInterface())
 			{
