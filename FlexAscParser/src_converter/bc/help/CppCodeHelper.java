@@ -4,7 +4,8 @@ import bc.lang.BcVectorTypeNode;
 
 public class CppCodeHelper extends BcCodeHelper
 {
-
+	private static final String IS_OPERATOR = "ASIS";
+	
 	@Override
 	public String construct(String type, Object initializer)
 	{
@@ -14,7 +15,7 @@ public class CppCodeHelper extends BcCodeHelper
 	@Override
 	public String operatorIs(Object lhs, Object rhs)
 	{
-		return "foo";
+		return String.format("%s(%s, %s)", IS_OPERATOR, lhs, rhs);
 	}
 
 	@Override
