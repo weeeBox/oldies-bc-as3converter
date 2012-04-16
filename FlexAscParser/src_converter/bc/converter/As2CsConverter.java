@@ -16,6 +16,7 @@ import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcMetadata;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
+import bc.lang.BcVectorTypeNode;
 
 public class As2CsConverter extends As2WhateverConverter
 {
@@ -362,5 +363,82 @@ public class As2CsConverter extends As2WhateverConverter
 		
 		src.writeln(new ListWriteDestination(lines));
 	}
-
+	
+	private List<String> getImports(BcClassDefinitionNode bcClass)
+	{
+		List<String> imports = new ArrayList<String>();
+		
+		if (bcClass.hasExtendsType())
+		{
+			tryAddUniqueNamespace(imports, bcClass.getExtendsType());
+		}
+		
+		if (bcClass.hasInterfaces())
+		{
+			List<BcTypeNode> interfaces = bcClass.getInterfaces();
+			for (BcTypeNode bcInterface : interfaces)
+			{
+				tryAddUniqueNamespace(imports, bcInterface);
+			}
+		}
+		
+		List<BcVariableDeclaration> classVars = bcClass.getDeclaredVars();
+		for (BcVariableDeclaration bcVar : classVars)
+		{
+			BcTypeNode type = bcVar.getType();
+			tryAddUniqueNamespace(imports, type);
+		}
+		
+		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
+		for (BcFunctionDeclaration bcFunc : functions)
+		{
+			if (bcFunc.hasReturnType())
+			{
+				BcTypeNode returnType = bcFunc.getReturnType();
+				tryAddUniqueNamespace(imports, returnType);
+			}
+			
+			List<BcFuncParam> params = bcFunc.getParams();
+			for (BcFuncParam param : params)
+			{
+				BcTypeNode type = param.getType();
+				tryAddUniqueNamespace(imports, type);
+			}
+		}
+		
+		List<BcTypeNode> additionalImports = bcClass.getAdditionalImports();
+		for (BcTypeNode bcType : additionalImports) 
+		{
+			tryAddUniqueNamespace(imports, bcType);
+		}
+		
+		return imports;
+	}
+	
+	private void tryAddUniqueNamespace(List<String> imports, BcTypeNode type)
+	{
+		if (canBeClass(type))
+		{
+			BcClassDefinitionNode classNode = type.getClassNode();
+			assert classNode != null : type.getName();
+			
+			String packageName = classNode.getPackageName();
+			assert packageName != null : classNode.getName();
+			
+			if (!imports.contains(packageName))
+			{
+				imports.add(packageName);
+			}
+			
+			if (type instanceof BcVectorTypeNode)
+			{
+				BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
+				BcTypeNode generic = vectorType.getGeneric();
+				if (generic != null)
+				{
+					tryAddUniqueNamespace(imports, generic);
+				}
+			}
+		}
+	}
 }

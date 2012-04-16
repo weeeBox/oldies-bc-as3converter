@@ -79,6 +79,7 @@ import macromedia.asc.util.ContextStatics;
 import macromedia.asc.util.ObjectList;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
+import bc.help.BcCodeCpp;
 import bc.help.BcCodeCs;
 import bc.help.BcCodeHelper;
 import bc.help.BcNodeHelper;
@@ -2459,84 +2460,6 @@ public abstract class As2WhateverConverter
 		return null;
 	}
 	
-	protected List<String> getImports(BcClassDefinitionNode bcClass)
-	{
-		List<String> imports = new ArrayList<String>();
-		
-		if (bcClass.hasExtendsType())
-		{
-			tryAddUniqueNamespace(imports, bcClass.getExtendsType());
-		}
-		
-		if (bcClass.hasInterfaces())
-		{
-			List<BcTypeNode> interfaces = bcClass.getInterfaces();
-			for (BcTypeNode bcInterface : interfaces)
-			{
-				tryAddUniqueNamespace(imports, bcInterface);
-			}
-		}
-		
-		List<BcVariableDeclaration> classVars = bcClass.getDeclaredVars();
-		for (BcVariableDeclaration bcVar : classVars)
-		{
-			BcTypeNode type = bcVar.getType();
-			tryAddUniqueNamespace(imports, type);
-		}
-		
-		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
-		for (BcFunctionDeclaration bcFunc : functions)
-		{
-			if (bcFunc.hasReturnType())
-			{
-				BcTypeNode returnType = bcFunc.getReturnType();
-				tryAddUniqueNamespace(imports, returnType);
-			}
-			
-			List<BcFuncParam> params = bcFunc.getParams();
-			for (BcFuncParam param : params)
-			{
-				BcTypeNode type = param.getType();
-				tryAddUniqueNamespace(imports, type);
-			}
-		}
-		
-		List<BcTypeNode> additionalImports = bcClass.getAdditionalImports();
-		for (BcTypeNode bcType : additionalImports) 
-		{
-			tryAddUniqueNamespace(imports, bcType);
-		}
-		
-		return imports;
-	}
-	
-	private void tryAddUniqueNamespace(List<String> imports, BcTypeNode type)
-	{
-		if (canBeClass(type))
-		{
-			BcClassDefinitionNode classNode = type.getClassNode();
-			assert classNode != null : type.getName();
-			
-			String packageName = classNode.getPackageName();
-			assert packageName != null : classNode.getName();
-			
-			if (!imports.contains(packageName))
-			{
-				imports.add(packageName);
-			}
-			
-			if (type instanceof BcVectorTypeNode)
-			{
-				BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
-				BcTypeNode generic = vectorType.getGeneric();
-				if (generic != null)
-				{
-					tryAddUniqueNamespace(imports, generic);
-				}
-			}
-		}
-	}
-	
 	private void addToImport(BcTypeNode bcType) 
 	{
 		if (canBeClass(bcType))
@@ -2607,6 +2530,16 @@ public abstract class As2WhateverConverter
 	protected String getClassName(BcClassDefinitionNode bcClass)
 	{
 		return type(bcClass.getName());
+	}
+	
+	protected String getBaseClassName(BcClassDefinitionNode bcClass)
+	{
+		if (bcClass.hasExtendsType())
+		{
+			return type(bcClass.getExtendsType());
+		}
+		
+		return type(classObject);
 	}
 	
 	public BcTypeNode evaluateType(Node node)
