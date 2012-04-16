@@ -1,8 +1,9 @@
+package bc.converter;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -77,7 +78,6 @@ import macromedia.asc.parser.WhileStatementNode;
 import macromedia.asc.util.Context;
 import macromedia.asc.util.ContextStatics;
 import macromedia.asc.util.ObjectList;
-import bc.code.FileWriteDestination;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeCs;
@@ -93,17 +93,17 @@ import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 
-public class Main2
+public class As2Cs
 {
-	private static ListWriteDestination src;
+	private ListWriteDestination src;
 	
-	private static WriteDestination dest;
-	private static Stack<WriteDestination> destStack;
+	private WriteDestination dest;
+	private Stack<WriteDestination> destStack;
 	
-	private static String packageName;
-	private static BcClassDefinitionNode lastBcClass;
-	private static BcFunctionDeclaration lastBcFunction;
-	private static BcFunctionTypeNode lastBcFunctionType;
+	private String packageName;
+	private BcClassDefinitionNode lastBcClass;
+	private BcFunctionDeclaration lastBcFunction;
+	private BcFunctionTypeNode lastBcFunctionType;
 	
 	private static final String internalFieldInitializer = "__internalInitializeFields";
 	
@@ -118,16 +118,16 @@ public class Main2
 	private static final String classBoolean = "Boolean";
 	private static final String classNull = "null";
 	
-	private static List<BcVariableDeclaration> declaredVars;
+	private List<BcVariableDeclaration> declaredVars;
 	
-	private static List<BcClassDefinitionNode> bcPlatformClasses;
-	private static List<BcClassDefinitionNode> bcApiClasses;
-	private static List<BcClassDefinitionNode> bcClasses;
-	private static List<BcFunctionDeclaration> bcGlobalFunctions;
+	private List<BcClassDefinitionNode> bcPlatformClasses;
+	private List<BcClassDefinitionNode> bcApiClasses;
+	private List<BcClassDefinitionNode> bcClasses;
+	private List<BcFunctionDeclaration> bcGlobalFunctions;
 	
-	private static Map<DefinitionNode, BcMetadata> bcMetadataMap;
+	private Map<DefinitionNode, BcMetadata> bcMetadataMap;
 	
-	private static boolean needFieldsInitializer;
+	private boolean needFieldsInitializer;
 	
 	public static void main(String[] args)
 	{
@@ -141,18 +141,8 @@ public class Main2
 		
 		try
 		{
-			bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
-			bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
-			
-			bcPlatformClasses = collect("bc-platform/src");			
-			bcApiClasses = collect("bc-api/src");
-			bcClasses = collect(filenames);
-			
-			process();
-			
-			write(new File(outputDir, "Platform"), bcPlatformClasses);
-			write(new File(outputDir, "Api"), bcApiClasses);
-			write(new File(outputDir, "Converted"), bcClasses);
+			As2Cs converter = new As2Cs();
+			converter.convert(outputDir, filenames);
 		}
 		catch (IOException e)
 		{
@@ -160,7 +150,26 @@ public class Main2
 		}
 	}
 
-	private static List<BcClassDefinitionNode> collect(String... filenames) throws IOException
+	public As2Cs()
+	{
+		bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
+		bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
+	}
+	
+	public void convert(File outputDir, String... filenames) throws IOException
+	{
+		bcPlatformClasses = collect("bc-platform/src");			
+		bcApiClasses = collect("bc-api/src");
+		bcClasses = collect(filenames);
+		
+		process();
+		
+		write(new File(outputDir, "Platform"), bcPlatformClasses);
+		write(new File(outputDir, "Api"), bcApiClasses);
+		write(new File(outputDir, "Converted"), bcClasses);
+	}
+	
+	private List<BcClassDefinitionNode> collect(String... filenames) throws IOException
 	{		
 		bcClasses = new ArrayList<BcClassDefinitionNode>();
 		for (int i = 0; i < filenames.length; ++i)
@@ -170,7 +179,7 @@ public class Main2
 		return bcClasses;
 	}
 	
-	private static void collect(File file) throws IOException
+	private void collect(File file) throws IOException
 	{
 		if (file.isDirectory())
 		{
@@ -199,7 +208,7 @@ public class Main2
 		
 	}
 	
-	private static void collectSource(File file) throws IOException
+	private void collectSource(File file) throws IOException
 	{
 		ContextStatics statics = new ContextStatics();
 		Context cx = new Context(statics);
@@ -263,7 +272,7 @@ public class Main2
 		}
 	}
 
-	private static BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
+	private BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
 	{
 		String interfaceDeclaredName = BcCodeCs.identifier(interfaceDefinitionNode.name);
 		
@@ -299,7 +308,7 @@ public class Main2
 		return bcInterface;
 	}
 	
-	private static BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
+	private BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
 	{
 		String classDeclaredName = BcCodeCs.identifier(classDefinitionNode.name);
 		declaredVars = new ArrayList<BcVariableDeclaration>();
@@ -382,7 +391,7 @@ public class Main2
 		return bcClass;
 	}
 
-	private static BcVariableDeclaration collect(VariableDefinitionNode node)
+	private BcVariableDeclaration collect(VariableDefinitionNode node)
 	{
 		assert node.list.items.size() == 1 : node.list.items.size();
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
@@ -401,7 +410,7 @@ public class Main2
 	}
 
 	
-	private static BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode)
+	private BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode)
 	{
 		FunctionNameNode functionNameNode = functionDefinitionNode.name;
 		String name = BcCodeCs.identifier(functionNameNode.identifier);
@@ -468,7 +477,7 @@ public class Main2
 		return bcFunc;
 	}
 	
-	private static void process()
+	private void process()
 	{
 		Collection<BcTypeNode> values = BcTypeNode.uniqueTypes.values();
 		for (BcTypeNode type : values)
@@ -481,7 +490,7 @@ public class Main2
 		process(bcClasses);
 	}
 
-	private static void process(List<BcClassDefinitionNode> classes) 
+	private void process(List<BcClassDefinitionNode> classes) 
 	{
 		for (BcClassDefinitionNode bcClass : classes)
 		{
@@ -498,12 +507,12 @@ public class Main2
 		}
 	}
 
-	private static void process(BcInterfaceDefinitionNode bcInterface)
+	private void process(BcInterfaceDefinitionNode bcInterface)
 	{
 		declaredVars = bcInterface.getDeclaredVars();
 	}
 	
-	private static void process(BcClassDefinitionNode bcClass)
+	private void process(BcClassDefinitionNode bcClass)
 	{
 		System.out.println("Process: " + bcClass.getName());
 		
@@ -526,7 +535,7 @@ public class Main2
 		declaredVars = null;
 	}
 	
-	private static void process(BcVariableDeclaration bcVar)
+	private void process(BcVariableDeclaration bcVar)
 	{
 		BcTypeNode varType = bcVar.getType();
 		String varId = bcVar.getIdentifier();
@@ -559,7 +568,7 @@ public class Main2
 	}
 	
 	
-	private static void process(Node node)
+	private void process(Node node)
 	{
 		assert node != null;
 		
@@ -632,7 +641,7 @@ public class Main2
 			assert false : node.getClass();
 	}
 	
-	private static void process(StatementListNode statementsNode)
+	private void process(StatementListNode statementsNode)
 	{
 		writeBlockOpen(dest);
 		
@@ -645,7 +654,7 @@ public class Main2
 		writeBlockClose(dest);
 	}
 	
-	private static void process(ArgumentListNode node)
+	private void process(ArgumentListNode node)
 	{
 		int itemIndex = 0;
 		for (Node arg : node.items)
@@ -659,13 +668,13 @@ public class Main2
 		}
 	}
 	
-	private static void process(FunctionCommonNode node)
+	private void process(FunctionCommonNode node)
 	{
 		System.err.println("Fix me!!! FunctionCommonNode");
 		assert false;
 	}
 	
-	private static BcVariableDeclaration process(VariableDefinitionNode node)
+	private BcVariableDeclaration process(VariableDefinitionNode node)
 	{
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
@@ -714,10 +723,10 @@ public class Main2
 	
 	// dirty hack: we need to check the recursion depth
 	
-	private static BcTypeNode lastBcMemberType;
-	private static Stack<BcTypeNode> bcMembersTypesStack;
+	private BcTypeNode lastBcMemberType;
+	private Stack<BcTypeNode> bcMembersTypesStack;
 	
-	private static void process(MemberExpressionNode node)
+	private void process(MemberExpressionNode node)
 	{
 		bcMembersTypesStack.push(lastBcMemberType);
 		lastBcMemberType = null;
@@ -738,7 +747,7 @@ public class Main2
 			baseType = lastBcMemberType;
 			
 			IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier(base);
-			if (identifierNode != null && canBeClass(identifierNode.name)) // is static call?
+			if (identifierNode != null && canBeClass(identifierNode.name)) // is call?
 			{
 				ListWriteDestination baseExpr = new ListWriteDestination();
 				pushDest(baseExpr);
@@ -852,7 +861,7 @@ public class Main2
 		lastBcMemberType = bcMembersTypesStack.pop();
 	}
 	
-	private static void process(SelectorNode node)
+	private void process(SelectorNode node)
 	{
 		if (node instanceof DeleteExpressionNode)
 			process((DeleteExpressionNode)node);
@@ -870,7 +879,7 @@ public class Main2
 			assert false : node.getClass();
 	}
 	
-	private static void process(DeleteExpressionNode node)
+	private void process(DeleteExpressionNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -881,7 +890,7 @@ public class Main2
 		dest.writef(".remove(%s)", expr);
 	}
 	
-	private static void process(GetExpressionNode node)
+	private void process(GetExpressionNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -1036,7 +1045,7 @@ public class Main2
 		}
 	}
 
-	private static BcTypeNode findIdentifierType(String name)
+	private BcTypeNode findIdentifierType(String name)
 	{
 		BcClassDefinitionNode bcClass = findClass(name);
 		if (bcClass != null)
@@ -1059,12 +1068,12 @@ public class Main2
 		return null;
 	}
 	
-	private static BcVariableDeclaration findVariable(String name)
+	private BcVariableDeclaration findVariable(String name)
 	{
 		return findVariable(lastBcClass, name);
 	}
 
-	private static BcVariableDeclaration findVariable(BcClassDefinitionNode bcClass, String name) 
+	private BcVariableDeclaration findVariable(BcClassDefinitionNode bcClass, String name) 
 	{
 		BcVariableDeclaration bcVar = findLocalVar(name);
 		if (bcVar != null)
@@ -1075,7 +1084,7 @@ public class Main2
 		return bcClass.findField(name);
 	}
 	
-	private static BcVariableDeclaration findLocalVar(String name)
+	private BcVariableDeclaration findLocalVar(String name)
 	{
 		if (lastBcFunction == null)
 		{
@@ -1085,7 +1094,7 @@ public class Main2
 		return lastBcFunction.findVariable(name);
 	}
 
-	private static void process(CallExpressionNode node)
+	private void process(CallExpressionNode node)
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
 		pushDest(exprDest);
@@ -1320,7 +1329,7 @@ public class Main2
 		}
 	}
 
-	private static void process(SetExpressionNode node)
+	private void process(SetExpressionNode node)
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
 		pushDest(exprDest);
@@ -1475,7 +1484,7 @@ public class Main2
 		}
 	}
 	
-	private static void process(ApplyTypeExprNode node)
+	private void process(ApplyTypeExprNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -1507,7 +1516,7 @@ public class Main2
 		dest.write(type);
 	}
 
-	private static void process(IncrementNode node)
+	private void process(IncrementNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -1525,7 +1534,7 @@ public class Main2
 		}
 	}
 	
-	private static void process(IdentifierNode node)
+	private void process(IdentifierNode node)
 	{
 		if (node.isAttr())
 		{
@@ -1539,12 +1548,12 @@ public class Main2
 		}
 	}
 	
-	private static void process(VariableBindingNode node)
+	private void process(VariableBindingNode node)
 	{
 		System.err.println("Fix me!!! VariableBindingNode");
 	}
 	
-	private static void processLiteral(Node node)
+	private void processLiteral(Node node)
 	{
 		if (node instanceof LiteralNumberNode)
 		{
@@ -1596,12 +1605,12 @@ public class Main2
 		}
 	}
 	
-	private static String replaceEscapes(String str)
+	private String replaceEscapes(String str)
 	{
 		return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
 	}
 	
-	private static void process(IfStatementNode node)
+	private void process(IfStatementNode node)
 	{
 		ListWriteDestination condDest = new ListWriteDestination();
 		pushDest(condDest);
@@ -1640,7 +1649,7 @@ public class Main2
 		}
 	}
 
-	private static String createSafeConditionString(String condString, ListNode listNode) 
+	private String createSafeConditionString(String condString, ListNode listNode) 
 	{
 		assert listNode.size() == 1 : listNode.size();
 		Node condition = listNode.items.get(0);
@@ -1648,7 +1657,7 @@ public class Main2
 		return createSafeConditionString(condString, condition);		
 	}
 
-	private static String createSafeConditionString(String condString, Node condition) 
+	private String createSafeConditionString(String condString, Node condition) 
 	{
 		BcTypeNode conditionType = evaluateType(condition);
 		if (!typeEquals(conditionType, classBoolean))
@@ -1665,7 +1674,7 @@ public class Main2
 		}
 	}
 	
-	private static void process(ConditionalExpressionNode node)
+	private void process(ConditionalExpressionNode node)
 	{
 		ListWriteDestination condDest = new ListWriteDestination();
 		pushDest(condDest);
@@ -1688,7 +1697,7 @@ public class Main2
 		dest.writef("((%s) ? (%s) : (%s))", condString, thenDest, elseDest);
 	}
 	
-	private static void process(WhileStatementNode node)
+	private void process(WhileStatementNode node)
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
 		pushDest(exprDest);
@@ -1717,7 +1726,7 @@ public class Main2
 		}		
 	}
 	
-	private static void process(ForStatementNode node)
+	private void process(ForStatementNode node)
 	{
 		boolean isForEach = node.test instanceof HasNextNode;
 		if (isForEach)
@@ -1840,11 +1849,11 @@ public class Main2
 		}
 	}
 	
-	private static void process(DoStatementNode node)
+	private void process(DoStatementNode node)
 	{
 	}
 	
-	private static void process(SwitchStatementNode node)
+	private void process(SwitchStatementNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -1894,7 +1903,7 @@ public class Main2
 		writeBlockClose(dest);
 	}
 	
-	private static void process(TryStatementNode node)
+	private void process(TryStatementNode node)
 	{
 		dest.writeln("try");
 
@@ -1922,7 +1931,7 @@ public class Main2
 		}
 	}
 	
-	private static void process(CatchClauseNode node)
+	private void process(CatchClauseNode node)
 	{
 		ListWriteDestination paramDest = new ListWriteDestination();
 		if (node.parameter != null)
@@ -1936,7 +1945,7 @@ public class Main2
 		process(node.statements);
 	}
 	
-	private static void process(ParameterNode node)
+	private void process(ParameterNode node)
 	{
 		BcTypeNode type = BcNodeHelper.extractBcType(node.type);
 		addToImport(type);
@@ -1947,19 +1956,19 @@ public class Main2
 		dest.writef("%s %s", BcCodeCs.type(type), identifier);
 	}
 	
-	private static void process(FinallyClauseNode node)
+	private void process(FinallyClauseNode node)
 	{
 		assert false;
 	}
 	
-	private static void process(ThrowStatementNode node)
+	private void process(ThrowStatementNode node)
 	{
 		dest.write("throw ");
 		process(node.expr);
 		dest.writeln(";");
 	}
 	
-	private static void process(BinaryExpressionNode node)
+	private void process(BinaryExpressionNode node)
 	{
 		ListWriteDestination ldest = new ListWriteDestination();
 		ListWriteDestination rdest = new ListWriteDestination();
@@ -2030,7 +2039,7 @@ public class Main2
 		}
 	}
 	
-	private static void process(UnaryExpressionNode node)
+	private void process(UnaryExpressionNode node)
 	{	
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -2069,7 +2078,7 @@ public class Main2
 		}
 	}
 	
-	private static void process(ReturnStatementNode node)
+	private void process(ReturnStatementNode node)
 	{
 		assert !node.finallyInserted;
 		
@@ -2103,7 +2112,7 @@ public class Main2
 		dest.writeln(";");
 	}
 	
-	private static void process(BreakStatementNode node)
+	private void process(BreakStatementNode node)
 	{
 		dest.write("break");
 		if (node.id != null)
@@ -2114,17 +2123,17 @@ public class Main2
 		dest.writeln(";");
 	}
 	
-	private static void process(ThisExpressionNode node)
+	private void process(ThisExpressionNode node)
 	{
 		dest.write("this");
 	}
 	
-	private static void process(SuperExpressionNode node)
+	private void process(SuperExpressionNode node)
 	{
 		dest.write("base");
 	}
 	
-	private static void process(SuperStatementNode node)
+	private void process(SuperStatementNode node)
 	{
 		ArgumentListNode args = node.call.args;
 		
@@ -2148,7 +2157,7 @@ public class Main2
 		dest.writelnf("%s(%s);", BcCodeCs.superCallMarker, argsDest);
 	}
 	
-	private static void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
+	private void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> oldDeclaredVars = declaredVars;
 		lastBcFunction = bcFunc;
@@ -2180,7 +2189,7 @@ public class Main2
 		lastBcFunction = null;
 	}
 
-	private static void process(BcMetadata bcMetadata, BcClassDefinitionNode bcClass, BcFunctionDeclaration bcFunc) 
+	private void process(BcMetadata bcMetadata, BcClassDefinitionNode bcClass, BcFunctionDeclaration bcFunc) 
 	{
 		List<BcMetadataNode> functions = bcMetadata.children("FunctionType");
 		assert functions.size() <= 1;
@@ -2212,7 +2221,7 @@ public class Main2
 		}
 	}
 	
-	private static void process(BcFunctionTypeNode funcType, BcMetadataNode typeMetadata) 
+	private void process(BcFunctionTypeNode funcType, BcMetadataNode typeMetadata) 
 	{
 		String returnTypeString = typeMetadata.attribute("returnType");
 		if (returnTypeString != null)
@@ -2241,13 +2250,13 @@ public class Main2
 		}
 	}
 
-	private static void process(ExpressionStatementNode node)
+	private void process(ExpressionStatementNode node)
 	{
 		process(node.expr);
 		dest.writeln(";");
 	}
 	
-	private static void process(ListNode node)
+	private void process(ListNode node)
 	{
 		ObjectList<Node> items = node.items;
 		for (Node item : items)
@@ -2256,7 +2265,7 @@ public class Main2
 		}
 	}
 	
-	private static void process(BcTypeNode typeNode)
+	private void process(BcTypeNode typeNode)
 	{
 		if (!typeNode.isIntegral() && !typeNode.hasClassNode())
 		{
@@ -2266,7 +2275,7 @@ public class Main2
 		}
 	}
 	
-	private static BcClassDefinitionNode findClass(String name)
+	private BcClassDefinitionNode findClass(String name)
 	{
 		BcClassDefinitionNode bcClass;
 		if ((bcClass = findClass(bcPlatformClasses, name)) != null)
@@ -2282,7 +2291,7 @@ public class Main2
 		return findClass(bcClasses, name);
 	}
 
-	private static BcClassDefinitionNode findClass(List<BcClassDefinitionNode> classes, String name) 
+	private BcClassDefinitionNode findClass(List<BcClassDefinitionNode> classes, String name) 
 	{
 		for (BcClassDefinitionNode bcClass : classes)
 		{
@@ -2295,7 +2304,7 @@ public class Main2
 		return null;
 	}
 	
-	private static void write(File outputDir, List<BcClassDefinitionNode> classes) throws IOException
+	private void write(File outputDir, List<BcClassDefinitionNode> classes) throws IOException
 	{
 		for (BcClassDefinitionNode bcClass : classes)
 		{
@@ -2303,7 +2312,7 @@ public class Main2
 		}
 	}
 	
-	private static void writeImports(WriteDestination dest, List<String> imports)	
+	private void writeImports(WriteDestination dest, List<String> imports)	
 	{
 		List<String> sortedImports = new ArrayList<String>(imports);
 		Collections.sort(sortedImports);
@@ -2314,7 +2323,7 @@ public class Main2
 		}
 	}
 
-	private static void writeInterfaceFunctions(BcClassDefinitionNode bcClass)
+	private void writeInterfaceFunctions(BcClassDefinitionNode bcClass)
 	{
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
@@ -2351,7 +2360,7 @@ public class Main2
 		}
 	}
 
-	private static void writeClassDefinition(BcClassDefinitionNode bcClass, File outputDir) throws IOException
+	private void writeClassDefinition(BcClassDefinitionNode bcClass, File outputDir) throws IOException
 	{
 		boolean isInterface = bcClass instanceof BcInterfaceDefinitionNode;
 		
@@ -2471,7 +2480,7 @@ public class Main2
 		writeDestToFile(src, outputFile);
 	}
 
-	private static void writeFunctionTypes(BcClassDefinitionNode bcClass) 
+	private void writeFunctionTypes(BcClassDefinitionNode bcClass) 
 	{
 		List<BcFunctionTypeNode> functionTypes = bcClass.getFunctionTypes();
 		for (BcFunctionTypeNode funcType : functionTypes) 
@@ -2480,7 +2489,7 @@ public class Main2
 		}
 	}
 
-	private static void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
+	private void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
 	{
 		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
 		String name = BcCodeCs.identifier(funcType.getName());			
@@ -2488,7 +2497,7 @@ public class Main2
 		src.writelnf("public delegate %s %s(%s);", type, type(name), paramsString(funcType.getParams()));
 	}
 
-	private static void writeFields(BcClassDefinitionNode bcClass)
+	private void writeFields(BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> fields = bcClass.getFields();
 		
@@ -2524,7 +2533,7 @@ public class Main2
 		}
 	}
 	
-	private static void writeFieldsInitializer(BcClassDefinitionNode bcClass, List<BcVariableDeclaration> bcFields) 
+	private void writeFieldsInitializer(BcClassDefinitionNode bcClass, List<BcVariableDeclaration> bcFields) 
 	{
 		src.writelnf("private void %s()", internalFieldInitializer);
 		writeBlockOpen(src);
@@ -2538,7 +2547,7 @@ public class Main2
 		writeBlockClose(src);
 	}
 	
-	private static void writeFunctions(BcClassDefinitionNode bcClass)
+	private void writeFunctions(BcClassDefinitionNode bcClass)
 	{
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
@@ -2591,7 +2600,7 @@ public class Main2
 		}
 	}
 
-	private static String paramsString(List<BcFuncParam> params) 
+	private String paramsString(List<BcFuncParam> params) 
 	{
 		ListWriteDestination paramsDest = new ListWriteDestination();
 		int paramIndex = 0;
@@ -2609,7 +2618,7 @@ public class Main2
 		return paramsDest.toString();
 	}
 
-	private static void writeConstructorBody(ListWriteDestination body) 
+	private void writeConstructorBody(ListWriteDestination body) 
 	{
 		List<String> lines = body.getLines();
 		String firstLine = lines.get(1).trim();
@@ -2644,40 +2653,35 @@ public class Main2
 		src.writeln(new ListWriteDestination(lines));
 	}
 	
-	private static void writeBlockOpen(WriteDestination dest)
+	private void writeBlockOpen(WriteDestination dest)
 	{
 		dest.writeln("{");
 		dest.incTab();
 	}
 	
-	private static void writeBlockClose(WriteDestination dest)
+	private void writeBlockClose(WriteDestination dest)
 	{
 		dest.decTab();
 		dest.writeln("}");
 	}
 	
-	private static void writeEmptyBlock()
+	private void writeEmptyBlock()
 	{
 		writeEmptyBlock(dest);
 	}
 	
-	private static void writeBlankLine(WriteDestination dest)
+	private void writeBlankLine(WriteDestination dest)
 	{
 		dest.writeln();
 	}
 	
-	private static void writeBlankLine()
-	{
-		src.writeln();
-	}
-	
-	private static void writeEmptyBlock(WriteDestination dest)
+	private void writeEmptyBlock(WriteDestination dest)
 	{
 		writeBlockOpen(dest);
 		writeBlockClose(dest);
 	}
 	
-	private static void writeDestToFile(ListWriteDestination src, File file) throws IOException 
+	private void writeDestToFile(ListWriteDestination src, File file) throws IOException 
 	{
 		if (needUpldateFile(file, src))
 		{
@@ -2689,7 +2693,7 @@ public class Main2
 		}
 	}
 	
-	private static boolean needUpldateFile(File file, ListWriteDestination src) throws IOException
+	private boolean needUpldateFile(File file, ListWriteDestination src) throws IOException
 	{
 		if (file.exists())
 		{
@@ -2715,7 +2719,7 @@ public class Main2
 		return true;
 	}
 
-	private static List<String> readFile(File file) throws IOException 
+	private List<String> readFile(File file) throws IOException 
 	{
 		BufferedReader reader = null;
 		try 
@@ -2739,7 +2743,7 @@ public class Main2
 		}
 	}
 	
-	private static void writeFile(File file, ListWriteDestination src) throws IOException 
+	private void writeFile(File file, ListWriteDestination src) throws IOException 
 	{
 		PrintStream stream = null;
 		try 
@@ -2762,13 +2766,13 @@ public class Main2
 		}
 	}
 	
-	private static void pushDest(WriteDestination newDest)
+	private void pushDest(WriteDestination newDest)
 	{
 		destStack.push(dest);
 		dest = newDest;
 	}
 	
-	private static void popDest()
+	private void popDest()
 	{
 		dest = destStack.pop();
 	}
@@ -2776,7 +2780,7 @@ public class Main2
 	///////////////////////////////////////////////////////////////
 	// Helpers
 	
-	private static BcFunctionDeclaration findFunction(String name)
+	private BcFunctionDeclaration findFunction(String name)
 	{
 		BcFunctionDeclaration classFunc = lastBcClass.findFunction(name);
 		if (classFunc != null)
@@ -2787,7 +2791,7 @@ public class Main2
 		return findGlobalFunction(name);
 	}
 	
-	private static BcFunctionDeclaration findGlobalFunction(String name)
+	private BcFunctionDeclaration findGlobalFunction(String name)
 	{
 		for (BcFunctionDeclaration bcFunc : bcGlobalFunctions) 
 		{
@@ -2800,7 +2804,7 @@ public class Main2
 		return null;
 	}
 	
-	private static BcVariableDeclaration findDeclaredVar(String name)
+	private BcVariableDeclaration findDeclaredVar(String name)
 	{
 		assert declaredVars != null;
 		
@@ -2813,7 +2817,7 @@ public class Main2
 		return null;
 	}
 	
-	private static List<String> getImports(BcClassDefinitionNode bcClass)
+	private List<String> getImports(BcClassDefinitionNode bcClass)
 	{
 		List<String> imports = new ArrayList<String>();
 		
@@ -2864,7 +2868,7 @@ public class Main2
 		return imports;
 	}
 	
-	private static void tryAddUniqueNamespace(List<String> imports, BcTypeNode type)
+	private void tryAddUniqueNamespace(List<String> imports, BcTypeNode type)
 	{
 		if (canBeClass(type))
 		{
@@ -2891,7 +2895,7 @@ public class Main2
 		}
 	}
 	
-	private static void addToImport(BcTypeNode bcType) 
+	private void addToImport(BcTypeNode bcType) 
 	{
 		if (canBeClass(bcType))
 		{
@@ -2900,7 +2904,7 @@ public class Main2
 		}
 	}
 	
-	private static List<BcVariableDeclaration> collectFieldsWithInitializer(BcClassDefinitionNode bcClass)
+	private List<BcVariableDeclaration> collectFieldsWithInitializer(BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> bcFields = bcClass.getFields();
 		List<BcVariableDeclaration> bcInitializedFields = new ArrayList<BcVariableDeclaration>();
@@ -2916,7 +2920,7 @@ public class Main2
 		return bcInitializedFields;
 	}
 
-	private static boolean isSafeInitialized(BcClassDefinitionNode bcClass, BcVariableDeclaration bcField) 
+	private boolean isSafeInitialized(BcClassDefinitionNode bcClass, BcVariableDeclaration bcField) 
 	{
 		if (bcField.isStatic() || bcField.getType().isIntegral())
 		{
@@ -2958,12 +2962,12 @@ public class Main2
 		return true;
 	}
 	
-	private static String getClassName(BcClassDefinitionNode bcClass)
+	private String getClassName(BcClassDefinitionNode bcClass)
 	{
 		return type(bcClass.getName());
 	}
 	
-	public static BcTypeNode evaluateType(Node node)
+	public BcTypeNode evaluateType(Node node)
 	{
 		if (node instanceof MemberExpressionNode)
 		{
@@ -3166,7 +3170,7 @@ public class Main2
 		return null;
 	}
 
-	private static BcTypeNode evaluateMemberExpression(MemberExpressionNode node)
+	private BcTypeNode evaluateMemberExpression(MemberExpressionNode node)
 	{
 		BcClassDefinitionNode baseClass = lastBcClass;		
 		boolean hasCallTarget = node.base != null;
@@ -3288,7 +3292,7 @@ public class Main2
 		return null;
 	}
 
-	private static BcTypeNode findIdentifierType(BcClassDefinitionNode baseClass, IdentifierNode identifier, boolean hasCallTarget)
+	private BcTypeNode findIdentifierType(BcClassDefinitionNode baseClass, IdentifierNode identifier, boolean hasCallTarget)
 	{
 		if (identifier.isAttr())
 		{
@@ -3335,7 +3339,7 @@ public class Main2
 		return null;
 	}
 	
-	private static BcTypeNode extractBcType(Node node)
+	private BcTypeNode extractBcType(Node node)
 	{
 		BcTypeNode bcType = BcNodeHelper.extractBcType(node);
 		if (bcType instanceof BcVectorTypeNode)
@@ -3359,7 +3363,7 @@ public class Main2
 		return bcType;
 	}
 	
-	private static void writeNewLiteralArray(ObjectList<Node> args)
+	private void writeNewLiteralArray(ObjectList<Node> args)
 	{
 		WriteDestination elementDest = new ListWriteDestination();
 		pushDest(elementDest);
@@ -3377,7 +3381,7 @@ public class Main2
 		dest.writef(BcCodeCs.construct(type(classArray), elementDest));		
 	}
 	
-	private static void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
+	private void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
 	{
 		if (args == null)
 		{
@@ -3439,7 +3443,7 @@ public class Main2
 		}
 	}
 	
-	private static String type(BcTypeNode type) 
+	private String type(BcTypeNode type) 
 	{
 		if (type instanceof BcFunctionTypeNode)
 		{
@@ -3449,7 +3453,7 @@ public class Main2
 		return BcCodeCs.type(type);
 	}
 	
-	private static String type(String type) 
+	private String type(String type) 
 	{
 		if (type.equals(classFunction))
 		{
@@ -3459,12 +3463,12 @@ public class Main2
 		return BcCodeCs.type(type);
 	}
 
-	private static boolean classEquals(BcClassDefinitionNode classNode, String name)
+	private boolean classEquals(BcClassDefinitionNode classNode, String name)
 	{
 		return typeEquals(classNode.getClassType(), name);
 	}
 	
-	private static boolean typeOneOf(BcTypeNode type, String... names)
+	private boolean typeOneOf(BcTypeNode type, String... names)
 	{
 		for (String name : names) 
 		{
@@ -3476,7 +3480,7 @@ public class Main2
 		return false;
 	}
 	
-	private static boolean typeEquals(BcTypeNode type, String name)
+	private boolean typeEquals(BcTypeNode type, String name)
 	{
 		if (name.equals(classVector) && type instanceof BcVectorTypeNode)
 		{
@@ -3486,7 +3490,7 @@ public class Main2
 		return type == createBcType(name);
 	}
 
-	private static BcTypeNode createBcType(String name) 
+	private BcTypeNode createBcType(String name) 
 	{
 		BcTypeNode type = BcTypeNode.create(name);
 		if (type instanceof BcFunctionTypeNode)
@@ -3497,17 +3501,17 @@ public class Main2
 		return type;
 	}
 
-	private static boolean canBeClass(String name) 
+	private boolean canBeClass(String name) 
 	{
 		return findClass(name) != null;
 	}
 	
-	private static boolean canBeClass(BcTypeNode type) 
+	private boolean canBeClass(BcTypeNode type) 
 	{
 		return canBeClass(type.getName());
 	}
 	
-	private static String typeDefault(BcTypeNode type)
+	private String typeDefault(BcTypeNode type)
 	{
 		if (type.isIntegral())
 		{
@@ -3522,22 +3526,7 @@ public class Main2
 		return BcCodeCs.NULL;
 	}
 	
-	private static boolean typeDerivesFrom(BcTypeNode type, BcTypeNode superType)
-	{
-		if (!canBeClass(type))
-		{
-			return false;
-		}
-		
-		if (!canBeClass(superType))
-		{
-			return false;
-		}
-		
-		return false;
-	}
-	
-	private static boolean needExplicitCast(BcTypeNode fromType, BcTypeNode toType)
+	private boolean needExplicitCast(BcTypeNode fromType, BcTypeNode toType)
 	{
 		if (fromType.isIntegral() && toType.isIntegral())
 		{
@@ -3575,7 +3564,7 @@ public class Main2
 		return false;
 	}
 	
-	private static String cast(Object expression, BcTypeNode fromType, BcTypeNode toType) 
+	private String cast(Object expression, BcTypeNode fromType, BcTypeNode toType) 
 	{
 		if (toType.isIntegral() && typeEquals(fromType, classString))
 		{
