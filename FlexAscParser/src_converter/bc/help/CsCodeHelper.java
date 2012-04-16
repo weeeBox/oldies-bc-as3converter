@@ -2,7 +2,7 @@ package bc.help;
 
 import bc.lang.BcVectorTypeNode;
 
-public class BcCodeCs extends BcCodeHelper
+public class CsCodeHelper extends BcCodeHelper
 {
 	private static final String NEW = "new";
 	private static final String IS = "is";

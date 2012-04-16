@@ -80,7 +80,7 @@ import macromedia.asc.util.ObjectList;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeCpp;
-import bc.help.BcCodeCs;
+import bc.help.CsCodeHelper;
 import bc.help.BcCodeHelper;
 import bc.help.BcNodeHelper;
 import bc.lang.BcClassDefinitionNode;
@@ -127,14 +127,14 @@ public abstract class As2WhateverConverter
 	private Map<DefinitionNode, BcMetadata> bcMetadataMap;
 	
 	protected boolean needFieldsInitializer;
-	protected BcCodeHelper codeHelper;
+	private BcCodeHelper codeHelper;
 
-	public As2WhateverConverter()
+	public As2WhateverConverter(BcCodeHelper codeHelper)
 	{
 		bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
 		bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
 		
-		codeHelper = new BcCodeCs();
+		this.codeHelper = codeHelper;
 		
 		BcFunctionDeclaration.thisCallMarker = codeHelper.thisCallMarker;
 		BcFunctionDeclaration.superCallMarker = codeHelper.superCallMarker;
@@ -1768,7 +1768,7 @@ public abstract class As2WhateverConverter
 			
 			// get loop body
 			final String collectionTemp = "__" + loopVarName + "s_";
-			dest.writelnf("%s %s = %s;", codeHelper.type(collectionType), collectionTemp, collection);
+			dest.writelnf("%s %s = %s;", type(collectionType), collectionTemp, collection);
 			dest.writelnf("if (%s != null)", collectionTemp);
 			dest.writeBlockOpen();
 			dest.writelnf("foreach (%s in %s)", loopVarString, collectionTemp);
@@ -2547,6 +2547,11 @@ public abstract class As2WhateverConverter
 		}
 		
 		return true;
+	}
+	
+	protected BcCodeHelper getCodeHelper()
+	{
+		return codeHelper;
 	}
 	
 	protected String getClassName(BcClassDefinitionNode bcClass)

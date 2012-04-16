@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import bc.code.FileWriteDestination;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
-import bc.help.BcCodeCpp;
+import bc.help.CppCodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
@@ -35,6 +34,11 @@ public class As2CppConverter extends As2WhateverConverter
 	private ListWriteDestination hdr;
 	private ListWriteDestination impl;
 
+	public As2CppConverter()
+	{
+		super(new CppCodeHelper());
+	}
+	
 	@Override
 	protected void writeClassDefinition(BcClassDefinitionNode bcClass, File outputDir) throws IOException
 	{
@@ -121,15 +125,15 @@ public class As2CppConverter extends As2WhateverConverter
 			if (bcType instanceof BcVectorTypeNode)
 			{
 				BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
-				String genericName = BcCodeCpp.type(vectorType.getGeneric());
-				String typeName = BcCodeCpp.type(bcType);
+				String genericName = type(vectorType.getGeneric());
+				String typeName = type(bcType);
 				
-				dst.writelnf("typedef %s<%s> %s;", BcCodeCpp.type(BcCodeCpp.VECTOR_TYPE), BcCodeCpp.typeRef(genericName), typeName);
-				dst.writelnf("typedef %s::Ref %s;", typeName, BcCodeCpp.typeRef(typeName));
+				dst.writelnf("typedef %s<%s> %s;", type(getCodeHelper().VECTOR_TYPE), getCodeHelper().typeRef(genericName), typeName);
+				dst.writelnf("typedef %s::Ref %s;", typeName, getCodeHelper().typeRef(typeName));
 			}
 			else
 			{
-				String typeName = BcCodeCpp.type(bcType);
+				String typeName = type(bcType);
 				dst.writelnf("ASDEF(%s)", typeName);				
 			}
 		}
@@ -145,7 +149,7 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 			else
 			{
-				String typeName = BcCodeCpp.type(type);
+				String typeName = type(type);
 				dst.writelnf("#include \"%s.h\"", typeName);
 			}
 		}
@@ -170,9 +174,9 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		for (BcVariableDeclaration bcField : fields)
 		{
-			String type = BcCodeCpp.typeRef(bcField.getType());
-			String name = BcCodeCpp.identifier(bcField.getIdentifier());
-			boolean canBeClass = BcCodeCpp.canBeClass(bcField.getType());
+			String type = getCodeHelper().typeRef(bcField.getType());
+			String name = getCodeHelper().identifier(bcField.getIdentifier());
+			boolean canBeClass = canBeClass(bcField.getType());
 			boolean isConst = bcField.isConst();
 			
 			writeVisiblity(bcField.getVisiblity(), forceVisiblity);
@@ -210,8 +214,8 @@ public class As2CppConverter extends As2WhateverConverter
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? BcCodeCpp.typeRef(bcFunc.getReturnType()) : "void";
-			String name = BcCodeCpp.identifier(bcFunc.getName());
+			String type = bcFunc.hasReturnType() ? getCodeHelper().typeRef(bcFunc.getReturnType()) : "void";
+			String name = getCodeHelper().identifier(bcFunc.getName());
 			
 			if (bcFunc.isConstructor())
 			{
@@ -239,8 +243,8 @@ public class As2CppConverter extends As2WhateverConverter
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = BcCodeCpp.typeArgRef(bcParam.getType());
-				String paramName = BcCodeCpp.identifier(bcParam.getIdentifier());
+				String paramType = getCodeHelper().typeArgRef(bcParam.getType());
+				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				if (++paramIndex < params.size())
 				{
@@ -282,8 +286,8 @@ public class As2CppConverter extends As2WhateverConverter
 			int paramIndex = 0;
 			for (BcVariableDeclaration bcParam : params)
 			{
-				String paramType = BcCodeCpp.typeArgRef(bcParam.getType());
-				String paramName = BcCodeCpp.identifier(bcParam.getIdentifier());
+				String paramType = getCodeHelper().typeArgRef(bcParam.getType());
+				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				if (++paramIndex < params.size())
 				{
@@ -301,15 +305,15 @@ public class As2CppConverter extends As2WhateverConverter
 			String constructorLine = bodyLines.get(1);
 			
 			String superConstructFuncName = classConstructName + getBaseClassName(bcClass);
-			if (constructorLine.contains(BcCodeCpp.superCallMarker))
+			if (constructorLine.contains(getCodeHelper().superCallMarker))
 			{
-				String newConstructorLine = constructorLine.replace(BcCodeCpp.superCallMarker, superConstructFuncName);
+				String newConstructorLine = constructorLine.replace(getCodeHelper().superCallMarker, superConstructFuncName);
 				bodyLines.set(1, newConstructorLine);				
 			}
-			else if (constructorLine.contains(BcCodeCpp.thisCallMarker))
+			else if (constructorLine.contains(getCodeHelper().thisCallMarker))
 			{
 				String thisConstructFuncName = classConstructName + getClassName(bcClass);
-				String newConstructorLine = constructorLine.replace(BcCodeCpp.thisCallMarker, thisConstructFuncName);
+				String newConstructorLine = constructorLine.replace(getCodeHelper().thisCallMarker, thisConstructFuncName);
 				bodyLines.set(1, newConstructorLine);
 			}
 			else
@@ -348,7 +352,7 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			if (field.hasInitializer())
 			{
-				impl.writelnf("%s = %s;", BcCodeCpp.identifier(field.getIdentifier()), field.getInitializer());
+				impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), field.getInitializer());
 			}
 		}
 		
@@ -402,7 +406,7 @@ public class As2CppConverter extends As2WhateverConverter
 				continue;
 			}
 			
-			impl.writelnf("%s = %s;", BcCodeCpp.identifier(field.getIdentifier()), field.getInitializer());
+			impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), field.getInitializer());
 		}
 		
 		writeBlockClose(impl);		
@@ -445,13 +449,13 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				impl.write("  ");
 				
-				if (BcCodeCpp.canBeClass(field.getType()))
+				if (canBeClass(field.getType()))
 				{
-					impl.writef("%s(false)", BcCodeCpp.identifier(field.getIdentifier()));
+					impl.writef("%s(false)", getCodeHelper().identifier(field.getIdentifier()));
 				}
 				else
 				{
-					impl.writef("%s(0)", BcCodeCpp.identifier(field.getIdentifier()));
+					impl.writef("%s(0)", getCodeHelper().identifier(field.getIdentifier()));
 				}
 				if (++fieldIndex < initializedFields.size())
 				{
@@ -496,13 +500,13 @@ public class As2CppConverter extends As2WhateverConverter
 					continue;
 				}
 				
-				if (!BcCodeCpp.canBeClass(field.getType()))
+				if (!canBeClass(field.getType()))
 				{
 					continue;
 				}
 				
-				String identifier = BcCodeCpp.identifier(field.getIdentifier());
-				impl.writelnf("if (%s != %s) %s->%s();", identifier, BcCodeCpp.NULL, identifier, classGcName);
+				String identifier = getCodeHelper().identifier(field.getIdentifier());
+				impl.writelnf("if (%s != %s) %s->%s();", identifier, getCodeHelper().literalNull(), identifier, classGcName);
 			}
 			
 			writeBlockClose(impl);
@@ -529,7 +533,7 @@ public class As2CppConverter extends As2WhateverConverter
 	{
 		String className = getClassName(bcClass);
 		String interfaceName = getClassName(interfaceClass);
-		String interfaceRef = BcCodeCpp.typeRef(interfaceName);
+		String interfaceRef = getCodeHelper().typeRef(interfaceName);
 		String boxName = interfaceBoxName + interfaceName; 
 		
 		hdr.writelnf("%s %s();", interfaceRef, boxName);
@@ -568,7 +572,7 @@ public class As2CppConverter extends As2WhateverConverter
 		impl.writeln();
 		
 		String className = getClassName(bcClass);
-		String classRef = BcCodeCpp.typeRef(className);
+		String classRef = getCodeHelper().typeRef(className);
 		
 		String interfaceName = getClassName(bcClass) + "_" + interfaceClass.getName();
 		String interfaceBaseName = getClassName(interfaceClass);
@@ -596,8 +600,8 @@ public class As2CppConverter extends As2WhateverConverter
 		List<BcFunctionDeclaration> functions = interfaceClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? BcCodeCpp.typeRef(bcFunc.getReturnType()) : "void";
-			String name = BcCodeCpp.identifier(bcFunc.getName());
+			String type = bcFunc.hasReturnType() ? getCodeHelper().typeRef(bcFunc.getReturnType()) : "void";
+			String name = getCodeHelper().identifier(bcFunc.getName());
 			
 			hdr.writef("%s %s(", type, name);
 			
@@ -610,8 +614,8 @@ public class As2CppConverter extends As2WhateverConverter
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = BcCodeCpp.typeArgRef(bcParam.getType());
-				String paramName = BcCodeCpp.identifier(bcParam.getIdentifier());
+				String paramType = getCodeHelper().typeArgRef(bcParam.getType());
+				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(String.format("%s", paramName));
 				if (++paramIndex < params.size())
@@ -733,7 +737,7 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private void tryAddUniqueType(List<BcTypeNode> types, BcTypeNode type)
 	{
-		if (BcCodeCpp.canBeClass(type))
+		if (canBeClass(type))
 		{
 			if (type instanceof BcVectorTypeNode)
 			{
@@ -745,5 +749,10 @@ public class As2CppConverter extends As2WhateverConverter
 				types.add(type);
 			}
 		}
+	}
+	
+	protected CppCodeHelper getCodeHelper()
+	{
+		return (CppCodeHelper) super.getCodeHelper();
 	}
 }

@@ -8,12 +8,12 @@ import java.util.List;
 
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
+import bc.help.CsCodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcInterfaceDefinitionNode;
-import bc.lang.BcMetadata;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -21,6 +21,11 @@ import bc.lang.BcVectorTypeNode;
 public class As2CsConverter extends As2WhateverConverter
 {
 	private ListWriteDestination src;
+	
+	public As2CsConverter()
+	{
+		super(new CsCodeHelper());
+	}
 	
 	private void writeImports(WriteDestination dest, List<String> imports)	
 	{
@@ -38,8 +43,8 @@ public class As2CsConverter extends As2WhateverConverter
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? codeHelper.typeRef(bcFunc.getReturnType()) : "void";
-			String name = codeHelper.identifier(bcFunc.getName());
+			String type = bcFunc.hasReturnType() ? getCodeHelper().typeRef(bcFunc.getReturnType()) : "void";
+			String name = getCodeHelper().identifier(bcFunc.getName());
 			
 			if (bcFunc.isConstructor())
 			{
@@ -55,7 +60,7 @@ public class As2CsConverter extends As2WhateverConverter
 			for (BcFuncParam bcParam : params)
 			{
 				String paramType = type(bcParam.getType());
-				String paramName = codeHelper.identifier(bcParam.getIdentifier());
+				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(paramName);
 				if (++paramIndex < params.size())
@@ -102,7 +107,7 @@ public class As2CsConverter extends As2WhateverConverter
 		writeImports(src, getImports(bcClass));
 		writeBlankLine(src);
 		
-		src.writeln("namespace " + codeHelper.namespace(bcClass.getPackageName()));
+		src.writeln("namespace " + getCodeHelper().namespace(bcClass.getPackageName()));
 		writeBlockOpen(src);
 		
 		if (bcClass.hasFunctionTypes())
@@ -189,7 +194,7 @@ public class As2CsConverter extends As2WhateverConverter
 	private void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
 	{
 		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
-		String name = codeHelper.identifier(funcType.getName());			
+		String name = getCodeHelper().identifier(funcType.getName());			
 		
 		src.writelnf("public delegate %s %s(%s);", type, type(name), paramsString(funcType.getParams()));
 	}
@@ -201,7 +206,7 @@ public class As2CsConverter extends As2WhateverConverter
 		for (BcVariableDeclaration bcField : fields)
 		{
 			String type = type(bcField.getType());
-			String name = codeHelper.identifier(bcField.getIdentifier());
+			String name = getCodeHelper().identifier(bcField.getIdentifier());
 						
 			src.write(bcField.getVisiblity() + " ");
 			
@@ -237,7 +242,7 @@ public class As2CsConverter extends As2WhateverConverter
 		
 		for (BcVariableDeclaration bcVar : bcFields) 
 		{
-			String name = codeHelper.identifier(bcVar.getIdentifier());
+			String name = getCodeHelper().identifier(bcVar.getIdentifier());
 			src.writelnf("%s = %s;", name, bcVar.getInitializer());
 		}
 		
@@ -270,15 +275,15 @@ public class As2CsConverter extends As2WhateverConverter
 				}
 				
 				String type = bcFunc.hasReturnType() ? type(bcFunc.getReturnType()) : "void";
-				String name = codeHelper.identifier(bcFunc.getName());			
+				String name = getCodeHelper().identifier(bcFunc.getName());			
 				
 				if (bcFunc.isGetter())
 				{
-					name = codeHelper.getter(name);
+					name = getCodeHelper().getter(name);
 				}
 				else if (bcFunc.isSetter())
 				{
-					name = codeHelper.setter(name);
+					name = getCodeHelper().setter(name);
 				}
 				src.writef("%s %s", type, name);
 			}
@@ -304,7 +309,7 @@ public class As2CsConverter extends As2WhateverConverter
 		for (BcFuncParam bcParam : params)
 		{
 			String paramType = type(bcParam.getType());
-			String paramName = codeHelper.identifier(bcParam.getIdentifier());
+			String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
 			paramsDest.writef("%s %s", paramType, paramName);
 			if (++paramIndex < params.size())
 			{
@@ -319,9 +324,9 @@ public class As2CsConverter extends As2WhateverConverter
 	{
 		List<String> lines = body.getLines();
 		String firstLine = lines.get(1).trim();
-		if (firstLine.startsWith(codeHelper.thisCallMarker))
+		if (firstLine.startsWith(getCodeHelper().thisCallMarker))
 		{
-			firstLine = firstLine.replace(codeHelper.thisCallMarker, "this");
+			firstLine = firstLine.replace(getCodeHelper().thisCallMarker, "this");
 			if (firstLine.endsWith(";"))
 			{
 				firstLine = firstLine.substring(0, firstLine.length() - 1);
@@ -330,9 +335,9 @@ public class As2CsConverter extends As2WhateverConverter
 			src.writeln(" : " + firstLine);
 			lines.remove(1);
 		}
-		else if (firstLine.startsWith(codeHelper.superCallMarker))
+		else if (firstLine.startsWith(getCodeHelper().superCallMarker))
 		{
-			firstLine = firstLine.replace(codeHelper.superCallMarker, "base");
+			firstLine = firstLine.replace(getCodeHelper().superCallMarker, "base");
 			if (firstLine.endsWith(";"))
 			{
 				firstLine = firstLine.substring(0, firstLine.length() - 1);
