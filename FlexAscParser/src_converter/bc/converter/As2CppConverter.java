@@ -22,8 +22,8 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String classGcName = "__internalGc";
 	private static final String classGcNeeded = "__internalGcNeeded";
 	private static final String classConstructName = "__internalConstruct";
-	private static final String classCreateName = "__create";
-	
+	private static final String classAllocName = "__alloc";
+
 	private static final String interfaceBoxName = "__internalBox";
 	private static final String interfaceUnboxName = "__internalUnbox";
 	
@@ -32,8 +32,8 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String classStaticInitFuncName = "__internalStaticInit";
 	
 	private String lastVisiblityModifier;
-	private FileWriteDestination hdr;
-	private FileWriteDestination impl;
+	private ListWriteDestination hdr;
+	private ListWriteDestination impl;
 
 	@Override
 	protected void writeClassDefinition(BcClassDefinitionNode bcClass, File outputDir) throws IOException
@@ -41,10 +41,13 @@ public class As2CppConverter extends As2WhateverConverter
 		String className = getClassName(bcClass);
 		String classExtends = getBaseClassName(bcClass);
 		
+		File hdrFile = new File(outputDir, className + ".h");
+		File implFile = new File(outputDir, className + ".cpp");
+		
 		outputDir.mkdirs();
 		
-		hdr = new FileWriteDestination(new File(outputDir, className + ".h"));
-		impl = new FileWriteDestination(new File(outputDir, className + ".cpp"));
+		hdr = new ListWriteDestination();
+		impl = new ListWriteDestination();
 		
 		lastVisiblityModifier = null;
 		
@@ -78,7 +81,6 @@ public class As2CppConverter extends As2WhateverConverter
 		writeTypename(bcClass);
 		writeFields(bcClass);
 		writeFunctions(bcClass);
-		writeCreate(bcClass);
 		writeConstruct(bcClass);
 		writeClassInit(bcClass);
 		writeClassStaticInit(bcClass);
@@ -105,8 +107,11 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		hdr.writeln("#endif // " + defGuardName);
 		
-		hdr.close();
-		impl.close();		
+		if (shouldWriteClassToFile(bcClass, hdrFile))
+			writeDestToFile(hdr, hdrFile);
+		
+		if (shouldWriteClassToFile(bcClass, implFile))
+			writeDestToFile(impl, implFile);
 	}
 
 	private void writeHeaderTypes(WriteDestination dst, List<BcTypeNode> types)
@@ -125,7 +130,7 @@ public class As2CppConverter extends As2WhateverConverter
 			else
 			{
 				String typeName = BcCodeCpp.type(bcType);
-				dst.writelnf("__TYPEREF_DEF(%s)", typeName);				
+				dst.writelnf("ASDEF(%s)", typeName);				
 			}
 		}
 	}
@@ -152,7 +157,7 @@ public class As2CppConverter extends As2WhateverConverter
 		String baseClassName = getBaseClassName(bcClass);
 		
 		writeVisiblity("public", true);
-		hdr.writelnf("__TYPENAME(%s, %s);", className, baseClassName);
+		hdr.writelnf("ASOBJ(%s, %s);", className, baseClassName);
 	}
 	
 	private void writeFields(BcClassDefinitionNode bcClass)
@@ -250,73 +255,6 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			impl.writeln(bcFunc.getBody());
 		}
-	}
-	
-	private void writeCreate(BcClassDefinitionNode bcClass)
-	{
-		writeVisiblity("public", true);
-		
-		if (bcClass.hasConstructors())
-		{
-			List<BcFunctionDeclaration> constructors = bcClass.getConstructors();
-			for (BcFunctionDeclaration bcFunc : constructors)
-			{
-				List<BcFuncParam> params = bcFunc.getParams();
-				writeClassCreateFunction(bcClass, params);
-			}
-		}
-		else
-		{
-			List<BcFuncParam> params = new ArrayList<BcFuncParam>();
-			writeClassCreateFunction(bcClass, params);
-		}
-	}
-	
-	private void writeClassCreateFunction(BcClassDefinitionNode bcClass, List<BcFuncParam> params)
-	{
-		String className = getClassName(bcClass);
-		String classRef = BcCodeCpp.typeRef(bcClass.getName());
-		
-		String createFuncName = classCreateName + className;
-		
-		hdr.writef("static %s %s(", classRef, createFuncName);
-		
-		impl.writeln();
-		impl.writef("%s %s::%s(", classRef, className, createFuncName);
-		
-		StringBuilder paramsBuffer = new StringBuilder();
-		StringBuilder argsBuffer = new StringBuilder();
-		int paramIndex = 0;
-		for (BcVariableDeclaration bcParam : params)
-		{
-			String paramType = BcCodeCpp.typeArgRef(bcParam.getType());
-			String paramName = BcCodeCpp.identifier(bcParam.getIdentifier());
-			paramsBuffer.append(String.format("%s %s", paramType, paramName));
-			argsBuffer.append(paramName);
-			if (++paramIndex < params.size())
-			{
-				paramsBuffer.append(", ");
-				argsBuffer.append(", ");
-			}
-		}
-		
-		hdr.write(paramsBuffer);
-		impl.write(paramsBuffer);
-		hdr.writeln(");");
-		impl.writeln(")");
-		writeBlockOpen(impl);
-		
-		impl.writelnf("%s __reference(new %s());", classRef, className);
-		
-		if (bcClass.hasConstructors())
-		{
-			String constructFuncName = classConstructName + className;
-			impl.writelnf("__reference->%s(%s);", constructFuncName, argsBuffer);
-		}
-		
-		impl.writeln("return __reference;");
-		
-		writeBlockClose(impl);
 	}
 	
 	private void writeConstruct(BcClassDefinitionNode bcClass)

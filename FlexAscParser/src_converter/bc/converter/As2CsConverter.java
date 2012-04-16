@@ -89,23 +89,9 @@ public class As2CsConverter extends As2WhateverConverter
 		
 		File outputFile = new File(srcFileDir, className + ".cs");
 		
-		BcMetadata metadata = bcClass.getMetadata();
-		if (metadata != null)
+		if (!shouldWriteClassToFile(bcClass, outputFile))
 		{
-			if (metadata.contains("NoConversion"))
-			{
-				System.out.println("No conversion: " + bcClass.getName());
-				return;
-			}
-			
-			if (metadata.contains("ConvertOnce"))
-			{
-				if (outputFile.exists())
-				{
-					System.out.println("Convert once: " + bcClass.getName());
-					return;
-				}
-			}			
+			return;
 		}
 		
 		src = new ListWriteDestination();		

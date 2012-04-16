@@ -2324,6 +2324,28 @@ public abstract class As2WhateverConverter
 		writeBlockClose(dest);
 	}
 	
+	protected boolean shouldWriteClassToFile(BcClassDefinitionNode bcClass, File file)
+	{
+		BcMetadata metadata = bcClass.getMetadata();
+		if (metadata != null)
+		{
+			if (metadata.contains("NoConversion"))
+			{
+				return false;
+			}
+			
+			if (metadata.contains("ConvertOnce"))
+			{
+				if (file.exists())
+				{
+					return false;
+				}
+			}			
+		}
+		
+		return true;
+	}
+	
 	protected void writeDestToFile(ListWriteDestination src, File file) throws IOException 
 	{
 		if (needUpldateFile(file, src))
@@ -2332,7 +2354,7 @@ public abstract class As2WhateverConverter
 		}
 		else
 		{
-			System.out.println("Up to data: " + file.getName());
+			System.out.println("Up to date: " + file.getName());
 		}
 	}
 	
