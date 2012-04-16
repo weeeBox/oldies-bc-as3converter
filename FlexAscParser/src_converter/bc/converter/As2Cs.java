@@ -81,6 +81,7 @@ import macromedia.asc.util.ObjectList;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeCs;
+import bc.help.BcCodeHelper;
 import bc.help.BcNodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
@@ -128,12 +129,10 @@ public class As2Cs
 	private Map<DefinitionNode, BcMetadata> bcMetadataMap;
 	
 	private boolean needFieldsInitializer;
+	BcCodeHelper codeHelper;
 	
 	public static void main(String[] args)
 	{
-		BcFunctionDeclaration.thisCallMarker = BcCodeCs.thisCallMarker;
-		BcFunctionDeclaration.superCallMarker = BcCodeCs.superCallMarker;
-		
 		File outputDir = new File(args[0]);
 
 		String[] filenames = new String[args.length - 1];
@@ -154,6 +153,11 @@ public class As2Cs
 	{
 		bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
 		bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
+		
+		codeHelper = new BcCodeCs();
+		
+		BcFunctionDeclaration.thisCallMarker = codeHelper.thisCallMarker;
+		BcFunctionDeclaration.superCallMarker = codeHelper.superCallMarker;
 	}
 	
 	public void convert(File outputDir, String... filenames) throws IOException
@@ -271,7 +275,7 @@ public class As2Cs
 
 	private BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
 	{
-		String interfaceDeclaredName = BcCodeCs.identifier(interfaceDefinitionNode.name);
+		String interfaceDeclaredName = codeHelper.identifier(interfaceDefinitionNode.name);
 		
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
@@ -307,7 +311,7 @@ public class As2Cs
 	
 	private BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
 	{
-		String classDeclaredName = BcCodeCs.identifier(classDefinitionNode.name);
+		String classDeclaredName = codeHelper.identifier(classDefinitionNode.name);
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
 		BcTypeNode classType = createBcType(classDeclaredName);
@@ -394,7 +398,7 @@ public class As2Cs
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
 		BcTypeNode bcType = extractBcType(varBindNode.variable.type);
-		String bcIdentifier = BcCodeCs.identifier(varBindNode.variable.identifier);	
+		String bcIdentifier = codeHelper.identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcType, bcIdentifier);
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
@@ -410,7 +414,7 @@ public class As2Cs
 	private BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode)
 	{
 		FunctionNameNode functionNameNode = functionDefinitionNode.name;
-		String name = BcCodeCs.identifier(functionNameNode.identifier);
+		String name = codeHelper.identifier(functionNameNode.identifier);
 		BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);
 		
 		String typeString = BcNodeHelper.tryExtractFunctionType(functionDefinitionNode);
@@ -450,7 +454,7 @@ public class As2Cs
 			ObjectList<ParameterNode> params = parameterNode.items;
 			for (ParameterNode param : params)
 			{
-				BcFuncParam bcParam = new BcFuncParam(extractBcType(param.type), BcCodeCs.identifier(param.identifier));
+				BcFuncParam bcParam = new BcFuncParam(extractBcType(param.type), codeHelper.identifier(param.identifier));
 				
 				if (param.init != null)
 				{
@@ -539,7 +543,7 @@ public class As2Cs
 		BcTypeNode varType = bcVar.getType();
 		String varId = bcVar.getIdentifier();
 		
-		dest.writef("%s %s", type(varType), BcCodeCs.identifier(varId));
+		dest.writef("%s %s", type(varType), codeHelper.identifier(varId));
 		
 		Node initializer = bcVar.getInitializerNode();
 		if (initializer != null)
@@ -680,13 +684,13 @@ public class As2Cs
 		BcTypeNode varType = extractBcType(varBindNode.variable.type);
 		addToImport(varType);
 		
-		String bcIdentifier = BcCodeCs.identifier(varBindNode.variable.identifier);	
+		String bcIdentifier = codeHelper.identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier);
 		
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
 		
-		dest.writef("%s %s", type(varType), BcCodeCs.identifier(bcIdentifier));
+		dest.writef("%s %s", type(varType), codeHelper.identifier(bcIdentifier));
 		
 		if (varBindNode.initializer != null)
 		{
@@ -834,7 +838,7 @@ public class As2Cs
 			IdentifierNode funcIndentifierNode = BcNodeHelper.tryExtractIdentifier(selector);
 			assert funcIndentifierNode != null;
 			
-			String funcName = BcCodeCs.identifier(funcIndentifierNode);
+			String funcName = codeHelper.identifier(funcIndentifierNode);
 			if (callExpr.args != null)
 			{
 				dest.writef("AsString.%s(%s, %s)", funcName, baseDest, argsDest);
@@ -950,7 +954,7 @@ public class As2Cs
 						}
 						else
 						{
-							identifier = BcCodeCs.getter(identifier);
+							identifier = codeHelper.getter(identifier);
 							getterCalled = true;
 						}
 							
@@ -1113,7 +1117,7 @@ public class As2Cs
 		{
 			if (lastBcMemberType == null)
 			{
-				if (!(identifier.equals(BcCodeCs.thisCallMarker) && identifier.equals(BcCodeCs.thisCallMarker)))
+				if (!(identifier.equals(codeHelper.thisCallMarker) && identifier.equals(codeHelper.thisCallMarker)))
 				{
 					BcFunctionDeclaration bcFunc = findFunction(identifier);
 					if (bcFunc != null)
@@ -1268,7 +1272,7 @@ public class As2Cs
 			}
 			else
 			{
-				dest.write(BcCodeCs.construct(type, argsDest));
+				dest.write(codeHelper.construct(type, argsDest));
 			}
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
@@ -1376,7 +1380,7 @@ public class As2Cs
 					BcTypeNode setterType = funcParams.get(0).getType();
 					setterCalled = true;
 					
-					identifier = BcCodeCs.setter(identifier);
+					identifier = codeHelper.setter(identifier);
 					lastBcMemberType = setterType;
 				}
 				else
@@ -1490,7 +1494,7 @@ public class As2Cs
 		process(node.expr);
 		popDest();
 		
-		String typeName = BcCodeCs.identifier((IdentifierNode)node.expr);
+		String typeName = codeHelper.identifier((IdentifierNode)node.expr);
 		StringBuilder typeBuffer = new StringBuilder(typeName);
 		
 		ListNode typeArgs = node.typeArgs;
@@ -1538,12 +1542,12 @@ public class As2Cs
 		if (node.isAttr())
 		{
 			dest.write("attributeValue(\"");
-			dest.write(BcCodeCs.identifier(node));
+			dest.write(codeHelper.identifier(node));
 			dest.write("\")");
 		}
 		else
 		{
-			dest.write(BcCodeCs.identifier(node));
+			dest.write(codeHelper.identifier(node));
 		}
 	}
 	
@@ -1565,17 +1569,17 @@ public class As2Cs
 		}
 		else if (node instanceof LiteralNullNode)
 		{
-			dest.write(BcCodeCs.NULL);
+			dest.write(codeHelper.literalNull());
 		}
 		else if (node instanceof LiteralBooleanNode)
 		{
 			LiteralBooleanNode booleanNode = (LiteralBooleanNode) node;
-			dest.write(booleanNode.value ? "true" : "false");
+			dest.write(codeHelper.literalBool(booleanNode.value));
 		}
 		else if (node instanceof LiteralStringNode)
 		{			
 			LiteralStringNode stringNode = (LiteralStringNode) node;
-			dest.writef("\"%s\"", replaceEscapes(stringNode.value));
+			dest.write(codeHelper.literalString(stringNode.value));
 		}
 		else if (node instanceof LiteralRegExpNode)
 		{
@@ -1602,11 +1606,6 @@ public class As2Cs
 		{
 			assert false : node.getClass();
 		}
-	}
-	
-	private String replaceEscapes(String str)
-	{
-		return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
 	}
 	
 	private void process(IfStatementNode node)
@@ -1762,12 +1761,12 @@ public class As2Cs
 			if (child3.expr instanceof QualifiedIdentifierNode)
 			{
 				QualifiedIdentifierNode identifier = (QualifiedIdentifierNode) child3.expr;
-				loopVarName = BcCodeCs.identifier(identifier);
+				loopVarName = codeHelper.identifier(identifier);
 			}
 			else if (child3.expr instanceof IdentifierNode)
 			{
 				IdentifierNode identifier = (IdentifierNode) child3.expr;
-				loopVarName = BcCodeCs.identifier(identifier);
+				loopVarName = codeHelper.identifier(identifier);
 			}
 			else
 			{
@@ -1788,7 +1787,7 @@ public class As2Cs
 			
 			// get loop body
 			final String collectionTemp = "__" + loopVarName + "s_";
-			dest.writelnf("%s %s = %s;", BcCodeCs.type(collectionType), collectionTemp, collection);
+			dest.writelnf("%s %s = %s;", codeHelper.type(collectionType), collectionTemp, collection);
 			dest.writelnf("if (%s != null)", collectionTemp);
 			dest.writeBlockOpen();
 			dest.writelnf("foreach (%s in %s)", loopVarString, collectionTemp);
@@ -1949,10 +1948,10 @@ public class As2Cs
 		BcTypeNode type = BcNodeHelper.extractBcType(node.type);
 		addToImport(type);
 		
-		String identifier = BcCodeCs.identifier(node.identifier);
+		String identifier = codeHelper.identifier(node.identifier);
 		
 		declaredVars.add(new BcVariableDeclaration(type, identifier));		
-		dest.writef("%s %s", BcCodeCs.type(type), identifier);
+		dest.writef("%s %s", codeHelper.type(type), identifier);
 	}
 	
 	private void process(FinallyClauseNode node)
@@ -2017,12 +2016,12 @@ public class As2Cs
 		}
 		else if (node.op == Tokens.IS_TOKEN)
 		{
-			dest.write(BcCodeCs.operatorIs(ldest, rdest));
+			dest.write(codeHelper.operatorIs(ldest, rdest));
 		}
 		else if (node.op == Tokens.AS_TOKEN)
 		{
 			BcTypeNode castType = extractBcType(node.rhs);
-			dest.writef("((%s) ? (%s) : %s)", BcCodeCs.operatorIs(ldest, rdest), BcCodeCs.cast(lshString, castType), BcCodeCs.NULL);
+			dest.writef("((%s) ? (%s) : %s)", codeHelper.operatorIs(ldest, rdest), codeHelper.cast(lshString, castType), codeHelper.literalNull());
 		}
 		else
 		{
@@ -2116,7 +2115,7 @@ public class As2Cs
 		dest.write("break");
 		if (node.id != null)
 		{
-			String id = BcCodeCs.identifier(node.id);
+			String id = codeHelper.identifier(node.id);
 			dest.write(" " + id);
 		}
 		dest.writeln(";");
@@ -2153,7 +2152,7 @@ public class As2Cs
 			popDest();
 		}
 		
-		dest.writelnf("%s(%s);", BcCodeCs.superCallMarker, argsDest);
+		dest.writelnf("%s(%s);", codeHelper.superCallMarker, argsDest);
 	}
 	
 	private void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
@@ -2244,7 +2243,7 @@ public class As2Cs
 				String type = token.substring(index + 1);
 				assert type != null;
 				
-				funcType.addParam(new BcFuncParam(createBcType(type), BcCodeCs.identifier(name)));
+				funcType.addParam(new BcFuncParam(createBcType(type), codeHelper.identifier(name)));
 			}
 		}
 	}
@@ -2327,8 +2326,8 @@ public class As2Cs
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? BcCodeCs.typeRef(bcFunc.getReturnType()) : "void";
-			String name = BcCodeCs.identifier(bcFunc.getName());
+			String type = bcFunc.hasReturnType() ? codeHelper.typeRef(bcFunc.getReturnType()) : "void";
+			String name = codeHelper.identifier(bcFunc.getName());
 			
 			if (bcFunc.isConstructor())
 			{
@@ -2344,7 +2343,7 @@ public class As2Cs
 			for (BcFuncParam bcParam : params)
 			{
 				String paramType = type(bcParam.getType());
-				String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
+				String paramName = codeHelper.identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(paramName);
 				if (++paramIndex < params.size())
@@ -2404,7 +2403,7 @@ public class As2Cs
 		writeImports(src, getImports(bcClass));
 		writeBlankLine(src);
 		
-		src.writeln("namespace " + BcCodeCs.namespace(bcClass.getPackageName()));
+		src.writeln("namespace " + codeHelper.namespace(bcClass.getPackageName()));
 		writeBlockOpen(src);
 		
 		if (bcClass.hasFunctionTypes())
@@ -2491,7 +2490,7 @@ public class As2Cs
 	private void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
 	{
 		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
-		String name = BcCodeCs.identifier(funcType.getName());			
+		String name = codeHelper.identifier(funcType.getName());			
 		
 		src.writelnf("public delegate %s %s(%s);", type, type(name), paramsString(funcType.getParams()));
 	}
@@ -2503,7 +2502,7 @@ public class As2Cs
 		for (BcVariableDeclaration bcField : fields)
 		{
 			String type = type(bcField.getType());
-			String name = BcCodeCs.identifier(bcField.getIdentifier());
+			String name = codeHelper.identifier(bcField.getIdentifier());
 						
 			src.write(bcField.getVisiblity() + " ");
 			
@@ -2539,7 +2538,7 @@ public class As2Cs
 		
 		for (BcVariableDeclaration bcVar : bcFields) 
 		{
-			String name = BcCodeCs.identifier(bcVar.getIdentifier());
+			String name = codeHelper.identifier(bcVar.getIdentifier());
 			src.writelnf("%s = %s;", name, bcVar.getInitializer());
 		}
 		
@@ -2572,15 +2571,15 @@ public class As2Cs
 				}
 				
 				String type = bcFunc.hasReturnType() ? type(bcFunc.getReturnType()) : "void";
-				String name = BcCodeCs.identifier(bcFunc.getName());			
+				String name = codeHelper.identifier(bcFunc.getName());			
 				
 				if (bcFunc.isGetter())
 				{
-					name = BcCodeCs.getter(name);
+					name = codeHelper.getter(name);
 				}
 				else if (bcFunc.isSetter())
 				{
-					name = BcCodeCs.setter(name);
+					name = codeHelper.setter(name);
 				}
 				src.writef("%s %s", type, name);
 			}
@@ -2606,7 +2605,7 @@ public class As2Cs
 		for (BcFuncParam bcParam : params)
 		{
 			String paramType = type(bcParam.getType());
-			String paramName = BcCodeCs.identifier(bcParam.getIdentifier());
+			String paramName = codeHelper.identifier(bcParam.getIdentifier());
 			paramsDest.writef("%s %s", paramType, paramName);
 			if (++paramIndex < params.size())
 			{
@@ -2621,9 +2620,9 @@ public class As2Cs
 	{
 		List<String> lines = body.getLines();
 		String firstLine = lines.get(1).trim();
-		if (firstLine.startsWith(BcCodeCs.thisCallMarker))
+		if (firstLine.startsWith(codeHelper.thisCallMarker))
 		{
-			firstLine = firstLine.replace(BcCodeCs.thisCallMarker, "this");
+			firstLine = firstLine.replace(codeHelper.thisCallMarker, "this");
 			if (firstLine.endsWith(";"))
 			{
 				firstLine = firstLine.substring(0, firstLine.length() - 1);
@@ -2632,9 +2631,9 @@ public class As2Cs
 			src.writeln(" : " + firstLine);
 			lines.remove(1);
 		}
-		else if (firstLine.startsWith(BcCodeCs.superCallMarker))
+		else if (firstLine.startsWith(codeHelper.superCallMarker))
 		{
-			firstLine = firstLine.replace(BcCodeCs.superCallMarker, "base");
+			firstLine = firstLine.replace(codeHelper.superCallMarker, "base");
 			if (firstLine.endsWith(";"))
 			{
 				firstLine = firstLine.substring(0, firstLine.length() - 1);
@@ -2947,7 +2946,7 @@ public class As2Cs
 						IdentifierNode argIdentifier = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)argItem);
 						if (argIdentifier != null)
 						{
-							BcVariableDeclaration bcUsedField = bcClass.findField(BcCodeCs.identifier(argIdentifier));
+							BcVariableDeclaration bcUsedField = bcClass.findField(codeHelper.identifier(argIdentifier));
 							if (bcUsedField != null && !bcUsedField.isStatic())
 							{
 								return false;
@@ -2976,7 +2975,7 @@ public class As2Cs
 		if (node instanceof IdentifierNode)
 		{
 			IdentifierNode identifier = (IdentifierNode) node;
-			return findIdentifierType(BcCodeCs.identifier(identifier));
+			return findIdentifierType(codeHelper.identifier(identifier));
 		}
 		
 		if (node instanceof LiteralNumberNode)
@@ -3251,7 +3250,7 @@ public class As2Cs
 						
 						return createBcType(classXMLList); // dirty hack
 					}
-					else if (BcCodeCs.identifier(identifier).equals(BcCodeCs.thisCallMarker))
+					else if (codeHelper.identifier(identifier).equals(codeHelper.thisCallMarker))
 					{
 						return lastBcClass.getClassType(); // this referes to the current class
 					}
@@ -3298,7 +3297,7 @@ public class As2Cs
 			return createBcType(classString); // hack
 		}
 		
-		String name = BcCodeCs.identifier(identifier);
+		String name = codeHelper.identifier(identifier);
 		
 		// check if it's class
 		BcClassDefinitionNode bcClass = findClass(name);
@@ -3307,7 +3306,7 @@ public class As2Cs
 			return bcClass.getClassType();
 		}
 		
-		if (BcCodeCs.isBasicType(name))
+		if (codeHelper.isBasicType(name))
 		{			
 			return createBcType(name);
 		}
@@ -3377,14 +3376,14 @@ public class As2Cs
 		}
 		popDest();
 		
-		dest.writef(BcCodeCs.construct(type(classArray), elementDest));		
+		dest.writef(codeHelper.construct(type(classArray), elementDest));		
 	}
 	
 	private void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
 	{
 		if (args == null)
 		{
-			dest.write(BcCodeCs.construct(vectorType));
+			dest.write(codeHelper.construct(vectorType));
 		}
 		else
 		{
@@ -3417,7 +3416,7 @@ public class As2Cs
 				}
 				popDest();
 				
-				dest.write(BcCodeCs.construct(vectorType, initDest));
+				dest.write(codeHelper.construct(vectorType, initDest));
 			}
 			else
 			{
@@ -3437,7 +3436,7 @@ public class As2Cs
 				
 				popDest();
 				
-				dest.write(BcCodeCs.construct(vectorType, argsDest));
+				dest.write(codeHelper.construct(vectorType, argsDest));
 			}
 		}
 	}
@@ -3449,7 +3448,7 @@ public class As2Cs
 			type = lastBcFunctionType != null ? lastBcFunctionType : type;
 		}
 		
-		return BcCodeCs.type(type);
+		return codeHelper.type(type);
 	}
 	
 	private String type(String type) 
@@ -3459,7 +3458,7 @@ public class As2Cs
 			type = lastBcFunctionType != null ? lastBcFunctionType.getName() : type;
 		}
 		
-		return BcCodeCs.type(type);
+		return codeHelper.type(type);
 	}
 
 	private boolean classEquals(BcClassDefinitionNode classNode, String name)
@@ -3522,7 +3521,7 @@ public class As2Cs
 			return "0";
 		}
 		
-		return BcCodeCs.NULL;
+		return codeHelper.literalNull();
 	}
 	
 	private boolean needExplicitCast(BcTypeNode fromType, BcTypeNode toType)
@@ -3567,9 +3566,9 @@ public class As2Cs
 	{
 		if (toType.isIntegral() && typeEquals(fromType, classString))
 		{
-			return BcCodeCs.parseString(expression, toType);
+			return codeHelper.parseString(expression, toType);
 		}
 		
-		return BcCodeCs.cast(expression, toType);
+		return codeHelper.cast(expression, toType);
 	}
 }
