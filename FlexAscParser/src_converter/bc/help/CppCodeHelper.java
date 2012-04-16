@@ -1,9 +1,12 @@
 package bc.help;
 
+import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
 
 public class CppCodeHelper extends BcCodeHelper
 {
+	private static final String PREFIX_REF = "_ref";
+	
 	private static final String IS_OPERATOR = "ASIS";
 	
 	@Override
@@ -25,12 +28,6 @@ public class CppCodeHelper extends BcCodeHelper
 	}
 
 	@Override
-	protected String classType(String name)
-	{
-		return "foo";
-	}
-
-	@Override
 	protected String vectorType(BcVectorTypeNode vectorType)
 	{
 		return "foo";
@@ -47,5 +44,28 @@ public class CppCodeHelper extends BcCodeHelper
 	{
 		return String.format("%s::%s(%s)", type, method, args);
 	}
+	
+	public String typeRef(BcTypeNode bcType)
+	{
+		return typeRef(bcType.getName());
+	}
 
+	public String typeRef(String type)
+	{
+		if (isBasicType(type))
+		{
+			return type(type);
+		}
+		return String.format("%s%s", type(type), PREFIX_REF);
+	}
+	
+	@Override
+	public String paramDecl(BcTypeNode type, String identifier)
+	{
+		if (isBasicType(type))
+		{
+			return String.format("%s %s", type(type), identifier(identifier));
+		}
+		return String.format("const %s& %s", typeRef(type), identifier(identifier));
+	}
 }

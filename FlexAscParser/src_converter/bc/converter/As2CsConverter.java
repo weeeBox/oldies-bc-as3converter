@@ -43,7 +43,7 @@ public class As2CsConverter extends As2WhateverConverter
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? getCodeHelper().typeRef(bcFunc.getReturnType()) : "void";
+			String type = bcFunc.hasReturnType() ? type(bcFunc.getReturnType()) : "void";
 			String name = getCodeHelper().identifier(bcFunc.getName());
 			
 			if (bcFunc.isConstructor())

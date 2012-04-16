@@ -134,7 +134,7 @@ public class As2CppConverter extends As2WhateverConverter
 			else
 			{
 				String typeName = type(bcType);
-				dst.writelnf("ASDEF(%s)", typeName);				
+				dst.writelnf("ASTYPEDEF(%s)", typeName);				
 			}
 		}
 	}
@@ -243,9 +243,7 @@ public class As2CppConverter extends As2WhateverConverter
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = getCodeHelper().typeArgRef(bcParam.getType());
-				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
-				paramsBuffer.append(String.format("%s %s", paramType, paramName));
+				paramsBuffer.append(getCodeHelper().paramDecl(bcParam.getType(), bcParam.getIdentifier()));
 				if (++paramIndex < params.size())
 				{
 					paramsBuffer.append(", ");
@@ -286,9 +284,7 @@ public class As2CppConverter extends As2WhateverConverter
 			int paramIndex = 0;
 			for (BcVariableDeclaration bcParam : params)
 			{
-				String paramType = getCodeHelper().typeArgRef(bcParam.getType());
-				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
-				paramsBuffer.append(String.format("%s %s", paramType, paramName));
+				paramsBuffer.append(getCodeHelper().paramDecl(bcParam.getType(), bcParam.getIdentifier()));
 				if (++paramIndex < params.size())
 				{
 					paramsBuffer.append(", ");
@@ -614,10 +610,7 @@ public class As2CppConverter extends As2WhateverConverter
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = getCodeHelper().typeArgRef(bcParam.getType());
-				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
-				paramsBuffer.append(String.format("%s %s", paramType, paramName));
-				argsBuffer.append(String.format("%s", paramName));
+				argsBuffer.append(getCodeHelper().paramDecl(bcParam.getType(), bcParam.getIdentifier()));
 				if (++paramIndex < params.size())
 				{
 					paramsBuffer.append(", ");

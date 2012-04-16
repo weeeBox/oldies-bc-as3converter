@@ -18,11 +18,7 @@ public class CsCodeHelper extends BcCodeHelper
 			return name;
 		}
 		
-		if (name.startsWith(TYPE_PREFIX))
-		{
-			return name; 
-		}
-		return TYPE_PREFIX + name;
+		return super.classType(name);
 	}
 	
 	@Override

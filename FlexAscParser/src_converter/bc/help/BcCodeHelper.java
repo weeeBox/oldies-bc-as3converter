@@ -56,12 +56,10 @@ public abstract class BcCodeHelper
 	public abstract String operatorIs(Object lhs, Object rhs);
 	public abstract String literalNull();
 	
-	protected abstract String classType(String name);
 	protected abstract String vectorType(BcVectorTypeNode vectorType);
 	protected abstract String constructVector(BcVectorTypeNode vectorType, Object initializer);
 	
 	protected abstract String staticCall(String type, String method, Object args);
-	
 	
 	public String type(BcTypeNode bcType)
 	{
@@ -83,6 +81,16 @@ public abstract class BcCodeHelper
 		}
 		
 		return classType(name);
+	}
+	
+	
+	protected String classType(String name)
+	{
+		if (name.startsWith(TYPE_PREFIX))
+		{
+			return name; 
+		}
+		return TYPE_PREFIX + name;
 	}
 	
 	public String keywordSafe(String name)
@@ -108,21 +116,6 @@ public abstract class BcCodeHelper
 		return basicTypes.containsKey(name);
 	}
 	
-	public String typeArgRef(BcTypeNode bcType)
-	{		
-		return type(bcType);
-	}
-	
-	public String typeRef(BcTypeNode bcType)
-	{
-		return type(bcType);
-	}
-
-	public String typeRef(String type)
-	{
-		return type(type);
-	}
-
 	public String identifier(IdentifierNode identifier)
 	{
 		String name = identifier.name;
