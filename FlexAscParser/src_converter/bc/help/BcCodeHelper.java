@@ -59,8 +59,6 @@ public abstract class BcCodeHelper
 	protected abstract String vectorType(BcVectorTypeNode vectorType);
 	protected abstract String constructVector(BcVectorTypeNode vectorType, Object initializer);
 	
-	protected abstract String staticCall(String type, String method, Object args);
-	
 	public String type(BcTypeNode bcType)
 	{
 		String typeName = bcType.getName();
@@ -162,6 +160,16 @@ public abstract class BcCodeHelper
 	public String paramDecl(BcTypeNode type, String identifier)
 	{
 		return varDecl(type, identifier);
+	}
+	
+	protected String staticCall(String type, String method, Object... args)
+	{
+		return memberCall(type, method, args);
+	}
+	
+	protected String memberCall(String type, String method, Object... args)
+	{
+		return String.format("%s.%s(%s)", type, method, BcStringUtils.commaSeparated(args));
 	}
 	
 	public String cast(Object expr, BcTypeNode type)

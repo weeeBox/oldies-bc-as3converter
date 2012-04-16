@@ -41,12 +41,6 @@ public class CsCodeHelper extends BcCodeHelper
 	}
 	
 	@Override
-	protected String staticCall(String type, String method, Object args)
-	{
-		return String.format("%s.%s(%s)", type, method, args);
-	}
-	
-	@Override
 	public String operatorIs(Object lhs, Object rhs)
 	{
 		return String.format("%s %s %s", lhs, IS, type(rhs.toString()));
