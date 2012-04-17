@@ -79,8 +79,6 @@ import macromedia.asc.util.ContextStatics;
 import macromedia.asc.util.ObjectList;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
-import bc.help.BcCodeCpp;
-import bc.help.CsCodeHelper;
 import bc.help.BcCodeHelper;
 import bc.help.BcNodeHelper;
 import bc.lang.BcClassDefinitionNode;
@@ -715,6 +713,7 @@ public abstract class As2WhateverConverter
 		bcMembersTypesStack.push(lastBcMemberType);
 		lastBcMemberType = null;
 		BcTypeNode baseType = null;
+		boolean staticCall = false;
 		
 		Node base = node.base;
 		SelectorNode selector = node.selector;
@@ -733,6 +732,8 @@ public abstract class As2WhateverConverter
 			IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier(base);
 			if (identifierNode != null && canBeClass(identifierNode.name)) // is call?
 			{
+				staticCall = true;
+				
 				ListWriteDestination baseExpr = new ListWriteDestination();
 				pushDest(baseExpr);
 				process(base);
@@ -792,11 +793,11 @@ public abstract class As2WhateverConverter
 				process(setExpr.args);
 				popDest();
 				
-				dest.writef("%s.setOwnProperty(%s, %s)", baseDest, exprDest, argsDest);
+				dest.write(getCodeHelper().memberCall(baseDest, "setOwnProperty", exprDest, argsDest));
 			}
 			else if (selector instanceof GetExpressionNode)
 			{
-				dest.writef("%s.getOwnProperty(%s)", baseDest, exprDest);
+				dest.writef(getCodeHelper().memberCall(baseDest, "getOwnProperty", exprDest));
 			}
 			else
 			{
@@ -822,24 +823,38 @@ public abstract class As2WhateverConverter
 			String funcName = codeHelper.identifier(funcIndentifierNode);
 			if (callExpr.args != null)
 			{
-				dest.writef("AsString.%s(%s, %s)", funcName, baseDest, argsDest);
+				dest.write(getCodeHelper().staticCall("AsString", funcName, baseDest, argsDest));
 			}
 			else
 			{
-				dest.writef("AsString.%s(%s)", funcName, baseDest);
+				dest.write(getCodeHelper().staticCall("AsString", funcName, baseDest));				
 			}
 		}
 		else
 		{
 			if (base != null)
 			{
-				dest.write(baseDest);
 				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
 				{
-					dest.write(".");
+					if (staticCall)
+					{
+						dest.write(getCodeHelper().staticSelector(baseDest, selectorDest));
+					}
+					else
+					{
+						dest.write(getCodeHelper().memberSelector(baseDest, selectorDest));
+					}
+				}
+				else
+				{
+					dest.write(baseDest);
+					dest.write(selectorDest);
 				}
 			}
-			dest.write(selectorDest);
+			else
+			{
+				dest.write(selectorDest);
+			}
 		}
 		
 		lastBcMemberType = bcMembersTypesStack.pop();

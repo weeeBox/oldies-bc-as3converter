@@ -162,14 +162,24 @@ public abstract class BcCodeHelper
 		return varDecl(type, identifier);
 	}
 	
-	protected String staticCall(String type, String method, Object... args)
+	public String memberSelector(Object target, Object selector)
 	{
-		return memberCall(type, method, args);
+		return String.format("%s.%s", target, selector);
 	}
 	
-	protected String memberCall(String type, String method, Object... args)
+	public String staticSelector(Object target, Object selector)
 	{
-		return String.format("%s.%s(%s)", type, method, BcStringUtils.commaSeparated(args));
+		return memberSelector(target, selector);
+	}
+	
+	public String staticCall(Object target, Object selector, Object... args)
+	{
+		return memberCall(target, selector, args);
+	}
+	
+	public String memberCall(Object target, Object selector, Object... args)
+	{
+		return memberSelector(target, String.format("%s(%s)", selector, BcStringUtils.commaSeparated(args)));
 	}
 	
 	public String cast(Object expr, BcTypeNode type)

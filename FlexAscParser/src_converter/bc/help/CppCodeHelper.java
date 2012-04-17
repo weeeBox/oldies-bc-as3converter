@@ -40,15 +40,15 @@ public class CppCodeHelper extends BcCodeHelper
 	}
 
 	@Override
-	protected String memberCall(String type, String method, Object... args)
+	public String memberSelector(Object target, Object selector)
 	{
-		return String.format("%s->%s(%s)", type, method, BcStringUtils.commaSeparated(args));
+		return String.format("%s->%s", target, selector);
 	}
 	
 	@Override
-	protected String staticCall(String type, String method, Object... args)
+	public String staticSelector(Object target, Object selector)
 	{
-		return String.format("%s::%s(%s)", type, method, BcStringUtils.commaSeparated(args));
+		return String.format("%s::%s", target, selector);
 	}
 	
 	public String typeRef(BcTypeNode bcType)
