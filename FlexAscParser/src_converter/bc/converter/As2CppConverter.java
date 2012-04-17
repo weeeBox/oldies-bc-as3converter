@@ -17,6 +17,9 @@ import bc.lang.BcVectorTypeNode;
 
 public class As2CppConverter extends As2WhateverConverter
 {
+	private static final String defineClass = "AS_CLASS";
+	private static final String defineObject = "AS_OBJ";
+	
 	private static final String classInitialiseName = "__internalInitialise";
 	private static final String classGcName = "__internalGc";
 	private static final String classGcNeeded = "__internalGcNeeded";
@@ -134,7 +137,7 @@ public class As2CppConverter extends As2WhateverConverter
 			else
 			{
 				String typeName = type(bcType);
-				dst.writelnf("ASTYPEDEF(%s)", typeName);				
+				dst.writelnf("%s(%s)", defineClass, typeName);				
 			}
 		}
 	}
@@ -161,7 +164,7 @@ public class As2CppConverter extends As2WhateverConverter
 		String baseClassName = getBaseClassName(bcClass);
 		
 		writeVisiblity("public", true);
-		hdr.writelnf("ASOBJ(%s, %s);", className, baseClassName);
+		hdr.writelnf("%s(%s, %s);", defineObject, className, baseClassName);
 	}
 	
 	private void writeFields(BcClassDefinitionNode bcClass)
