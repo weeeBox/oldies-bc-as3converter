@@ -19,12 +19,15 @@ public class As2CppConverter extends As2WhateverConverter
 {
 	private static final String defineClass = "AS_CLASS";
 	private static final String defineObject = "AS_OBJ";
+	private static final String defineGcMark = "AS_GC_MARK";
 	
 	private static final String classInitialiseName = "__internalInitialise";
-	private static final String classGcName = "__internalGc";
-	private static final String classGcNeeded = "__internalGcNeeded";
 	private static final String classConstructName = "__internalConstruct";
-	private static final String classAllocName = "__alloc";
+	
+	private static final String classAllocName = "_as_alloc";
+	private static final String classGcMarkName = "_as_gc_mark";
+	private static final String classGcMarkNeededName = "_as_gc_mark_needed";
+	
 
 	private static final String interfaceBoxName = "__internalBox";
 	private static final String interfaceUnboxName = "__internalUnbox";
@@ -92,7 +95,7 @@ public class As2CppConverter extends As2WhateverConverter
 		writeClassInit(bcClass);
 		writeClassStaticInit(bcClass);
 		writeClassDefaultConstructor(bcClass);
-		writeClassInternalGc(bcClass);
+		writeClassSweepMethod(bcClass);
 		
 		// generate interface boxers accessors if any
 		if (bcClass.hasInterfaces())
@@ -472,7 +475,7 @@ public class As2CppConverter extends As2WhateverConverter
 		writeBlockClose(impl);
 	}
 	
-	private void writeClassInternalGc(BcClassDefinitionNode bcClass)
+	private void writeClassSweepMethod(BcClassDefinitionNode bcClass)
 	{
 		if (bcClass.hasReferenceVars())
 		{
@@ -481,15 +484,15 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			writeVisiblity("public", true);
 			
-			hdr.writelnf("void %s();", classGcName);
+			hdr.writelnf("void %s();", classGcMarkName);
 			
 			impl.writeln();
-			impl.writelnf("void %s::%s()", className, classGcName);
+			impl.writelnf("void %s::%s()", className, classGcMarkName);
 			writeBlockOpen(impl);
 
-			impl.writelnf("if(%s())", classGcNeeded);
+			impl.writelnf("if(%s())", classGcMarkNeededName);
 			writeBlockOpen(impl);
-			impl.writelnf("%s::%s();", baseClassName, classGcName);
+			impl.writelnf("%s::%s();", baseClassName, classGcMarkName);
 			
 			List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
 			for (BcVariableDeclaration field : fields)
@@ -505,7 +508,7 @@ public class As2CppConverter extends As2WhateverConverter
 				}
 				
 				String identifier = getCodeHelper().identifier(field.getIdentifier());
-				impl.writelnf("if (%s != %s) %s->%s();", identifier, getCodeHelper().literalNull(), identifier, classGcName);
+				impl.writelnf("%s(%s);", defineGcMark, identifier);
 			}
 			
 			writeBlockClose(impl);
@@ -642,13 +645,13 @@ public class As2CppConverter extends As2WhateverConverter
 		impl.writeln();
 		
 		writeVisiblity("public", true);
-		hdr.writelnf("void %s();", classGcName);
-		impl.writelnf("void %s::%s()", interfaceName, classGcName);
+		hdr.writelnf("void %s();", classGcMarkName);
+		impl.writelnf("void %s::%s()", interfaceName, classGcMarkName);
 		writeBlockOpen(impl);
-		impl.writelnf("if(%s())", classGcNeeded);
+		impl.writelnf("if(%s())", classGcMarkNeededName);
 		writeBlockOpen(impl);
-		impl.writelnf("%s::%s();", interfaceBaseName, classGcName);
-		impl.writelnf("m_base->%s();", classGcName);
+		impl.writelnf("%s::%s();", interfaceBaseName, classGcMarkName);
+		impl.writelnf("m_base->%s();", classGcMarkName);
 		writeBlockClose(impl);		
 		writeBlockClose(impl);		
 		
