@@ -19,15 +19,15 @@ public class As2CppConverter extends As2WhateverConverter
 {
 	private static final String defineClass = "AS_CLASS";
 	private static final String defineObject = "AS_OBJ";
+	private static final String defineGcMarkHeader = "AS_GC_MARK_H";
+	private static final String defineGcMarkBegin = "AS_GC_MARK_BEGIN";
 	private static final String defineGcMark = "AS_GC_MARK";
+	private static final String defineGcMarkEnd = "AS_GC_MARK_END";
 	
 	private static final String classInitialiseName = "__internalInitialise";
 	private static final String classConstructName = "__internalConstruct";
 	
-	private static final String classAllocName = "_as_alloc";
-	private static final String classGcMarkName = "_as_gc_mark";
-	private static final String classGcMarkNeededName = "_as_gc_mark_needed";
-	
+	private static final String classInitName = "_as_init_";
 
 	private static final String interfaceBoxName = "__internalBox";
 	private static final String interfaceUnboxName = "__internalUnbox";
@@ -91,7 +91,7 @@ public class As2CppConverter extends As2WhateverConverter
 		writeTypename(bcClass);
 		writeFields(bcClass);
 		writeFunctions(bcClass);
-		writeConstruct(bcClass);
+		writeInit(bcClass);
 		writeClassInit(bcClass);
 		writeClassStaticInit(bcClass);
 		writeClassDefaultConstructor(bcClass);
@@ -265,7 +265,7 @@ public class As2CppConverter extends As2WhateverConverter
 		}
 	}
 	
-	private void writeConstruct(BcClassDefinitionNode bcClass)
+	private void writeInit(BcClassDefinitionNode bcClass)
 	{
 		List<BcFunctionDeclaration> constructors = bcClass.getConstructors();
 		if (constructors.isEmpty())
@@ -275,32 +275,18 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		String className = getClassName(bcClass);
 		
-		writeVisiblity("private", true);
+		writeVisiblity("protected", true);
 		
 		for (BcFunctionDeclaration bcFunc : constructors)
 		{
-			String constructFuncName = classConstructName + className;
+			String initFuncName = classInitName + className;
 			
-			hdr.writef("void %s(", constructFuncName);
+			String params = getCodeHelper().paramsDef(bcFunc.getParams());
+			
 			impl.writeln();
-			impl.writef("void %s::%s(", className, constructFuncName);
 			
-			StringBuilder paramsBuffer = new StringBuilder();
-			List<BcFuncParam> params = bcFunc.getParams();
-			int paramIndex = 0;
-			for (BcVariableDeclaration bcParam : params)
-			{
-				paramsBuffer.append(getCodeHelper().paramDecl(bcParam.getType(), bcParam.getIdentifier()));
-				if (++paramIndex < params.size())
-				{
-					paramsBuffer.append(", ");
-				}
-			}
-			
-			hdr.write(paramsBuffer);
-			impl.write(paramsBuffer);
-			hdr.writeln(");");
-			impl.writeln(")");
+			hdr.writelnf("void %s(%s);", initFuncName, params);
+			impl.writelnf("void %s::%s(%s)", className, initFuncName, params);
 			
 			ListWriteDestination body = bcFunc.getBody();
 			List<String> bodyLines = body.getLines();
@@ -484,16 +470,10 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			writeVisiblity("public", true);
 			
-			hdr.writelnf("void %s();", classGcMarkName);
+			hdr.writelnf("%s;", defineGcMarkHeader);
 			
 			impl.writeln();
-			impl.writelnf("void %s::%s()", className, classGcMarkName);
-			writeBlockOpen(impl);
-
-			impl.writelnf("if(%s())", classGcMarkNeededName);
-			writeBlockOpen(impl);
-			impl.writelnf("%s::%s();", baseClassName, classGcMarkName);
-			
+			impl.writelnf("%s(%s, %s)", defineGcMarkBegin, className, baseClassName);
 			List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
 			for (BcVariableDeclaration field : fields)
 			{
@@ -508,11 +488,9 @@ public class As2CppConverter extends As2WhateverConverter
 				}
 				
 				String identifier = getCodeHelper().identifier(field.getIdentifier());
-				impl.writelnf("%s(%s);", defineGcMark, identifier);
+				impl.writelnf("%s(%s)", defineGcMark, identifier);
 			}
-			
-			writeBlockClose(impl);
-			writeBlockClose(impl);
+			impl.writeln(defineGcMarkEnd);
 		}
 	}
 	
@@ -645,15 +623,11 @@ public class As2CppConverter extends As2WhateverConverter
 		impl.writeln();
 		
 		writeVisiblity("public", true);
-		hdr.writelnf("void %s();", classGcMarkName);
-		impl.writelnf("void %s::%s()", interfaceName, classGcMarkName);
-		writeBlockOpen(impl);
-		impl.writelnf("if(%s())", classGcMarkNeededName);
-		writeBlockOpen(impl);
-		impl.writelnf("%s::%s();", interfaceBaseName, classGcMarkName);
-		impl.writelnf("m_base->%s();", classGcMarkName);
-		writeBlockClose(impl);		
-		writeBlockClose(impl);		
+		
+		hdr.writelnf("%s;", defineGcMarkHeader);
+		impl.writelnf("%s(%s, %s)", defineGcMarkBegin, interfaceName, interfaceBaseName);
+		impl.writelnf("%s(m_base)", defineGcMark);
+		impl.writeln(defineGcMarkEnd);
 		
 		hdr.decTab();
 		hdr.writeln("};");

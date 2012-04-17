@@ -1,11 +1,14 @@
 package bc.help;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import macromedia.asc.parser.IdentifierNode;
 import bc.code.ListWriteDestination;
+import bc.lang.BcFuncParam;
 import bc.lang.BcTypeNode;
+import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 
 public abstract class BcCodeHelper
@@ -155,6 +158,22 @@ public abstract class BcCodeHelper
 	public String varDecl(BcTypeNode type, String identifier)
 	{
 		return String.format("%s %s", type(type), identifier(identifier));
+	}
+	
+	public String paramsDef(List<BcFuncParam> params)
+	{
+		StringBuilder buffer = new StringBuilder();
+		
+		int paramIndex = 0;
+		for (BcVariableDeclaration bcParam : params)
+		{
+			buffer.append(paramDecl(bcParam.getType(), bcParam.getIdentifier()));
+			if (++paramIndex < params.size())
+			{
+				buffer.append(", ");
+			}
+		}
+		return buffer.toString();
 	}
 	
 	public String paramDecl(BcTypeNode type, String identifier)
