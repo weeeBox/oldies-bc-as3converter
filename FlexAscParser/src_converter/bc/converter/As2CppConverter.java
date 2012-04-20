@@ -64,6 +64,8 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		outputDir.mkdirs();
 		
+		boolean isInterface = bcClass.isInterface();
+		
 		hdr = new ListWriteDestination();
 		impl = new ListWriteDestination();
 		
@@ -75,7 +77,7 @@ public class As2CppConverter extends As2WhateverConverter
 		hdr.writeln("#define " + defGuardName);
 		hdr.writeln();
 		
-		hdr.writeln(getCodeHelper().include("AsBase.h"));
+		hdr.writeln(getCodeHelper().include("AsBc.h"));
 		hdr.writeln();
 		
 		hdr.writelnf(getCodeHelper().include(classExtends + ".h"));
@@ -84,7 +86,7 @@ public class As2CppConverter extends As2WhateverConverter
 			List<BcTypeNode> interfaces = bcClass.getInterfaces();
 			for (BcTypeNode bcInterface : interfaces)
 			{
-				hdr.writeln(getCodeHelper().include(type(bcInterface)) + ".h");
+				hdr.writeln(getCodeHelper().include(type(bcInterface) + ".h"));
 			}
 		}
 		
@@ -111,16 +113,19 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		hdr.writeln();
 		
-		writeFieldsInit(bcClass);
-		writeClassDefaultConstructor(bcClass);
-		writeConstructors(bcClass);
-		writeClassStaticInit(bcClass);
-		writeClassSweepMethod(bcClass);
-		
-		// generate interface boxers accessors if any
-		if (bcClass.hasInterfaces())
+		if (!isInterface)
 		{
-			writeBoxingInterfaces(bcClass);
+			writeFieldsInit(bcClass);
+			writeClassDefaultConstructor(bcClass);
+			writeConstructors(bcClass);
+			writeClassStaticInit(bcClass);
+			writeClassSweepMethod(bcClass);
+			
+			// generate interface boxers accessors if any
+			if (bcClass.hasInterfaces())
+			{
+				writeBoxingInterfaces(bcClass);
+			}
 		}
 		
 		hdr.decTab();
@@ -132,8 +137,11 @@ public class As2CppConverter extends As2WhateverConverter
 		if (shouldWriteClassToFile(bcClass, hdrFile))
 			writeDestToFile(hdr, hdrFile);
 		
-		if (shouldWriteClassToFile(bcClass, implFile))
-			writeDestToFile(impl, implFile);
+		if (!isInterface)
+		{
+			if (shouldWriteClassToFile(bcClass, implFile))
+				writeDestToFile(impl, implFile);
+		}
 	}
 
 	private void writeHeaderTypes(WriteDestination dst, List<BcTypeNode> types)
@@ -251,28 +259,19 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				hdr.write("virtual ");
 			}
-			hdr.writef("%s %s(", type, name);
-			
-			impl.writeln();
-			impl.writef("%s %s::%s(", type, getClassName(bcClass), name);
-			
-			StringBuilder paramsBuffer = new StringBuilder();
-			List<BcFuncParam> params = bcFunc.getParams();
-			int paramIndex = 0;
-			for (BcFuncParam bcParam : params)
+			String params = getCodeHelper().paramsDef(bcFunc.getParams());
+	
+			if (bcClass.isInterface())
 			{
-				paramsBuffer.append(getCodeHelper().paramDecl(bcParam.getType(), bcParam.getIdentifier()));
-				if (++paramIndex < params.size())
-				{
-					paramsBuffer.append(", ");
-				}
+				hdr.writelnf("%s %s(%s) = 0;", type, name, params);
+			}
+			else
+			{
+				hdr.writelnf("%s %s(%s);", type, name, params);
 			}
 			
-			hdr.write(paramsBuffer);
-			impl.write(paramsBuffer);
-			hdr.writeln(");");
-			impl.writeln(")");
-			
+			impl.writeln();
+			impl.writelnf("%s %s::%s(%s)", type, getClassName(bcClass), name, params);			
 			impl.writeln(bcFunc.getBody());
 		}
 	}
@@ -401,6 +400,10 @@ public class As2CppConverter extends As2WhateverConverter
 	private void writeClassDefaultConstructor(BcClassDefinitionNode bcClass)
 	{
 		String className = getClassName(bcClass);
+		
+		hdr.writeln();
+		writeVisiblity("protected", true);
+		hdr.writelnf("%s();", className);
 		
 		impl.writeln();
 		impl.writef("%s::%s()", className, className);

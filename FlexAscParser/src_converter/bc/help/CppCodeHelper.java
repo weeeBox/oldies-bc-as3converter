@@ -24,7 +24,7 @@ public class CppCodeHelper extends BcCodeHelper
 	@Override
 	public String literalNull()
 	{
-		return "NULL";
+		return "AS_NULL";
 	}
 
 	@Override
@@ -73,6 +73,12 @@ public class CppCodeHelper extends BcCodeHelper
 			return String.format("%s %s", type(type), identifier(identifier));
 		}
 		return String.format("const %s& %s", typeRef(type), identifier(identifier));
+	}
+	
+	@Override
+	public String varDecl(BcTypeNode type, String identifier)
+	{
+		return String.format("%s %s", typeRef(type), identifier(identifier));
 	}
 	
 	public String include(String filename)

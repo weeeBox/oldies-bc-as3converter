@@ -669,7 +669,7 @@ public abstract class As2WhateverConverter
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
 		
-		dest.writef("%s %s", type(varType), codeHelper.identifier(bcIdentifier));
+		dest.write(getCodeHelper().varDecl(varType, bcIdentifier));
 		
 		if (varBindNode.initializer != null)
 		{
@@ -1319,7 +1319,7 @@ public abstract class As2WhateverConverter
 			}
 			else if (isGlobalCalled)
 			{
-				dest.writef("AsGlobal.%s(%s)", identifier, argsDest);
+				dest.writef(getCodeHelper().staticSelector("AsGlobal", String.format("%s(%s)", identifier, argsDest)));
 			}
 			else
 			{
