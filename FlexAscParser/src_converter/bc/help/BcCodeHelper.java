@@ -176,6 +176,22 @@ public abstract class BcCodeHelper
 		return buffer.toString();
 	}
 	
+	public String argsDef(List<BcFuncParam> params)
+	{
+		StringBuilder buffer = new StringBuilder();
+		
+		int paramIndex = 0;
+		for (BcVariableDeclaration bcParam : params)
+		{
+			buffer.append(identifier(bcParam.getIdentifier()));
+			if (++paramIndex < params.size())
+			{
+				buffer.append(", ");
+			}
+		}
+		return buffer.toString();
+	}
+	
 	public String paramDecl(BcTypeNode type, String identifier)
 	{
 		return varDecl(type, identifier);

@@ -19,18 +19,26 @@ public class As2CppConverter extends As2WhateverConverter
 {
 	private static final String defineClass = "AS_CLASS";
 	private static final String defineObject = "AS_OBJ";
+	private static final String defineConstructorHeader = "AS_CONSTRUCTOR_H";
+	private static final String defineConstructorImpl = "AS_CONSTRUCTOR_CPP";
+	private static final String defineConstructor = "AS_CONSTRUCTOR";
+	
+	private static final String defineFieldsHeader = "AS_FIELDS_H";
+	private static final String defineFieldsImpl = "AS_FIELDS_CPP";
+	private static final String defineFieldsInit = "AS_FIELDS";
+	
 	private static final String defineGcMarkHeader = "AS_GC_MARK_H";
 	private static final String defineGcMarkBegin = "AS_GC_MARK_BEGIN";
 	private static final String defineGcMark = "AS_GC_MARK";
 	private static final String defineGcMarkEnd = "AS_GC_MARK_END";
 	
-	private static final String classInitialiseName = "__internalInitialise";
-	private static final String classConstructName = "__internalConstruct";
+	private static final String defineStaticInitHeader = "AS_STATIC_INIT_H";
+	private static final String defineStaticInitBegin = "AS_STATIC_INIT_BEGIN";	
+	private static final String defineStaticInitEnd = "AS_STATIC_INIT_END";
 	
-	private static final String classInitName = "_as_init_";
-
-	private static final String interfaceBoxName = "__internalBox";
-	private static final String interfaceUnboxName = "__internalUnbox";
+	private static final String defineInterfaceBoxBegin = "AS_INTERFACE_BOX_BEGIN";	
+	private static final String defineInterfaceBoxCall = "AS_INTERFACE_CALL";	
+	private static final String defineInterfaceBoxEnd = "AS_INTERFACE_BOX_END";	
 	
 	private static final String classStaticInitializerName = "__internalStaticInitializer";
 	private static final String classStaticInitializedName = "__internalStaticInitialized";
@@ -67,10 +75,19 @@ public class As2CppConverter extends As2WhateverConverter
 		hdr.writeln("#define " + defGuardName);
 		hdr.writeln();
 		
-		hdr.writeln("#include \"AsBase.h\"");
+		hdr.writeln(getCodeHelper().include("AsBase.h"));
 		hdr.writeln();
 		
-		hdr.writelnf("#include \"%s.h\"", classExtends);
+		hdr.writelnf(getCodeHelper().include(classExtends + ".h"));
+		if (bcClass.hasInterfaces())
+		{
+			List<BcTypeNode> interfaces = bcClass.getInterfaces();
+			for (BcTypeNode bcInterface : interfaces)
+			{
+				hdr.writeln(getCodeHelper().include(type(bcInterface)) + ".h");
+			}
+		}
+		
 		hdr.writeln();
 		
 		impl.writelnf("#include \"%s.h\"", className);
@@ -91,30 +108,25 @@ public class As2CppConverter extends As2WhateverConverter
 		writeTypename(bcClass);
 		writeFields(bcClass);
 		writeFunctions(bcClass);
-		writeInit(bcClass);
-		writeClassInit(bcClass);
-		writeClassStaticInit(bcClass);
+		
+		hdr.writeln();
+		
+		writeFieldsInit(bcClass);
 		writeClassDefaultConstructor(bcClass);
+		writeConstructors(bcClass);
+		writeClassStaticInit(bcClass);
 		writeClassSweepMethod(bcClass);
 		
 		// generate interface boxers accessors if any
 		if (bcClass.hasInterfaces())
 		{
-			writeBoxingInterfacesAccessors(bcClass);
+			writeBoxingInterfaces(bcClass);
 		}
 		
 		hdr.decTab();
 		hdr.writeln("};");
-		
-		hdr.writeln();
-		impl.writeln();
 
-		// generate interface boxers if any
-		if (bcClass.hasInterfaces())
-		{
-			writeBoxingInterfaces(bcClass);
-		}
-		
+		hdr.writeln();
 		hdr.writeln("#endif // " + defGuardName);
 		
 		if (shouldWriteClassToFile(bcClass, hdrFile))
@@ -140,7 +152,7 @@ public class As2CppConverter extends As2WhateverConverter
 			else
 			{
 				String typeName = type(bcType);
-				dst.writelnf("%s(%s)", defineClass, typeName);				
+				dst.writelnf("%s(%s);", defineClass, typeName);				
 			}
 		}
 	}
@@ -265,34 +277,29 @@ public class As2CppConverter extends As2WhateverConverter
 		}
 	}
 	
-	private void writeInit(BcClassDefinitionNode bcClass)
+	private void writeConstructors(BcClassDefinitionNode bcClass)
 	{
 		List<BcFunctionDeclaration> constructors = bcClass.getConstructors();
 		if (constructors.isEmpty())
 		{
 			return;
 		}
-		
+
 		String className = getClassName(bcClass);
-		
-		writeVisiblity("protected", true);
-		
 		for (BcFunctionDeclaration bcFunc : constructors)
 		{
-			String initFuncName = classInitName + className;
-			
 			String params = getCodeHelper().paramsDef(bcFunc.getParams());
 			
-			impl.writeln();
+			hdr.writelnf("%s(%s,(%s));", defineConstructorHeader, className, params);
 			
-			hdr.writelnf("void %s(%s);", initFuncName, params);
-			impl.writelnf("void %s::%s(%s)", className, initFuncName, params);
+			impl.writeln();
+			impl.writelnf("%s(%s,(%s))", defineConstructorImpl, className, params);
 			
 			ListWriteDestination body = bcFunc.getBody();
 			List<String> bodyLines = body.getLines();
 			String constructorLine = bodyLines.get(1);
 			
-			String superConstructFuncName = classConstructName + getBaseClassName(bcClass);
+			String superConstructFuncName = String.format("%s(%s)", defineConstructor, getBaseClassName(bcClass));
 			if (constructorLine.contains(getCodeHelper().superCallMarker))
 			{
 				String newConstructorLine = constructorLine.replace(getCodeHelper().superCallMarker, superConstructFuncName);
@@ -300,37 +307,46 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 			else if (constructorLine.contains(getCodeHelper().thisCallMarker))
 			{
-				String thisConstructFuncName = classConstructName + getClassName(bcClass);
+				String thisConstructFuncName = String.format("%s(%s)", defineConstructor, getClassName(bcClass));
 				String newConstructorLine = constructorLine.replace(getCodeHelper().thisCallMarker, thisConstructFuncName);
 				bodyLines.set(1, newConstructorLine);
 			}
 			else
 			{
-				bodyLines.add(1, "\t" + superConstructFuncName + "();");
+				bodyLines.add(1, String.format("\t%s();", superConstructFuncName));
 			}
 			if (!bcFunc.isOverridenConstructor())
 			{
-				bodyLines.add(2, "\t" + classInitialiseName + className + "();");
+				bodyLines.add(2, String.format("\t%s(%s);", defineFieldsInit, className));
 			}
 			impl.writeln(body);
 		}
 	}
 	
-	private void writeClassInit(BcClassDefinitionNode bcClass)
+	private void writeFieldsInit(BcClassDefinitionNode bcClass)
 	{
-		String className = getClassName(bcClass);
+		List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
+
+		// count fields with initializer
+		int initializedCount = 0;
+		for (BcVariableDeclaration field : fields)
+		{
+			if (!field.isConst() && !field.hasInitializer())
+			{
+				initializedCount++;
+			}
+		}
+
+		if (initializedCount == 0) return; // we don't need that block			
 		
-		String initializeName = classInitialiseName + className;
+		String className = getClassName(bcClass);		
 		
-		writeVisiblity("public", false);
-		
-		hdr.writelnf("void %s();", initializeName);
+		hdr.writelnf("%s(%s);", defineFieldsHeader, className);
 		
 		impl.writeln();
-		impl.writelnf("void %s::%s()", className, initializeName);
+		impl.writelnf("%s(%s)", defineFieldsImpl, className);
 		writeBlockOpen(impl);
 		
-		List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
 		for (BcVariableDeclaration field : fields)
 		{
 			if (field.isConst())
@@ -352,28 +368,10 @@ public class As2CppConverter extends As2WhateverConverter
 		String classType = getClassName(bcClass);
 		String superClassType = getBaseClassName(bcClass);
 		
-		String initializerName = classStaticInitializerName + classType;
-		String initializedFlagName = classStaticInitializedName + classType;
-		
-		writeVisiblity("private", true);
-		hdr.writelnf("static StaticInit %s;", initializerName);
-		hdr.writelnf("static BOOL %s;", initializedFlagName);
-		
-		writeVisiblity("public", true);
-		hdr.writelnf("static void %s();", classStaticInitFuncName);
+		hdr.writelnf("%s(%s);", defineStaticInitHeader, classType);
 		
 		impl.writeln();
-		impl.writelnf("StaticInit %s::%s(&%s::%s);", classType, initializerName, classType, classStaticInitFuncName);
-		impl.writelnf("BOOL %s::%s = false;", classType, initializedFlagName);
-		impl.writeln();
-		impl.writelnf("void %s::%s()", classType, classStaticInitFuncName);
-		writeBlockOpen(impl);
-		impl.writelnf("if (!%s)", initializedFlagName);
-		writeBlockOpen(impl);
-		impl.writelnf("%s = true;", initializedFlagName);
-		
-		// super class initialization
-		impl.writelnf("%s::%s();", superClassType, classStaticInitFuncName);
+		impl.writelnf("%s(%s,%s)", defineStaticInitBegin, classType, superClassType);
 		
 		// initialize static members
 		List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
@@ -397,16 +395,12 @@ public class As2CppConverter extends As2WhateverConverter
 			impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), field.getInitializer());
 		}
 		
-		writeBlockClose(impl);		
-		writeBlockClose(impl);
+		impl.writelnf("%s", defineStaticInitEnd);		
 	}
 	
 	private void writeClassDefaultConstructor(BcClassDefinitionNode bcClass)
 	{
 		String className = getClassName(bcClass);
-		
-		writeVisiblity("protected", true);
-		hdr.writelnf("%s();", className);
 		
 		impl.writeln();
 		impl.writef("%s::%s()", className, className);
@@ -467,9 +461,7 @@ public class As2CppConverter extends As2WhateverConverter
 		{
 			String className = getClassName(bcClass);
 			String baseClassName = getBaseClassName(bcClass);
-			
-			writeVisiblity("public", true);
-			
+
 			hdr.writelnf("%s;", defineGcMarkHeader);
 			
 			impl.writeln();
@@ -494,44 +486,8 @@ public class As2CppConverter extends As2WhateverConverter
 		}
 	}
 	
-	private void writeBoxingInterfacesAccessors(BcClassDefinitionNode bcClass)
-	{
-		hdr.writeln();
-		writeVisiblity("public", true);
-		
-		List<BcTypeNode> interfaces = bcClass.getInterfaces();
-		for (BcTypeNode bcInterface : interfaces)
-		{
-			BcClassDefinitionNode interfaceClass = bcInterface.getClassNode();
-			assert interfaceClass != null : bcInterface.getName();
-			
-			writeBoxingInterfaceAccessor(bcClass, interfaceClass);
-		}
-	}
-	
-	private void writeBoxingInterfaceAccessor(BcClassDefinitionNode bcClass, BcClassDefinitionNode interfaceClass)
-	{
-		String className = getClassName(bcClass);
-		String interfaceName = getClassName(interfaceClass);
-		String interfaceRef = getCodeHelper().typeRef(interfaceName);
-		String boxName = interfaceBoxName + interfaceName; 
-		
-		hdr.writelnf("%s %s();", interfaceRef, boxName);
-		impl.writelnf("%s %s::%s()", interfaceRef, className, boxName);
-		writeBlockOpen(impl);
-		impl.writelnf("return %s(new %s(this));", interfaceRef, className + "_" + interfaceClass.getName());
-		writeBlockClose(impl);
-	}
-	
 	private void writeBoxingInterfaces(BcClassDefinitionNode bcClass)
 	{
-		hdr.writeln("/////////////////////////////////////////////////////////////////////////////");
-		hdr.writeln("// interface boxing");
-		hdr.writeln("/////////////////////////////////////////////////////////////////////////////");		
-		impl.writeln("/////////////////////////////////////////////////////////////////////////////");
-		impl.writeln("// interface boxing");
-		impl.writeln("/////////////////////////////////////////////////////////////////////////////");		
-		
 		List<BcTypeNode> interfaces = bcClass.getInterfaces();
 		for (BcTypeNode bcInterface : interfaces)
 		{
@@ -540,97 +496,37 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			writeBoxingInterface(bcClass, interfaceClass);
 		}
-		
-		hdr.writeln();
 	}
 	
 	private void writeBoxingInterface(BcClassDefinitionNode bcClass, BcClassDefinitionNode interfaceClass)
 	{
 		lastVisiblityModifier = null;
 		
-		impl.writelnf("// %s", interfaceClass.getName());
-		impl.writeln();
-		
 		String className = getClassName(bcClass);
-		String classRef = getCodeHelper().typeRef(className);
+		String baseName = getClassName(interfaceClass);
 		
-		String interfaceName = getClassName(bcClass) + "_" + interfaceClass.getName();
-		String interfaceBaseName = getClassName(interfaceClass);
-		
-		hdr.writelnf("#include \"%s.h\"", interfaceBaseName);
 		hdr.writeln();
-		
-		hdr.writelnf("class %s : public %s", interfaceName, interfaceBaseName);
-		hdr.writeln("{");
-		hdr.incTab();
-		
-		// delegate
-		writeVisiblity("private", true);
-		hdr.writelnf("%s m_base;", classRef);
-		
-		// constructor
 		writeVisiblity("public", true);
-		hdr.writelnf("%s(const %s& base);", interfaceName, classRef);
-		impl.writelnf("%s::%s(const %s& base) : m_base(base)", interfaceName, interfaceName, classRef);
-		writeBlockOpen(impl);
-		writeBlockClose(impl);
+		hdr.writelnf("%s(%s,%s)", defineInterfaceBoxBegin, className, baseName);
 		
-		// functions
-		writeVisiblity("public", true);
 		List<BcFunctionDeclaration> functions = interfaceClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
 			String type = bcFunc.hasReturnType() ? getCodeHelper().typeRef(bcFunc.getReturnType()) : "void";
 			String name = getCodeHelper().identifier(bcFunc.getName());
 			
-			hdr.writef("%s %s(", type, name);
+			String params = getCodeHelper().paramsDef(bcFunc.getParams());
+			String args = getCodeHelper().argsDef(bcFunc.getParams());
 			
-			impl.writeln();
-			impl.writef("%s %s::%s(", type, interfaceName, name);
-			
-			StringBuilder paramsBuffer = new StringBuilder();
-			StringBuilder argsBuffer = new StringBuilder();
-			List<BcFuncParam> params = bcFunc.getParams();
-			int paramIndex = 0;
-			for (BcFuncParam bcParam : params)
-			{
-				argsBuffer.append(getCodeHelper().paramDecl(bcParam.getType(), bcParam.getIdentifier()));
-				if (++paramIndex < params.size())
-				{
-					paramsBuffer.append(", ");
-					argsBuffer.append(", ");
-				}
-			}
-			
-			hdr.write(paramsBuffer);
-			impl.write(paramsBuffer);
-			hdr.writeln(");");
-			impl.writeln(")");
-			
-			writeBlockOpen(impl);
-			
+			hdr.writef("%s %s(%s) { ", type, name, params);			
 			if (bcFunc.hasReturnType())
 			{
-				impl.write("return ");
+				hdr.write("return ");
 			}
-			impl.writelnf("m_base->%s(%s);", bcFunc.getName(), argsBuffer);
-			
-			writeBlockClose(impl);
+			hdr.writelnf("%s(%s,(%s)); }", defineInterfaceBoxCall, name, args);
 		}
 		
-		// internalGc
-
-		impl.writeln();
-		
-		writeVisiblity("public", true);
-		
-		hdr.writelnf("%s;", defineGcMarkHeader);
-		impl.writelnf("%s(%s, %s)", defineGcMarkBegin, interfaceName, interfaceBaseName);
-		impl.writelnf("%s(m_base)", defineGcMark);
-		impl.writeln(defineGcMarkEnd);
-		
-		hdr.decTab();
-		hdr.writeln("};");
+		hdr.writelnf("%s(%s,%s)", defineInterfaceBoxEnd, className, baseName);
 	}
 	
 	private List<BcTypeNode> getHeaderTypedefs(BcClassDefinitionNode bcClass)

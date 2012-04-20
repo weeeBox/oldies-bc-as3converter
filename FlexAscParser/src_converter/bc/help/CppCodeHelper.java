@@ -74,4 +74,9 @@ public class CppCodeHelper extends BcCodeHelper
 		}
 		return String.format("const %s& %s", typeRef(type), identifier(identifier));
 	}
+	
+	public String include(String filename)
+	{
+		return String.format("#include \"%s\"", filename);
+	}
 }
