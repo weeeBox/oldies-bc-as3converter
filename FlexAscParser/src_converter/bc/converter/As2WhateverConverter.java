@@ -104,16 +104,16 @@ public abstract class As2WhateverConverter
 	
 	protected static final String internalFieldInitializer = "__internalInitializeFields";
 	
-	private static final String classObject = "Object";
-	private static final String classString = "String";
-	private static final String classVector = "Vector";
-	private static final String classArray = "Array";
-	private static final String classDictionary = "Dictionary";
-	private static final String classFunction = "Function";
-	private static final String classXML = "XML";
-	private static final String classXMLList = "XMLList";
-	private static final String classBoolean = "Boolean";
-	private static final String classNull = "null";
+	protected static final String classObject = "Object";
+	protected static final String classString = "String";
+	protected static final String classVector = "Vector";
+	protected static final String classArray = "Array";
+	protected static final String classDictionary = "Dictionary";
+	protected static final String classFunction = "Function";
+	protected static final String classXML = "XML";
+	protected static final String classXMLList = "XMLList";
+	protected static final String classBoolean = "Boolean";
+	protected static final String classNull = "null";
 	
 	private List<BcVariableDeclaration> declaredVars;
 	
@@ -2581,6 +2581,16 @@ public abstract class As2WhateverConverter
 		return type(classObject);
 	}
 	
+	protected BcTypeNode getBaseClassType(BcClassDefinitionNode bcClass)
+	{
+		if (bcClass.hasExtendsType())
+		{
+			return bcClass.getExtendsType();
+		}
+		
+		return BcTypeNode.create(classObject);
+	}
+	
 	public BcTypeNode evaluateType(Node node)
 	{
 		if (node instanceof MemberExpressionNode)
@@ -3077,7 +3087,7 @@ public abstract class As2WhateverConverter
 		return codeHelper.type(type);
 	}
 
-	private boolean classEquals(BcClassDefinitionNode classNode, String name)
+	protected boolean classEquals(BcClassDefinitionNode classNode, String name)
 	{
 		return typeEquals(classNode.getClassType(), name);
 	}
@@ -3094,7 +3104,7 @@ public abstract class As2WhateverConverter
 		return false;
 	}
 	
-	private boolean typeEquals(BcTypeNode type, String name)
+	protected boolean typeEquals(BcTypeNode type, String name)
 	{
 		if (name.equals(classVector) && type instanceof BcVectorTypeNode)
 		{

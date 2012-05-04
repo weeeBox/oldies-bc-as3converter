@@ -316,6 +316,10 @@ public class As2CppConverter extends As2WhateverConverter
 			hdr.writelnf("void %s(%s);", constructor, params);
 			
 			impl.writeln();
+			if (bcFunc.isOverridenConstructor())
+			{
+				impl.write("inline ");
+			}
 			impl.writelnf("void %s::%s(%s)", className, constructor, params);
 			
 			ListWriteDestination body = bcFunc.getBody();
@@ -324,25 +328,24 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			if (constructorLine.contains(BcCodeHelper.superCallMarker))
 			{
-				int start = constructorLine.indexOf(BcCodeHelper.superCallMarker) + BcCodeHelper.superCallMarker.length();
-				String argsStr = BcStringUtils.captureBraces(constructorLine, start);
-				
-				String constructorCall = String.format("%s(%s,%s)", defineCallConstructor, getBaseClassName(bcClass), argsStr);
-				String newConstructorLine = constructorLine.replace(BcCodeHelper.superCallMarker + argsStr, constructorCall);
-				bodyLines.set(1, newConstructorLine);				
+				if (!typeEquals(getBaseClassType(bcClass), classObject))
+				{
+					String constructorCall = classConstructor + getBaseClassName(bcClass);
+					String newConstructorLine = constructorLine.replace(BcCodeHelper.superCallMarker, constructorCall);
+					bodyLines.set(1, newConstructorLine);
+				}
 			}
 			else if (constructorLine.contains(BcCodeHelper.thisCallMarker))
 			{
-				int start = constructorLine.indexOf(BcCodeHelper.thisCallMarker) + BcCodeHelper.thisCallMarker.length();
-				String argsStr = BcStringUtils.captureBraces(constructorLine, start);
-				
-				String constructorCall = String.format("%s(%s,%s)", defineCallConstructor, getBaseClassName(bcClass), argsStr);
-				String newConstructorLine = constructorLine.replace(BcCodeHelper.thisCallMarker + argsStr, constructorCall);
+				String newConstructorLine = constructorLine.replace(BcCodeHelper.thisCallMarker, constructor);
 				bodyLines.set(1, newConstructorLine);
 			}
 			else
 			{
-				bodyLines.add(1, String.format("\t%s(%s,());", defineCallConstructor, getBaseClassName(bcClass)));
+				if (!typeEquals(getBaseClassType(bcClass), classObject))
+				{
+					bodyLines.add(1, String.format("\t%s();", classConstructor + getBaseClassName(bcClass)));
+				}
 			}
 			if (!bcFunc.isOverridenConstructor())
 			{
