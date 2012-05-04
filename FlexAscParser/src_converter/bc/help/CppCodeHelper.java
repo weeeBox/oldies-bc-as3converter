@@ -14,7 +14,7 @@ public class CppCodeHelper extends BcCodeHelper
 	@Override
 	public String construct(String type, Object initializer)
 	{
-		return String.format("%s(%s, (%s))", NEW, type(type), initializer);
+		return String.format("%s(%s,(%s))", NEW, type(type), initializer);
 	}
 
 	@Override

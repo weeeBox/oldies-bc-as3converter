@@ -30,6 +30,8 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String classCreate = "_as_create_";
 	private static final String classConstructor = "_as_construct_";
 	private static final String classInitFields = "_as_init_fields_";
+	private static final String classStaticInit = "_as_static_init_";
+	private static final String classStaticInitializedFlag = "_as_static_initialized_";
 	
 	private static final String defineFieldsHeader = "AS_FIELDS_H";
 	private static final String defineFieldsImpl = "AS_FIELDS_CPP";
@@ -382,7 +384,7 @@ public class As2CppConverter extends As2WhateverConverter
 				List<BcVariableDeclaration> initFields = getInitFields(bcClass);
 				if (initFields.size() > 0)
 				{
-					bodyLines.add(1, String.format("\t%s(%s);", defineFieldsInit, className));
+					bodyLines.add(1, String.format("\t%s();", classInitFields + className));
 				}
 			}
 			impl.writeln(body);
@@ -413,14 +415,32 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private void writeClassStaticInit(BcClassDefinitionNode bcClass)
 	{
-		String classType = getClassName(bcClass);
-		String superClassType = getBaseClassName(bcClass);
+		String className = getClassName(bcClass);
+		String superClassName = getBaseClassName(bcClass);
+		String staticInitFlagName = classStaticInitializedFlag + className;
+		String staticInitName = classStaticInit + className;
 		
-		hdr.writelnf("%s(%s);", defineStaticInitHeader, classType);
+		writeVisiblity("protected", false);
+		hdr.writelnf("static void %s();", staticInitName);
+		
+		writeVisiblity("private", false);
+		hdr.writelnf("static bool %s;", staticInitFlagName);
 		
 		impl.writeln();
-		impl.writelnf("%s(%s,%s)", defineStaticInitBegin, classType, superClassType);
+		impl.writelnf("bool %s::%s = false;", className, staticInitFlagName);
+		impl.writelnf("void %s::%s()", className, staticInitName);
+		impl.writeBlockOpen();
 		
+		impl.writelnf("if (!%s)", staticInitFlagName);
+		impl.writeBlockOpen();
+		
+		impl.writelnf("%s = true;", staticInitFlagName);
+		
+		if (!typeEquals(getBaseClassType(bcClass), classObject))
+		{
+			impl.writelnf("%s();", classStaticInit + superClassName);
+		}
+				
 		// initialize static members
 		List<BcVariableDeclaration> fields = bcClass.getFields(new BcVariableFilter()
 		{
@@ -430,12 +450,18 @@ public class As2CppConverter extends As2WhateverConverter
 				return field.isStatic() && !canBeInitializedInHeader(field);
 			}
 		});
-		for (BcVariableDeclaration field : fields)
+		
+		if (fields.size() > 0)
 		{
-			impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), field.getInitializer());
+			impl.writeln();
+			for (BcVariableDeclaration field : fields)
+			{
+				impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), field.getInitializer());
+			}
 		}
 		
-		impl.writelnf("%s", defineStaticInitEnd);		
+		impl.writeBlockClose();
+		impl.writeBlockClose();
 	}
 	
 	private void writeClassDefaultConstructor(BcClassDefinitionNode bcClass)
