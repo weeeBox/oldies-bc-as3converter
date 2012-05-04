@@ -23,9 +23,6 @@ public class As2CppConverter extends As2WhateverConverter
 {
 	private static final String defineClass = "AS_CLASS";
 	private static final String defineObject = "AS_OBJ";
-	private static final String defineConstructorHeader = "AS_CONSTRUCTOR_H";
-	private static final String defineConstructorImpl = "AS_CONSTRUCTOR_CPP";
-	private static final String defineCallConstructor = "AS_CONSTRUCTOR";
 	
 	private static final String classCreate = "_as_create_";
 	private static final String classConstructor = "_as_construct_";
@@ -35,18 +32,7 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String classGcMark = "_as_gc_mark";
 	private static final String classGcMarkNeeded = "_as_gc_mark_needed";
 	
-	private static final String defineFieldsHeader = "AS_FIELDS_H";
-	private static final String defineFieldsImpl = "AS_FIELDS_CPP";
-	private static final String defineFieldsInit = "AS_FIELDS";
-	
-	private static final String defineGcMarkHeader = "AS_GC_MARK_H";
-	private static final String defineGcMarkBegin = "AS_GC_MARK_BEGIN";
 	private static final String defineGcMark = "AS_GC_MARK";
-	private static final String defineGcMarkEnd = "AS_GC_MARK_END";
-	
-	private static final String defineStaticInitHeader = "AS_STATIC_INIT_H";
-	private static final String defineStaticInitBegin = "AS_STATIC_INIT_BEGIN";	
-	private static final String defineStaticInitEnd = "AS_STATIC_INIT_END";
 	
 	private static final String defineInterfaceBoxBegin = "AS_INTERFACE_BOX_BEGIN";	
 	private static final String defineInterfaceBoxCall = "AS_INTERFACE_CALL";	
