@@ -3,7 +3,9 @@ package bc.converter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
@@ -25,6 +27,9 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String defineConstructorHeader = "AS_CONSTRUCTOR_H";
 	private static final String defineConstructorImpl = "AS_CONSTRUCTOR_CPP";
 	private static final String defineCallConstructor = "AS_CONSTRUCTOR";
+	
+	private static final String classCreate = "_as_create_";
+	private static final String classConstructor = "_as_construct_";
 	
 	private static final String defineFieldsHeader = "AS_FIELDS_H";
 	private static final String defineFieldsImpl = "AS_FIELDS_CPP";
@@ -285,15 +290,33 @@ public class As2CppConverter extends As2WhateverConverter
 			return;
 		}
 
+		writeVisiblity("public", true);
+
 		String className = getClassName(bcClass);
 		for (BcFunctionDeclaration bcFunc : constructors)
 		{
 			String params = getCodeHelper().paramsDef(bcFunc.getParams());
+			String args = getCodeHelper().argsDef(bcFunc.getParams());
 			
-			hdr.writelnf("%s(%s,(%s));", defineConstructorHeader, className, params);
+			String typeRef = getCodeHelper().typeRef(className);
+			String type = getCodeHelper().type(className);
+			String create = classCreate + type;
+			String constructor = classConstructor + type;
+			
+			hdr.writelnf("static %s %s(%s);", typeRef, create, params);
 			
 			impl.writeln();
-			impl.writelnf("%s(%s,(%s))", defineConstructorImpl, className, params);
+			impl.writelnf("inline %s %s::%s(%s)", typeRef, className, create, params);
+			impl.writeBlockOpen();
+			impl.writelnf("%s __instance(new %s());", typeRef, type);
+			impl.writelnf("__instance->%s(%s);", constructor, args);
+			impl.writeln("return __instance;");
+			impl.writeBlockClose();
+			
+			hdr.writelnf("void %s(%s);", constructor, params);
+			
+			impl.writeln();
+			impl.writelnf("void %s::%s(%s)", className, constructor, params);
 			
 			ListWriteDestination body = bcFunc.getBody();
 			List<String> bodyLines = body.getLines();
@@ -302,19 +325,19 @@ public class As2CppConverter extends As2WhateverConverter
 			if (constructorLine.contains(BcCodeHelper.superCallMarker))
 			{
 				int start = constructorLine.indexOf(BcCodeHelper.superCallMarker) + BcCodeHelper.superCallMarker.length();
-				String args = BcStringUtils.captureBraces(constructorLine, start);
+				String argsStr = BcStringUtils.captureBraces(constructorLine, start);
 				
-				String constructorCall = String.format("%s(%s,%s)", defineCallConstructor, getBaseClassName(bcClass), args);
-				String newConstructorLine = constructorLine.replace(BcCodeHelper.superCallMarker + args, constructorCall);
+				String constructorCall = String.format("%s(%s,%s)", defineCallConstructor, getBaseClassName(bcClass), argsStr);
+				String newConstructorLine = constructorLine.replace(BcCodeHelper.superCallMarker + argsStr, constructorCall);
 				bodyLines.set(1, newConstructorLine);				
 			}
 			else if (constructorLine.contains(BcCodeHelper.thisCallMarker))
 			{
 				int start = constructorLine.indexOf(BcCodeHelper.thisCallMarker) + BcCodeHelper.thisCallMarker.length();
-				String args = BcStringUtils.captureBraces(constructorLine, start);
+				String argsStr = BcStringUtils.captureBraces(constructorLine, start);
 				
-				String constructorCall = String.format("%s(%s,%s)", defineCallConstructor, getBaseClassName(bcClass), args);
-				String newConstructorLine = constructorLine.replace(BcCodeHelper.thisCallMarker + args, constructorCall);
+				String constructorCall = String.format("%s(%s,%s)", defineCallConstructor, getBaseClassName(bcClass), argsStr);
+				String newConstructorLine = constructorLine.replace(BcCodeHelper.thisCallMarker + argsStr, constructorCall);
 				bodyLines.set(1, newConstructorLine);
 			}
 			else
@@ -517,15 +540,6 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		tryAddUniqueType(includes, bcClass.getClassType());
 		
-		if (bcClass.hasInterfaces())
-		{
-			List<BcTypeNode> interfaces = bcClass.getInterfaces();
-			for (BcTypeNode bcInterface : interfaces)
-			{
-				tryAddUniqueType(includes, bcInterface);
-			}
-		}
-		
 		List<BcVariableDeclaration> classVars = bcClass.getDeclaredVars();
 		for (BcVariableDeclaration bcVar : classVars)
 		{
@@ -561,11 +575,16 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				hdr.writeln();
 			}
-			hdr.decTab();
-			hdr.writeln(visiblity + ":");
-			hdr.incTab();
+			writeVisiblity(hdr, visiblity);
 			lastVisiblityModifier = visiblity;
 		}
+	}
+
+	protected void writeVisiblity(WriteDestination dest, String visiblity)
+	{
+		dest.decTab();
+		dest.writeln(visiblity + ":");
+		dest.incTab();
 	}
 	
 	private List<BcTypeNode> getImplementationTypedefs(BcClassDefinitionNode bcClass)
