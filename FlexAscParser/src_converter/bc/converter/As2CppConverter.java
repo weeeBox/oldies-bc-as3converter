@@ -22,6 +22,9 @@ import bc.lang.BcVectorTypeNode;
 public class As2CppConverter extends As2WhateverConverter
 {
 	private static final String defineClass = "AS_CLASS";
+	private static final String defineVector = "AS_VECTOR";
+	private static final String definePrimitiveVector = "AS_VECTOR_PRIMITIVE";
+	
 	private static final String defineObject = "AS_OBJ";
 	
 	private static final String classCreate = "_as_create_";
@@ -156,10 +159,15 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
 				String genericName = type(vectorType.getGeneric());
-				String typeName = type(bcType);
 				
-				dst.writelnf("typedef %s<%s> %s;", type(getCodeHelper().VECTOR_TYPE), getCodeHelper().typeRef(genericName), typeName);
-				dst.writelnf("typedef %s::Ref %s;", typeName, getCodeHelper().typeRef(typeName));
+				if (vectorType.getGeneric().isIntegral())
+				{
+					defineDest.writelnf("%s(%s);", definePrimitiveVector, genericName);
+				}
+				else
+				{
+					defineDest.writelnf("%s(%s);", defineVector, getCodeHelper().type(vectorType.getGeneric()));
+				}
 			}
 			else
 			{
@@ -241,7 +249,8 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				hdr.write("const ");
 			}
-			hdr.writef("%s %s", type, name);
+			
+			hdr.write(getCodeHelper().varDecl(bcField.getType(), name));
 			if (canBeInitializedInHeader(bcField))
 			{
 				hdr.writef(" = %s", bcField.getInitializer());
@@ -618,6 +627,12 @@ public class As2CppConverter extends As2WhateverConverter
 				BcTypeNode type = param.getType();
 				tryAddUniqueType(includes, type);
 			}
+		}
+		
+		List<BcTypeNode> additionalImports = bcClass.getAdditionalImports();
+		for (BcTypeNode bcType : additionalImports) 
+		{
+			tryAddUniqueType(includes, bcType);
 		}
 		
 		return includes;

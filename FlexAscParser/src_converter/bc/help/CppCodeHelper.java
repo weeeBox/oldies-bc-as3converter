@@ -6,6 +6,7 @@ import bc.lang.BcVectorTypeNode;
 public class CppCodeHelper extends BcCodeHelper
 {
 	private static final String PREFIX_REF = "_ref";
+	private static final String PREFIX_VECTOR = "_V_";
 	private static final String NEW = "AS_NEW";
 	private static final String STRING_LITERAL = "ASL";
 	
@@ -38,7 +39,8 @@ public class CppCodeHelper extends BcCodeHelper
 	@Override
 	protected String vectorType(BcVectorTypeNode vectorType)
 	{
-		return "foo";
+		BcTypeNode genericType = vectorType.getGeneric();
+		return String.format("%s%s", PREFIX_VECTOR, typeRef(genericType));
 	}
 
 	@Override
@@ -67,6 +69,11 @@ public class CppCodeHelper extends BcCodeHelper
 	
 	public String typeRef(BcTypeNode bcType)
 	{
+		if (bcType instanceof BcVectorTypeNode)
+		{
+			BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
+			return PREFIX_VECTOR + type(vectorType.getGeneric()) + PREFIX_REF;
+		}
 		return typeRef(bcType.getName());
 	}
 
