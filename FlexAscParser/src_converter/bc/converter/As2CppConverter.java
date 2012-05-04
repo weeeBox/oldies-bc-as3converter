@@ -32,6 +32,8 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String classInitFields = "_as_init_fields_";
 	private static final String classStaticInit = "_as_static_init_";
 	private static final String classStaticInitializedFlag = "_as_static_initialized_";
+	private static final String classGcMark = "_as_gc_mark";
+	private static final String classGcMarkNeeded = "_as_gc_mark_needed";
 	
 	private static final String defineFieldsHeader = "AS_FIELDS_H";
 	private static final String defineFieldsImpl = "AS_FIELDS_CPP";
@@ -537,17 +539,25 @@ public class As2CppConverter extends As2WhateverConverter
 			String className = getClassName(bcClass);
 			String baseClassName = getBaseClassName(bcClass);
 
-			hdr.writelnf("%s;", defineGcMarkHeader);
+			writeVisiblity("public", false);
+			hdr.writelnf("void %s();", classGcMark);
 			
 			impl.writeln();
-			impl.writelnf("%s(%s, %s)", defineGcMarkBegin, className, baseClassName);
+			impl.writelnf("void %s::%s()", className, classGcMark);
+			impl.writeBlockOpen();
 
+			impl.writelnf("if (%s())", classGcMarkNeeded);
+			impl.writeBlockOpen();
+			impl.writelnf("%s::%s();", baseClassName, classGcMark);
+			
 			for (BcVariableDeclaration field : fields)
 			{
 				String identifier = getCodeHelper().identifier(field.getIdentifier());
 				impl.writelnf("%s(%s)", defineGcMark, identifier);
 			}
-			impl.writeln(defineGcMarkEnd);
+			
+			impl.writeBlockClose();
+			impl.writeBlockClose();
 		}
 	}
 	
