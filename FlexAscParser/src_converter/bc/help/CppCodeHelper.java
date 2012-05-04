@@ -6,13 +6,15 @@ import bc.lang.BcVectorTypeNode;
 public class CppCodeHelper extends BcCodeHelper
 {
 	private static final String PREFIX_REF = "_ref";
+	private static final String NEW = "AS_NEW";
+	private static final String STRING_LITERAL = "ASL";
 	
-	private static final String IS_OPERATOR = "ASIS";
+	private static final String IS_OPERATOR = "AS_IS";
 	
 	@Override
 	public String construct(String type, Object initializer)
 	{
-		return "foo";
+		return String.format("%s(%s, (%s))", NEW, type(type), initializer);
 	}
 
 	@Override
@@ -26,6 +28,12 @@ public class CppCodeHelper extends BcCodeHelper
 	{
 		return "AS_NULL";
 	}
+	
+	@Override
+	public String literalString(String value)
+	{
+		return String.format("%s(\"%s\")", STRING_LITERAL, BcStringUtils.replaceEscapes(value));
+	}
 
 	@Override
 	protected String vectorType(BcVectorTypeNode vectorType)
@@ -37,6 +45,12 @@ public class CppCodeHelper extends BcCodeHelper
 	protected String constructVector(BcVectorTypeNode vectorType, Object initializer)
 	{
 		return "foo";
+	}
+	
+	@Override
+	public String cast(Object expr, BcTypeNode type)
+	{
+		return String.format("(%s)(%s)", typeRef(type), expr);
 	}
 
 	@Override

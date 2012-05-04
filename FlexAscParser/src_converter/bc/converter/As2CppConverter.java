@@ -40,10 +40,6 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String defineInterfaceBoxCall = "AS_INTERFACE_CALL";	
 	private static final String defineInterfaceBoxEnd = "AS_INTERFACE_BOX_END";	
 	
-	private static final String classStaticInitializerName = "__internalStaticInitializer";
-	private static final String classStaticInitializedName = "__internalStaticInitialized";
-	private static final String classStaticInitFuncName = "__internalStaticInit";
-	
 	private String lastVisiblityModifier;
 	private ListWriteDestination hdr;
 	private ListWriteDestination impl;
@@ -316,7 +312,7 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 			if (!bcFunc.isOverridenConstructor())
 			{
-				bodyLines.add(2, String.format("\t%s(%s);", defineFieldsInit, className));
+				bodyLines.add(1, String.format("\t%s(%s);", defineFieldsInit, className));
 			}
 			impl.writeln(body);
 		}
@@ -367,7 +363,7 @@ public class As2CppConverter extends As2WhateverConverter
 		String classType = getClassName(bcClass);
 		String superClassType = getBaseClassName(bcClass);
 		
-		hdr.writelnf("%s(%s);", defineStaticInitHeader, classType);
+		// hdr.writelnf("%s(%s);", defineStaticInitHeader, classType);
 		
 		impl.writeln();
 		impl.writelnf("%s(%s,%s)", defineStaticInitBegin, classType, superClassType);
