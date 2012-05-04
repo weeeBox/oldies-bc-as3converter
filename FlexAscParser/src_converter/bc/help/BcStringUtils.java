@@ -23,4 +23,66 @@ public class BcStringUtils
 		
 		return buffer.toString();
 	}
+	
+	public static String captureBraces(String line, int startIndex)
+	{
+		boolean insideString = false;
+		boolean insideChar = false;
+		char prevChar = 0;
+		char chr = 0;
+		
+		StringBuilder capture = new StringBuilder();
+		
+		int parentnessisCounter = 0;
+		boolean insideComment = false;
+		
+		for (int index = startIndex; index < line.length(); ++index)
+		{
+			prevChar = chr;
+			chr = line.charAt(index);
+			
+			capture.append(chr);
+			
+			if (chr == '"' && prevChar != '\\')
+			{
+				insideString = !insideString;
+			}
+			
+			if (insideString)
+			{
+				continue;
+			}
+			
+			if (chr =='\'' && prevChar != '\\')
+			{
+				insideChar = !insideChar;
+			}
+			
+			if (insideChar)
+			{
+				continue;
+			}
+			
+			if (chr == '(')
+			{
+				parentnessisCounter++;
+			}
+			else if (chr == ')')
+			{
+				assert parentnessisCounter > 0;
+				parentnessisCounter--;
+				
+				if (parentnessisCounter == 0)
+				{
+					break;
+				}
+			}
+		}
+
+		assert !insideString;
+		assert !insideComment;		
+		assert parentnessisCounter == 0;
+		
+		return capture.toString();
+	}
 }
