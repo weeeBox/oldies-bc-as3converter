@@ -216,17 +216,17 @@ public class As2CppConverter extends As2WhateverConverter
 				{
 					impl.writelnf("%s %s::%s(true);", type, className, name);
 				}
-				else
+				else if (!canBeInitializedInHeader(bcField))
 				{
 					impl.writelnf("%s %s::%s(0);", type, className, name);
 				}
 			}
-			if (bcField.isConst() && !canBeClass)
+			if (isConst && !canBeClass)
 			{
 				hdr.write("const ");
 			}
 			hdr.writef("%s %s", type, name);
-			if (isConst && bcField.isIntegralInitializerFlag())
+			if (canBeInitializedInHeader(bcField))
 			{
 				hdr.writef(" = %s", bcField.getInitializer());
 			}
@@ -370,7 +370,7 @@ public class As2CppConverter extends As2WhateverConverter
 			@Override
 			public boolean accept(BcVariableDeclaration field)
 			{
-				return field.isStatic() && field.hasInitializer() && !field.isIntegralInitializerFlag();
+				return field.isStatic() && !canBeInitializedInHeader(field);
 			}
 		});
 		for (BcVariableDeclaration field : fields)
@@ -617,5 +617,10 @@ public class As2CppConverter extends As2WhateverConverter
 				return !field.isStatic() && !field.isConst() && field.hasInitializer();
 			}
 		});
+	}
+	
+	private boolean canBeInitializedInHeader(BcVariableDeclaration field)
+	{
+		return field.isStatic() && field.isConst() && field.getType().isIntegral() && field.hasInitializer() && field.isIntegralInitializerFlag();
 	}
 }
