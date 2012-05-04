@@ -10,7 +10,6 @@ import java.util.Set;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeHelper;
-import bc.help.BcStringUtils;
 import bc.help.BcVariableFilter;
 import bc.help.CppCodeHelper;
 import bc.lang.BcClassDefinitionNode;
@@ -52,6 +51,14 @@ public class As2CppConverter extends As2WhateverConverter
 	private ListWriteDestination hdr;
 	private ListWriteDestination impl;
 
+	private static Set<String> definedTypes;
+	static
+	{
+		definedTypes = new HashSet<String>();
+		definedTypes.add("Object");
+		definedTypes.add("String");
+	}
+	
 	public As2CppConverter()
 	{
 		super(new CppCodeHelper());
@@ -149,6 +156,9 @@ public class As2CppConverter extends As2WhateverConverter
 
 	private void writeHeaderTypes(WriteDestination dst, List<BcTypeNode> types)
 	{
+		ListWriteDestination includeDest = new ListWriteDestination();
+		ListWriteDestination defineDest = new ListWriteDestination();
+		
 		for (BcTypeNode bcType : types)
 		{
 			if (bcType instanceof BcVectorTypeNode)
@@ -162,10 +172,20 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 			else
 			{
-				String typeName = type(bcType);
-				dst.writelnf("%s(%s);", defineClass, typeName);				
+				if (definedTypes.contains(bcType.getName()))
+				{
+					includeDest.writeln(getCodeHelper().include(type(bcType) + ".h"));
+				}
+				else
+				{
+					defineDest.writelnf("%s(%s);", defineClass, type(bcType));
+				}
 			}
 		}
+		
+		dst.writeln(includeDest);
+		dst.writeln();
+		dst.writeln(defineDest);
 	}
 	
 	private void writeImplementationTypes(WriteDestination dst, List<BcTypeNode> types)
