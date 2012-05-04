@@ -29,6 +29,7 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private static final String classCreate = "_as_create_";
 	private static final String classConstructor = "_as_construct_";
+	private static final String classInitFields = "_as_init_fields_";
 	
 	private static final String defineFieldsHeader = "AS_FIELDS_H";
 	private static final String defineFieldsImpl = "AS_FIELDS_CPP";
@@ -125,11 +126,11 @@ public class As2CppConverter extends As2WhateverConverter
 		{
 			hdr.writeln();
 			
-			writeFieldsInit(bcClass);
-			writeClassDefaultConstructor(bcClass);
 			writeConstructors(bcClass);
+			writeFieldsInit(bcClass);
 			writeClassStaticInit(bcClass);
 			writeClassSweepMethod(bcClass);
+			writeClassDefaultConstructor(bcClass);
 			
 			// generate interface boxers accessors if any
 			if (bcClass.hasInterfaces())
@@ -310,9 +311,9 @@ public class As2CppConverter extends As2WhateverConverter
 			return;
 		}
 
-		writeVisiblity("public", true);
-
 		String className = getClassName(bcClass);
+		
+		writeVisiblity("public", true);
 		for (BcFunctionDeclaration bcFunc : constructors)
 		{
 			String params = getCodeHelper().paramsDef(bcFunc.getParams());
@@ -332,6 +333,15 @@ public class As2CppConverter extends As2WhateverConverter
 			impl.writelnf("__instance->%s(%s);", constructor, args);
 			impl.writeln("return __instance;");
 			impl.writeBlockClose();
+		}
+		
+		writeVisiblity("protected", true);
+		for (BcFunctionDeclaration bcFunc : constructors)
+		{
+			String params = getCodeHelper().paramsDef(bcFunc.getParams());
+			
+			String type = getCodeHelper().type(className);
+			String constructor = classConstructor + type;
 			
 			hdr.writelnf("void %s(%s);", constructor, params);
 			
@@ -384,13 +394,14 @@ public class As2CppConverter extends As2WhateverConverter
 		List<BcVariableDeclaration> fields = getInitFields(bcClass);
 		if (fields.size() > 0)
 		{		
-			String className = getClassName(bcClass);		
+			String className = getClassName(bcClass);
+			String initFieldsName = classInitFields + className;
 			
-			hdr.writelnf("%s(%s);", defineFieldsHeader, className);
+			writeVisiblity("protected", false);
+			hdr.writelnf("void %s();", initFieldsName);
 			
 			impl.writeln();
-			impl.writelnf("%s(%s)", defineFieldsImpl, className);
-			
+			impl.writelnf("void %s::%s()", className, initFieldsName);
 			writeBlockOpen(impl);
 			for (BcVariableDeclaration field : fields)
 			{
