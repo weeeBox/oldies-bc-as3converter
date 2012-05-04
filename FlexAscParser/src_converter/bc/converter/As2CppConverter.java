@@ -153,12 +153,20 @@ public class As2CppConverter extends As2WhateverConverter
 		ListWriteDestination includeDest = new ListWriteDestination();
 		ListWriteDestination defineDest = new ListWriteDestination();
 		
+		boolean vectorIncluded = false; // hack
+		
 		for (BcTypeNode bcType : types)
 		{
 			if (bcType instanceof BcVectorTypeNode)
 			{
 				BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
 				String genericName = type(vectorType.getGeneric());
+				
+				if (!vectorIncluded)
+				{
+					vectorIncluded = true;
+					includeDest.writeln(getCodeHelper().include(type(bcType) + ".h"));
+				}
 				
 				if (vectorType.getGeneric().isIntegral())
 				{
@@ -629,12 +637,6 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 		}
 		
-		List<BcTypeNode> additionalImports = bcClass.getAdditionalImports();
-		for (BcTypeNode bcType : additionalImports) 
-		{
-			tryAddUniqueType(includes, bcType);
-		}
-		
 		return includes;
 	}
 	
@@ -671,6 +673,12 @@ public class As2CppConverter extends As2WhateverConverter
 				BcTypeNode type = var.getType();
 				tryAddUniqueType(includes, type);
 			}
+		}
+		
+		List<BcTypeNode> additionalImports = bcClass.getAdditionalImports();
+		for (BcTypeNode bcType : additionalImports) 
+		{
+			tryAddUniqueType(includes, bcType);
 		}
 		
 		return includes;

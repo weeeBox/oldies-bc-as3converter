@@ -39,8 +39,7 @@ public class CppCodeHelper extends BcCodeHelper
 	@Override
 	protected String vectorType(BcVectorTypeNode vectorType)
 	{
-		BcTypeNode genericType = vectorType.getGeneric();
-		return String.format("%s%s", PREFIX_VECTOR, typeRef(genericType));
+		return type(vectorType.getName());
 	}
 
 	@Override
