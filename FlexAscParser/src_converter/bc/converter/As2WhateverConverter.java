@@ -133,9 +133,6 @@ public abstract class As2WhateverConverter
 		bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
 		
 		this.codeHelper = codeHelper;
-		
-		BcFunctionDeclaration.thisCallMarker = codeHelper.thisCallMarker;
-		BcFunctionDeclaration.superCallMarker = codeHelper.superCallMarker;
 	}
 	
 	public void convert(File outputDir, String... filenames) throws IOException
@@ -1113,7 +1110,7 @@ public abstract class As2WhateverConverter
 		{
 			if (lastBcMemberType == null)
 			{
-				if (!(identifier.equals(codeHelper.thisCallMarker) && identifier.equals(codeHelper.thisCallMarker)))
+				if (!(identifier.equals(BcCodeHelper.thisCallMarker) && identifier.equals(BcCodeHelper.thisCallMarker)))
 				{
 					BcFunctionDeclaration bcFunc = findFunction(identifier);
 					if (bcFunc != null)
@@ -2151,7 +2148,7 @@ public abstract class As2WhateverConverter
 			popDest();
 		}
 		
-		dest.writelnf("%s(%s);", codeHelper.superCallMarker, argsDest);
+		dest.writelnf("%s(%s);", BcCodeHelper.superCallMarker, argsDest);
 	}
 	
 	private void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
@@ -2869,7 +2866,7 @@ public abstract class As2WhateverConverter
 						
 						return createBcType(classXMLList); // dirty hack
 					}
-					else if (codeHelper.identifier(identifier).equals(codeHelper.thisCallMarker))
+					else if (codeHelper.identifier(identifier).equals(BcCodeHelper.thisCallMarker))
 					{
 						return lastBcClass.getClassType(); // this referes to the current class
 					}

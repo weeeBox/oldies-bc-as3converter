@@ -7,6 +7,8 @@ import java.util.List;
 
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
+import bc.help.BcCodeHelper;
+import bc.help.BcVariableFilter;
 import bc.help.CppCodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
@@ -21,7 +23,7 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String defineObject = "AS_OBJ";
 	private static final String defineConstructorHeader = "AS_CONSTRUCTOR_H";
 	private static final String defineConstructorImpl = "AS_CONSTRUCTOR_CPP";
-	private static final String defineConstructor = "AS_CONSTRUCTOR";
+	private static final String defineCallConstructor = "AS_CONSTRUCTOR";
 	
 	private static final String defineFieldsHeader = "AS_FIELDS_H";
 	private static final String defineFieldsImpl = "AS_FIELDS_CPP";
@@ -94,7 +96,6 @@ public class As2CppConverter extends As2WhateverConverter
 		List<BcTypeNode> implTypes = getImplementationTypedefs(bcClass);
 		
 		writeHeaderTypes(hdr, headerTypes);
-		writeImplementationTypes(impl, headerTypes);
 		writeImplementationTypes(impl, implTypes);
 		
 		hdr.writeln();
@@ -107,10 +108,10 @@ public class As2CppConverter extends As2WhateverConverter
 		writeFields(bcClass);
 		writeFunctions(bcClass);
 		
-		hdr.writeln();
-		
 		if (!isInterface)
 		{
+			hdr.writeln();
+			
 			writeFieldsInit(bcClass);
 			writeClassDefaultConstructor(bcClass);
 			writeConstructors(bcClass);
@@ -189,7 +190,10 @@ public class As2CppConverter extends As2WhateverConverter
 	private void writeFields(BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> fields = bcClass.getFields();
-		impl.writeln();
+		if (fields.size() > 0)
+		{
+			impl.writeln();
+		}
 		
 		boolean forceVisiblity = true;
 		String className = getClassName(bcClass);
@@ -211,7 +215,7 @@ public class As2CppConverter extends As2WhateverConverter
 				{
 					impl.writelnf("%s %s::%s(true);", type, className, name);
 				}
-				else if (!bcField.hasInitializer())
+				else
 				{
 					impl.writelnf("%s %s::%s(0);", type, className, name);
 				}
@@ -294,16 +298,16 @@ public class As2CppConverter extends As2WhateverConverter
 			List<String> bodyLines = body.getLines();
 			String constructorLine = bodyLines.get(1);
 			
-			String superConstructFuncName = String.format("%s(%s)", defineConstructor, getBaseClassName(bcClass));
-			if (constructorLine.contains(getCodeHelper().superCallMarker))
+			String superConstructFuncName = String.format("%s(%s)", defineCallConstructor, getBaseClassName(bcClass));
+			if (constructorLine.contains(BcCodeHelper.superCallMarker))
 			{
-				String newConstructorLine = constructorLine.replace(getCodeHelper().superCallMarker, superConstructFuncName);
+				String newConstructorLine = constructorLine.replace(BcCodeHelper.superCallMarker, superConstructFuncName);
 				bodyLines.set(1, newConstructorLine);				
 			}
-			else if (constructorLine.contains(getCodeHelper().thisCallMarker))
+			else if (constructorLine.contains(BcCodeHelper.thisCallMarker))
 			{
-				String thisConstructFuncName = String.format("%s(%s)", defineConstructor, getClassName(bcClass));
-				String newConstructorLine = constructorLine.replace(getCodeHelper().thisCallMarker, thisConstructFuncName);
+				String thisConstructFuncName = String.format("%s(%s)", defineCallConstructor, getClassName(bcClass));
+				String newConstructorLine = constructorLine.replace(BcCodeHelper.thisCallMarker, thisConstructFuncName);
 				bodyLines.set(1, newConstructorLine);
 			}
 			else
@@ -312,7 +316,11 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 			if (!bcFunc.isOverridenConstructor())
 			{
-				bodyLines.add(1, String.format("\t%s(%s);", defineFieldsInit, className));
+				List<BcVariableDeclaration> initFields = getInitFields(bcClass);
+				if (initFields.size() > 0)
+				{
+					bodyLines.add(1, String.format("\t%s(%s);", defineFieldsInit, className));
+				}
 			}
 			impl.writeln(body);
 		}
@@ -320,42 +328,23 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private void writeFieldsInit(BcClassDefinitionNode bcClass)
 	{
-		List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
-
-		// count fields with initializer
-		int initializedCount = 0;
-		for (BcVariableDeclaration field : fields)
-		{
-			if (!field.isConst() && !field.hasInitializer())
-			{
-				initializedCount++;
-			}
-		}
-
-		if (initializedCount == 0) return; // we don't need that block			
-		
-		String className = getClassName(bcClass);		
-		
-		hdr.writelnf("%s(%s);", defineFieldsHeader, className);
-		
-		impl.writeln();
-		impl.writelnf("%s(%s)", defineFieldsImpl, className);
-		writeBlockOpen(impl);
-		
-		for (BcVariableDeclaration field : fields)
-		{
-			if (field.isConst())
-			{
-				continue;
-			}
+		List<BcVariableDeclaration> fields = getInitFields(bcClass);
+		if (fields.size() > 0)
+		{		
+			String className = getClassName(bcClass);		
 			
-			if (field.hasInitializer())
+			hdr.writelnf("%s(%s);", defineFieldsHeader, className);
+			
+			impl.writeln();
+			impl.writelnf("%s(%s)", defineFieldsImpl, className);
+			
+			writeBlockOpen(impl);
+			for (BcVariableDeclaration field : fields)
 			{
 				impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), field.getInitializer());
 			}
+			writeBlockClose(impl);
 		}
-		
-		writeBlockClose(impl);
 	}
 	
 	private void writeClassStaticInit(BcClassDefinitionNode bcClass)
@@ -363,30 +352,22 @@ public class As2CppConverter extends As2WhateverConverter
 		String classType = getClassName(bcClass);
 		String superClassType = getBaseClassName(bcClass);
 		
-		// hdr.writelnf("%s(%s);", defineStaticInitHeader, classType);
+		hdr.writelnf("%s(%s);", defineStaticInitHeader, classType);
 		
 		impl.writeln();
 		impl.writelnf("%s(%s,%s)", defineStaticInitBegin, classType, superClassType);
 		
 		// initialize static members
-		List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
+		List<BcVariableDeclaration> fields = bcClass.getFields(new BcVariableFilter()
+		{
+			@Override
+			public boolean accept(BcVariableDeclaration field)
+			{
+				return field.isStatic() && field.hasInitializer() && !field.isIntegralInitializerFlag();
+			}
+		});
 		for (BcVariableDeclaration field : fields)
 		{
-			if (field.isConst())
-			{
-				continue;
-			}
-			
-			if (!field.hasInitializer())
-			{
-				continue;
-			}
-			
-			if (field.isIntegralInitializerFlag())
-			{
-				continue;
-			}
-			
 			impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), field.getInitializer());
 		}
 		
@@ -395,38 +376,38 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private void writeClassDefaultConstructor(BcClassDefinitionNode bcClass)
 	{
-		String className = getClassName(bcClass);
-		
-		hdr.writeln();
-		writeVisiblity("protected", true);
-		hdr.writelnf("%s();", className);
-		
-		impl.writeln();
-		impl.writef("%s::%s()", className, className);
-		
-		List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
-		List<BcVariableDeclaration> initializedFields = new ArrayList<BcVariableDeclaration>();
-		for (BcVariableDeclaration field : fields)
+		List<BcVariableDeclaration> fields = bcClass.getFields(new BcVariableFilter()
 		{
-			if (field.isStatic())
+			@Override
+			public boolean accept(BcVariableDeclaration field)
 			{
-				continue;
+				if (field.isStatic())
+				{
+					return false;
+				}
+				
+				if (field.hasInitializer() && field.getType().isIntegral())
+				{
+					return false;
+				}
+				
+				return true;
 			}
-			
-			if (field.hasInitializer())
-			{
-				continue;
-			}
-			
-			initializedFields.add(field);
-		}
-
-		if (initializedFields.size() > 0)
+		});
+		
+		if (fields.size() > 0)
 		{
-			impl.writeln(" :");
+			String className = getClassName(bcClass);
+			
+			hdr.writeln();
+			writeVisiblity("protected", true);
+			hdr.writelnf("%s();", className);
+			
+			impl.writeln();
+			impl.writelnf("%s::%s() : ", className, className);
 			
 			int fieldIndex = 0;
-			for (BcVariableDeclaration field : initializedFields)
+			for (BcVariableDeclaration field : fields)
 			{
 				impl.write("  ");
 				
@@ -438,25 +419,30 @@ public class As2CppConverter extends As2WhateverConverter
 				{
 					impl.writef("%s(0)", getCodeHelper().identifier(field.getIdentifier()));
 				}
-				if (++fieldIndex < initializedFields.size())
+				if (++fieldIndex < fields.size())
 				{
 					impl.write(",");
 				}			
 				impl.writeln();
 			}
+			
+			writeBlockOpen(impl);
+			writeBlockClose(impl);
 		}
-		else
-		{
-			impl.writeln();
-		}
-		
-		writeBlockOpen(impl);
-		writeBlockClose(impl);
 	}
 	
 	private void writeClassSweepMethod(BcClassDefinitionNode bcClass)
 	{
-		if (bcClass.hasReferenceVars())
+		List<BcVariableDeclaration> fields = bcClass.getFields(new BcVariableFilter()
+		{
+			@Override
+			public boolean accept(BcVariableDeclaration field)
+			{
+				return !field.isStatic() && !field.getType().isIntegral();
+			}
+		});
+		
+		if (fields.size() > 0)
 		{
 			String className = getClassName(bcClass);
 			String baseClassName = getBaseClassName(bcClass);
@@ -465,19 +451,9 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			impl.writeln();
 			impl.writelnf("%s(%s, %s)", defineGcMarkBegin, className, baseClassName);
-			List<BcVariableDeclaration> fields = bcClass.getDeclaredVars();
+
 			for (BcVariableDeclaration field : fields)
 			{
-				if (field.isStatic())
-				{
-					continue;
-				}
-				
-				if (!canBeClass(field.getType()))
-				{
-					continue;
-				}
-				
 				String identifier = getCodeHelper().identifier(field.getIdentifier());
 				impl.writelnf("%s(%s)", defineGcMark, identifier);
 			}
@@ -622,5 +598,17 @@ public class As2CppConverter extends As2WhateverConverter
 	protected CppCodeHelper getCodeHelper()
 	{
 		return (CppCodeHelper) super.getCodeHelper();
+	}
+
+	private List<BcVariableDeclaration> getInitFields(BcClassDefinitionNode bcClass)
+	{
+		return bcClass.getFields(new BcVariableFilter()
+		{
+			@Override
+			public boolean accept(BcVariableDeclaration field)
+			{
+				return !field.isStatic() && !field.isConst() && field.hasInitializer();
+			}
+		});
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bc.help.BcCodeCpp;
+import bc.help.BcVariableFilter;
 
 import macromedia.asc.parser.Node;
 
@@ -156,18 +157,9 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public void add(BcVariableDeclaration var)
 	{
-		if (BcCodeCpp.canBeClass(var.getType()))
-		{
-			hasReferenceVars = true;
-		}
 		fields.add(var);
 	}
 	
-	public boolean hasReferenceVars()
-	{
-		return hasReferenceVars;
-	}
-
 	public void add(BcFunctionDeclaration func)
 	{
 		functions.add(func);
@@ -197,6 +189,17 @@ public class BcClassDefinitionNode extends BcDeclaration
 	public List<BcVariableDeclaration> getFields()
 	{
 		return fields;
+	}
+	
+	public List<BcVariableDeclaration> getFields(BcVariableFilter filter)
+	{
+		List<BcVariableDeclaration> result = new ArrayList<BcVariableDeclaration>();
+		for (BcVariableDeclaration field : fields)
+		{
+			if (filter.accept(field))
+				result.add(field);
+		}
+		return result;
 	}
 	
 	public List<BcFunctionDeclaration> getFunctions()

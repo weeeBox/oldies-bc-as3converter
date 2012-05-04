@@ -17,7 +17,7 @@ public abstract class BcCodeHelper
 	public static final String VECTOR_TYPE = "Vector";
 	
 	public static final String superCallMarker = "__$super$__";
-	public static final String thisCallMarker = "__$base$__";
+	public static final String thisCallMarker = "__$this$__";
 	
 	private static String[] keyWords = 
 	{

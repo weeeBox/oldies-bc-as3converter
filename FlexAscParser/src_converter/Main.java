@@ -209,9 +209,6 @@ public class Main
 	
 	public static void main(String[] args)
 	{
-		BcFunctionDeclaration.thisCallMarker = BcCodeCpp.thisCallMarker;
-		BcFunctionDeclaration.superCallMarker = BcCodeCpp.superCallMarker;		
-		
 		File outputDir = new File(args[0]);
 
 		String[] filenames = new String[args.length - 1];
@@ -2291,7 +2288,7 @@ public class Main
 	
 	private static void writeClassInternalGc(BcClassDefinitionNode bcClass)
 	{
-		if (bcClass.hasReferenceVars())
+		//if (bcClass.hasReferenceVars())
 		{
 			String className = getClassName(bcClass);
 			String baseClassName = getBaseClassName(bcClass);

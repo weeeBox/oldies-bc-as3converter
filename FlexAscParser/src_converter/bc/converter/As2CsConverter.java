@@ -8,6 +8,7 @@ import java.util.List;
 
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
+import bc.help.BcCodeHelper;
 import bc.help.CsCodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
@@ -324,9 +325,9 @@ public class As2CsConverter extends As2WhateverConverter
 	{
 		List<String> lines = body.getLines();
 		String firstLine = lines.get(1).trim();
-		if (firstLine.startsWith(getCodeHelper().thisCallMarker))
+		if (firstLine.startsWith(BcCodeHelper.thisCallMarker))
 		{
-			firstLine = firstLine.replace(getCodeHelper().thisCallMarker, "this");
+			firstLine = firstLine.replace(BcCodeHelper.thisCallMarker, "this");
 			if (firstLine.endsWith(";"))
 			{
 				firstLine = firstLine.substring(0, firstLine.length() - 1);
@@ -335,9 +336,9 @@ public class As2CsConverter extends As2WhateverConverter
 			src.writeln(" : " + firstLine);
 			lines.remove(1);
 		}
-		else if (firstLine.startsWith(getCodeHelper().superCallMarker))
+		else if (firstLine.startsWith(BcCodeHelper.superCallMarker))
 		{
-			firstLine = firstLine.replace(getCodeHelper().superCallMarker, "base");
+			firstLine = firstLine.replace(BcCodeHelper.superCallMarker, "base");
 			if (firstLine.endsWith(";"))
 			{
 				firstLine = firstLine.substring(0, firstLine.length() - 1);
