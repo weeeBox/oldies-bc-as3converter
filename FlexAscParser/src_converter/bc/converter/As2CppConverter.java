@@ -42,6 +42,7 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String classInterfaceBox = "_as_box_";
 	
 	private static final String defineGcMark = "AS_GC_MARK";
+	private static final String defineInterface = "AS_INTERFACE";
 	
 	
 	private String lastVisiblityModifier;
@@ -614,13 +615,9 @@ public class As2CppConverter extends As2WhateverConverter
 		hdr.writelnf("class %s : public %s", interfaceWrapperName, baseName);
 		hdr.writeBlockOpen();
 		
-		// target object
-		writeVisiblity("private", true);
-		hdr.writelnf("%s *%s;", className, targetFieldName);
-		
-		// constructor
+		// interface macro
 		writeVisiblity("public", true);
-		hdr.writelnf("%s(%s *target) : %s(target) {}", interfaceWrapperName, className, targetFieldName);
+		hdr.writelnf("%s(%s, %s)", defineInterface, className, baseName);
 		
 		// functions
 		writeVisiblity("public", true);
@@ -640,14 +637,6 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 			hdr.writelnf("%s->%s(%s); }", targetFieldName, name, args);
 		}
-		
-		// gc mark
-		writeVisiblity("public", true);
-		hdr.writef("void %s() { ", classGcMark);
-
-		hdr.writef("if (%s()) { ", classGcMarkNeeded);
-		hdr.writef("%s::%s(); ", baseName, classGcMark);
-		hdr.writelnf("%s(%s); }}", defineGcMark, targetFieldName);
 		
 		hdr.writeBlockClose(true);
 		
