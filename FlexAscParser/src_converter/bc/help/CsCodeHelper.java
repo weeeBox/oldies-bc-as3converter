@@ -38,9 +38,15 @@ public class CsCodeHelper extends BcCodeHelper
 	}
 	
 	@Override
-	protected String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
+	public String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
 	{
 		return NEW + " " + type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGeneric()) + ">" + "(" + args + ")";
+	}
+	
+	@Override
+	public String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args)
+	{
+		return constructVector(vectorType, args);
 	}
 	
 	@Override

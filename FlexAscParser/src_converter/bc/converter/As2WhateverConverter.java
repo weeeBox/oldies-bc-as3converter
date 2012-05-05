@@ -1255,15 +1255,7 @@ public abstract class As2WhateverConverter
 		
 		if (node.is_new)
 		{
-			if (type instanceof BcVectorTypeNode)
-			{
-				ObjectList<Node> args = node.args != null ? node.args.items : null;
-				writeNewLiteralVector((BcVectorTypeNode) type, args);
-			}
-			else
-			{
-				dest.write(codeHelper.construct(type, argsList));
-			}
+			dest.write(codeHelper.construct(type, argsList));
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
 		{
@@ -3061,11 +3053,11 @@ public abstract class As2WhateverConverter
 					}
 				}
 				
-				dest.write(codeHelper.construct(vectorType, argsList));
+				dest.write(codeHelper.constructLiteralVector(vectorType, argsList));
 			}
 			else
 			{
-				dest.write(codeHelper.construct(vectorType, getArgs(args)));
+				dest.write(codeHelper.constructLiteralVector(vectorType, getArgs(args)));
 			}
 		}
 	}

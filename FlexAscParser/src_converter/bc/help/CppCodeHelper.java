@@ -49,13 +49,22 @@ public class CppCodeHelper extends BcCodeHelper
 	}
 
 	@Override
-	protected String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
+	public String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
 	{	
 		BcTypeNode genericType = vectorType.getGeneric();
 		String defineName = genericType.isIntegral() ? NEW_PRIMITIVE_VECTOR : NEW_VECTOR;
 
+		return String.format("%s(%s,(%s))", defineName, type(genericType), args);
+	}
+	
+	@Override
+	public String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args)
+	{	
+		BcArgumentsList initializer = new BcArgumentsList(1);
+		initializer.add(args.size());
+		
 		ListWriteDestination dest = new ListWriteDestination();
-		dest.writef("%s(%s, %s)", defineName, type(genericType), args.size());
+		dest.write(constructVector(vectorType, initializer));
 		
 		for (Object arg : args)
 		{

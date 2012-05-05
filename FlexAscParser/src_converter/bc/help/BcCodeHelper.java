@@ -64,7 +64,8 @@ public abstract class BcCodeHelper
 	public abstract String literalNull();
 	
 	protected abstract String vectorType(BcVectorTypeNode vectorType);
-	protected abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);
+	public abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);
+	public abstract String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args);
 	
 	public String type(BcTypeNode bcType)
 	{
