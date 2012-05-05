@@ -39,12 +39,10 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String classGcMarkNeeded = "_as_gc_mark_needed";
 	
 	private static final String classInterfaceWrapper = "_as_interface_";
+	private static final String classInterfaceBox = "_as_box_";
 	
 	private static final String defineGcMark = "AS_GC_MARK";
 	
-	private static final String defineInterfaceBoxBegin = "AS_INTERFACE_BOX_BEGIN";	
-	private static final String defineInterfaceBoxCall = "AS_INTERFACE_CALL";	
-	private static final String defineInterfaceBoxEnd = "AS_INTERFACE_BOX_END";	
 	
 	private String lastVisiblityModifier;
 	private ListWriteDestination hdr;
@@ -354,7 +352,7 @@ public class As2CppConverter extends As2WhateverConverter
 			impl.writeln();
 			impl.writelnf("inline %s %s::%s(%s)", typeRef, className, create, params);
 			impl.writeBlockOpen();
-			impl.writelnf("%s __instance(new %s());", typeRef, type);
+			impl.writelnf("%s* __instance = new %s();", type, type);
 			impl.writelnf("__instance->%s(%s);", constructor, args);
 			impl.writeln("return __instance;");
 			impl.writeBlockClose();
@@ -603,6 +601,11 @@ public class As2CppConverter extends As2WhateverConverter
 		String targetFieldName = "m_target";
 		
 		hdr.writeln();
+		
+		hdr.decTab();
+		hdr.writelnf("/* %s interface wrapper */", baseName);
+		hdr.incTab();
+		
 		writeVisiblity("public", true);
 		
 		resetVisiblity();
@@ -647,6 +650,12 @@ public class As2CppConverter extends As2WhateverConverter
 		hdr.writelnf("%s(%s); }}", defineGcMark, targetFieldName);
 		
 		hdr.writeBlockClose(true);
+		
+		// box method	
+		String refName = getCodeHelper().typeRef(baseName);
+		String boxName = classInterfaceBox + baseName;
+		hdr.writeln();
+		hdr.writelnf("inline %s %s() { return new %s(this); }", refName, boxName, interfaceWrapperName);
 	}
 	
 	private List<BcTypeNode> getHeaderTypedefs(BcClassDefinitionNode bcClass)
