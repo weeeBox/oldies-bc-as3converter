@@ -1762,7 +1762,7 @@ public abstract class As2WhateverConverter
 			assert loopVar != null : loopVarName;
 			
 			BcTypeNode loopVarType = loopVar.getType();
-			String loopVarString = String.format("%s %s", type(loopVarType), loopVarName);
+			String loopVarString = codeHelper.varDecl(loopVarType, loopVarName);
 			String loopVarStringGenerated = loopVarString + " = " + typeDefault(loopVar.getType()) + ";";
 			
 			ListWriteDestination listDest = (ListWriteDestination) dest;
