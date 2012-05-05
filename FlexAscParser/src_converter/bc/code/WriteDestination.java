@@ -97,8 +97,16 @@ public abstract class WriteDestination
 	
 	public void writeBlockClose()
 	{
+		writeBlockClose(false);
+	}
+	
+	public void writeBlockClose(boolean needSeparator)
+	{
 		decTab();
-		writeln("}");
+		if (needSeparator)
+			writeln("};");
+		else
+			writeln("}");
 	}
 	
 	public void incTab()

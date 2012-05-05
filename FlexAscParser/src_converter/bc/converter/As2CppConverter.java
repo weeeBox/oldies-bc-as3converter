@@ -38,6 +38,8 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String classGcMark = "_as_gc_mark";
 	private static final String classGcMarkNeeded = "_as_gc_mark_needed";
 	
+	private static final String classInterfaceWrapper = "_as_interface_";
+	
 	private static final String defineGcMark = "AS_GC_MARK";
 	
 	private static final String defineInterfaceBoxBegin = "AS_INTERFACE_BOX_BEGIN";	
@@ -138,7 +140,7 @@ public class As2CppConverter extends As2WhateverConverter
 			writeConstructors(bcClass);
 			writeFieldsInit(bcClass);
 			writeClassStaticInit(bcClass);
-			writeClassSweepMethod(bcClass);
+			writeClassGcMarkMethod(bcClass);
 			writeClassDefaultConstructor(bcClass);
 			
 			// generate interface boxers accessors if any
@@ -542,7 +544,7 @@ public class As2CppConverter extends As2WhateverConverter
 		}
 	}
 	
-	private void writeClassSweepMethod(BcClassDefinitionNode bcClass)
+	private void writeClassGcMarkMethod(BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> fields = bcClass.getFields(new BcVariableFilter()
 		{
@@ -598,11 +600,27 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		String className = getClassName(bcClass);
 		String baseName = getClassName(interfaceClass);
+		String targetFieldName = "m_target";
 		
 		hdr.writeln();
 		writeVisiblity("public", true);
-		hdr.writelnf("%s(%s,%s)", defineInterfaceBoxBegin, className, baseName);
 		
+		resetVisiblity();
+		
+		String interfaceWrapperName = classInterfaceWrapper + baseName;
+		hdr.writelnf("class %s : public %s", interfaceWrapperName, baseName);
+		hdr.writeBlockOpen();
+		
+		// target object
+		writeVisiblity("private", true);
+		hdr.writelnf("%s *%s;", className, targetFieldName);
+		
+		// constructor
+		writeVisiblity("public", true);
+		hdr.writelnf("%s(%s *target) : %s(target) {}", interfaceWrapperName, className, targetFieldName);
+		
+		// functions
+		writeVisiblity("public", true);
 		List<BcFunctionDeclaration> functions = interfaceClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
@@ -617,10 +635,18 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				hdr.write("return ");
 			}
-			hdr.writelnf("%s(%s,(%s)); }", defineInterfaceBoxCall, name, args);
+			hdr.writelnf("%s->%s(%s); }", targetFieldName, name, args);
 		}
 		
-		hdr.writelnf("%s(%s,%s)", defineInterfaceBoxEnd, className, baseName);
+		// gc mark
+		writeVisiblity("public", true);
+		hdr.writef("void %s() { ", classGcMark);
+
+		hdr.writef("if (%s()) { ", classGcMarkNeeded);
+		hdr.writef("%s::%s(); ", baseName, classGcMark);
+		hdr.writelnf("%s(%s); }}", defineGcMark, targetFieldName);
+		
+		hdr.writeBlockClose(true);
 	}
 	
 	private List<BcTypeNode> getHeaderTypedefs(BcClassDefinitionNode bcClass)
@@ -654,6 +680,11 @@ public class As2CppConverter extends As2WhateverConverter
 		}
 		
 		return includes;
+	}
+	
+	private void resetVisiblity()
+	{
+		lastVisiblityModifier = null;
 	}
 	
 	private void writeVisiblity(String visiblity, boolean force)
