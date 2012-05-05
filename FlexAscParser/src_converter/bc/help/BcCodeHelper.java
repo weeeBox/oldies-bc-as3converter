@@ -1,11 +1,13 @@
 package bc.help;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import macromedia.asc.parser.IdentifierNode;
 import bc.code.ListWriteDestination;
+import bc.lang.BcArgumentsList;
 import bc.lang.BcFuncParam;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
@@ -18,6 +20,8 @@ public abstract class BcCodeHelper
 	
 	public static final String superCallMarker = "__$super$__";
 	public static final String thisCallMarker = "__$this$__";
+	
+	private static final BcArgumentsList emptyInitializer = new BcArgumentsList();
 	
 	private static String[] keyWords = 
 	{
@@ -60,7 +64,7 @@ public abstract class BcCodeHelper
 	public abstract String literalNull();
 	
 	protected abstract String vectorType(BcVectorTypeNode vectorType);
-	protected abstract String constructVector(BcVectorTypeNode vectorType, Object initializer);
+	protected abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);
 	
 	public String type(BcTypeNode bcType)
 	{
@@ -135,16 +139,16 @@ public abstract class BcCodeHelper
 	
 	public String construct(BcTypeNode type)
 	{
-		return construct(type, "");
+		return construct(type, emptyInitializer);
 	}
 	
-	public String construct(BcTypeNode type, Object initializer)
+	public String construct(BcTypeNode type, BcArgumentsList argsList)
 	{
 		if (type instanceof BcVectorTypeNode)
 		{
-			return constructVector((BcVectorTypeNode)type, initializer);
+			return constructVector((BcVectorTypeNode)type, argsList);
 		}
-		return construct(type.getName(), initializer);
+		return construct(type.getName(), argsList);
 	}
 	
 	

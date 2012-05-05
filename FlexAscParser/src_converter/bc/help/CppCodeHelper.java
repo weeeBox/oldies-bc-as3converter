@@ -1,5 +1,7 @@
 package bc.help;
 
+import bc.code.ListWriteDestination;
+import bc.lang.BcArgumentsList;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
 
@@ -8,7 +10,11 @@ public class CppCodeHelper extends BcCodeHelper
 	private static final String PREFIX_REF = "_ref";
 	private static final String PREFIX_VECTOR = "_V_";
 	private static final String NEW = "AS_NEW";
+	private static final String NEW_VECTOR = "AS_NEW_VECTOR";
+	private static final String NEW_PRIMITIVE_VECTOR = "AS_NEW_PRIMITIVES_VECTOR";
+	
 	private static final String STRING_LITERAL = "ASL";
+	
 	
 	private static final String IS_OPERATOR = "AS_IS";
 	
@@ -43,9 +49,20 @@ public class CppCodeHelper extends BcCodeHelper
 	}
 
 	@Override
-	protected String constructVector(BcVectorTypeNode vectorType, Object initializer)
-	{
-		return "foo";
+	protected String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
+	{	
+		BcTypeNode genericType = vectorType.getGeneric();
+		String defineName = genericType.isIntegral() ? NEW_PRIMITIVE_VECTOR : NEW_VECTOR;
+
+		ListWriteDestination dest = new ListWriteDestination();
+		dest.writef("%s(%s, %s)", defineName, type(genericType), args.size());
+		
+		for (Object arg : args)
+		{
+			dest.writef(" << %s", arg);
+		}
+		
+		return dest.toString();
 	}
 	
 	@Override

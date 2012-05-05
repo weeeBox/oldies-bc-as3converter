@@ -1,5 +1,7 @@
 package bc.help;
 
+import java.util.List;
+
 public class BcStringUtils
 {
 	public static String replaceEscapes(String str)
@@ -16,6 +18,23 @@ public class BcStringUtils
 		{
 			buffer.append(val);
 			if (++valIndex < values.length)
+			{
+				buffer.append(", ");
+			}
+		}
+		
+		return buffer.toString();
+	}
+	
+	public static <T> String commaSeparated(List<T> values)
+	{
+		StringBuilder buffer = new StringBuilder();
+		
+		int valIndex = 0;
+		for (Object val : values)
+		{
+			buffer.append(val);
+			if (++valIndex < values.size())
 			{
 				buffer.append(", ");
 			}

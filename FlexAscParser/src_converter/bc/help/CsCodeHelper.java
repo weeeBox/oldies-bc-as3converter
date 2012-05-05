@@ -1,5 +1,8 @@
 package bc.help;
 
+import java.util.List;
+
+import bc.lang.BcArgumentsList;
 import bc.lang.BcVectorTypeNode;
 
 public class CsCodeHelper extends BcCodeHelper
@@ -35,9 +38,9 @@ public class CsCodeHelper extends BcCodeHelper
 	}
 	
 	@Override
-	protected String constructVector(BcVectorTypeNode vectorType, Object initializer)
+	protected String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
 	{
-		return NEW + " " + type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGeneric()) + ">" + "(" + initializer + ")";
+		return NEW + " " + type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGeneric()) + ">" + "(" + args + ")";
 	}
 	
 	@Override

@@ -81,6 +81,7 @@ import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeHelper;
 import bc.help.BcNodeHelper;
+import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
@@ -1198,13 +1199,13 @@ public abstract class As2WhateverConverter
 			assert false : node;
 		}
 		
-		ListWriteDestination argsDest = new ListWriteDestination();
+		BcArgumentsList argsList;
 		if (node.args != null)
 		{
-			pushDest(argsDest);
-			
 			if (calledFunction != null && !isCast)
 			{
+				argsList = new BcArgumentsList(node.args.size());
+				
 				List<BcFuncParam> params = calledFunction.getParams();
 				ObjectList<Node> args = node.args.items;
 				
@@ -1221,39 +1222,35 @@ public abstract class As2WhateverConverter
 					BcTypeNode argType = evaluateType(arg);
 					assert argType != null;
 					
-					BcTypeNode paramType = params.get(argIndex).getType();
+					BcTypeNode paramType = params.get(argIndex++).getType();
 					
 					if (needExplicitCast(argType, paramType))
 					{
-						dest.write(cast(argDest, argType, paramType));
+						argsList.add(cast(argDest, argType, paramType));
 					}
 					else
 					{
-						dest.write(argDest);
-					}
-					
-					if (++argIndex < args.size())
-					{
-						dest.write(", ");
+						argsList.add(argDest);
 					}
 				}
 				
-				if (calledFunction.getName().equals("hasOwnProperty") && args.size() == 1)
+				if (calledFunction.getName().equals("hasOwnProperty") && argsList.size() == 1)
 				{
-					String argsString = argsDest.toString();
-					if (argsString.startsWith("\"@"))
+					String argString = argsList.get(0).toString();
+					if (argString.startsWith("\"@"))
 					{
-						argsDest = new ListWriteDestination();
-						argsDest.write(codeHelper.literalString(argsString.substring(2, argsString.length() - 1)));
+						argsList.set(0, codeHelper.literalString(argString.substring(2, argString.length() - 1)));
 					}
 				}
 			}
 			else
 			{
-				process(node.args);
+				argsList = getArgs(node.args);
 			}
-			
-			popDest();
+		}
+		else
+		{
+			argsList = new BcArgumentsList();
 		}
 		
 		if (node.is_new)
@@ -1265,7 +1262,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				dest.write(codeHelper.construct(type, argsDest));
+				dest.write(codeHelper.construct(type, argsList));
 			}
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
@@ -1301,26 +1298,27 @@ public abstract class As2WhateverConverter
 				assert node.args.size() == 1;
 				
 				Node argNode = node.args.items.get(0);
+				String argStr = argsList.get(0).toString();
 				
 				BcTypeNode argType = evaluateType(argNode);
 				assert argType != null;
 				
 				if (typeEquals(type, classString))
 				{
-					dest.writef("(%s).ToString()", argsDest);
+					dest.writef("(%s).ToString()", argStr);
 				}
 				else
 				{				
-					dest.writef("(%s)", cast(argsDest, argType, type));
+					dest.writef("(%s)", cast(argStr, argType, type));
 				}
 			}
 			else if (isGlobalCalled)
 			{
-				dest.writef(getCodeHelper().staticSelector("AsGlobal", String.format("%s(%s)", identifier, argsDest)));
+				dest.writef(getCodeHelper().staticSelector(type("Global"), String.format("%s(%s)", identifier, argsList)));
 			}
 			else
 			{
-				dest.writef("%s(%s)", identifier, argsDest);
+				dest.writef("%s(%s)", identifier, argsList);
 			}
 		}
 	}
@@ -2987,6 +2985,29 @@ public abstract class As2WhateverConverter
 		return bcType;
 	}
 	
+	private BcArgumentsList getArgs(ArgumentListNode args)
+	{
+		return args.items == null ? new BcArgumentsList() : getArgs(args.items);
+	}
+	
+	private BcArgumentsList getArgs(ObjectList<Node> items)
+	{
+		BcArgumentsList argsList = new BcArgumentsList(items.size());
+		
+		for (Node arg : items)
+		{
+			ListWriteDestination argDest = new ListWriteDestination();
+			pushDest(argDest);
+			
+			process(arg);
+			
+			popDest();
+			argsList.add(argDest);
+		}
+		
+		return argsList;
+	}
+	
 	private void writeNewLiteralArray(ObjectList<Node> args)
 	{
 		WriteDestination elementDest = new ListWriteDestination();
@@ -3020,9 +3041,8 @@ public abstract class As2WhateverConverter
 				BcTypeNode genericType = vectorType.getGeneric();
 				
 				ArgumentListNode elementlist = arrayNode.elementlist;
+				BcArgumentsList argsList = new BcArgumentsList(elementlist.size());
 				
-				WriteDestination initDest = new ListWriteDestination();
-				pushDest(initDest);
 				for (Node elementNode : elementlist.items)
 				{
 					ListWriteDestination argDest = new ListWriteDestination();
@@ -3033,36 +3053,19 @@ public abstract class As2WhateverConverter
 					BcTypeNode argType = evaluateType(elementNode);
 					if (argType != genericType)
 					{
-						dest.writef("%s(%s)", type(genericType), argDest);
+						argsList.add(getCodeHelper().cast(argDest, genericType));
 					}
 					else
 					{
-						dest.write(argDest);
+						argsList.add(argDest);
 					}
 				}
-				popDest();
 				
-				dest.write(codeHelper.construct(vectorType, initDest));
+				dest.write(codeHelper.construct(vectorType, argsList));
 			}
 			else
 			{
-				ListWriteDestination argsDest = new ListWriteDestination();
-				pushDest(argsDest);
-				
-				int itemIndex = 0;
-				for (Node arg : args)
-				{
-					process(arg);
-					
-					if (++itemIndex < args.size())
-					{
-						dest.write(", ");
-					}
-				}
-				
-				popDest();
-				
-				dest.write(codeHelper.construct(vectorType, argsDest));
+				dest.write(codeHelper.construct(vectorType, getArgs(args)));
 			}
 		}
 	}
