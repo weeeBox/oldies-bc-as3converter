@@ -1,7 +1,5 @@
 package bc.help;
 
-import java.util.List;
-
 import bc.lang.BcArgumentsList;
 import bc.lang.BcVectorTypeNode;
 

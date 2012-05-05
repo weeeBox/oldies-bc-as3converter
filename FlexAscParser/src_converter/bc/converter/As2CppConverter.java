@@ -24,6 +24,9 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String defineClass = "AS_CLASS";
 	private static final String defineVector = "AS_VECTOR";
 	private static final String definePrimitiveVector = "AS_VECTOR_PRIMITIVE";
+	private static final String defineForeach = "AS_FOREACH";
+	private static final String definePrimitiveForeach = "AS_PRIMITIVE_FOREACH";
+	private static final String defineForeachEnd = "AS_FOREACH_END";
 	
 	private static final String defineObject = "AS_OBJ";
 	
@@ -56,6 +59,19 @@ public class As2CppConverter extends As2WhateverConverter
 	public As2CppConverter()
 	{
 		super(new CppCodeHelper());
+	}
+	
+	@Override
+	protected void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNode loopVarType, Object collection, BcTypeNode collectionType, Object body)
+	{
+		assert collectionType instanceof BcVectorTypeNode;
+		BcVectorTypeNode vectorType = (BcVectorTypeNode) collectionType;
+		
+		String defineName = vectorType.getGeneric().isIntegral() ? definePrimitiveForeach : defineForeach;
+		
+		dest.writelnf("%s(%s, %s, %s)", defineName, type(loopVarType), loopVarName, collection);
+		dest.writeln(body);
+		dest.writeln(defineForeachEnd);
 	}
 	
 	@Override

@@ -128,6 +128,8 @@ public abstract class As2WhateverConverter
 	protected boolean needFieldsInitializer;
 	private BcCodeHelper codeHelper;
 
+	protected abstract void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNode loopVarType, Object collection, BcTypeNode collectionType, Object body);
+	
 	public As2WhateverConverter(BcCodeHelper codeHelper)
 	{
 		bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
@@ -1759,7 +1761,8 @@ public abstract class As2WhateverConverter
 			BcVariableDeclaration loopVar = findDeclaredVar(loopVarName);
 			assert loopVar != null : loopVarName;
 			
-			String loopVarString = String.format("%s %s", type(loopVar.getType()), loopVarName);
+			BcTypeNode loopVarType = loopVar.getType();
+			String loopVarString = String.format("%s %s", type(loopVarType), loopVarName);
 			String loopVarStringGenerated = loopVarString + " = " + typeDefault(loopVar.getType()) + ";";
 			
 			ListWriteDestination listDest = (ListWriteDestination) dest;
@@ -1769,12 +1772,10 @@ public abstract class As2WhateverConverter
 			}
 			
 			// get loop body
-			final String collectionTemp = "__" + loopVarName + "s_";
-			dest.writelnf("%s %s = %s;", type(collectionType), collectionTemp, collection);
-			dest.writelnf("if (%s != null)", collectionTemp);
-			dest.writeBlockOpen();
-			dest.writelnf("foreach (%s in %s)", loopVarString, collectionTemp);
 			Node bodyNode = statements.items.get(1);
+			ListWriteDestination bodyDest = new ListWriteDestination();
+			pushDest(bodyDest);
+			
 			if (bodyNode != null)
 			{
 				assert bodyNode instanceof StatementListNode : bodyNode.getClass();
@@ -1794,7 +1795,9 @@ public abstract class As2WhateverConverter
 			{
 				writeEmptyBlock();
 			}
-			dest.writeBlockClose();
+			popDest();
+			
+			writeForeach(dest, loopVarName, loopVarType, collection, collectionType, bodyDest);
 		}
 		else
 		{

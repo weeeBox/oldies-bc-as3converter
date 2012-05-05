@@ -28,6 +28,18 @@ public class As2CsConverter extends As2WhateverConverter
 		super(new CsCodeHelper());
 	}
 	
+	@Override
+	protected void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNode loopVarType, Object collection, BcTypeNode collectionType, Object body)
+	{
+		final String collectionTemp = "__" + loopVarName + "s_";
+		dest.writelnf("%s %s = %s;", type(collectionType), collectionTemp, collection);
+		dest.writelnf("if (%s != %s)", collectionTemp, getCodeHelper().literalNull());
+		dest.writeBlockOpen();
+		dest.writelnf("foreach (%s %s in %s)", type(loopVarType), loopVarName, collectionTemp);		
+		dest.writeln(body);		
+		dest.writeBlockClose();
+	}
+	
 	private void writeImports(WriteDestination dest, List<String> imports)	
 	{
 		List<String> sortedImports = new ArrayList<String>(imports);
