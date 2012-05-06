@@ -43,6 +43,7 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private static final String defineGcMark = "AS_GC_MARK";
 	private static final String defineInterface = "AS_INTERFACE";
+	private static final String defineInterfaceRef = "AS_INTERFACE_REF";
 	
 	
 	private String lastVisiblityModifier;
@@ -124,6 +125,12 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		hdr.writeln();
 		
+		if (bcClass.isInterface())
+		{
+			hdr.writelnf("class %s;", getCodeHelper().typeRef(className));
+			hdr.writeln();
+		}
+		
 		hdr.writelnf("class %s : public %s", className, classExtends);
 		hdr.writeln("{");
 		hdr.incTab();
@@ -152,6 +159,12 @@ public class As2CppConverter extends As2WhateverConverter
 		hdr.decTab();
 		hdr.writeln("};");
 
+		if (bcClass.isInterface())
+		{
+			hdr.writeln();
+			hdr.writelnf("%s(%s);", defineInterfaceRef, className);
+		}
+		
 		hdr.writeln();
 		hdr.writeln("#endif // " + defGuardName);
 		
@@ -343,15 +356,14 @@ public class As2CppConverter extends As2WhateverConverter
 			String params = getCodeHelper().paramsDef(bcFunc.getParams());
 			String args = getCodeHelper().argsDef(bcFunc.getParams());
 			
-			String typeRef = getCodeHelper().typeRef(className);
 			String type = getCodeHelper().type(className);
 			String create = classCreate + type;
 			String constructor = classConstructor + type;
 			
-			hdr.writelnf("static %s %s(%s);", typeRef, create, params);
+			hdr.writelnf("static %s* %s(%s);", type, create, params);
 			
 			impl.writeln();
-			impl.writelnf("inline %s %s::%s(%s)", typeRef, className, create, params);
+			impl.writelnf("%s* %s::%s(%s)", type, className, create, params);
 			impl.writeBlockOpen();
 			impl.writelnf("%s* __instance = new %s();", type, type);
 			impl.writelnf("__instance->%s(%s);", constructor, args);
@@ -651,7 +663,10 @@ public class As2CppConverter extends As2WhateverConverter
 	{
 		List<BcTypeNode> includes = new ArrayList<BcTypeNode>();
 		
-		tryAddUniqueType(includes, bcClass.getClassType());
+		if (!bcClass.isInterface())
+		{
+			tryAddUniqueType(includes, bcClass.getClassType());
+		}
 		
 		List<BcVariableDeclaration> classVars = bcClass.getDeclaredVars();
 		for (BcVariableDeclaration bcVar : classVars)
