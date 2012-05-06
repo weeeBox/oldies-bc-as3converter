@@ -22,8 +22,9 @@ import bc.lang.BcVectorTypeNode;
 public class As2CppConverter extends As2WhateverConverter
 {
 	private static final String defineClass = "AS_CLASS";
-	private static final String defineVector = "AS_VECTOR";
-	private static final String definePrimitiveVector = "AS_VECTOR_PRIMITIVE";
+	private static final String defineRef = "AS_REF";
+	private static final String defineVector = "AS_VECTOR_REF";
+	private static final String definePrimitiveVector = "AS_VECTOR_PRIMITIVE_REF";
 	private static final String defineForeach = "AS_FOREACH";
 	private static final String definePrimitiveForeach = "AS_PRIMITIVE_FOREACH";
 	private static final String defineForeachEnd = "AS_FOREACH_END";
@@ -125,11 +126,8 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		hdr.writeln();
 		
-		if (bcClass.isInterface())
-		{
-			hdr.writelnf("class %s;", getCodeHelper().typeRef(className));
-			hdr.writeln();
-		}
+		hdr.writelnf("%s(%s);", isInterface ? defineRef : defineClass, className);
+		hdr.writeln();
 		
 		hdr.writelnf("class %s : public %s", className, classExtends);
 		hdr.writeln("{");
@@ -215,7 +213,7 @@ public class As2CppConverter extends As2WhateverConverter
 				}
 				else
 				{
-					defineDest.writelnf("%s(%s);", defineClass, type(bcType));
+					defineDest.writelnf("%s(%s);", defineRef, type(bcType));
 				}
 			}
 		}
@@ -662,11 +660,6 @@ public class As2CppConverter extends As2WhateverConverter
 	private List<BcTypeNode> getHeaderTypedefs(BcClassDefinitionNode bcClass)
 	{
 		List<BcTypeNode> includes = new ArrayList<BcTypeNode>();
-		
-		if (!bcClass.isInterface())
-		{
-			tryAddUniqueType(includes, bcClass.getClassType());
-		}
 		
 		List<BcVariableDeclaration> classVars = bcClass.getDeclaredVars();
 		for (BcVariableDeclaration bcVar : classVars)
