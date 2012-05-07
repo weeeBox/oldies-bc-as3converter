@@ -9,6 +9,9 @@ import java.util.Set;
 
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
+import bc.cpp.BcCppDefine;
+import bc.cpp.BcCppDefines;
+import bc.cpp.BcCppDefinesReader;
 import bc.help.BcCodeHelper;
 import bc.help.BcVariableFilter;
 import bc.help.CppCodeHelper;
@@ -51,6 +54,7 @@ public class As2CppConverter extends As2WhateverConverter
 	private String lastVisiblityModifier;
 	private ListWriteDestination hdr;
 	private ListWriteDestination impl;
+	private BcCppDefines defines;
 
 	private static Set<String> definedTypes;
 	static
@@ -63,6 +67,20 @@ public class As2CppConverter extends As2WhateverConverter
 	public As2CppConverter()
 	{
 		super(new CppCodeHelper());
+		
+		readCppDefines();
+	}
+
+	protected void readCppDefines()
+	{
+		try
+		{
+			defines = BcCppDefinesReader.read(new File("cpp_defines"));
+		}
+		catch (IOException e)
+		{
+			System.err.println("Unable to read defines: " + e);
+		}
 	}
 	
 	@Override
