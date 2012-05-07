@@ -81,6 +81,16 @@ public class BcTypeNode extends BcNode
 	{
 		return integral;
 	}
+	
+	public boolean isInterface()
+	{
+		return !integral && classNode != null && classNode.isInterface();
+	}
+	
+	public boolean isClass()
+	{
+		return !integral && classNode != null && !classNode.isInterface();
+	}
 
 	@Override
 	public int hashCode()

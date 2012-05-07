@@ -41,6 +41,7 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private static final String classInterfaceWrapper = "_as_interface_";
 	private static final String classInterfaceBox = "_as_box_";
+	private static final String classInterfaceUnbox = "_as_unbox";
 	
 	private static final String defineGcMark = "AS_GC_MARK";
 	private static final String defineInterface = "AS_INTERFACE";
@@ -213,14 +214,21 @@ public class As2CppConverter extends As2WhateverConverter
 				}
 				else
 				{
-					defineDest.writelnf("%s(%s);", defineRef, type(bcType));
+					String defineName = bcType.getClassNode().isInterface() ? defineRef : defineClass;
+					defineDest.writelnf("%s(%s);", defineName, type(bcType));
 				}
 			}
 		}
 		
-		dst.writeln(includeDest);
-		dst.writeln();
-		dst.writeln(defineDest);
+		if (includeDest.linesCount() > 0)
+		{
+			dst.writeln(includeDest);
+			dst.writeln();
+		}
+		if (defineDest.linesCount() > 0)
+		{
+			dst.writeln(defineDest);
+		}
 	}
 	
 	private void writeImplementationTypes(WriteDestination dst, List<BcTypeNode> types)
@@ -355,13 +363,14 @@ public class As2CppConverter extends As2WhateverConverter
 			String args = getCodeHelper().argsDef(bcFunc.getParams());
 			
 			String type = getCodeHelper().type(className);
+			String typeRef = getCodeHelper().typeRef(className);
 			String create = classCreate + type;
 			String constructor = classConstructor + type;
 			
-			hdr.writelnf("static %s* %s(%s);", type, create, params);
+			hdr.writelnf("static %s %s(%s);", typeRef, create, params);
 			
 			impl.writeln();
-			impl.writelnf("%s* %s::%s(%s)", type, className, create, params);
+			impl.writelnf("%s %s::%s(%s)", typeRef, className, create, params);
 			impl.writeBlockOpen();
 			impl.writelnf("%s* __instance = new %s();", type, type);
 			impl.writelnf("__instance->%s(%s);", constructor, args);
@@ -650,11 +659,11 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		hdr.writeBlockClose(true);
 		
-		// box method	
-		String refName = getCodeHelper().typeRef(baseName);
+		// box/unbox methods	
 		String boxName = classInterfaceBox + baseName;
 		hdr.writeln();
-		hdr.writelnf("inline %s %s() { return new %s(this); }", refName, boxName, interfaceWrapperName);
+		hdr.writelnf("inline %s %s() { return new %s(this); }", getCodeHelper().typeRef(baseName), boxName, interfaceWrapperName);
+		hdr.writelnf("inline static %s* %s(%s* obj) { return ((%s*)obj)->%s; }", className, classInterfaceUnbox, baseName, interfaceWrapperName, targetFieldName);
 	}
 	
 	private List<BcTypeNode> getHeaderTypedefs(BcClassDefinitionNode bcClass)

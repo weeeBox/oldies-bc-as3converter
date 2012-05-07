@@ -46,6 +46,11 @@ public class ListWriteDestination extends WriteDestination
 		return lines;
 	}
 	
+	public int linesCount()
+	{
+		return getLines().size();
+	}
+	
 	@Override
 	public String toString()
 	{

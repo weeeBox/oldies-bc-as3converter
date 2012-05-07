@@ -227,6 +227,16 @@ public abstract class BcCodeHelper
 		return String.format("(%s)(%s)", type(type), expr);
 	}
 	
+	public String castClass(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	{
+		return cast(expr, toType);
+	}
+	
+	public String castInterface(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	{
+		return cast(expr, toType);
+	}
+	
 	public String getter(String name)
 	{
 		return "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);

@@ -12,9 +12,9 @@ public class CppCodeHelper extends BcCodeHelper
 	private static final String NEW = "AS_NEW";
 	private static final String NEW_VECTOR = "AS_NEW_VECTOR";
 	private static final String NEW_PRIMITIVE_VECTOR = "AS_NEW_PRIMITIVES_VECTOR";
+	private static final String UNBOX = "AS_UNBOX";
 	
 	private static final String STRING_LITERAL = "ASL";
-	
 	
 	private static final String IS_OPERATOR = "AS_IS";
 	
@@ -78,6 +78,18 @@ public class CppCodeHelper extends BcCodeHelper
 	public String cast(Object expr, BcTypeNode type)
 	{
 		return String.format("(%s)(%s)", typeRef(type), expr);
+	}
+	
+	@Override
+	public String castClass(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	{
+		return expr.toString();
+	}
+	
+	@Override
+	public String castInterface(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	{
+		return String.format("%s(%s, %s)", UNBOX, type(toType), expr);
 	}
 
 	@Override

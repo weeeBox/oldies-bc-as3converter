@@ -3192,6 +3192,22 @@ public abstract class As2WhateverConverter
 		{
 			return codeHelper.parseString(expression, toType);
 		}
+
+		if (toType.isClass())
+		{
+			if (fromType.isClass())
+			{
+				return codeHelper.castClass(expression, fromType, toType);
+			}
+			else if (fromType.isInterface())
+			{
+				return codeHelper.castInterface(expression, fromType, toType);
+			}
+			else
+			{
+				assert false;
+			}
+		}
 		
 		return codeHelper.cast(expression, toType);
 	}
