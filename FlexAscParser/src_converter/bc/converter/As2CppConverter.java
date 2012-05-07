@@ -13,6 +13,7 @@ import bc.cpp.BcCppDefine;
 import bc.cpp.BcCppDefines;
 import bc.cpp.BcCppDefinesReader;
 import bc.help.BcCodeHelper;
+import bc.help.BcStringUtils;
 import bc.help.BcVariableFilter;
 import bc.help.CppCodeHelper;
 import bc.lang.BcClassDefinitionNode;
@@ -179,7 +180,7 @@ public class As2CppConverter extends As2WhateverConverter
 		if (bcClass.isInterface())
 		{
 			hdr.writeln();
-			hdr.writelnf("%s(%s);", defineInterfaceRef, className);
+			writeDefine(hdr, defineInterfaceRef, true, className);
 		}
 		
 		hdr.writeln();
@@ -654,7 +655,7 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		// interface macro
 		writeVisiblity("public", true);
-		hdr.writelnf("%s(%s, %s)", defineInterface, className, baseName);
+		writeDefine(hdr, defineInterface, className, baseName);
 		
 		// functions
 		writeVisiblity("public", true);
@@ -738,6 +739,25 @@ public class As2CppConverter extends As2WhateverConverter
 		dest.decTab();
 		dest.writeln(visiblity + ":");
 		dest.incTab();
+	}
+	
+	private void writeDefine(WriteDestination dest, String defineName, String...args)
+	{
+		writeDefine(dest, defineName, false, args);
+	}
+	
+	private void writeDefine(WriteDestination dest, String defineName, boolean addSemicolon, String...args)
+	{
+		BcCppDefine define = defines.find(defineName);
+		if (define != null)
+		{
+			define.write(dest, args);
+		}
+		else
+		{
+			String format = addSemicolon ? "%s(%s);" : "%s(%s)";
+			dest.writelnf(format, defineName, BcStringUtils.commaSeparated(args));
+		}
 	}
 	
 	private List<BcTypeNode> getImplementationTypedefs(BcClassDefinitionNode bcClass)

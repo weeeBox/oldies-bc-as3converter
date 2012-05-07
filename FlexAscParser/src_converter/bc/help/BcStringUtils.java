@@ -9,12 +9,12 @@ public class BcStringUtils
 		return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
 	}
 	
-	public static String commaSeparated(Object... values)
+	public static <T> String commaSeparated(T... values)
 	{
 		StringBuilder buffer = new StringBuilder();
 		
 		int valIndex = 0;
-		for (Object val : values)
+		for (T val : values)
 		{
 			buffer.append(val);
 			if (++valIndex < values.length)
