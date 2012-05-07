@@ -64,10 +64,16 @@ public class BcCppDefinesReader
 		while (iter.hasNext())
 		{
 			String bodyLine = iter.next();
-			if (bodyLine.trim().length() == 0)
-				break;
+						
+			boolean lineSplited = bodyLine.endsWith("\\");
+			
+			if (lineSplited)
+				bodyLine = bodyLine.substring(0, bodyLine.length() - 1);
 			
 			define.addLine(bodyLine);
+			
+			if (!lineSplited)
+				break;
 		}
 		
 		return define;
