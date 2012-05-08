@@ -3204,6 +3204,21 @@ public abstract class As2WhateverConverter
 		return bcPlatformClasses.contains(bcClass);
 	}
 	
+	protected boolean isKindOfClass(BcClassDefinitionNode childClass, BcClassDefinitionNode parentClass)
+	{
+		BcClassDefinitionNode bcClass = childClass;
+		while (bcClass.hasExtendsType())
+		{
+			if (bcClass == parentClass)
+			{
+				return true;
+			}
+			bcClass = bcClass.getExtendsType().getClassNode();
+		}
+		
+		return false;
+	}
+	
 	private String cast(Object expression, BcTypeNode fromType, BcTypeNode toType) 
 	{
 		if (toType.isIntegral() && typeEquals(fromType, classString))

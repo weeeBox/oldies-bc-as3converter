@@ -854,15 +854,14 @@ public class As2CppConverter extends As2WhateverConverter
 		});
 	}
 	
-	protected List<BcTypeNode> getTypesForStaticInitialization(BcClassDefinitionNode bcClass)
+	private List<BcTypeNode> getTypesForStaticInitialization(BcClassDefinitionNode bcClass)
 	{
 		List<BcTypeNode> uniqueClasses = new ArrayList<BcTypeNode>();
 		
-		List<BcTypeNode> types = bcClass.getAdditionalImports();
-		
+		List<BcTypeNode> types = bcClass.getAdditionalImports();		
 		for (BcTypeNode type : types)
 		{
-			if (type.isClass() && !isPlatformClass(type.getClassNode()))
+			if (type.isClass() && !isPlatformClass(type.getClassNode()) && !isKindOfClass(type.getClassNode(), bcClass))
 			{
 				if (!uniqueClasses.contains(type))
 				{
