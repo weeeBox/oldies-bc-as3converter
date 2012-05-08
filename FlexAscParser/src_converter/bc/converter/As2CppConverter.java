@@ -59,7 +59,7 @@ public class As2CppConverter extends As2WhateverConverter
 	private ListWriteDestination impl;
 	private BcCppDefines defines;
 
-	private static Set<String> definedTypes;
+	private static Set<String> definedTypes; // this types shouldn't be redefined
 	static
 	{
 		definedTypes = new HashSet<String>();
@@ -502,7 +502,7 @@ public class As2CppConverter extends As2WhateverConverter
 		String staticInitFuncName = classStaticInit + className;
 		String staticInitializer = classStaticInitializer + className;
 		
-		writeVisiblity("protected", false);
+		writeVisiblity("public", false);
 		hdr.writelnf("static void %s();", staticInitFuncName);
 		
 		writeVisiblity("private", false);
@@ -537,6 +537,19 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		if (fields.size() > 0)
 		{
+			List<BcTypeNode> uniqueTypes = getTypesForStaticInitialization(bcClass);
+			if (uniqueTypes.size() > 0)
+			{
+				impl.writeln();
+				for (BcTypeNode type : uniqueTypes)
+				{
+					String typeName = type(type);
+					String funcName = classStaticInit + typeName;
+					
+					impl.writelnf("%s::%s();", typeName, funcName);
+				}
+			}
+			
 			impl.writeln();
 			for (BcVariableDeclaration field : fields)
 			{
@@ -839,6 +852,25 @@ public class As2CppConverter extends As2WhateverConverter
 				return !field.isStatic() && !field.isConst() && field.hasInitializer();
 			}
 		});
+	}
+	
+	protected List<BcTypeNode> getTypesForStaticInitialization(BcClassDefinitionNode bcClass)
+	{
+		List<BcTypeNode> uniqueClasses = new ArrayList<BcTypeNode>();
+		
+		List<BcTypeNode> types = bcClass.getAdditionalImports();
+		
+		for (BcTypeNode type : types)
+		{
+			if (type.isClass() && !isPlatformClass(type.getClassNode()))
+			{
+				if (!uniqueClasses.contains(type))
+				{
+					uniqueClasses.add(type);
+				}
+			}
+		}
+		return uniqueClasses;
 	}
 	
 	private boolean canBeInitializedInHeader(BcVariableDeclaration field)

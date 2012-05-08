@@ -3199,6 +3199,11 @@ public abstract class As2WhateverConverter
 		return false;
 	}
 	
+	protected boolean isPlatformClass(BcClassDefinitionNode bcClass)
+	{
+		return bcPlatformClasses.contains(bcClass);
+	}
+	
 	private String cast(Object expression, BcTypeNode fromType, BcTypeNode toType) 
 	{
 		if (toType.isIntegral() && typeEquals(fromType, classString))
