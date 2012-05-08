@@ -358,6 +358,15 @@ public class As2CppConverter extends As2WhateverConverter
 				continue;
 			}
 			
+			if (bcFunc.isGetter())
+			{
+				name = getCodeHelper().getter(name);
+			}
+			else if (bcFunc.isSetter())
+			{
+				name = getCodeHelper().setter(name);
+			}
+			
 			writeVisiblity(bcFunc.getVisiblity(), forceVisiblity);
 			forceVisiblity = false;
 			
