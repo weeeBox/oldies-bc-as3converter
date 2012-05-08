@@ -40,6 +40,8 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String classInitFields = "_as_init_fields_";
 	private static final String classStaticInit = "_as_static_init_";
 	private static final String classStaticInitializedFlag = "_as_static_initialized_";
+	private static final String classStaticInitializer = "_as_static_initializer_";
+	private static final String classStaticInitializerClass = "AsStaticRefInitializer";
 	private static final String classGcMark = "_as_gc_mark";
 	private static final String classGcMarkNeeded = "_as_gc_mark_needed";
 	
@@ -81,6 +83,25 @@ public class As2CppConverter extends As2WhateverConverter
 		catch (IOException e)
 		{
 			System.err.println("Unable to read defines: " + e);
+		}
+	}
+	
+	@Override
+	protected void postProcess(BcClassDefinitionNode bcClass)
+	{
+		if (!bcClass.isInterface() && !bcClass.hasConstructors())
+		{
+			BcFunctionDeclaration defaultConstructor = new BcFunctionDeclaration(bcClass.getName());
+			defaultConstructor.setConstructorFlag(true);
+			defaultConstructor.setDeclaredVars(new ArrayList<BcVariableDeclaration>());
+			
+			ListWriteDestination body = new ListWriteDestination();
+			body.writeBlockOpen();
+			body.writeBlockClose();
+			
+			defaultConstructor.setBody(body);
+			
+			bcClass.add(defaultConstructor);
 		}
 	}
 	
@@ -478,17 +499,20 @@ public class As2CppConverter extends As2WhateverConverter
 		String className = getClassName(bcClass);
 		String superClassName = getBaseClassName(bcClass);
 		String staticInitFlagName = classStaticInitializedFlag + className;
-		String staticInitName = classStaticInit + className;
+		String staticInitFuncName = classStaticInit + className;
+		String staticInitializer = classStaticInitializer + className;
 		
 		writeVisiblity("protected", false);
-		hdr.writelnf("static void %s();", staticInitName);
+		hdr.writelnf("static void %s();", staticInitFuncName);
 		
 		writeVisiblity("private", false);
 		hdr.writelnf("static bool %s;", staticInitFlagName);
+		hdr.writelnf("static %s %s;", classStaticInitializerClass, staticInitializer);
 		
 		impl.writeln();
 		impl.writelnf("bool %s::%s = false;", className, staticInitFlagName);
-		impl.writelnf("void %s::%s()", className, staticInitName);
+		impl.writelnf("%s %s::%s(%s);", classStaticInitializerClass, className, staticInitializer, staticInitFuncName);
+		impl.writelnf("void %s::%s()", className, staticInitFuncName);
 		impl.writeBlockOpen();
 		
 		impl.writelnf("if (!%s)", staticInitFlagName);

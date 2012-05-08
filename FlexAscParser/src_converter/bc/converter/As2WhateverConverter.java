@@ -467,6 +467,7 @@ public abstract class As2WhateverConverter
 		process(new ArrayList<BcClassDefinitionNode>(bcPlatformClasses));
 		process(bcApiClasses);
 		process(bcClasses);
+		postProcess(bcClasses);
 	}
 
 	private void process(List<BcClassDefinitionNode> classes) 
@@ -2260,6 +2261,18 @@ public abstract class As2WhateverConverter
 			assert classNode != null : typeNode.getNameEx();
 			typeNode.setClassNode(classNode);
 		}
+	}
+	
+	private void postProcess(List<BcClassDefinitionNode> classes) 
+	{
+		for (BcClassDefinitionNode bcClass : classes)
+		{
+			postProcess(bcClass);
+		}
+	}
+
+	protected void postProcess(BcClassDefinitionNode bcClass)
+	{
 	}
 	
 	private BcClassDefinitionNode findClass(String name)
