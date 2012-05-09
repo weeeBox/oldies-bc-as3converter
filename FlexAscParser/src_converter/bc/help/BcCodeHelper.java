@@ -204,9 +204,9 @@ public abstract class BcCodeHelper
 		return varDecl(type, identifier);
 	}
 	
-	public String selector(BcClassDefinitionNode bcClass, BcFunctionDeclaration func)
+	public String selector(BcClassDefinitionNode bcClass, Object funcExp)
 	{
-		return identifier(func.getName());
+		return funcExp.toString();
 	}
 	
 	public String memberSelector(Object target, Object selector)

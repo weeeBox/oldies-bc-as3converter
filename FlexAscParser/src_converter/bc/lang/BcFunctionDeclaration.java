@@ -26,6 +26,8 @@ public class BcFunctionDeclaration extends BcDeclaration
 	private boolean isOverridenConstructor;
 	private int defaultParamsCount;
 
+	private BcClassDefinitionNode owner;
+	
 	private List<BcVariableDeclaration> declaredVars;
 	private ListWriteDestination body;
 
@@ -51,6 +53,21 @@ public class BcFunctionDeclaration extends BcDeclaration
 	public StatementListNode getStatements()
 	{
 		return statements;
+	}
+	
+	public void setOwner(BcClassDefinitionNode owner)
+	{
+		this.owner = owner;
+	}
+	
+	public BcClassDefinitionNode getOwner()
+	{
+		return owner;
+	}
+
+	public boolean hasOwner()
+	{
+		return owner != null;
 	}
 	
 	public void setStatements(StatementListNode statements)

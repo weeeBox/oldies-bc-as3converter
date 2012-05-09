@@ -1324,7 +1324,7 @@ public abstract class As2WhateverConverter
 		process(node.expr);
 		popDest();
 		
-		String identifier = exprDest.toString();
+		String identifier = exprDest.toString();		
 		
 		boolean setterCalled = false;
 		if (node.expr instanceof IdentifierNode)
@@ -1438,35 +1438,48 @@ public abstract class As2WhateverConverter
 			
 			Node argNode = node.args.items.get(0);
 			
-			BcTypeNode argType = evaluateType(argNode);
-			if (argType == null)
+			if (selectorType instanceof BcFunctionTypeNode)
 			{
-				evaluateType(argNode);
-			}
-			assert argType != null : argNode;
-			
-			boolean needCast = needExplicitCast(argType, selectorType);
-			
-			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
-			{
-				if (needCast)
-				{
-					dest.writef("[%s] = %s", identifier, cast(argsDest, argType, selectorType));
-				}
-				else
-				{
-					dest.writef("[%s] = %s", identifier, argsDest);
-				}
+				BcTypeNode argType = evaluateType(argNode, true);
+				assert argType instanceof BcFunctionTypeNode;
+				
+				BcFunctionTypeNode funcType = (BcFunctionTypeNode) argType;
+				assert funcType.isComplete();
+				
+				BcFunctionDeclaration func = funcType.getFunc();
+				assert func.hasOwner();
+				
+				BcClassDefinitionNode ownerClass = func.getOwner();				
+				dest.writef("%s = %s", identifier, codeHelper.selector(ownerClass, argsDest));
 			}
 			else
-			{
-				if (needCast)
+			{			
+				BcTypeNode argType = evaluateType(argNode);
+				assert argType != null : argNode;
+				
+				boolean needCast = needExplicitCast(argType, selectorType);
+				
+				if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 				{
-					dest.writef("%s = %s", identifier, cast(argsDest, argType, selectorType));
+					if (needCast)
+					{
+						dest.writef("[%s] = %s", identifier, cast(argsDest, argType, selectorType));
+					}
+					else
+					{
+						dest.writef("[%s] = %s", identifier, argsDest);
+					}
 				}
 				else
 				{
-					dest.writef("%s = %s", identifier, argsDest);
+					if (needCast)
+					{
+						dest.writef("%s = %s", identifier, cast(argsDest, argType, selectorType));
+					}
+					else
+					{
+						dest.writef("%s = %s", identifier, argsDest);
+					}
 				}
 			}
 		}
@@ -2181,6 +2194,7 @@ public abstract class As2WhateverConverter
 		List<BcMetadataNode> functions = bcMetadata.children("FunctionType");
 		assert functions.size() <= 1;
 		
+		/*
 		for (BcMetadataNode funcTypeMetadata : functions) 
 		{
 			String callbackName = funcTypeMetadata.attribute("callback");
@@ -2206,10 +2220,12 @@ public abstract class As2WhateverConverter
 			assert lastBcFunctionType == null;
 			lastBcFunctionType = funcType;
 		}
+		*/
 	}
 	
 	private void process(BcFunctionTypeNode funcType, BcMetadataNode typeMetadata) 
 	{
+		/*
 		String returnTypeString = typeMetadata.attribute("returnType");
 		if (returnTypeString != null)
 		{
@@ -2235,6 +2251,7 @@ public abstract class As2WhateverConverter
 				funcType.addParam(new BcFuncParam(createBcType(type), codeHelper.identifier(name)));
 			}
 		}
+		*/
 	}
 
 	private void process(ExpressionStatementNode node)
@@ -2598,6 +2615,23 @@ public abstract class As2WhateverConverter
 	
 	public BcTypeNode evaluateType(Node node)
 	{
+		return evaluateType(node, false);
+	}
+	
+	public BcTypeNode evaluateType(Node node, boolean returnFuncType)
+	{
+		BcTypeNode type = evaluateTypeHelper(node);
+		if (type instanceof BcFunctionTypeNode)
+		{
+			BcFunctionTypeNode funcType = (BcFunctionTypeNode) type;
+			return returnFuncType ? funcType : (funcType.hasReturnType() ? funcType.getReturnType() : BcTypeNode.create("void"));
+		}			
+		
+		return type;
+	}
+	
+	private BcTypeNode evaluateTypeHelper(Node node)
+	{
 		if (node instanceof MemberExpressionNode)
 		{
 			return evaluateMemberExpression((MemberExpressionNode) node);
@@ -2954,11 +2988,7 @@ public abstract class As2WhateverConverter
 		BcFunctionDeclaration bcFunc = baseClass.findFunction(name);
 		if (bcFunc != null || (bcFunc = findGlobalFunction(name)) != null)
 		{
-			if (bcFunc.hasReturnType())
-			{
-				return bcFunc.getReturnType();
-			}
-			return createBcType("void");
+			return new BcFunctionTypeNode(bcFunc); 
 		}
 		// search for field
 		BcVariableDeclaration bcField = baseClass.findField(name);

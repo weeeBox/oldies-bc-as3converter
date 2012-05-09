@@ -1,46 +1,55 @@
 package bc.lang;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BcFunctionTypeNode extends BcTypeNode
 {
-	private List<BcFuncParam> params;
-	private BcTypeNode returnType;
+	private BcFunctionDeclaration func;
 
 	public BcFunctionTypeNode()
 	{
-		this("Function");		
+		super("Function");		
 	}
 	
-	public BcFunctionTypeNode(String name)
+	public BcFunctionTypeNode(BcFunctionDeclaration func)
 	{
-		super(name);
-		params = new ArrayList<BcFuncParam>();
+		super("Function");
+		this.func = func;
+		
+		if (func.hasReturnType())
+		{
+			BcTypeNode returnType = func.getReturnType();
+			if (returnType.isClass())
+			{
+				setClassNode(returnType.getClassNode());
+			}
+		}
 	}
 
-	public void addParam(BcFuncParam param)
+	public boolean isComplete()
 	{
-		params.add(param);
+		return func != null;
+	}
+	
+	public BcFunctionDeclaration getFunc()
+	{
+		return func;
 	}
 	
 	public List<BcFuncParam> getParams() 
 	{
-		return params;
-	}
-	
-	public void setReturnType(BcTypeNode returnType)
-	{
-		this.returnType = returnType;
+		assert isComplete();
+		return func.getParams();
 	}
 	
 	public BcTypeNode getReturnType()
 	{
-		return returnType;
+		assert isComplete();
+		return func.getReturnType();
 	}
 	
 	public boolean hasReturnType()
 	{
-		return returnType != null;
+		return isComplete() && func.hasReturnType();
 	}
 }

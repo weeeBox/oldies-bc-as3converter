@@ -106,7 +106,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public void addFunctionType(BcFunctionTypeNode node)
 	{
-		functionTypes.add(node);
+		functionTypes.add(node);		
 	}
 	
 	public BcFunctionTypeNode findFunctionType(String name)
@@ -164,6 +164,8 @@ public class BcClassDefinitionNode extends BcDeclaration
 	public void add(BcFunctionDeclaration func)
 	{
 		functions.add(func);
+		func.setOwner(this);
+		
 		if (func.isConstructor())
 		{
 			constructors.add(func);

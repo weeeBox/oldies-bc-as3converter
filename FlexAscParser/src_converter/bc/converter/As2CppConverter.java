@@ -13,6 +13,7 @@ import bc.cpp.BcCppDefine;
 import bc.cpp.BcCppDefines;
 import bc.cpp.BcCppDefinesReader;
 import bc.help.BcCodeHelper;
+import bc.help.BcFunctionFilter;
 import bc.help.BcStringUtils;
 import bc.help.BcVariableFilter;
 import bc.help.CppCodeHelper;
@@ -37,6 +38,7 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private static final String classCreate = "_as_create_";
 	private static final String classConstructor = "_as_construct_";
+	private static final String classSelector = "_as_selector_";
 	private static final String classInitFields = "_as_init_fields_";
 	private static final String classStaticInit = "_as_static_init_";
 	private static final String classStaticInitializedFlag = "_as_static_initialized_";
@@ -65,6 +67,7 @@ public class As2CppConverter extends As2WhateverConverter
 		definedTypes = new HashSet<String>();
 		definedTypes.add("Object");
 		definedTypes.add("String");
+		definedTypes.add("Function");
 	}
 	
 	public As2CppConverter()
@@ -184,6 +187,7 @@ public class As2CppConverter extends As2WhateverConverter
 			writeClassStaticInit(bcClass);
 			writeClassGcMarkMethod(bcClass);
 			writeClassDefaultConstructor(bcClass);
+			writeClassSelectors(bcClass);
 			
 			// generate interface boxers accessors if any
 			if (bcClass.hasInterfaces())
@@ -629,6 +633,47 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			writeBlockOpen(impl);
 			writeBlockClose(impl);
+		}
+	}
+	
+	private void writeClassSelectors(BcClassDefinitionNode bcClass)
+	{
+		List<BcFunctionDeclaration> functions = bcClass.getFunctions(new BcFunctionFilter()
+		{
+			@Override
+			public boolean accept(BcFunctionDeclaration func)
+			{
+				return func.isPublic() && !func.isConstructor();
+			}
+		});
+		
+		if (functions.isEmpty())
+			return;
+		
+		writeVisiblity("public", false);
+		String instanceName = "__instance";
+		
+		for (BcFunctionDeclaration func : functions)
+		{
+			String funcName = getCodeHelper().identifier(func.getName());
+			String selectorName = classSelector + funcName;
+			String type = func.hasReturnType() ? getCodeHelper().typeRef(func.getReturnType()) : "void";
+			
+			List<BcFuncParam> params = new ArrayList<BcFuncParam>(func.getParams());
+			params.add(0, new BcFuncParam(bcClass.getClassType(), instanceName));			
+			
+			String paramsString = getCodeHelper().paramsDef(params);
+			String argsString = getCodeHelper().argsDef(params);
+			
+			hdr.writef("inline static %s %s(%s)", type, selectorName, paramsString);
+			hdr.write(" { ");
+			if (func.hasReturnType())
+			{
+				hdr.write("return ");
+			}
+			hdr.writef("%s(%s);", funcName, argsString);
+							
+			hdr.writeln(" }");
 		}
 	}
 	

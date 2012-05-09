@@ -96,9 +96,9 @@ public class CppCodeHelper extends BcCodeHelper
 	}
 
 	@Override
-	public String selector(BcClassDefinitionNode bcClass, BcFunctionDeclaration func)
+	public String selector(BcClassDefinitionNode bcClass, Object funcExp)
 	{
-		return String.format("%s(%s, %s)", SELECTOR, type(bcClass.getClassType()), identifier(func.getName()));
+		return String.format("%s(%s, %s)", SELECTOR, type(bcClass.getClassType()), funcExp);
 	}
 	
 	@Override
