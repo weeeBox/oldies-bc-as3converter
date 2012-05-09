@@ -562,7 +562,8 @@ public class As2CppConverter extends As2WhateverConverter
 			impl.writeln();
 			for (BcVariableDeclaration field : fields)
 			{
-				impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), field.getInitializer());
+				Object initializer = field.hasInitializer() ? field.getInitializer() : typeDefault(field.getType());
+				impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), initializer);
 			}
 		}
 		

@@ -114,7 +114,6 @@ public abstract class As2WhateverConverter
 	protected static final String classXML = "XML";
 	protected static final String classXMLList = "XMLList";
 	protected static final String classBoolean = "Boolean";
-	protected static final String classNull = "null";
 	
 	private List<BcVariableDeclaration> declaredVars;
 	
@@ -2628,7 +2627,7 @@ public abstract class As2WhateverConverter
 		
 		if (node instanceof LiteralNullNode)
 		{
-			return createBcType("null");
+			return createBcType(codeHelper.literalNull());
 		}
 		
 		if (node instanceof ListNode)
@@ -2773,6 +2772,8 @@ public abstract class As2WhateverConverter
 			ConditionalExpressionNode conditional = (ConditionalExpressionNode) node;
 			BcTypeNode thenType = evaluateType(conditional.thenexpr);
 			assert thenType != null;
+			
+			String classNull = getCodeHelper().literalNull();
 			
 			if (!typeEquals(thenType, classNull))
 			{
@@ -3146,7 +3147,7 @@ public abstract class As2WhateverConverter
 		return canBeClass(type.getName());
 	}
 	
-	private String typeDefault(BcTypeNode type)
+	protected String typeDefault(BcTypeNode type)
 	{
 		if (type.isIntegral())
 		{
