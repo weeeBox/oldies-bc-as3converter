@@ -107,11 +107,8 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	@Override
 	protected void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNode loopVarType, Object collection, BcTypeNode collectionType, Object body)
-	{
-		assert collectionType instanceof BcVectorTypeNode;
-		BcVectorTypeNode vectorType = (BcVectorTypeNode) collectionType;
-		
-		String defineName = vectorType.getGeneric().isIntegral() ? definePrimitiveForeach : defineForeach;
+	{	
+		String defineName = foreachNameForType(collectionType);
 		
 		dest.writelnf("%s(%s, %s, %s)", defineName, type(loopVarType), loopVarName, collection);
 		dest.writeln(body);
@@ -326,7 +323,14 @@ public class As2CppConverter extends As2WhateverConverter
 				}
 				else if (!canBeInitializedInHeader(bcField))
 				{
-					impl.writelnf("%s %s::%s(0);", type, className, name);
+					if (canBeInitializedInImplementation(bcField))
+					{
+						impl.writelnf("const %s %s::%s = %s;", type, className, name, bcField.getInitializer());
+					}
+					else
+					{
+						impl.writelnf("%s %s::%s(0);", type, className, name);
+					}
 				}
 			}
 			if (isConst && !canBeClass)
@@ -540,7 +544,7 @@ public class As2CppConverter extends As2WhateverConverter
 			@Override
 			public boolean accept(BcVariableDeclaration field)
 			{
-				return field.isStatic() && !canBeInitializedInHeader(field);
+				return field.isStatic() && !canBeInitializedInHeader(field) && !canBeInitializedInImplementation(field);
 			}
 		});
 		
@@ -882,8 +886,36 @@ public class As2CppConverter extends As2WhateverConverter
 		return uniqueClasses;
 	}
 	
+	private String foreachNameForType(BcTypeNode type)
+	{
+		if (type instanceof BcVectorTypeNode)
+		{
+			BcVectorTypeNode vectorType = (BcVectorTypeNode) type;		
+			return vectorType.getGeneric().isIntegral() ? definePrimitiveForeach : defineForeach;
+		}
+		else if (typeEquals(type, classXMLList))
+		{
+			return defineForeach;
+		}
+		else
+		{
+			assert false : type.getName();
+		}
+		return null;
+	}
+	
 	private boolean canBeInitializedInHeader(BcVariableDeclaration field)
 	{
-		return field.isStatic() && field.isConst() && field.getType().isIntegral() && field.hasInitializer() && field.isIntegralInitializerFlag();
+		return field.isStatic() && field.isConst() && field.getType().isIntegral() && field.hasInitializer() && field.isIntegralInitializerFlag() && !isFloatType(field.getType());
+	}
+	
+	private boolean canBeInitializedInImplementation(BcVariableDeclaration field)
+	{
+		return field.isStatic() && field.isConst() && field.getType().isIntegral() && field.hasInitializer() && field.isIntegralInitializerFlag() && isFloatType(field.getType());		
+	}
+	
+	private boolean isFloatType(BcTypeNode type)
+	{
+		return type.isIntegral() && typeOneOf(type, "float", "Number");
 	}
 }

@@ -3104,7 +3104,7 @@ public abstract class As2WhateverConverter
 		return typeEquals(classNode.getClassType(), name);
 	}
 	
-	private boolean typeOneOf(BcTypeNode type, String... names)
+	protected boolean typeOneOf(BcTypeNode type, String... names)
 	{
 		for (String name : names) 
 		{
