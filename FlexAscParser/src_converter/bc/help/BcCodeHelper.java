@@ -8,7 +8,9 @@ import java.util.Map;
 import macromedia.asc.parser.IdentifierNode;
 import bc.code.ListWriteDestination;
 import bc.lang.BcArgumentsList;
+import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
+import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -200,6 +202,11 @@ public abstract class BcCodeHelper
 	public String paramDecl(BcTypeNode type, String identifier)
 	{
 		return varDecl(type, identifier);
+	}
+	
+	public String selector(BcClassDefinitionNode bcClass, BcFunctionDeclaration func)
+	{
+		return identifier(func.getName());
 	}
 	
 	public String memberSelector(Object target, Object selector)

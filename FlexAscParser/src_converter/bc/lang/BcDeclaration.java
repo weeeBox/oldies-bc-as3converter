@@ -49,6 +49,11 @@ public class BcDeclaration extends BcNode
 		return modifiers.contains("private");
 	}
 	
+	public boolean isPublic()
+	{
+		return modifiers.contains("public");
+	}
+	
 	public boolean isConst()
 	{
 		return constant;

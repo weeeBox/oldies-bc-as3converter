@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bc.help.BcCodeCpp;
+import bc.help.BcFunctionFilter;
 import bc.help.BcVariableFilter;
 
 import macromedia.asc.parser.Node;
@@ -206,6 +207,19 @@ public class BcClassDefinitionNode extends BcDeclaration
 	{
 		return functions;
 	}
+	
+	public List<BcFunctionDeclaration> getFunctions(BcFunctionFilter filter)
+	{
+		List<BcFunctionDeclaration> result = new ArrayList<BcFunctionDeclaration>();
+		for (BcFunctionDeclaration func : result)
+		{
+			if (filter.accept(func))
+				result.add(func);
+		}
+		
+		return result;
+	}
+	
 	
 	public List<BcFunctionDeclaration> getConstructors()
 	{

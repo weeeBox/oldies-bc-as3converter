@@ -2,6 +2,8 @@ package bc.help;
 
 import bc.code.ListWriteDestination;
 import bc.lang.BcArgumentsList;
+import bc.lang.BcClassDefinitionNode;
+import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
 
@@ -13,6 +15,7 @@ public class CppCodeHelper extends BcCodeHelper
 	private static final String NEW_VECTOR = "AS_NEW_VECTOR";
 	private static final String NEW_PRIMITIVE_VECTOR = "AS_NEW_PRIMITIVES_VECTOR";
 	private static final String UNBOX = "AS_UNBOX";
+	private static final String SELECTOR = "AS_SELECTOR";
 	
 	private static final String STRING_LITERAL = "ASL";
 	
@@ -92,6 +95,12 @@ public class CppCodeHelper extends BcCodeHelper
 		return String.format("%s(%s, %s)", UNBOX, type(toType), expr);
 	}
 
+	@Override
+	public String selector(BcClassDefinitionNode bcClass, BcFunctionDeclaration func)
+	{
+		return String.format("%s(%s, %s)", SELECTOR, type(bcClass.getClassType()), identifier(func.getName()));
+	}
+	
 	@Override
 	public String memberSelector(Object target, Object selector)
 	{
