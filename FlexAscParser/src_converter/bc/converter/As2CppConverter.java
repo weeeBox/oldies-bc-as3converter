@@ -429,7 +429,7 @@ public class As2CppConverter extends As2WhateverConverter
 			impl.writeln();
 			impl.writelnf("%s %s::%s(%s)", typeRef, className, create, params);
 			impl.writeBlockOpen();
-			impl.writelnf("%s* __instance = new %s();", type, type);
+			impl.writelnf("%s __instance = new %s();", typeRef, type);
 			impl.writelnf("__instance->%s(%s);", constructor, args);
 			impl.writeln("return __instance;");
 			impl.writeBlockClose();
