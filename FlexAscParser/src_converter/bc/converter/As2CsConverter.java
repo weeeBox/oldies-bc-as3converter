@@ -9,8 +9,8 @@ import java.util.List;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeHelper;
-import bc.help.BcStringUtils;
 import bc.help.CsCodeHelper;
+import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
@@ -210,7 +210,7 @@ public class As2CsConverter extends As2WhateverConverter
 		String type = funcType.hasReturnType() ? typeEx(funcType.getReturnType()) : "void";
 		String name = getCodeHelper().identifier(funcType.getName());			
 		
-		src.writelnf("public delegate %s %s(%s);", type, typeEx(name), getCodeHelper().paramsDef(funcType.getParams()));
+		src.writelnf("public delegate %s %s(%s);", type, typeEx(name), paramsDef(funcType.getParams()));
 	}
 
 	private void writeFields(BcClassDefinitionNode bcClass)
@@ -302,7 +302,7 @@ public class As2CsConverter extends As2WhateverConverter
 				src.writef("%s %s", type, name);
 			}
 			
-			src.writelnf("(%s)", getCodeHelper().paramsDef(bcFunc.getParams()));
+			src.writelnf("(%s)", paramsDef(bcFunc.getParams()));
 			
 			ListWriteDestination body = bcFunc.getBody();
 			if (bcFunc.isConstructor())
@@ -427,5 +427,54 @@ public class As2CsConverter extends As2WhateverConverter
 				}
 			}
 		}
+	}
+	
+	/* code helper */
+	
+	private static final String NEW = "new";
+	private static final String IS = "is";
+	
+	protected static final String VECTOR_BC_TYPE = "Vector";
+		
+	@Override
+	protected String classType(String name)
+	{
+		if (name.equals("String"))
+		{
+			return name;
+		}
+		
+		return super.classType(name);
+	}
+	
+	@Override
+	public String construct(String type, Object initializer)
+	{
+		return NEW + " " + type(type) + "(" + initializer + ")";
+	}
+	
+	@Override
+	protected String vectorType(BcVectorTypeNode vectorType)
+	{
+		String genericName = type(vectorType.getGeneric());
+		return type(VECTOR_BC_TYPE) + "<" + genericName + ">";
+	}
+	
+	@Override
+	public String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
+	{
+		return NEW + " " + type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGeneric()) + ">" + "(" + args + ")";
+	}
+	
+	@Override
+	public String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args)
+	{
+		return constructVector(vectorType, args);
+	}
+	
+	@Override
+	public String operatorIs(Object lhs, Object rhs)
+	{
+		return String.format("%s %s %s", lhs, IS, type(rhs.toString()));
 	}
 }

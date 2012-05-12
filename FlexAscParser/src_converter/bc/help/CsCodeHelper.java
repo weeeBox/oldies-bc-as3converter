@@ -1,56 +1,37 @@
 package bc.help;
 
-import bc.lang.BcArgumentsList;
-import bc.lang.BcVectorTypeNode;
-
 public class CsCodeHelper extends BcCodeHelper
 {
-	private static final String NEW = "new";
-	private static final String IS = "is";
-	
-	protected static final String VECTOR_BC_TYPE = "Vector";
 	protected static final String NULL = "null";
 	
-	@Override
-	protected String classType(String name)
+	private static String[] keyWords = 
 	{
-		if (name.equals("String"))
-		{
-			return name;
-		}
-		
-		return super.classType(name);
-	}
+		"abstract", "add", "alias", "as", "ascending", 
+		"base", "bool", "break", "byte", "case", 
+		"catch", "char", "checked", "class", "const", 
+		"continue", "decimal", "default", "delegate", "descending", 
+		"do", "double", "dynamic", "else", "enum", 
+		"event", "explicit", "extern", "false", "finally", 
+		"fixed", "float", "for", "foreach", "from", 
+		"get", "global", "goto", "group", "if", 
+		"implicit", "in", "interface", "internal", 
+		"into", "is", "join", "let", "lock", 
+		"long", "namespace", "new", "null", "object", 
+		"operator", "orderby", "out", "override", "params", 
+		"partial", "private", "protected", "public", "readonly", 
+		"ref", "remove", "return", "sbyte", "sealed", 
+		"select", "set", "short", "sizeof", "stackalloc", 
+		"static", "string", "struct", "switch", "this", 
+		"throw", "true", "try", "typeof", 
+		"ulong", "unchecked", "unsafe", "ushort", "using", 
+		"value", "var", "virtual", "void", "volatile", 
+		"while", "yield"
+	};
 	
 	@Override
-	public String construct(String type, Object initializer)
+	protected String[] getKeywords()
 	{
-		return NEW + " " + type(type) + "(" + initializer + ")";
-	}
-	
-	@Override
-	protected String vectorType(BcVectorTypeNode vectorType)
-	{
-		String genericName = type(vectorType.getGeneric());
-		return type(VECTOR_BC_TYPE) + "<" + genericName + ">";
-	}
-	
-	@Override
-	public String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
-	{
-		return NEW + " " + type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGeneric()) + ">" + "(" + args + ")";
-	}
-	
-	@Override
-	public String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args)
-	{
-		return constructVector(vectorType, args);
-	}
-	
-	@Override
-	public String operatorIs(Object lhs, Object rhs)
-	{
-		return String.format("%s %s %s", lhs, IS, type(rhs.toString()));
+		return keyWords;
 	}
 	
 	@Override

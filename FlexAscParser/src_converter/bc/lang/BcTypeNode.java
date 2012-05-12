@@ -3,7 +3,7 @@ package bc.lang;
 import java.util.HashMap;
 import java.util.Map;
 
-import bc.help.BcCodeCpp;
+import bc.help.BcCodeHelper;
 
 public class BcTypeNode extends BcNode
 {
@@ -44,7 +44,7 @@ public class BcTypeNode extends BcNode
 	protected BcTypeNode(String name)
 	{
 		this.name = name;
-		integral = BcCodeCpp.isBasicType(name);
+		integral = BcCodeHelper.isBasicType(name);
 	}
 	
 	public void setName(String name)

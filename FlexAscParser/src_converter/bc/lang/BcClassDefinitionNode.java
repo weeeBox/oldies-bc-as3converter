@@ -3,7 +3,6 @@ package bc.lang;
 import java.util.ArrayList;
 import java.util.List;
 
-import bc.help.BcCodeCpp;
 import bc.help.BcFunctionFilter;
 import bc.help.BcVariableFilter;
 

@@ -13,7 +13,6 @@ import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.ReturnStatementNode;
 import macromedia.asc.parser.StatementListNode;
 import bc.code.ListWriteDestination;
-import bc.help.BcCodeCpp;
 import bc.help.BcCodeHelper;
 
 public class BcFunctionDeclaration extends BcDeclaration

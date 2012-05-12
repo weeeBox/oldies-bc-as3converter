@@ -81,6 +81,7 @@ import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeHelper;
 import bc.help.BcNodeHelper;
+import bc.help.BcStringUtils;
 import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
@@ -252,7 +253,7 @@ public abstract class As2WhateverConverter
 
 	private BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
 	{
-		String interfaceDeclaredName = codeHelper.identifier(interfaceDefinitionNode.name);
+		String interfaceDeclaredName = getCodeHelper().identifier(interfaceDefinitionNode.name);
 		
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
@@ -288,7 +289,7 @@ public abstract class As2WhateverConverter
 	
 	private BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
 	{
-		String classDeclaredName = codeHelper.identifier(classDefinitionNode.name);
+		String classDeclaredName = getCodeHelper().identifier(classDefinitionNode.name);
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
 		BcTypeNode classType = createBcType(classDeclaredName);
@@ -375,7 +376,7 @@ public abstract class As2WhateverConverter
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
 		BcTypeNode bcType = extractBcType(varBindNode.variable.type);
-		String bcIdentifier = codeHelper.identifier(varBindNode.variable.identifier);	
+		String bcIdentifier = getCodeHelper().identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcType, bcIdentifier);
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
@@ -391,7 +392,7 @@ public abstract class As2WhateverConverter
 	private BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode)
 	{
 		FunctionNameNode functionNameNode = functionDefinitionNode.name;
-		String name = codeHelper.identifier(functionNameNode.identifier);
+		String name = getCodeHelper().identifier(functionNameNode.identifier);
 		BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);
 		
 		String typeString = BcNodeHelper.tryExtractFunctionType(functionDefinitionNode);
@@ -431,7 +432,7 @@ public abstract class As2WhateverConverter
 			ObjectList<ParameterNode> params = parameterNode.items;
 			for (ParameterNode param : params)
 			{
-				BcFuncParam bcParam = new BcFuncParam(extractBcType(param.type), codeHelper.identifier(param.identifier));
+				BcFuncParam bcParam = new BcFuncParam(extractBcType(param.type), getCodeHelper().identifier(param.identifier));
 				
 				if (param.init != null)
 				{
@@ -521,7 +522,7 @@ public abstract class As2WhateverConverter
 		BcTypeNode varType = bcVar.getType();
 		String varId = bcVar.getIdentifier();
 		
-		dest.write(codeHelper.varDecl(varType, varId));
+		dest.write(varDecl(varType, varId));
 		
 		Node initializer = bcVar.getInitializerNode();
 		if (initializer != null)
@@ -663,13 +664,13 @@ public abstract class As2WhateverConverter
 		BcTypeNode varType = extractBcType(varBindNode.variable.type);
 		addToImport(varType);
 		
-		String bcIdentifier = codeHelper.identifier(varBindNode.variable.identifier);	
+		String bcIdentifier = getCodeHelper().identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier);
 		
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
 		
-		dest.write(getCodeHelper().varDecl(varType, bcIdentifier));
+		dest.write(varDecl(varType, bcIdentifier));
 		
 		if (varBindNode.initializer != null)
 		{
@@ -793,11 +794,11 @@ public abstract class As2WhateverConverter
 				process(setExpr.args);
 				popDest();
 				
-				dest.write(getCodeHelper().memberCall(baseDest, "setOwnProperty", exprDest, argsDest));
+				dest.write(memberCall(baseDest, "setOwnProperty", exprDest, argsDest));
 			}
 			else if (selector instanceof GetExpressionNode)
 			{
-				dest.writef(getCodeHelper().memberCall(baseDest, "getOwnProperty", exprDest));
+				dest.writef(memberCall(baseDest, "getOwnProperty", exprDest));
 			}
 			else
 			{
@@ -820,14 +821,14 @@ public abstract class As2WhateverConverter
 			IdentifierNode funcIndentifierNode = BcNodeHelper.tryExtractIdentifier(selector);
 			assert funcIndentifierNode != null;
 			
-			String funcName = codeHelper.identifier(funcIndentifierNode);
+			String funcName = getCodeHelper().identifier(funcIndentifierNode);
 			if (callExpr.args != null)
 			{
-				dest.write(getCodeHelper().staticCall("AsString", funcName, baseDest, argsDest));
+				dest.write(staticCall("AsString", funcName, baseDest, argsDest));
 			}
 			else
 			{
-				dest.write(getCodeHelper().staticCall("AsString", funcName, baseDest));				
+				dest.write(staticCall("AsString", funcName, baseDest));				
 			}
 		}
 		else
@@ -838,11 +839,11 @@ public abstract class As2WhateverConverter
 				{
 					if (staticCall)
 					{
-						dest.write(getCodeHelper().staticSelector(baseDest, selectorDest));
+						dest.write(staticSelector(baseDest, selectorDest));
 					}
 					else
 					{
-						dest.write(getCodeHelper().memberSelector(baseDest, selectorDest));
+						dest.write(memberSelector(baseDest, selectorDest));
 					}
 				}
 				else
@@ -950,7 +951,7 @@ public abstract class As2WhateverConverter
 						}
 						else
 						{
-							identifier = codeHelper.getter(identifier);
+							identifier = getCodeHelper().getter(identifier);
 							getterCalled = true;
 						}
 							
@@ -1241,7 +1242,7 @@ public abstract class As2WhateverConverter
 					String argString = argsList.get(0).toString();
 					if (argString.startsWith("\"@"))
 					{
-						argsList.set(0, codeHelper.literalString(argString.substring(2, argString.length() - 1)));
+						argsList.set(0, getCodeHelper().literalString(argString.substring(2, argString.length() - 1)));
 					}
 				}
 			}
@@ -1257,7 +1258,7 @@ public abstract class As2WhateverConverter
 		
 		if (node.is_new)
 		{
-			dest.write(codeHelper.construct(type, argsList));
+			dest.write(construct(type, argsList));
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
 		{
@@ -1308,7 +1309,7 @@ public abstract class As2WhateverConverter
 			}
 			else if (isGlobalCalled)
 			{
-				dest.writef(getCodeHelper().staticSelector(typeEx("Global"), String.format("%s(%s)", identifier, argsList)));
+				dest.writef(staticSelector(typeEx("Global"), String.format("%s(%s)", identifier, argsList)));
 			}
 			else
 			{
@@ -1365,7 +1366,7 @@ public abstract class As2WhateverConverter
 					BcTypeNode setterType = funcParams.get(0).getType();
 					setterCalled = true;
 					
-					identifier = codeHelper.setter(identifier);
+					identifier = getCodeHelper().setter(identifier);
 					lastBcMemberType = setterType;
 				}
 				else
@@ -1452,7 +1453,7 @@ public abstract class As2WhateverConverter
 				func.setSelector();
 				
 				BcClassDefinitionNode ownerClass = func.getOwner();				
-				dest.writef("%s = %s", identifier, codeHelper.selector(ownerClass, argsDest));
+				dest.writef("%s = %s", identifier, selector(ownerClass, argsDest));
 			}
 			else
 			{
@@ -1494,7 +1495,7 @@ public abstract class As2WhateverConverter
 		process(node.expr);
 		popDest();
 		
-		String typeName = codeHelper.identifier((IdentifierNode)node.expr);
+		String typeName = getCodeHelper().identifier((IdentifierNode)node.expr);
 		StringBuilder typeBuffer = new StringBuilder(typeName);
 		
 		ListNode typeArgs = node.typeArgs;
@@ -1542,12 +1543,12 @@ public abstract class As2WhateverConverter
 		if (node.isAttr())
 		{
 			dest.write("attributeValue(\"");
-			dest.write(codeHelper.identifier(node));
+			dest.write(getCodeHelper().identifier(node));
 			dest.write("\")");
 		}
 		else
 		{
-			dest.write(codeHelper.identifier(node));
+			dest.write(getCodeHelper().identifier(node));
 		}
 	}
 	
@@ -1569,17 +1570,17 @@ public abstract class As2WhateverConverter
 		}
 		else if (node instanceof LiteralNullNode)
 		{
-			dest.write(codeHelper.literalNull());
+			dest.write(getCodeHelper().literalNull());
 		}
 		else if (node instanceof LiteralBooleanNode)
 		{
 			LiteralBooleanNode booleanNode = (LiteralBooleanNode) node;
-			dest.write(codeHelper.literalBool(booleanNode.value));
+			dest.write(getCodeHelper().literalBool(booleanNode.value));
 		}
 		else if (node instanceof LiteralStringNode)
 		{			
 			LiteralStringNode stringNode = (LiteralStringNode) node;
-			dest.write(codeHelper.literalString(stringNode.value));
+			dest.write(getCodeHelper().literalString(stringNode.value));
 		}
 		else if (node instanceof LiteralRegExpNode)
 		{
@@ -1761,12 +1762,12 @@ public abstract class As2WhateverConverter
 			if (child3.expr instanceof QualifiedIdentifierNode)
 			{
 				QualifiedIdentifierNode identifier = (QualifiedIdentifierNode) child3.expr;
-				loopVarName = codeHelper.identifier(identifier);
+				loopVarName = getCodeHelper().identifier(identifier);
 			}
 			else if (child3.expr instanceof IdentifierNode)
 			{
 				IdentifierNode identifier = (IdentifierNode) child3.expr;
-				loopVarName = codeHelper.identifier(identifier);
+				loopVarName = getCodeHelper().identifier(identifier);
 			}
 			else
 			{
@@ -1777,7 +1778,7 @@ public abstract class As2WhateverConverter
 			assert loopVar != null : loopVarName;
 			
 			BcTypeNode loopVarType = loopVar.getType();
-			String loopVarString = codeHelper.varDecl(loopVarType, loopVarName);
+			String loopVarString = varDecl(loopVarType, loopVarName);
 			String loopVarStringGenerated = loopVarString + " = " + typeDefault(loopVar.getType()) + ";";
 			
 			ListWriteDestination listDest = (ListWriteDestination) dest;
@@ -1940,7 +1941,7 @@ public abstract class As2WhateverConverter
 			popDest();
 		}
 		
-		dest.writeln(codeHelper.catchClause(paramDest));
+		dest.writeln(catchClause(paramDest));
 		process(node.statements);
 	}
 	
@@ -1949,10 +1950,10 @@ public abstract class As2WhateverConverter
 		BcTypeNode type = BcNodeHelper.extractBcType(node.type);
 		addToImport(type);
 		
-		String identifier = codeHelper.identifier(node.identifier);
+		String identifier = getCodeHelper().identifier(node.identifier);
 		
 		declaredVars.add(new BcVariableDeclaration(type, identifier));		
-		dest.write(codeHelper.paramDecl(type, identifier));
+		dest.write(paramDecl(type, identifier));
 	}
 	
 	private void process(FinallyClauseNode node)
@@ -1967,7 +1968,7 @@ public abstract class As2WhateverConverter
 		process(node.expr);
 		popDest();
 		
-		dest.writelnf("%s;", codeHelper.throwStatment(throwDest));
+		dest.writelnf("%s;", throwStatment(throwDest));
 	}
 	
 	private void process(BinaryExpressionNode node)
@@ -1996,11 +1997,11 @@ public abstract class As2WhateverConverter
 			{
 				if (canBeClass(lshType))
 				{
-					lshString = String.format("(%s)", codeHelper.notNull(lshString));
+					lshString = String.format("(%s)", getCodeHelper().notNull(lshString));
 				}
 				else
 				{
-					lshString = String.format("(%s)", codeHelper.notZero(lshString));
+					lshString = String.format("(%s)", getCodeHelper().notZero(lshString));
 				}
 			}
 			
@@ -2008,11 +2009,11 @@ public abstract class As2WhateverConverter
 			{
 				if (canBeClass(rshType))
 				{
-					rshString = String.format("(%s)", codeHelper.notNull(rshString));
+					rshString = String.format("(%s)", getCodeHelper().notNull(rshString));
 				}
 				else
 				{
-					rshString = String.format("(%s)", codeHelper.notZero(rshString));
+					rshString = String.format("(%s)", getCodeHelper().notZero(rshString));
 				}
 			}
 			
@@ -2020,12 +2021,12 @@ public abstract class As2WhateverConverter
 		}
 		else if (node.op == Tokens.IS_TOKEN)
 		{
-			dest.write(codeHelper.operatorIs(ldest, rdest));
+			dest.write(operatorIs(ldest, rdest));
 		}
 		else if (node.op == Tokens.AS_TOKEN)
 		{
 			BcTypeNode castType = extractBcType(node.rhs);
-			dest.writef("((%s) ? (%s) : %s)", codeHelper.operatorIs(ldest, rdest), codeHelper.cast(lshString, castType), codeHelper.literalNull());
+			dest.writef("((%s) ? (%s) : %s)", operatorIs(ldest, rdest), cast(lshString, castType), getCodeHelper().literalNull());
 		}
 		else
 		{
@@ -2057,7 +2058,7 @@ public abstract class As2WhateverConverter
 				BcTypeNode memberType = evaluateType(node.expr);
 				if (!typeEquals(memberType, classBoolean))
 				{
-					dest.writef("(%s)", codeHelper.isNull(expr));
+					dest.writef("(%s)", getCodeHelper().isNull(expr));
 				}
 				else
 				{
@@ -2118,7 +2119,7 @@ public abstract class As2WhateverConverter
 		dest.write("break");
 		if (node.id != null)
 		{
-			String id = codeHelper.identifier(node.id);
+			String id = getCodeHelper().identifier(node.id);
 			dest.write(" " + id);
 		}
 		dest.writeln(";");
@@ -2246,7 +2247,7 @@ public abstract class As2WhateverConverter
 				String type = token.substring(index + 1);
 				assert type != null;
 				
-				funcType.addParam(new BcFuncParam(createBcType(type), codeHelper.identifier(name)));
+				funcType.addParam(new BcFuncParam(createBcType(type), getCodeHelper().identifier(name)));
 			}
 		}
 	}
@@ -2571,7 +2572,7 @@ public abstract class As2WhateverConverter
 						IdentifierNode argIdentifier = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)argItem);
 						if (argIdentifier != null)
 						{
-							BcVariableDeclaration bcUsedField = bcClass.findField(codeHelper.identifier(argIdentifier));
+							BcVariableDeclaration bcUsedField = bcClass.findField(getCodeHelper().identifier(argIdentifier));
 							if (bcUsedField != null && !bcUsedField.isStatic())
 							{
 								return false;
@@ -2648,7 +2649,7 @@ public abstract class As2WhateverConverter
 		if (node instanceof IdentifierNode)
 		{
 			IdentifierNode identifier = (IdentifierNode) node;
-			return findIdentifierType(codeHelper.identifier(identifier));
+			return findIdentifierType(getCodeHelper().identifier(identifier));
 		}
 		
 		if (node instanceof LiteralNumberNode)
@@ -2669,7 +2670,7 @@ public abstract class As2WhateverConverter
 		
 		if (node instanceof LiteralNullNode)
 		{
-			return createBcType(codeHelper.literalNull());
+			return createBcType(getCodeHelper().literalNull());
 		}
 		
 		if (node instanceof ListNode)
@@ -2925,7 +2926,7 @@ public abstract class As2WhateverConverter
 						
 						return createBcType(classXMLList); // dirty hack
 					}
-					else if (codeHelper.identifier(identifier).equals(BcCodeHelper.thisCallMarker))
+					else if (getCodeHelper().identifier(identifier).equals(BcCodeHelper.thisCallMarker))
 					{
 						return lastBcClass.getClassType(); // this referes to the current class
 					}
@@ -2972,7 +2973,7 @@ public abstract class As2WhateverConverter
 			return createBcType(classString); // hack
 		}
 		
-		String name = codeHelper.identifier(identifier);
+		String name = getCodeHelper().identifier(identifier);
 		
 		// check if it's class
 		BcClassDefinitionNode bcClass = findClass(name);
@@ -2981,7 +2982,7 @@ public abstract class As2WhateverConverter
 			return bcClass.getClassType();
 		}
 		
-		if (codeHelper.isBasicType(name))
+		if (BcCodeHelper.isBasicType(name))
 		{			
 			return createBcType(name);
 		}
@@ -3070,14 +3071,14 @@ public abstract class As2WhateverConverter
 		}
 		popDest();
 		
-		dest.writef(codeHelper.construct(typeEx(classArray), elementDest));		
+		dest.writef(construct(typeEx(classArray), elementDest));		
 	}
 	
 	private void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
 	{
 		if (args == null)
 		{
-			dest.write(codeHelper.construct(vectorType));
+			dest.write(construct(vectorType));
 		}
 		else
 		{
@@ -3100,7 +3101,7 @@ public abstract class As2WhateverConverter
 					BcTypeNode argType = evaluateType(elementNode);
 					if (argType != genericType)
 					{
-						argsList.add(getCodeHelper().cast(argDest, genericType));
+						argsList.add(cast(argDest, genericType));
 					}
 					else
 					{
@@ -3108,11 +3109,11 @@ public abstract class As2WhateverConverter
 					}
 				}
 				
-				dest.write(codeHelper.constructLiteralVector(vectorType, argsList));
+				dest.write(constructLiteralVector(vectorType, argsList));
 			}
 			else
 			{
-				dest.write(codeHelper.constructLiteralVector(vectorType, getArgs(args)));
+				dest.write(constructLiteralVector(vectorType, getArgs(args)));
 			}
 		}
 	}
@@ -3124,7 +3125,7 @@ public abstract class As2WhateverConverter
 			type = lastBcFunctionType != null ? lastBcFunctionType : type;
 		}
 		
-		return codeHelper.type(type);
+		return type(type);
 	}
 	
 	protected String typeEx(String type) 
@@ -3134,7 +3135,7 @@ public abstract class As2WhateverConverter
 			type = lastBcFunctionType != null ? lastBcFunctionType.getName() : type;
 		}
 		
-		return codeHelper.type(type);
+		return type(type);
 	}
 
 	protected boolean classEquals(BcClassDefinitionNode classNode, String name)
@@ -3197,7 +3198,7 @@ public abstract class As2WhateverConverter
 			return "0";
 		}
 		
-		return codeHelper.literalNull();
+		return getCodeHelper().literalNull();
 	}
 	
 	private boolean needExplicitCast(BcTypeNode fromType, BcTypeNode toType)
@@ -3262,18 +3263,18 @@ public abstract class As2WhateverConverter
 	{
 		if (toType.isIntegral() && typeEquals(fromType, classString))
 		{
-			return codeHelper.parseString(expression, toType);
+			return parseString(expression, toType);
 		}
 
 		if (toType.isClass())
 		{
 			if (fromType.isClass())
 			{
-				return codeHelper.castClass(expression, fromType, toType);
+				return castClass(expression, fromType, toType);
 			}
 			else if (fromType.isInterface())
 			{
-				return codeHelper.castInterface(expression, fromType, toType);
+				return castInterface(expression, fromType, toType);
 			}
 			else
 			{
@@ -3281,6 +3282,165 @@ public abstract class As2WhateverConverter
 			}
 		}
 		
-		return codeHelper.cast(expression, toType);
+		return cast(expression, toType);
+	}
+	
+	/* code helper */
+	
+	public static final String TYPE_PREFIX = "As";
+	
+	private static final BcArgumentsList emptyInitializer = new BcArgumentsList();
+	
+	public abstract String construct(String type, Object initializer);
+	public abstract String operatorIs(Object lhs, Object rhs);
+	
+	protected abstract String vectorType(BcVectorTypeNode vectorType);
+	public abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);
+	public abstract String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args);
+	
+	public String type(BcTypeNode bcType)
+	{
+		String typeName = bcType.getName();
+		if (bcType instanceof BcVectorTypeNode)
+		{
+			return vectorType((BcVectorTypeNode) bcType);
+		}
+		
+		return type(typeName);
+	}
+	
+	public String type(String name)
+	{
+		String basic = BcCodeHelper.findBasicType(name);
+		if (basic != null)
+		{
+			return basic;
+		}
+		
+		return classType(name);
+	}
+	
+	
+	protected String classType(String name)
+	{
+		if (name.startsWith(TYPE_PREFIX))
+		{
+			return name; 
+		}
+		return TYPE_PREFIX + name;
+	}
+	
+	public String construct(BcTypeNode type)
+	{
+		return construct(type, emptyInitializer);
+	}
+	
+	public String construct(BcTypeNode type, BcArgumentsList argsList)
+	{
+		if (type instanceof BcVectorTypeNode)
+		{
+			return constructVector((BcVectorTypeNode)type, argsList);
+		}
+		return construct(type.getName(), argsList);
+	}
+	
+	
+	public String parseString(Object expr, BcTypeNode exprType)
+	{
+		String typeString = type(exprType);
+		typeString = Character.toUpperCase(typeString.charAt(0)) + typeString.substring(1);
+		return staticCall("AsString", "parse" + typeString, expr);
+	}
+	
+	public String varDecl(BcTypeNode type, String identifier)
+	{
+		return String.format("%s %s", type(type), getCodeHelper().identifier(identifier));
+	}
+	
+	public String paramsDef(List<BcFuncParam> params)
+	{
+		StringBuilder buffer = new StringBuilder();
+		
+		int paramIndex = 0;
+		for (BcVariableDeclaration bcParam : params)
+		{
+			buffer.append(paramDecl(bcParam.getType(), bcParam.getIdentifier()));
+			if (++paramIndex < params.size())
+			{
+				buffer.append(", ");
+			}
+		}
+		return buffer.toString();
+	}
+	
+	public String argsDef(List<BcFuncParam> params)
+	{
+		StringBuilder buffer = new StringBuilder();
+		
+		int paramIndex = 0;
+		for (BcVariableDeclaration bcParam : params)
+		{
+			buffer.append(getCodeHelper().identifier(bcParam.getIdentifier()));
+			if (++paramIndex < params.size())
+			{
+				buffer.append(", ");
+			}
+		}
+		return buffer.toString();
+	}
+	
+	public String paramDecl(BcTypeNode type, String identifier)
+	{
+		return varDecl(type, identifier);
+	}
+	
+	public String selector(BcClassDefinitionNode bcClass, Object funcExp)
+	{
+		return funcExp.toString();
+	}
+	
+	public String memberSelector(Object target, Object selector)
+	{
+		return String.format("%s.%s", target, selector);
+	}
+	
+	public String staticSelector(Object target, Object selector)
+	{
+		return memberSelector(target, selector);
+	}
+	
+	public String staticCall(Object target, Object selector, Object... args)
+	{
+		return memberCall(target, selector, args);
+	}
+	
+	public String memberCall(Object target, Object selector, Object... args)
+	{
+		return memberSelector(target, String.format("%s(%s)", selector, BcStringUtils.commaSeparated(args)));
+	}
+	
+	public String cast(Object expr, BcTypeNode type)
+	{
+		return String.format("(%s)(%s)", type(type), expr);
+	}
+	
+	public String castClass(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	{
+		return cast(expr, toType);
+	}
+	
+	public String castInterface(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	{
+		return cast(expr, toType);
+	}
+	
+	public String catchClause(ListWriteDestination paramDest)
+	{
+		return String.format("catch (%s)", paramDest);
+	}
+	
+	public String throwStatment(Object expr)
+	{
+		return "throw " + expr;
 	}
 }

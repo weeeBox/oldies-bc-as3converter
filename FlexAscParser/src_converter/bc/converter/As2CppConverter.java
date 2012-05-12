@@ -17,6 +17,7 @@ import bc.help.BcFunctionFilter;
 import bc.help.BcStringUtils;
 import bc.help.BcVariableFilter;
 import bc.help.CppCodeHelper;
+import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
@@ -252,7 +253,7 @@ public class As2CppConverter extends As2WhateverConverter
 				}
 				else
 				{
-					defineDest.writelnf("%s(%s);", defineVector, getCodeHelper().type(vectorType.getGeneric()));
+					defineDest.writelnf("%s(%s);", defineVector, type(vectorType.getGeneric()));
 				}
 			}
 			else
@@ -318,7 +319,7 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		for (BcVariableDeclaration bcField : fields)
 		{
-			String type = getCodeHelper().typeRef(bcField.getType());
+			String type = typeRef(bcField.getType());
 			String name = getCodeHelper().identifier(bcField.getIdentifier());
 			boolean canBeClass = canBeClass(bcField.getType());
 			boolean isConst = bcField.isConst();
@@ -350,7 +351,7 @@ public class As2CppConverter extends As2WhateverConverter
 				hdr.write("const ");
 			}
 			
-			hdr.write(getCodeHelper().varDecl(bcField.getType(), name));
+			hdr.write(varDecl(bcField.getType(), name));
 			if (canBeInitializedInHeader(bcField))
 			{
 				hdr.writef(" = %s", bcField.getInitializer());
@@ -366,7 +367,7 @@ public class As2CppConverter extends As2WhateverConverter
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? getCodeHelper().typeRef(bcFunc.getReturnType()) : "void";
+			String type = bcFunc.hasReturnType() ? typeRef(bcFunc.getReturnType()) : "void";
 			String name = getCodeHelper().identifier(bcFunc.getName());
 			
 			if (bcFunc.isConstructor())
@@ -394,7 +395,7 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				hdr.write("virtual ");
 			}
-			String params = getCodeHelper().paramsDef(bcFunc.getParams());
+			String params = paramsDef(bcFunc.getParams());
 	
 			if (bcClass.isInterface())
 			{
@@ -424,11 +425,11 @@ public class As2CppConverter extends As2WhateverConverter
 		writeVisiblity("public", true);
 		for (BcFunctionDeclaration bcFunc : constructors)
 		{
-			String params = getCodeHelper().paramsDef(bcFunc.getParams());
-			String args = getCodeHelper().argsDef(bcFunc.getParams());
+			String params = paramsDef(bcFunc.getParams());
+			String args = argsDef(bcFunc.getParams());
 			
-			String type = getCodeHelper().type(className);
-			String typeRef = getCodeHelper().typeRef(className);
+			String type = type(className);
+			String typeRef = typeRef(className);
 			String create = classCreate + type;
 			String constructor = classConstructor + type;
 			
@@ -446,9 +447,9 @@ public class As2CppConverter extends As2WhateverConverter
 		writeVisiblity("protected", true);
 		for (BcFunctionDeclaration bcFunc : constructors)
 		{
-			String params = getCodeHelper().paramsDef(bcFunc.getParams());
+			String params = paramsDef(bcFunc.getParams());
 			
-			String type = getCodeHelper().type(className);
+			String type = type(className);
 			String constructor = classConstructor + type;
 			
 			hdr.writelnf("void %s(%s);", constructor, params);
@@ -665,15 +666,15 @@ public class As2CppConverter extends As2WhateverConverter
 		{
 			String funcName = getCodeHelper().identifier(func.getName());
 			String selectorName = classSelector + funcName;
-			String returnType = func.hasReturnType() ? getCodeHelper().typeRef(func.getReturnType()) : "void";
+			String returnType = func.hasReturnType() ? typeRef(func.getReturnType()) : "void";
 			
 			List<BcFuncParam> params = func.getParams();
-			String targetParam = getCodeHelper().typePtr(classObject) + instanceName;
-			String argsString = getCodeHelper().argsDef(params);
+			String targetParam = typePtr(classObject) + instanceName;
+			String argsString = argsDef(params);
 			
 			if (params.size() > 0)
 			{
-				String paramsString = getCodeHelper().paramsDef(params);				
+				String paramsString = paramsDef(params);				
 				hdr.writef("inline static %s %s(%s, %s)", returnType, selectorName, targetParam, paramsString);
 			}
 			else
@@ -685,7 +686,7 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				hdr.write("return ");
 			}
-			hdr.writef("((%s)%s)->%s(%s);", getCodeHelper().typePtr(bcClass.getClassType()), instanceName, funcName, argsString);
+			hdr.writef("((%s)%s)->%s(%s);", typePtr(bcClass.getClassType()), instanceName, funcName, argsString);
 							
 			hdr.writeln(" }");
 		}
@@ -743,7 +744,7 @@ public class As2CppConverter extends As2WhateverConverter
 		String type = funcType.hasReturnType() ? typeEx(funcType.getReturnType()) : "void";
 		String name = getCodeHelper().identifier(funcType.getName());			
 		
-		hdr.writelnf("public delegate %s %s(%s);", type, typeEx(name), getCodeHelper().paramsDef(funcType.getParams()));
+		hdr.writelnf("public delegate %s %s(%s);", type, typeEx(name), paramsDef(funcType.getParams()));
 	}
 	
 	private void writeBoxingInterfaces(BcClassDefinitionNode bcClass)
@@ -789,11 +790,11 @@ public class As2CppConverter extends As2WhateverConverter
 		List<BcFunctionDeclaration> functions = interfaceClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? getCodeHelper().typeRef(bcFunc.getReturnType()) : "void";
+			String type = bcFunc.hasReturnType() ? typeRef(bcFunc.getReturnType()) : "void";
 			String name = getCodeHelper().identifier(bcFunc.getName());
 			
-			String params = getCodeHelper().paramsDef(bcFunc.getParams());
-			String args = getCodeHelper().argsDef(bcFunc.getParams());
+			String params = paramsDef(bcFunc.getParams());
+			String args = argsDef(bcFunc.getParams());
 			
 			hdr.writef("%s %s(%s) { ", type, name, params);			
 			if (bcFunc.hasReturnType())
@@ -808,7 +809,7 @@ public class As2CppConverter extends As2WhateverConverter
 		// box/unbox methods	
 		String boxName = classInterfaceBox + baseName;
 		hdr.writeln();
-		hdr.writelnf("inline %s %s() { return new %s(this); }", getCodeHelper().typeRef(baseName), boxName, interfaceWrapperName);
+		hdr.writelnf("inline %s %s() { return new %s(this); }", typeRef(baseName), boxName, interfaceWrapperName);
 		hdr.writelnf("inline static %s* %s(%s* obj) { return ((%s*)obj)->%s; }", className, classInterfaceUnbox, baseName, interfaceWrapperName, targetFieldName);
 	}
 	
@@ -994,4 +995,141 @@ public class As2CppConverter extends As2WhateverConverter
 	{
 		return type.isIntegral() && typeOneOf(type, "float", "Number");
 	}
+	
+	/* code helper */
+	
+	private static final String PREFIX_REF = "_ref";
+	private static final String PREFIX_VECTOR = "_V_";
+	private static final String NEW = "AS_NEW";
+	private static final String NEW_VECTOR = "AS_NEW_VECTOR";
+	private static final String NEW_PRIMITIVE_VECTOR = "AS_NEW_PRIMITIVES_VECTOR";
+	private static final String UNBOX = "AS_UNBOX";
+	private static final String SELECTOR = "AS_SELECTOR";
+	
+	private static final String IS_OPERATOR = "AS_IS";
+	
+	@Override
+	public String construct(String type, Object initializer)
+	{
+		return String.format("%s(%s,(%s))", NEW, type(type), initializer);
+	}
+
+	@Override
+	public String operatorIs(Object lhs, Object rhs)
+	{
+		return String.format("%s(%s, %s)", IS_OPERATOR, lhs, rhs);
+	}
+
+	@Override
+	protected String vectorType(BcVectorTypeNode vectorType)
+	{
+		return type(vectorType.getName());
+	}
+
+	@Override
+	public String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
+	{	
+		BcTypeNode genericType = vectorType.getGeneric();
+		String defineName = genericType.isIntegral() ? NEW_PRIMITIVE_VECTOR : NEW_VECTOR;
+
+		return String.format("%s(%s,(%s))", defineName, type(genericType), args);
+	}
+	
+	@Override
+	public String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args)
+	{	
+		BcArgumentsList initializer = new BcArgumentsList(1);
+		initializer.add(args.size());
+		
+		ListWriteDestination dest = new ListWriteDestination();
+		dest.write(constructVector(vectorType, initializer));
+		
+		for (Object arg : args)
+		{
+			dest.writef(" << %s", arg);
+		}
+		
+		return dest.toString();
+	}
+	
+	@Override
+	public String cast(Object expr, BcTypeNode type)
+	{
+		return String.format("(%s)(%s)", typeRef(type), expr);
+	}
+	
+	@Override
+	public String castClass(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	{
+		return expr.toString();
+	}
+	
+	@Override
+	public String castInterface(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	{
+		return String.format("%s(%s, %s)", UNBOX, type(toType), expr);
+	}
+
+	@Override
+	public String selector(BcClassDefinitionNode bcClass, Object funcExp)
+	{
+		return String.format("%s(%s, %s)", SELECTOR, type(bcClass.getClassType()), funcExp);
+	}
+	
+	@Override
+	public String memberSelector(Object target, Object selector)
+	{
+		return String.format("%s->%s", target, selector);
+	}
+	
+	@Override
+	public String staticSelector(Object target, Object selector)
+	{
+		return String.format("%s::%s", target, selector);
+	}
+	
+	public String typePtr(BcTypeNode bcType)
+	{
+		 return typePtr(bcType.getName());
+	}
+	
+	public String typePtr(String type)
+	{
+		return type(type) + "*";
+	}
+	
+	public String typeRef(BcTypeNode bcType)
+	{
+		if (bcType instanceof BcVectorTypeNode)
+		{
+			BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
+			return PREFIX_VECTOR + type(vectorType.getGeneric()) + PREFIX_REF;
+		}
+		return typeRef(bcType.getName());
+	}
+
+	public String typeRef(String type)
+	{
+		if (BcCodeHelper.isBasicType(type))
+		{
+			return type(type);
+		}
+		return String.format("%s%s", type(type), PREFIX_REF);
+	}
+	
+	@Override
+	public String paramDecl(BcTypeNode type, String identifier)
+	{
+		if (BcCodeHelper.isBasicType(type))
+		{
+			return String.format("%s %s", type(type), getCodeHelper().identifier(identifier));
+		}
+		return String.format("const %s& %s", typeRef(type), getCodeHelper().identifier(identifier));
+	}
+	
+	@Override
+	public String varDecl(BcTypeNode type, String identifier)
+	{
+		return String.format("%s %s", typeRef(type), getCodeHelper().identifier(identifier));
+	}	
 }
