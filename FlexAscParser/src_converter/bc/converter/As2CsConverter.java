@@ -9,6 +9,7 @@ import java.util.List;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeHelper;
+import bc.help.BcStringUtils;
 import bc.help.CsCodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
@@ -209,7 +210,7 @@ public class As2CsConverter extends As2WhateverConverter
 		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
 		String name = getCodeHelper().identifier(funcType.getName());			
 		
-		src.writelnf("public delegate %s %s(%s);", type, type(name), paramsString(funcType.getParams()));
+		src.writelnf("public delegate %s %s(%s);", type, type(name), getCodeHelper().paramsDef(funcType.getParams()));
 	}
 
 	private void writeFields(BcClassDefinitionNode bcClass)
@@ -301,7 +302,7 @@ public class As2CsConverter extends As2WhateverConverter
 				src.writef("%s %s", type, name);
 			}
 			
-			src.writelnf("(%s)", paramsString(bcFunc.getParams()));
+			src.writelnf("(%s)", getCodeHelper().paramsDef(bcFunc.getParams()));
 			
 			ListWriteDestination body = bcFunc.getBody();
 			if (bcFunc.isConstructor())
@@ -313,24 +314,6 @@ public class As2CsConverter extends As2WhateverConverter
 				src.writeln(body);
 			}
 		}
-	}
-
-	private String paramsString(List<BcFuncParam> params) 
-	{
-		ListWriteDestination paramsDest = new ListWriteDestination();
-		int paramIndex = 0;
-		for (BcFuncParam bcParam : params)
-		{
-			String paramType = type(bcParam.getType());
-			String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
-			paramsDest.writef("%s %s", paramType, paramName);
-			if (++paramIndex < params.size())
-			{
-				paramsDest.write(", ");
-			}
-		}
-		
-		return paramsDest.toString();
 	}
 
 	private void writeConstructorBody(ListWriteDestination body) 

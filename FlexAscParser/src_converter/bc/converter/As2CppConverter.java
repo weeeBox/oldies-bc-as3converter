@@ -20,6 +20,7 @@ import bc.help.CppCodeHelper;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
+import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -187,7 +188,14 @@ public class As2CppConverter extends As2WhateverConverter
 			writeClassStaticInit(bcClass);
 			writeClassGcMarkMethod(bcClass);
 			writeClassDefaultConstructor(bcClass);
+			/*
 			writeClassSelectors(bcClass);
+			*/
+			
+			if (bcClass.hasFunctionTypes())
+			{
+				writeFunctionTypes(bcClass);
+			}
 			
 			// generate interface boxers accessors if any
 			if (bcClass.hasInterfaces())
@@ -719,6 +727,23 @@ public class As2CppConverter extends As2WhateverConverter
 			impl.writeBlockClose();
 			impl.writeBlockClose();
 		}
+	}
+	
+	private void writeFunctionTypes(BcClassDefinitionNode bcClass) 
+	{
+		List<BcFunctionTypeNode> functionTypes = bcClass.getFunctionTypes();
+		for (BcFunctionTypeNode funcType : functionTypes) 
+		{
+			writeFunctionType(bcClass, funcType);
+		}
+	}
+
+	private void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
+	{
+		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
+		String name = getCodeHelper().identifier(funcType.getName());			
+		
+		hdr.writelnf("public delegate %s %s(%s);", type, type(name), getCodeHelper().paramsDef(funcType.getParams()));
 	}
 	
 	private void writeBoxingInterfaces(BcClassDefinitionNode bcClass)
