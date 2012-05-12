@@ -113,6 +113,16 @@ public class CppCodeHelper extends BcCodeHelper
 		return String.format("%s::%s", target, selector);
 	}
 	
+	public String typePtr(BcTypeNode bcType)
+	{
+		 return typePtr(bcType.getName());
+	}
+	
+	public String typePtr(String type)
+	{
+		return type(type) + "*";
+	}
+	
 	public String typeRef(BcTypeNode bcType)
 	{
 		if (bcType instanceof BcVectorTypeNode)

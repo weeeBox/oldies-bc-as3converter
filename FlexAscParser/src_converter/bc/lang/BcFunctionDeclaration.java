@@ -43,6 +43,8 @@ public class BcFunctionDeclaration extends BcDeclaration
 	private int kind = KIND_REGULAR;
 	
 	private StatementListNode statements;
+
+	private boolean isSelector;
 	
 	public BcFunctionDeclaration(String name)
 	{
@@ -157,6 +159,16 @@ public class BcFunctionDeclaration extends BcDeclaration
 	public boolean isOverridenConstructor()
 	{
 		return isOverridenConstructor;
+	}
+	
+	public void setSelector()
+	{
+		isSelector = true;
+	}
+	
+	public boolean isSelector()
+	{
+		return isSelector;
 	}
 	
 	public void setGetter()

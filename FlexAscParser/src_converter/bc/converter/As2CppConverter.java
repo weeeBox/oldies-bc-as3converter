@@ -643,7 +643,7 @@ public class As2CppConverter extends As2WhateverConverter
 			@Override
 			public boolean accept(BcFunctionDeclaration func)
 			{
-				return func.isPublic() && !func.isConstructor();
+				return func.isSelector();
 			}
 		});
 		
@@ -657,21 +657,27 @@ public class As2CppConverter extends As2WhateverConverter
 		{
 			String funcName = getCodeHelper().identifier(func.getName());
 			String selectorName = classSelector + funcName;
-			String type = func.hasReturnType() ? getCodeHelper().typeRef(func.getReturnType()) : "void";
+			String returnType = func.hasReturnType() ? getCodeHelper().typeRef(func.getReturnType()) : "void";
 			
-			List<BcFuncParam> params = new ArrayList<BcFuncParam>(func.getParams());
-			params.add(0, new BcFuncParam(bcClass.getClassType(), instanceName));			
-			
-			String paramsString = getCodeHelper().paramsDef(params);
+			List<BcFuncParam> params = func.getParams();
+			String targetParam = getCodeHelper().typePtr(classObject) + instanceName;
 			String argsString = getCodeHelper().argsDef(params);
 			
-			hdr.writef("inline static %s %s(%s)", type, selectorName, paramsString);
+			if (params.size() > 0)
+			{
+				String paramsString = getCodeHelper().paramsDef(params);				
+				hdr.writef("inline static %s %s(%s, %s)", returnType, selectorName, targetParam, paramsString);
+			}
+			else
+			{
+				hdr.writef("inline static %s %s(%s)", returnType, selectorName, targetParam);
+			}
 			hdr.write(" { ");
 			if (func.hasReturnType())
 			{
 				hdr.write("return ");
 			}
-			hdr.writef("%s(%s);", funcName, argsString);
+			hdr.writef("((%s)%s)->%s(%s);", getCodeHelper().typePtr(bcClass.getClassType()), instanceName, funcName, argsString);
 							
 			hdr.writeln(" }");
 		}

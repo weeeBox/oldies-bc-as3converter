@@ -1448,6 +1448,8 @@ public abstract class As2WhateverConverter
 				
 				BcFunctionDeclaration func = funcType.getFunc();
 				assert func.hasOwner();
+
+				func.setSelector();
 				
 				BcClassDefinitionNode ownerClass = func.getOwner();				
 				dest.writef("%s = %s", identifier, codeHelper.selector(ownerClass, argsDest));

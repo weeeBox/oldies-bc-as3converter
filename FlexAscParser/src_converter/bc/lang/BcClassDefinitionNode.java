@@ -13,8 +13,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 {
 	private BcTypeNode classType;
 	
-	private boolean hasReferenceVars;
-	
 	private String packageName;
 	
 	private boolean isFinal;
@@ -213,7 +211,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 	public List<BcFunctionDeclaration> getFunctions(BcFunctionFilter filter)
 	{
 		List<BcFunctionDeclaration> result = new ArrayList<BcFunctionDeclaration>();
-		for (BcFunctionDeclaration func : result)
+		for (BcFunctionDeclaration func : functions)
 		{
 			if (filter.accept(func))
 				result.add(func);
