@@ -2626,6 +2626,12 @@ public abstract class As2WhateverConverter
 		if (type instanceof BcFunctionTypeNode)
 		{
 			BcFunctionTypeNode funcType = (BcFunctionTypeNode) type;
+			if (!funcType.isComplete())
+			{
+				assert lastBcFunctionType != null;
+				funcType = lastBcFunctionType;
+			}
+			
 			return returnFuncType ? funcType : (funcType.hasReturnType() ? funcType.getReturnType() : BcTypeNode.create("void"));
 		}			
 		
