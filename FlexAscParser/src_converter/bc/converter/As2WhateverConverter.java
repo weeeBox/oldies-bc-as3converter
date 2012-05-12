@@ -540,7 +540,7 @@ public abstract class As2WhateverConverter
 			
 			if (needExplicitCast(initializerType, varType))
 			{
-				dest.write(" = " + castEx(initializerDest, initializerType, varType));
+				dest.write(" = " + cast(initializerDest, initializerType, varType));
 			}
 			else
 			{
@@ -686,7 +686,7 @@ public abstract class As2WhateverConverter
 			
 			if (needExplicitCast(initializerType, varType))
 			{
-				dest.writef(" = %s", castEx(initializer, initializerType, varType));
+				dest.writef(" = %s", cast(initializer, initializerType, varType));
 			}
 			else
 			{
@@ -1229,7 +1229,7 @@ public abstract class As2WhateverConverter
 					
 					if (needExplicitCast(argType, paramType))
 					{
-						argsList.add(castEx(argDest, argType, paramType));
+						argsList.add(cast(argDest, argType, paramType));
 					}
 					else
 					{
@@ -1282,7 +1282,7 @@ public abstract class As2WhateverConverter
 				process(argNode);
 				popDest();
 				
-				dest.write(castEx(argDest, argType, type));
+				dest.write(cast(argDest, argType, type));
 			}			
 		}
 		else
@@ -1304,7 +1304,7 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{				
-					dest.writef("(%s)", castEx(argStr, argType, type));
+					dest.writef("(%s)", cast(argStr, argType, type));
 				}
 			}
 			else if (isGlobalCalled)
@@ -1466,7 +1466,7 @@ public abstract class As2WhateverConverter
 				{
 					if (needCast)
 					{
-						dest.writef("[%s] = %s", identifier, castEx(argsDest, argType, selectorType));
+						dest.writef("[%s] = %s", identifier, cast(argsDest, argType, selectorType));
 					}
 					else
 					{
@@ -1477,7 +1477,7 @@ public abstract class As2WhateverConverter
 				{
 					if (needCast)
 					{
-						dest.writef("%s = %s", identifier, castEx(argsDest, argType, selectorType));
+						dest.writef("%s = %s", identifier, cast(argsDest, argType, selectorType));
 					}
 					else
 					{
@@ -2103,7 +2103,7 @@ public abstract class As2WhateverConverter
 			BcTypeNode returnType = lastBcFunction.getReturnType();
 			if (needExplicitCast(returnValueType, returnType))
 			{
-				dest.write(castEx(exprDest, returnValueType, returnType));
+				dest.write(cast(exprDest, returnValueType, returnType));
 			}
 			else
 			{
@@ -3259,7 +3259,7 @@ public abstract class As2WhateverConverter
 		return false;
 	}
 	
-	private String castEx(Object expression, BcTypeNode fromType, BcTypeNode toType) 
+	private String cast(Object expression, BcTypeNode fromType, BcTypeNode toType) 
 	{
 		if (toType.isIntegral() && typeEquals(fromType, classString))
 		{
