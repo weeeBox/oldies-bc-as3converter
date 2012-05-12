@@ -16,6 +16,8 @@ public abstract class BcCodeHelper
 	protected abstract String[] getKeywords();
 	
 	private static Map<String, String> basicTypes;
+	private static Map<String, String> integralTypes;
+	
 	static
 	{
 		basicTypes = new HashMap<String, String>();
@@ -25,6 +27,14 @@ public abstract class BcCodeHelper
 		basicTypes.put("Number", "float");
 		basicTypes.put("float", "float");
 		basicTypes.put("Boolean", "bool");
+		
+		integralTypes = new HashMap<String, String>();
+		integralTypes.put("uint", "uint");
+		integralTypes.put("int", "int");
+		integralTypes.put("long", "long");
+		integralTypes.put("Number", "float");
+		integralTypes.put("float", "float");
+		integralTypes.put("Boolean", "bool");
 	};
 	
 	public abstract String literalNull();
@@ -96,6 +106,11 @@ public abstract class BcCodeHelper
 	public static boolean isBasicType(String name)
 	{
 		return basicTypes.containsKey(name);
+	}
+	
+	public static boolean isIntegralType(String name)
+	{
+		return integralTypes.containsKey(name);
 	}
 	
 	public String identifier(IdentifierNode identifier)

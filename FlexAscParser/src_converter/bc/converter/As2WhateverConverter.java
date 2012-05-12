@@ -678,6 +678,7 @@ public abstract class As2WhateverConverter
 			pushDest(initializer);
 			process(varBindNode.initializer);
 			popDest();
+			
 			bcVar.setInitializer(initializer);
 			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(varBindNode.initializer));
 			

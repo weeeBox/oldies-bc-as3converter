@@ -44,7 +44,7 @@ public class BcTypeNode extends BcNode
 	protected BcTypeNode(String name)
 	{
 		this.name = name;
-		integral = BcCodeHelper.isBasicType(name);
+		integral = BcCodeHelper.isIntegralType(name);
 	}
 	
 	public void setName(String name)
