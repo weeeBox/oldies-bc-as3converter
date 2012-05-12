@@ -26,6 +26,12 @@ public class BcFunctionTypeNode extends BcTypeNode
 		}
 	}
 
+	@Override
+	public String getName()
+	{
+		return isComplete() ? func.getName() : super.getName();
+	}
+	
 	public boolean isComplete()
 	{
 		return func != null;
@@ -34,6 +40,11 @@ public class BcFunctionTypeNode extends BcTypeNode
 	public BcFunctionDeclaration getFunc()
 	{
 		return func;
+	}
+	
+	public void addParam(BcFuncParam param)
+	{
+		func.addParam(param);
 	}
 	
 	public List<BcFuncParam> getParams() 
@@ -51,5 +62,10 @@ public class BcFunctionTypeNode extends BcTypeNode
 	public boolean hasReturnType()
 	{
 		return isComplete() && func.hasReturnType();
+	}
+
+	public void setReturnType(BcTypeNode returnType)
+	{
+		func.setReturnType(returnType);
 	}
 }

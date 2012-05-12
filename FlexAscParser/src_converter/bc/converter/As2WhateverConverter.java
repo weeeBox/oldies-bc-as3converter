@@ -2195,7 +2195,6 @@ public abstract class As2WhateverConverter
 		List<BcMetadataNode> functions = bcMetadata.children("FunctionType");
 		assert functions.size() <= 1;
 		
-		/*
 		for (BcMetadataNode funcTypeMetadata : functions) 
 		{
 			String callbackName = funcTypeMetadata.attribute("callback");
@@ -2204,7 +2203,7 @@ public abstract class As2WhateverConverter
 			BcFunctionTypeNode funcType = bcClass.findFunctionType(callbackName);
 			if (funcType == null)
 			{
-				funcType = new BcFunctionTypeNode(callbackName);
+				funcType = new BcFunctionTypeNode(new BcFunctionDeclaration(callbackName));
 				process(funcType, funcTypeMetadata);
 				bcClass.addFunctionType(funcType);
 			}
@@ -2221,12 +2220,10 @@ public abstract class As2WhateverConverter
 			assert lastBcFunctionType == null;
 			lastBcFunctionType = funcType;
 		}
-		*/
 	}
 	
 	private void process(BcFunctionTypeNode funcType, BcMetadataNode typeMetadata) 
 	{
-		/*
 		String returnTypeString = typeMetadata.attribute("returnType");
 		if (returnTypeString != null)
 		{
@@ -2252,7 +2249,6 @@ public abstract class As2WhateverConverter
 				funcType.addParam(new BcFuncParam(createBcType(type), codeHelper.identifier(name)));
 			}
 		}
-		*/
 	}
 
 	private void process(ExpressionStatementNode node)
