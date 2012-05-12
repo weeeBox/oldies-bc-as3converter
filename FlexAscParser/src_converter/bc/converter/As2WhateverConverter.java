@@ -1193,7 +1193,7 @@ public abstract class As2WhateverConverter
 		}
 		else if (node.expr instanceof MemberExpressionNode)
 		{
-			lastBcMemberType = evaluateMemberExpression((MemberExpressionNode) node.expr);
+			lastBcMemberType = evaluateType(node.expr);
 			assert lastBcMemberType != null;
 		}
 		else
@@ -1455,7 +1455,7 @@ public abstract class As2WhateverConverter
 				dest.writef("%s = %s", identifier, codeHelper.selector(ownerClass, argsDest));
 			}
 			else
-			{			
+			{
 				BcTypeNode argType = evaluateType(argNode);
 				assert argType != null : argNode;
 				
@@ -2054,8 +2054,7 @@ public abstract class As2WhateverConverter
 		{
 			if (node.expr instanceof MemberExpressionNode)
 			{
-				MemberExpressionNode memberNode = (MemberExpressionNode) node.expr;
-				BcTypeNode memberType = evaluateMemberExpression(memberNode);
+				BcTypeNode memberType = evaluateType(node.expr);
 				if (!typeEquals(memberType, classBoolean))
 				{
 					dest.writef("(%s)", codeHelper.isNull(expr));
@@ -2483,7 +2482,12 @@ public abstract class As2WhateverConverter
 	
 	private BcFunctionDeclaration findFunction(String name)
 	{
-		BcFunctionDeclaration classFunc = lastBcClass.findFunction(name);
+		return findFunction(lastBcClass, name);
+	}
+	
+	private BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name)
+	{
+		BcFunctionDeclaration classFunc = bcClass.findFunction(name);
 		if (classFunc != null)
 		{
 			return classFunc;
