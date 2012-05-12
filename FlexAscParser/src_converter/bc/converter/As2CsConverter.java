@@ -33,10 +33,10 @@ public class As2CsConverter extends As2WhateverConverter
 	protected void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNode loopVarType, Object collection, BcTypeNode collectionType, Object body)
 	{
 		final String collectionTemp = "__" + loopVarName + "s_";
-		dest.writelnf("%s %s = %s;", typeEx(collectionType), collectionTemp, collection);
+		dest.writelnf("%s %s = %s;", type(collectionType), collectionTemp, collection);
 		dest.writelnf("if (%s != %s)", collectionTemp, getCodeHelper().literalNull());
 		dest.writeBlockOpen();
-		dest.writelnf("foreach (%s %s in %s)", typeEx(loopVarType), loopVarName, collectionTemp);		
+		dest.writelnf("foreach (%s %s in %s)", type(loopVarType), loopVarName, collectionTemp);		
 		dest.writeln(body);		
 		dest.writeBlockClose();
 	}
@@ -57,7 +57,7 @@ public class As2CsConverter extends As2WhateverConverter
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			String type = bcFunc.hasReturnType() ? typeEx(bcFunc.getReturnType()) : "void";
+			String type = bcFunc.hasReturnType() ? type(bcFunc.getReturnType()) : "void";
 			String name = getCodeHelper().identifier(bcFunc.getName());
 			
 			if (bcFunc.isConstructor())
@@ -73,7 +73,7 @@ public class As2CsConverter extends As2WhateverConverter
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = typeEx(bcParam.getType());
+				String paramType = type(bcParam.getType());
 				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(paramName);
@@ -157,7 +157,7 @@ public class As2CsConverter extends As2WhateverConverter
 			
 			if (hasExtendsType)
 			{
-				src.write(typeEx(bcClass.getExtendsType()));
+				src.write(type(bcClass.getExtendsType()));
 				if (hasInterfaces)
 				{
 					src.write(", ");
@@ -170,7 +170,7 @@ public class As2CsConverter extends As2WhateverConverter
 				int interfaceIndex= 0;
 				for (BcTypeNode bcInterface : interfaces) 
 				{					
-					String interfaceType = typeEx(bcInterface);
+					String interfaceType = type(bcInterface);
 					src.write(++interfaceIndex == interfaces.size() ? interfaceType : (interfaceType + ", "));
 				}
 			}
@@ -207,10 +207,10 @@ public class As2CsConverter extends As2WhateverConverter
 
 	private void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
 	{
-		String type = funcType.hasReturnType() ? typeEx(funcType.getReturnType()) : "void";
+		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
 		String name = getCodeHelper().identifier(funcType.getName());			
 		
-		src.writelnf("public delegate %s %s(%s);", type, typeEx(name), paramsDef(funcType.getParams()));
+		src.writelnf("public delegate %s %s(%s);", type, type(name), paramsDef(funcType.getParams()));
 	}
 
 	private void writeFields(BcClassDefinitionNode bcClass)
@@ -219,7 +219,7 @@ public class As2CsConverter extends As2WhateverConverter
 		
 		for (BcVariableDeclaration bcField : fields)
 		{
-			String type = typeEx(bcField.getType());
+			String type = type(bcField.getType());
 			String name = getCodeHelper().identifier(bcField.getIdentifier());
 						
 			src.write(bcField.getVisiblity() + " ");
@@ -288,7 +288,7 @@ public class As2CsConverter extends As2WhateverConverter
 					src.write("virtual ");
 				}
 				
-				String type = bcFunc.hasReturnType() ? typeEx(bcFunc.getReturnType()) : "void";
+				String type = bcFunc.hasReturnType() ? type(bcFunc.getReturnType()) : "void";
 				String name = getCodeHelper().identifier(bcFunc.getName());			
 				
 				if (bcFunc.isGetter())

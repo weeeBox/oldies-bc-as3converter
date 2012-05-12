@@ -741,7 +741,7 @@ public abstract class As2WhateverConverter
 				process(base);
 				popDest();
 				
-				dest.write(typeEx(baseExpr.toString()));
+				dest.write(type(baseExpr.toString()));
 			}
 			else
 			{
@@ -1310,7 +1310,7 @@ public abstract class As2WhateverConverter
 			}
 			else if (isGlobalCalled)
 			{
-				dest.writef(staticSelector(typeEx("Global"), String.format("%s(%s)", identifier, argsList)));
+				dest.writef(staticSelector(type("Global"), String.format("%s(%s)", identifier, argsList)));
 			}
 			else
 			{
@@ -1508,7 +1508,7 @@ public abstract class As2WhateverConverter
 			for (Node genericTypeNode : typeArgs.items)
 			{
 				BcTypeNode genericType = extractBcType(genericTypeNode);
-				typeBuffer.append(typeEx(genericType));
+				typeBuffer.append(type(genericType));
 				if (++genericIndex < genericCount)
 				{
 					typeBuffer.append(",");
@@ -2594,17 +2594,17 @@ public abstract class As2WhateverConverter
 	
 	protected String getClassName(BcClassDefinitionNode bcClass)
 	{
-		return typeEx(bcClass.getName());
+		return type(bcClass.getName());
 	}
 	
 	protected String getBaseClassName(BcClassDefinitionNode bcClass)
 	{
 		if (bcClass.hasExtendsType())
 		{
-			return typeEx(bcClass.getExtendsType());
+			return type(bcClass.getExtendsType());
 		}
 		
-		return typeEx(classObject);
+		return type(classObject);
 	}
 	
 	protected BcTypeNode getBaseClassType(BcClassDefinitionNode bcClass)
@@ -3072,7 +3072,7 @@ public abstract class As2WhateverConverter
 		}
 		popDest();
 		
-		dest.writef(construct(typeEx(classArray), elementDest));		
+		dest.writef(construct(type(classArray), elementDest));		
 	}
 	
 	private void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
@@ -3119,26 +3119,6 @@ public abstract class As2WhateverConverter
 		}
 	}
 	
-	protected String typeEx(BcTypeNode type) 
-	{
-		if (type instanceof BcFunctionTypeNode)
-		{
-			type = lastBcFunctionType != null ? lastBcFunctionType : type;
-		}
-		
-		return type(type);
-	}
-	
-	protected String typeEx(String type) 
-	{
-		if (type.equals(classFunction))
-		{
-			type = lastBcFunctionType != null ? lastBcFunctionType.getName() : type;
-		}
-		
-		return type(type);
-	}
-
 	protected boolean classEquals(BcClassDefinitionNode classNode, String name)
 	{
 		return typeEquals(classNode.getClassType(), name);
@@ -3301,6 +3281,11 @@ public abstract class As2WhateverConverter
 	
 	public String type(BcTypeNode bcType)
 	{
+		if (bcType instanceof BcFunctionTypeNode)
+		{
+			bcType = lastBcFunctionType != null ? lastBcFunctionType : bcType;
+		}
+		
 		String typeName = bcType.getName();
 		if (bcType instanceof BcVectorTypeNode)
 		{
@@ -3312,6 +3297,11 @@ public abstract class As2WhateverConverter
 	
 	public String type(String name)
 	{
+		if (name.equals(classFunction))
+		{
+			name = lastBcFunctionType != null ? lastBcFunctionType.getName() : name;
+		}
+		
 		String basic = BcCodeHelper.findBasicType(name);
 		if (basic != null)
 		{

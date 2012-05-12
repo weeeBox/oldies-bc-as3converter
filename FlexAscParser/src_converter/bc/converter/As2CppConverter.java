@@ -115,7 +115,7 @@ public class As2CppConverter extends As2WhateverConverter
 	{	
 		String defineName = foreachNameForType(collectionType);
 		
-		dest.writelnf("%s(%s, %s, %s)", defineName, typeEx(loopVarType), loopVarName, collection);
+		dest.writelnf("%s(%s, %s, %s)", defineName, type(loopVarType), loopVarName, collection);
 		dest.writeln(body);
 		dest.writeln(defineForeachEnd);
 	}
@@ -153,7 +153,7 @@ public class As2CppConverter extends As2WhateverConverter
 			List<BcTypeNode> interfaces = bcClass.getInterfaces();
 			for (BcTypeNode bcInterface : interfaces)
 			{
-				hdr.writeln(getCodeHelper().include(typeEx(bcInterface) + ".h"));
+				hdr.writeln(getCodeHelper().include(type(bcInterface) + ".h"));
 			}
 		}
 		
@@ -239,12 +239,12 @@ public class As2CppConverter extends As2WhateverConverter
 			if (bcType instanceof BcVectorTypeNode)
 			{
 				BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
-				String genericName = typeEx(vectorType.getGeneric());
+				String genericName = type(vectorType.getGeneric());
 				
 				if (!vectorIncluded)
 				{
 					vectorIncluded = true;
-					includeDest.writeln(getCodeHelper().include(typeEx(bcType) + ".h"));
+					includeDest.writeln(getCodeHelper().include(type(bcType) + ".h"));
 				}
 				
 				if (vectorType.getGeneric().isIntegral())
@@ -260,12 +260,12 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				if (definedTypes.contains(bcType.getName()))
 				{
-					includeDest.writeln(getCodeHelper().include(typeEx(bcType) + ".h"));
+					includeDest.writeln(getCodeHelper().include(type(bcType) + ".h"));
 				}
 				else
 				{
 					String defineName = bcType.getClassNode().isInterface() ? defineRef : defineClass;
-					defineDest.writelnf("%s(%s);", defineName, typeEx(bcType));
+					defineDest.writelnf("%s(%s);", defineName, type(bcType));
 				}
 			}
 		}
@@ -291,7 +291,7 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 			else
 			{
-				String typeName = typeEx(type);
+				String typeName = type(type);
 				dst.writelnf("#include \"%s.h\"", typeName);
 			}
 		}
@@ -569,7 +569,7 @@ public class As2CppConverter extends As2WhateverConverter
 				impl.writeln();
 				for (BcTypeNode type : uniqueTypes)
 				{
-					String typeName = typeEx(type);
+					String typeName = type(type);
 					String funcName = classStaticInit + typeName;
 					
 					impl.writelnf("%s::%s();", typeName, funcName);
@@ -741,10 +741,10 @@ public class As2CppConverter extends As2WhateverConverter
 
 	private void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
 	{
-		String type = funcType.hasReturnType() ? typeEx(funcType.getReturnType()) : "void";
+		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
 		String name = getCodeHelper().identifier(funcType.getName());			
 		
-		hdr.writelnf("public delegate %s %s(%s);", type, typeEx(name), paramsDef(funcType.getParams()));
+		hdr.writelnf("public delegate %s %s(%s);", type, type(name), paramsDef(funcType.getParams()));
 	}
 	
 	private void writeBoxingInterfaces(BcClassDefinitionNode bcClass)
