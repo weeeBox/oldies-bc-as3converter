@@ -28,6 +28,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 
 	private List<Node> statements;
 	private List<BcFunctionTypeNode> functionTypes;
+	private BcFunctionTypeNode defaultFunctionType;
 	
 	public BcClassDefinitionNode(BcTypeNode classType)
 	{
@@ -103,7 +104,23 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public void addFunctionType(BcFunctionTypeNode node)
 	{
-		functionTypes.add(node);		
+		functionTypes.add(node);
+		
+		if (node.isUseByDefault())
+		{
+			assert defaultFunctionType == null;
+			defaultFunctionType = node;
+		}
+	}
+	
+	public BcFunctionTypeNode getDefaultFunctionType()
+	{
+		return defaultFunctionType;
+	}
+	
+	public boolean hasDefaultFunctionType()
+	{
+		return defaultFunctionType != null;
 	}
 	
 	public BcFunctionTypeNode findFunctionType(String name)

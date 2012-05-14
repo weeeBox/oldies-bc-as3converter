@@ -23,15 +23,11 @@ public class BcTypeNode extends BcNode
 		BcTypeNode node = uniqueTypes.get(name);
 		if (node == null)
 		{
-			if (name.equals("Function"))
+			node = name.equals("Function") ? new BcFunctionTypeNode() : new BcTypeNode(name);
+			if (registerType)
 			{
-				node = new BcFunctionTypeNode();
+				uniqueTypes.put(name, node);
 			}
-			else
-			{			
-				node = new BcTypeNode(name);
-			}
-			if (registerType) uniqueTypes.put(name, node);
 		}
 		return node;
 	}

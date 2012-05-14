@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -102,7 +103,6 @@ public abstract class As2WhateverConverter
 	private String packageName;
 	private BcClassDefinitionNode lastBcClass;
 	private BcFunctionDeclaration lastBcFunction;
-	private BcFunctionTypeNode lastBcFunctionType;
 	
 	protected static final String internalFieldInitializer = "__internalInitializeFields";
 	
@@ -204,20 +204,17 @@ public abstract class As2WhateverConverter
 //		printer.evaluate(cx, programNode);
 
 		packageName = null;
+		bcMetadataMap.clear();
 		
 		for (Node node : programNode.statements.items)
 		{
 			if (node instanceof InterfaceDefinitionNode)
 			{
-				BcInterfaceDefinitionNode bcInterface = collect((InterfaceDefinitionNode) node);
-				bcInterface.setMetadata(bcMetadataMap.get(node));
-				bcClasses.add(bcInterface);
+				bcClasses.add(collect((InterfaceDefinitionNode) node));
 			}
 			else if (node instanceof ClassDefinitionNode)
 			{
-				BcClassDefinitionNode bcClass = collect((ClassDefinitionNode) node);
-				bcClass.setMetadata(bcMetadataMap.get(node));
-				bcClasses.add(bcClass);
+				bcClasses.add(collect((ClassDefinitionNode) node));
 			}
 			else if (node instanceof PackageDefinitionNode)
 			{
@@ -264,6 +261,11 @@ public abstract class As2WhateverConverter
 		
 		lastBcClass = bcInterface;
 		
+		BcMetadata metadata = findMetadata(interfaceDefinitionNode);
+		if (metadata != null)
+		{
+			collectClassMetadata(bcInterface, metadata);
+		}
 		
 		if (interfaceDefinitionNode.statements != null)
 		{
@@ -299,7 +301,14 @@ public abstract class As2WhateverConverter
 		bcClass.setPackageName(packageName);
 		bcClass.setDeclaredVars(declaredVars);
 		
-		lastBcClass = bcClass;		
+		lastBcClass = bcClass;
+		
+		// collect metadata
+		BcMetadata classMetadata = findMetadata(classDefinitionNode);
+		if (classMetadata != null)
+		{
+			collectClassMetadata(bcClass, classMetadata);
+		}
 
 		// super type
 		Node baseclass = classDefinitionNode.baseclass;
@@ -333,15 +342,11 @@ public abstract class As2WhateverConverter
 		{
 			if (node instanceof FunctionDefinitionNode)
 			{
-				BcFunctionDeclaration bcFunc = collect((FunctionDefinitionNode) node);
-				bcFunc.setMetadata(bcMetadataMap.get(node));
-				bcClass.add(bcFunc);
+				bcClass.add(collect((FunctionDefinitionNode) node));
 			}
 			else if (node instanceof VariableDefinitionNode)
 			{
-				BcVariableDeclaration bcVar = collect((VariableDefinitionNode)node);
-				bcVar.setMetadata(bcMetadataMap.get(node));
-				bcClass.add(bcVar);
+				bcClass.add(collect((VariableDefinitionNode)node));
 			}
 			else if (node instanceof MetaDataNode)
 			{
@@ -370,6 +375,17 @@ public abstract class As2WhateverConverter
 		return bcClass;
 	}
 
+	protected void collectClassMetadata(BcClassDefinitionNode bcClass, BcMetadata bcMetadata)
+	{
+		bcClass.setMetadata(bcMetadata);
+		
+		List<BcFunctionTypeNode> functionTypes = extractFunctionTypes(bcMetadata);
+		for (BcFunctionTypeNode funcType : functionTypes)
+		{
+			bcClass.addFunctionType(funcType);
+		}
+	}
+	
 	private BcVariableDeclaration collect(VariableDefinitionNode node)
 	{
 		assert node.list.items.size() == 1 : node.list.items.size();
@@ -387,7 +403,6 @@ public abstract class As2WhateverConverter
 		
 		return bcVar;
 	}
-
 	
 	private BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode)
 	{
@@ -499,7 +514,7 @@ public abstract class As2WhateverConverter
 		System.out.println("Process: " + bcClass.getName());
 		
 		declaredVars = bcClass.getDeclaredVars();
-		lastBcClass = bcClass;		
+		lastBcClass = bcClass;
 
 		List<BcVariableDeclaration> fields = bcClass.getFields();
 		for (BcVariableDeclaration bcField : fields)
@@ -629,9 +644,22 @@ public abstract class As2WhateverConverter
 		writeBlockOpen(dest);
 		
 		ObjectList<Node> items = statementsNode.items;
-		for (Node node : items)
+		Iterator<Node> iter = items.iterator();
+		
+		while (iter.hasNext())
 		{
-			process(node);
+			Node node = iter.next();			
+			if (node instanceof MetaDataNode)
+			{
+				BcNodeHelper.extractBcMetadata((MetaDataNode) node);
+				
+				assert iter.hasNext();
+				process(iter.next());
+			}
+			else
+			{			
+				process(node);
+			}
 		}
 		
 		writeBlockClose(dest);
@@ -2164,16 +2192,8 @@ public abstract class As2WhateverConverter
 	{
 		List<BcVariableDeclaration> oldDeclaredVars = declaredVars;
 		lastBcFunction = bcFunc;
-		lastBcFunctionType = null;
 		declaredVars = bcFunc.getDeclaredVars();
 
-		// metadata
-		BcMetadata bcMetadata = bcFunc.getMetadata();
-		if (bcMetadata != null)
-		{
-			process(bcMetadata, bcClass, bcFunc);
-		}
-		
 		// get function statements
 		ListWriteDestination body = new ListWriteDestination();
 		pushDest(body);
@@ -2191,68 +2211,7 @@ public abstract class As2WhateverConverter
 		declaredVars = oldDeclaredVars;
 		lastBcFunction = null;
 	}
-
-	private void process(BcMetadata bcMetadata, BcClassDefinitionNode bcClass, BcFunctionDeclaration bcFunc) 
-	{
-		List<BcMetadataNode> functions = bcMetadata.children("FunctionType");
-		assert functions.size() <= 1;
-		
-		for (BcMetadataNode funcTypeMetadata : functions) 
-		{
-			String callbackName = funcTypeMetadata.attribute("callback");
-			assert callbackName != null;
-
-			BcFunctionTypeNode funcType = bcClass.findFunctionType(callbackName);
-			if (funcType == null)
-			{
-				funcType = new BcFunctionTypeNode(new BcFunctionDeclaration(callbackName));
-				process(funcType, funcTypeMetadata);
-				bcClass.addFunctionType(funcType);
-			}
-			
-			String name = funcTypeMetadata.attribute("name");
-			if (name != null)
-			{
-				BcFuncParam param = bcFunc.findParam(name);
-				assert param != null;
-				
-				param.setType(funcType);
-			}
-			
-			assert lastBcFunctionType == null;
-			lastBcFunctionType = funcType;
-		}
-	}
 	
-	private void process(BcFunctionTypeNode funcType, BcMetadataNode typeMetadata) 
-	{
-		String returnTypeString = typeMetadata.attribute("returnType");
-		if (returnTypeString != null)
-		{
-			BcTypeNode returnType = createBcType(returnTypeString);
-			funcType.setReturnType(returnType);
-		}
-		
-		String paramsString = typeMetadata.attribute("params");
-		if (paramsString != null)
-		{
-			String[] tokens = paramsString.split(" ");
-			for (String token : tokens) 
-			{
-				int index = token.indexOf(":");
-				assert index != -1;
-				
-				String name = token.substring(0, index);
-				assert name != null;
-				
-				String type = token.substring(index + 1);
-				assert type != null;
-				
-				funcType.addParam(new BcFuncParam(createBcType(type), getCodeHelper().identifier(name)));
-			}
-		}
-	}
-
 	private void process(ExpressionStatementNode node)
 	{
 		process(node.expr);
@@ -2617,6 +2576,65 @@ public abstract class As2WhateverConverter
 		return BcTypeNode.create(classObject);
 	}
 	
+	protected List<BcFunctionTypeNode> extractFunctionTypes(BcMetadata metadata)
+	{
+		List<BcMetadataNode> functions = metadata.children("FunctionType");
+		List<BcFunctionTypeNode> functionTypes = new ArrayList<BcFunctionTypeNode>();
+		
+		for (BcMetadataNode funcMetadata : functions) 
+		{
+			String callbackName = funcMetadata.attribute("callback");
+			assert callbackName != null;
+			
+			BcFunctionDeclaration func = new BcFunctionDeclaration(callbackName);
+
+			String returnTypeString = funcMetadata.attribute("returns");
+			if (returnTypeString != null)
+			{
+				BcTypeNode returnType = createBcType(returnTypeString);
+				func.setReturnType(returnType);
+			}
+			
+			String paramsString = funcMetadata.attribute("params");
+			if (paramsString != null)
+			{
+				String[] tokens = paramsString.split("\\s*,\\s*");
+				for (String token : tokens) 
+				{
+					int index = token.indexOf(":");
+					assert index != -1;
+					
+					String name = token.substring(0, index);
+					assert name != null;
+					
+					String type = token.substring(index + 1);
+					assert type != null;
+					
+					func.addParam(new BcFuncParam(createBcType(type), getCodeHelper().identifier(name)));
+				}
+			}
+			
+			boolean useByDefault = false;
+			String defaultFlagString = funcMetadata.attribute("useByDefault");
+			if (defaultFlagString != null)
+			{
+				useByDefault = Boolean.parseBoolean(defaultFlagString);				
+			}
+
+			BcFunctionTypeNode funcType = new BcFunctionTypeNode(func);
+			funcType.setUseByDefault(useByDefault);
+			
+			functionTypes.add(funcType);
+		}
+		
+		return functionTypes;
+	}
+	
+	protected BcFunctionTypeNode getDefaultFunctionType()
+	{
+		return lastBcClass != null && lastBcClass.hasDefaultFunctionType() ? lastBcClass.getDefaultFunctionType() : new BcFunctionTypeNode();
+	}
+	
 	public BcTypeNode evaluateType(Node node)
 	{
 		return evaluateType(node, false);
@@ -2630,8 +2648,7 @@ public abstract class As2WhateverConverter
 			BcFunctionTypeNode funcType = (BcFunctionTypeNode) type;
 			if (!funcType.isComplete())
 			{
-				assert lastBcFunctionType != null;
-				funcType = lastBcFunctionType;
+				funcType = getDefaultFunctionType();
 			}
 			
 			return returnFuncType ? funcType : (funcType.hasReturnType() ? funcType.getReturnType() : BcTypeNode.create("void"));
@@ -2967,6 +2984,11 @@ public abstract class As2WhateverConverter
 		return null;
 	}
 
+	private BcMetadata findMetadata(Node node)
+	{
+		return bcMetadataMap.get(node);
+	}
+	
 	private BcTypeNode findIdentifierType(BcClassDefinitionNode baseClass, IdentifierNode identifier, boolean hasCallTarget)
 	{
 		if (identifier.isAttr())
@@ -3012,7 +3034,7 @@ public abstract class As2WhateverConverter
 	
 	private BcTypeNode extractBcType(Node node)
 	{
-		BcTypeNode bcType = BcNodeHelper.extractBcType(node);
+		BcTypeNode bcType = BcNodeHelper.extractBcType(node);		
 		if (bcType instanceof BcVectorTypeNode)
 		{
 			BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
@@ -3023,10 +3045,14 @@ public abstract class As2WhateverConverter
 			
 			vectorType.setClassNode(vectorGenericClass);
 			BcTypeNode genericType = vectorType.getGeneric();
-			if (genericType instanceof BcFunctionTypeNode && lastBcFunctionType != null)
+			if (genericType instanceof BcFunctionTypeNode)
 			{
-				vectorType.setGeneric(lastBcFunctionType);
+				vectorType.setGeneric(getDefaultFunctionType());
 			}
+		}
+		else if (bcType instanceof BcFunctionTypeNode)
+		{
+			return getDefaultFunctionType();
 		}
 		
 		BcTypeNode.add(bcType.getNameEx(), bcType);
@@ -3151,7 +3177,7 @@ public abstract class As2WhateverConverter
 		BcTypeNode type = BcTypeNode.create(name);
 		if (type instanceof BcFunctionTypeNode)
 		{
-			return lastBcFunctionType != null ? lastBcMemberType : type;
+			return lastBcClass != null && lastBcClass.hasDefaultFunctionType() ? lastBcClass.getDefaultFunctionType() : type;
 		}
 		
 		return type;
@@ -3283,7 +3309,8 @@ public abstract class As2WhateverConverter
 	{
 		if (bcType instanceof BcFunctionTypeNode)
 		{
-			bcType = lastBcFunctionType != null ? lastBcFunctionType : bcType;
+			BcFunctionTypeNode funcType = (BcFunctionTypeNode) bcType;
+			bcType = funcType.isComplete() ? funcType : getDefaultFunctionType();
 		}
 		
 		String typeName = bcType.getName();
@@ -3299,7 +3326,7 @@ public abstract class As2WhateverConverter
 	{
 		if (name.equals(classFunction))
 		{
-			name = lastBcFunctionType != null ? lastBcFunctionType.getName() : name;
+			name = getDefaultFunctionType().getName();
 		}
 		
 		String basic = BcCodeHelper.findBasicType(name);

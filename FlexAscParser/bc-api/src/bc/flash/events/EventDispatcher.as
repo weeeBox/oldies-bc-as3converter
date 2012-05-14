@@ -4,6 +4,7 @@ package bc.flash.events
 
 	import flash.utils.Dictionary;
 
+	[FunctionType(callback="EventListenerCallback", params="event:Event", useByDefault="true")]
 	public class EventDispatcher extends Object
 	{
 		private var mEventListeners : Dictionary;
@@ -14,7 +15,6 @@ package bc.flash.events
 		}
 
 		/** Registers an event listener at a certain object. */
-		[FunctionType(name="listener", callback="EventListenerCallback", params="event:Event")]
 		public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
 		{
 			if (mEventListeners == null)
@@ -31,7 +31,6 @@ package bc.flash.events
 		}
 
 		/** Removes an event listener from the object. */
-		[FunctionType(name="listener", callback="EventListenerCallback")]
 		public function removeEventListener(type : String, listener : Function) : void
 		{
 			if (mEventListeners)
@@ -71,7 +70,6 @@ package bc.flash.events
 		}
 
 		/** Dispatches an event to all objects that have registered for events of the same type. */
-		[FunctionType(callback="EventListenerCallback")]
 		public function dispatchEvent(event : Event) : void
 		{
 			var listeners : Vector.<Function> = mEventListeners ? mEventListeners[event.type] : null;

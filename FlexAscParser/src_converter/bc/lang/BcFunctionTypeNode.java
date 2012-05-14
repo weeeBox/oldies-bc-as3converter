@@ -5,6 +5,7 @@ import java.util.List;
 public class BcFunctionTypeNode extends BcTypeNode
 {
 	private BcFunctionDeclaration func;
+	private boolean useByDefault;
 
 	public BcFunctionTypeNode()
 	{
@@ -24,6 +25,16 @@ public class BcFunctionTypeNode extends BcTypeNode
 				setClassNode(returnType.getClassNode());
 			}
 		}
+	}
+	
+	public void setUseByDefault(boolean useByDefault)
+	{
+		this.useByDefault = useByDefault;
+	}
+	
+	public boolean isUseByDefault()
+	{
+		return useByDefault;
 	}
 
 	public boolean isComplete()

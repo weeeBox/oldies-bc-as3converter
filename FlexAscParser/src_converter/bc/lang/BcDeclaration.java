@@ -19,6 +19,11 @@ public class BcDeclaration extends BcNode
 		return metadata;
 	}
 	
+	public boolean hasMetadata()
+	{
+		return metadata != null;
+	}
+	
 	public void setModifiers(List<String> modifiers)
 	{
 		this.modifiers = modifiers;
