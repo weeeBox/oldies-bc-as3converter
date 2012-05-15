@@ -23,3 +23,10 @@ public: \
         return T::_as_unbox(obj); \
     } \
 };
+
+#define AS_OBJECT_REF_COMMON(type, objectType) \
+type() : AsObjectRef() {} \
+type(const AsObjectRefBase& other) : AsObjectRef(other) {} \
+type(const type& other) : AsObjectRef(other) {} \
+type(objectType* obj) : AsObjectRef(obj) {} \
+explicit type(bool isStatic) : AsObjectRef(isStatic) {}

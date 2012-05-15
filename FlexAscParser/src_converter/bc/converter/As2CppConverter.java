@@ -56,7 +56,7 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String defineGcMark = "AS_GC_MARK";
 	private static final String defineInterface = "AS_INTERFACE";
 	private static final String defineInterfaceRef = "AS_INTERFACE_REF";
-	
+	private static final String defineObjectRefCommon = "AS_OBJECT_REF_COMMON";	
 	
 	private String lastVisiblityModifier;
 	private ListWriteDestination hdr;
@@ -169,6 +169,14 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		hdr.writeln();
 		
+		if (bcClass.hasFunctionTypes())
+		{
+			hdr.writeln(getCodeHelper().include("AsFunction.h"));
+			
+			writeFunctionTypes(bcClass);
+			hdr.writeln();
+		}
+		
 		hdr.writelnf("%s(%s);", isInterface ? defineRef : defineClass, className);
 		hdr.writeln();
 		
@@ -189,14 +197,7 @@ public class As2CppConverter extends As2WhateverConverter
 			writeClassStaticInit(bcClass);
 			writeClassGcMarkMethod(bcClass);
 			writeClassDefaultConstructor(bcClass);
-			/*
 			writeClassSelectors(bcClass);
-			*/
-			
-			if (bcClass.hasFunctionTypes())
-			{
-				writeFunctionTypes(bcClass);
-			}
 			
 			// generate interface boxers accessors if any
 			if (bcClass.hasInterfaces())
@@ -625,13 +626,13 @@ public class As2CppConverter extends As2WhateverConverter
 			{
 				impl.write("  ");
 				
-				if (canBeClass(field.getType()))
+				if (field.getType().isIntegral())
 				{
-					impl.writef("%s(false)", getCodeHelper().identifier(field.getIdentifier()));
+					impl.writef("%s(0)", getCodeHelper().identifier(field.getIdentifier()));
 				}
 				else
 				{
-					impl.writef("%s(0)", getCodeHelper().identifier(field.getIdentifier()));
+					impl.writef("%s(false)", getCodeHelper().identifier(field.getIdentifier()));
 				}
 				if (++fieldIndex < fields.size())
 				{
@@ -741,10 +742,23 @@ public class As2CppConverter extends As2WhateverConverter
 
 	private void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
 	{
-		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
-		String name = getCodeHelper().identifier(funcType.getName());			
+		String type = funcType.hasReturnType() ? typeRef(funcType.getReturnType()) : "void";
+		String name = typeRef(getCodeHelper().identifier(funcType.getName()));			
+
+		hdr.writelnf("class %s : public AsObjectRef<%s>", name, type(classFunction));
+		hdr.writeBlockOpen();
 		
-		hdr.writelnf("public delegate %s %s(%s);", type, type(name), paramsDef(funcType.getParams()));
+		writeVisiblity("public", true);
+		writeDefine(hdr, defineObjectRefCommon, name, type(classFunction));
+		hdr.writeln();
+		
+		List<BcFuncParam> params = funcType.getParams();
+		hdr.writelnf("inline %s operator() (%s)", type, paramsDef(params));
+		hdr.writeBlockOpen();
+		hdr.writelnf("return object()->call<%s>(%s);", type, argsDef(params));
+		hdr.writeBlockClose();
+		
+		hdr.writeBlockClose(true);
 	}
 	
 	private void writeBoxingInterfaces(BcClassDefinitionNode bcClass)
