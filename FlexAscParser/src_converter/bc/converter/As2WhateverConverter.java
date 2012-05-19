@@ -1328,8 +1328,8 @@ public abstract class As2WhateverConverter
 				assert argType != null;
 				
 				if (typeEquals(type, classString))
-				{
-					dest.writef("(%s).ToString()", argStr);
+				{					
+					dest.writef(toString(argStr));
 				}
 				else
 				{				
@@ -3302,6 +3302,8 @@ public abstract class As2WhateverConverter
 	
 	public abstract String construct(String type, Object initializer);
 	public abstract String operatorIs(Object lhs, Object rhs);
+	
+	public abstract String toString(Object expr);
 	
 	protected abstract String vectorType(BcVectorTypeNode vectorType);
 	public abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);

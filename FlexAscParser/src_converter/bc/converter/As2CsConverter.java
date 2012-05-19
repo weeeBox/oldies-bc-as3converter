@@ -477,4 +477,10 @@ public class As2CsConverter extends As2WhateverConverter
 	{
 		return String.format("%s %s %s", lhs, IS, type(rhs.toString()));
 	}
+	
+	@Override
+	public String toString(Object expr)
+	{
+		return memberCall(expr, "ToString");
+	}
 }

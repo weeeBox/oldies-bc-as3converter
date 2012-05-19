@@ -1146,4 +1146,10 @@ public class As2CppConverter extends As2WhateverConverter
 	{
 		return String.format("%s %s", typeRef(type), getCodeHelper().identifier(identifier));
 	}	
+	
+	@Override
+	public String toString(Object expr)
+	{
+		return memberCall(expr, "toString");
+	}
 }

@@ -28,6 +28,13 @@ public class CsCodeHelper extends BcCodeHelper
 		"while", "yield"
 	};
 	
+	public static String SETTING_UPPERCASE_STRING_SELECTORS = "SETTING_UPPERCASE_STRING_SELECTORS";
+	
+	public CsCodeHelper()
+	{
+		setSetting(SETTING_UPPERCASE_STRING_SELECTORS, true);
+	}
+	
 	@Override
 	protected String[] getKeywords()
 	{

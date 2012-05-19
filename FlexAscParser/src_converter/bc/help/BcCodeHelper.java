@@ -16,7 +16,9 @@ public abstract class BcCodeHelper
 	protected abstract String[] getKeywords();
 	
 	private static Map<String, String> basicTypes;
-	private static Map<String, String> integralTypes;
+	private static Map<String, String> integralTypes;	
+	
+	private Map<String, Object> settingsMap;
 	
 	static
 	{
@@ -36,6 +38,11 @@ public abstract class BcCodeHelper
 		integralTypes.put("float", "float");
 		integralTypes.put("Boolean", "bool");
 	};
+	
+	public BcCodeHelper()
+	{
+		settingsMap = new HashMap<String, Object>();
+	}
 	
 	public abstract String literalNull();
 	
@@ -137,5 +144,37 @@ public abstract class BcCodeHelper
 	public String namespace(String packageName) 
 	{
 		return packageName;
+	}
+
+	protected void setSetting(String name, Object value)
+	{
+		settingsMap.put(name, value);
+	}
+	
+	public String stringSetting(String name)
+	{
+		return stringSetting(name, null);
+	}
+	
+	public String stringSetting(String name, String defaultValue)
+	{
+		Object value = objectSetting(name);
+		return value == null ? defaultValue : (String) value;
+	}
+	
+	public boolean boolSetting(String name)
+	{
+		return boolSetting(name, false);
+	}
+	
+	public boolean boolSetting(String name, boolean defaultValue)
+	{
+		Object value = objectSetting(name);
+		return value == null ? defaultValue : ((Boolean)value).booleanValue();
+	}
+	
+	public Object objectSetting(String name)
+	{
+		return settingsMap.get(name);
 	}
 }
