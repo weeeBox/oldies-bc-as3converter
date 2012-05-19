@@ -973,7 +973,7 @@ public abstract class As2WhateverConverter
 						assert funcType != null : identifier;
 						
 						lastBcMemberType = funcType;
-						if (classEquals(bcClass, classString) && identifier.equals("length"))
+						if (classEquals(bcClass, classString) && identifier.equals("length") && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
 						{
 							// keep String.length property as a "Lenght" property
 							identifier = Character.toUpperCase(identifier.charAt(0)) + identifier.substring(1);
