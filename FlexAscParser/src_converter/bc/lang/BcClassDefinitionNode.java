@@ -102,6 +102,11 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return extendsType != null;
 	}
 	
+	public BcClassDefinitionNode getExtendsClass()
+	{
+		return hasExtendsType() ? extendsType.getClassNode() : null;
+	}
+	
 	public void addFunctionType(BcFunctionTypeNode node)
 	{
 		functionTypes.add(node);
