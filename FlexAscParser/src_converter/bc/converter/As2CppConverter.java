@@ -1098,12 +1098,6 @@ public class As2CppConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	public String castClass(Object expr, BcTypeNode fromType, BcTypeNode toType)
-	{
-		return expr.toString();
-	}
-	
-	@Override
 	public String castInterface(Object expr, BcTypeNode fromType, BcTypeNode toType)
 	{
 		return String.format("%s(%s, %s)", UNBOX, type(toType), expr);
