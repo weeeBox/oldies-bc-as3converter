@@ -798,8 +798,8 @@ public abstract class As2WhateverConverter
 				objectAsDictionaryCall = !typeOneOf(baseType, classVector, classDictionary, classArray, classString, classXMLList);				
 			}
 			
-			if (typeEquals(baseType, classString))
-			{
+			if (typeEquals(baseType, classString) && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
+			{				
 				String selectorCode = selectorDest.toString();
 				stringCall = !selectorCode.equals("ToString()") && !selectorCode.equals("Length");
 			}			
@@ -1190,7 +1190,7 @@ public abstract class As2WhateverConverter
 					calledFunction = bcFunc;
 					
 					lastBcMemberType = bcFunc.getReturnType();
-					if (classEquals(bcClass, classString))
+					if (classEquals(bcClass, classString) && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
 					{
 						if (identifier.equals("toString"))
 						{
