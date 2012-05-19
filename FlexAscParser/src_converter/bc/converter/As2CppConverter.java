@@ -70,6 +70,7 @@ public class As2CppConverter extends As2WhateverConverter
 		definedTypes.add("Object");
 		definedTypes.add("String");
 		definedTypes.add("Function");
+		definedTypes.add("Vector");
 	}
 	
 	public As2CppConverter()
@@ -138,7 +139,7 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		lastVisiblityModifier = null;
 		
-		String defGuardName = className + "_h__";
+		String defGuardName = headerDefguard(className);
 		
 		hdr.writeln("#ifndef " + defGuardName);
 		hdr.writeln("#define " + defGuardName);
@@ -214,6 +215,9 @@ public class As2CppConverter extends As2WhateverConverter
 			hdr.writeln();
 			writeDefine(hdr, defineInterfaceRef, true, className);
 		}
+		
+		hdr.writeln();
+		writeFilesIncludes(hdr, headerTypes);
 		
 		hdr.writeln();
 		hdr.writeln("#endif // " + defGuardName);
@@ -835,6 +839,19 @@ public class As2CppConverter extends As2WhateverConverter
 		hdr.writelnf("inline static %s* %s(%s* obj) { return ((%s*)obj)->%s; }", className, classInterfaceUnbox, baseName, interfaceWrapperName, targetFieldName);
 	}
 	
+	private void writeFilesIncludes(ListWriteDestination dest, List<BcTypeNode> types)
+	{
+		for (BcTypeNode bcType : types)
+		{
+			if (!definedTypes.contains(bcType.getName()))
+			{
+				dest.writelnf("#ifndef %s", headerDefguard(type(bcType)));
+				dest.writeln(getCodeHelper().include(type(bcType) + ".h"));
+				dest.writeln("#endif");
+			}
+		}
+	}
+	
 	private List<BcTypeNode> getHeaderTypedefs(BcClassDefinitionNode bcClass)
 	{
 		List<BcTypeNode> includes = new ArrayList<BcTypeNode>();
@@ -1159,5 +1176,10 @@ public class As2CppConverter extends As2WhateverConverter
 	public String toString(Object expr)
 	{
 		return memberCall(expr, "toString");
+	}
+	
+	protected String headerDefguard(String className)
+	{
+		return className + "_h__";
 	}
 }

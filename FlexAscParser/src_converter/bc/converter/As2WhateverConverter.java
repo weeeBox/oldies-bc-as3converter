@@ -3434,7 +3434,7 @@ public abstract class As2WhateverConverter
 	
 	public String staticCall(Object target, Object selector, Object... args)
 	{
-		return memberCall(target, selector, args);
+		return staticSelector(target, String.format("%s(%s)", selector, BcStringUtils.commaSeparated(args)));
 	}
 	
 	public String memberCall(Object target, Object selector, Object... args)
