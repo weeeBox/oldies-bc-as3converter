@@ -2,8 +2,6 @@ package bc.help;
 
 public class CsCodeHelper extends BcCodeHelper
 {
-	protected static final String NULL = "null";
-	
 	private static String[] keyWords = 
 	{
 		"abstract", "add", "alias", "as", "ascending", 
@@ -42,6 +40,6 @@ public class CsCodeHelper extends BcCodeHelper
 	@Override
 	public String literalNull()
 	{
-		return NULL;
+		return "null";
 	}
 }

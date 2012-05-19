@@ -335,7 +335,14 @@ public class As2CppConverter extends As2WhateverConverter
 				{
 					impl.writelnf("%s %s::%s(true);", type, className, name);
 				}
-				else if (!canBeInitializedInHeader(bcField))
+				else if (canBeInitializedInHeader(bcField))
+				{
+					if (isConst)
+					{
+						hdr.write("const ");
+					}				
+				}
+				else
 				{
 					if (canBeInitializedInImplementation(bcField))
 					{
@@ -347,9 +354,12 @@ public class As2CppConverter extends As2WhateverConverter
 					}
 				}
 			}
-			if (isConst && !canBeClass)
+			else
 			{
-				hdr.write("const ");
+				if (isConst && !canBeClass)
+				{
+					hdr.write("const ");
+				}				
 			}
 			
 			hdr.write(varDecl(bcField.getType(), name));

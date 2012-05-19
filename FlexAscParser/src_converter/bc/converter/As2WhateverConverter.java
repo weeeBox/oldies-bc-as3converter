@@ -1694,9 +1694,9 @@ public abstract class As2WhateverConverter
 		{
 			if (typeEquals(conditionType, "int") || typeEquals(conditionType, "uint"))
 			{
-				return String.format("(%s) != 0", condString);
+				return getCodeHelper().notZero(condString);
 			}
-			return String.format("(%s) != null", condString);
+			return getCodeHelper().notNull(condString);
 		}
 		else
 		{
@@ -1882,6 +1882,7 @@ public abstract class As2WhateverConverter
 	
 	private void process(DoStatementNode node)
 	{
+		assert false;
 	}
 	
 	private void process(SwitchStatementNode node)
