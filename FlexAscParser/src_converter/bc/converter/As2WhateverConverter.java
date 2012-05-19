@@ -1354,7 +1354,8 @@ public abstract class As2WhateverConverter
 		process(node.expr);
 		popDest();
 		
-		String identifier = exprDest.toString();		
+		String identifier = exprDest.toString();
+		boolean addToDictionary = false;
 		
 		boolean setterCalled = false;
 		if (node.expr instanceof IdentifierNode)
@@ -1437,6 +1438,7 @@ public abstract class As2WhateverConverter
 			else
 			{
 				lastBcMemberType = createBcType(classObject);
+				addToDictionary = true;
 			}
 		}
 		else
@@ -1489,7 +1491,7 @@ public abstract class As2WhateverConverter
 				BcTypeNode argType = evaluateType(argNode);
 				assert argType != null : argNode;
 				
-				boolean needCast = needExplicitCast(argType, selectorType);
+				boolean needCast = !addToDictionary && needExplicitCast(argType, selectorType);
 				
 				if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 				{
