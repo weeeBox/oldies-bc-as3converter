@@ -335,23 +335,21 @@ public class As2CppConverter extends As2WhateverConverter
 				{
 					impl.writelnf("%s %s::%s(true);", type, className, name);
 				}
-				else if (canBeInitializedInHeader(bcField))
-				{
-					if (isConst)
-					{
-						hdr.write("const ");
-					}				
-				}
-				else
+				else if (!canBeInitializedInHeader(bcField))
 				{
 					if (canBeInitializedInImplementation(bcField))
 					{
+						hdr.write("const ");
 						impl.writelnf("const %s %s::%s = %s;", type, className, name, bcField.getInitializer());
 					}
 					else
 					{
 						impl.writelnf("%s %s::%s(0);", type, className, name);
 					}
+				}
+				else
+				{
+					hdr.write("const ");
 				}
 			}
 			else
