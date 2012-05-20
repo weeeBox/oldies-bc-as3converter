@@ -437,6 +437,18 @@ public class As2CsConverter extends As2WhateverConverter
 	protected static final String VECTOR_BC_TYPE = "Vector";
 		
 	@Override
+	public String thisSelector(BcClassDefinitionNode bcClass, Object selector)
+	{
+		return memberSelector("this", selector);
+	}
+	
+	@Override
+	public String superSelector(BcClassDefinitionNode bcClass, Object selector)
+	{
+		return memberSelector("base", selector);
+	}
+	
+	@Override
 	protected String classType(String name)
 	{
 		if (name.equals("String"))

@@ -797,12 +797,12 @@ public abstract class As2WhateverConverter
 			{
 				objectAsDictionaryCall = !typeOneOf(baseType, classVector, classDictionary, classArray, classString, classXMLList);				
 			}
-			
+						
 			if (typeEquals(baseType, classString) && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
 			{				
 				String selectorCode = selectorDest.toString();
 				stringCall = !selectorCode.equals("ToString()") && !selectorCode.equals("Length");
-			}			
+			}
 		}
 		
 		if (objectAsDictionaryCall)
@@ -869,6 +869,16 @@ public abstract class As2WhateverConverter
 					if (staticCall)
 					{
 						dest.write(staticSelector(baseDest, selectorDest));
+					}
+					else if (base instanceof ThisExpressionNode)
+					{
+						assert lastBcClass != null;
+						dest.write(thisSelector(lastBcClass, selectorDest));
+					}
+					else if (base instanceof SuperExpressionNode)
+					{
+						assert lastBcClass != null;
+						dest.write(superSelector(lastBcClass, selectorDest));
 					}
 					else
 					{
@@ -3303,6 +3313,9 @@ public abstract class As2WhateverConverter
 	
 	public abstract String construct(String type, Object initializer);
 	public abstract String operatorIs(Object lhs, Object rhs);
+	
+	public abstract String thisSelector(BcClassDefinitionNode bcClass, Object selector);
+	public abstract String superSelector(BcClassDefinitionNode bcClass, Object selector);
 	
 	public abstract String toString(Object expr);
 	

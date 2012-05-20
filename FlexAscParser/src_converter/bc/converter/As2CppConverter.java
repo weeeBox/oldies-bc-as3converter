@@ -1048,6 +1048,19 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String IS_OPERATOR = "AS_IS";
 	
 	@Override
+	public String thisSelector(BcClassDefinitionNode bcClass, Object selector)
+	{
+		return memberSelector("this", selector);
+	}
+	
+	@Override
+	public String superSelector(BcClassDefinitionNode bcClass, Object selector)
+	{
+		BcClassDefinitionNode extendsClass = bcClass.getExtendsClass();
+		return staticSelector(extendsClass != null ? type(extendsClass.getClassType()) : type(classObject), selector);
+	}
+	
+	@Override
 	public String construct(String type, Object initializer)
 	{
 		return String.format("%s(%s,(%s))", NEW, type(type), initializer);
