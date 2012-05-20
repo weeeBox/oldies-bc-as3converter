@@ -279,12 +279,12 @@ public class As2CppConverter extends As2WhateverConverter
 					String guardName = headerDefguard(type(bcType));
 					String defineName = bcType.getClassNode().isInterface() ? defineRef : defineClass;
 
-					defineDest.writeln();
-					defineDest.writelnf("#ifndef %s", guardName);
-					defineDest.writeln(getCodeHelper().include(type(bcType) + ".h"));
-					defineDest.writeln("#else");
-					defineDest.writelnf("%s(%s);", defineName, type(bcType));
-					defineDest.writelnf("#endif // %s", guardName);
+					includeDest.writeln();
+					includeDest.writelnf("#ifndef %s", guardName);
+					includeDest.writeln(getCodeHelper().include(type(bcType) + ".h"));
+					includeDest.writeln("#else");
+					includeDest.writelnf("%s(%s);", defineName, type(bcType));
+					includeDest.writelnf("#endif // %s", guardName);
 				}
 			}
 		}
