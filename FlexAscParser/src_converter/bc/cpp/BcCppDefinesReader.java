@@ -26,7 +26,12 @@ public class BcCppDefinesReader
 		return "(" + regex + ")";
 	}
 	
-	private static final Pattern definePattern = Pattern.compile("\\#define" + SPACE + IDENTIFIER + MB_SPACE + LPAR + ANY + RPAR);
+	private static String mb(String regex)
+	{
+		return "(" + regex + ")?";
+	}
+	
+	private static final Pattern definePattern = Pattern.compile("\\#define" + SPACE + IDENTIFIER + mb(MB_SPACE + LPAR + ANY + RPAR));
 	
 	public static BcCppDefines read(File file) throws IOException
 	{
@@ -56,8 +61,7 @@ public class BcCppDefinesReader
 		String name = m.group(1);
 		String paramsStr = m.group(2);
 		
-		assert paramsStr != null;
-		String[] params = paramsStr.trim().split("," + MB_SPACE);
+		String[] params = paramsStr != null ? m.group(3).trim().split("," + MB_SPACE) : new String[] {};
 		
 		BcCppDefine define = new BcCppDefine(name, params);
 

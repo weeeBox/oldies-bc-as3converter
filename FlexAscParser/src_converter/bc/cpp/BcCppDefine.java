@@ -23,7 +23,7 @@ public class BcCppDefine
 		body.add(line);
 	}
 	
-	public void write(WriteDestination dest, String... args)
+	public void write(WriteDestination dest, Object... args)
 	{
 		if (params.length != args.length)
 			throw new IllegalArgumentException("Params are different then args");
@@ -35,11 +35,11 @@ public class BcCppDefine
 		}
 	}
 	
-	private String inlineArgs(String line, String[] args)
+	private String inlineArgs(String line, Object[] args)
 	{
 		for (int i = 0; i < args.length; ++i)
 		{
-			String arg = args[i];
+			Object arg = args[i];
 			String param = params[i];
 			
 			line = inlineArg(line, param, arg);
@@ -47,12 +47,15 @@ public class BcCppDefine
 		return line;
 	}
 
-	private String inlineArg(String line, String param, String arg)
+	private String inlineArg(String line, String param, Object arg)
 	{
-		line = line.replaceAll("##" + param, arg);
-		line = line.replaceAll(param + "##", arg);
-		line = line.replaceAll("#" + param, '"' + arg + '"');
-		line = line.replaceAll("\\b" + param + "\\b", arg);
+		String argStr = arg.toString();
+		
+		line = line.replaceAll("##" + param, argStr);
+		line = line.replaceAll(param + "##", argStr);
+		line = line.replaceAll("#" + param, '"' + argStr + '"');
+		line = line.replaceAll("\\b" + param + "\\b", argStr);
+		line = line.replaceAll("##", "");
 		
 		return line;
 	}

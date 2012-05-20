@@ -116,9 +116,9 @@ public class As2CppConverter extends As2WhateverConverter
 	{	
 		String defineName = foreachNameForType(collectionType);
 		
-		dest.writelnf("%s(%s, %s, %s)", defineName, type(loopVarType), loopVarName, collection);
+		writeDefine(dest, defineName, type(loopVarType), loopVarName, collection);		
 		dest.writeln(body);
-		dest.writeln(defineForeachEnd);
+		writeDefine(dest, defineForeachEnd);
 	}
 	
 	@Override
@@ -288,11 +288,29 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private void writeImplementationTypes(WriteDestination dst, List<BcTypeNode> types)
 	{
+		boolean vectorIncluded = false;
+		
 		for (BcTypeNode type : types)
 		{
 			if (type instanceof BcVectorTypeNode)
 			{
-				System.err.println("Fix me!!! Vector in implementation");
+				BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
+				String genericName = type(vectorType.getGeneric());
+				
+				if (!vectorIncluded)
+				{
+					vectorIncluded = true;
+					dst.writeln(getCodeHelper().include(type(type) + ".h"));
+				}
+				
+				if (vectorType.getGeneric().isIntegral())
+				{
+					dst.writelnf("%s(%s);", definePrimitiveVector, genericName);
+				}
+				else
+				{
+					dst.writelnf("%s(%s);", defineVector, type(vectorType.getGeneric()));
+				}
 			}
 			else
 			{
@@ -908,12 +926,12 @@ public class As2CppConverter extends As2WhateverConverter
 		dest.incTab();
 	}
 	
-	private void writeDefine(WriteDestination dest, String defineName, String...args)
+	private void writeDefine(WriteDestination dest, String defineName, Object...args)
 	{
 		writeDefine(dest, defineName, false, args);
 	}
 	
-	private void writeDefine(WriteDestination dest, String defineName, boolean addSemicolon, String...args)
+	private void writeDefine(WriteDestination dest, String defineName, boolean addSemicolon, Object...args)
 	{
 		BcCppDefine define = defines.find(defineName);
 		if (define != null)
