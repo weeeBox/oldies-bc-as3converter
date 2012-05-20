@@ -1771,6 +1771,8 @@ public abstract class As2WhateverConverter
 		boolean isForEach = node.test instanceof HasNextNode;
 		if (isForEach)
 		{
+			assert lastBcClass != null;
+			
 			// get iterable collection expression
 			assert node.initialize != null;
 			assert node.initialize instanceof ListNode : node.initialize.getClass();
@@ -1788,6 +1790,8 @@ public abstract class As2WhateverConverter
 			
 			BcTypeNode collectionType = evaluateType(coerce.expr);
 			assert collectionType != null;
+			
+			lastBcClass.addToImport(collectionType);
 			
 			assert node.statement != null;
 			assert node.statement instanceof StatementListNode : node.statement.getClass();

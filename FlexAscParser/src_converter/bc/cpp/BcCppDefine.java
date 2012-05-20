@@ -44,7 +44,7 @@ public class BcCppDefine
 			
 			line = inlineArg(line, param, arg);
 		}
-		return line;
+		return line.replaceAll("##", "");
 	}
 
 	private String inlineArg(String line, String param, Object arg)
@@ -54,8 +54,7 @@ public class BcCppDefine
 		line = line.replaceAll("##" + param, argStr);
 		line = line.replaceAll(param + "##", argStr);
 		line = line.replaceAll("#" + param, '"' + argStr + '"');
-		line = line.replaceAll("\\b" + param + "\\b", argStr);
-		line = line.replaceAll("##", "");
+		line = line.replaceAll("\\b" + param + "\\b", argStr);		
 		
 		return line;
 	}

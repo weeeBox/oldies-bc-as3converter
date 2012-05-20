@@ -31,13 +31,13 @@ type(const type& other) : AsObjectRef(other) {} \
 type(objectType* obj) : AsObjectRef(obj) {} \
 explicit type(bool isStatic) : AsObjectRef(isStatic) {}
 
-#define AS_FOREACH(type, var, collection) \
-{ _V_##type##_ref __##var##s_ = collection; \
-if (__##var##s_ != AS_NULL) { for(_as_AsRefVector<type##_ref>::Iterator it = (__##var##s_)->iterator(); it.hasNext();) { type##_ref var = it.next();
+#define AS_FOREACH(varType, var, iterType, collection) \
+{ _V_##iterType##_ref __##var##s_ = collection; \
+if (__##var##s_ != AS_NULL) { for(_as_AsRefVector<iterType##_ref>::Iterator it = (__##var##s_)->iterator(); it.hasNext();) { varType##_ref var = it.next();
 
-#define AS_PRIMITIVE_FOREACH(type, var, collection) \
-{ _V_##type##_ref __##var##s_ = collection; \
-if (__##var##s_ != AS_NULL) { for(AsVector<type>::Iterator it = (__##var##s_)->iterator(); it.hasNext();) { type var = it.next();
+#define AS_PRIMITIVE_FOREACH(varType, var, iterType, collection) \
+{ _V_##iterType##_ref __##var##s_ = collection; \
+if (__##var##s_ != AS_NULL) { for(AsVector<iterType>::Iterator it = (__##var##s_)->iterator(); it.hasNext();) { varType var = it.next();
 
 #define AS_XML_FOREACH(var, collection) \
 { AsXMLList_ref __##var##s_ = collection; \

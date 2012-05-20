@@ -123,7 +123,8 @@ public class As2CppConverter extends As2WhateverConverter
 		}
 		else
 		{
-			writeDefine(dest, defineName, type(loopVarType), loopVarName, collection);
+			BcTypeNode iterType = foreachIterType(collectionType);
+			writeDefine(dest, defineName, type(loopVarType), loopVarName, type(iterType), collection);
 		}
 		
 		dest.writeln(body);
@@ -226,9 +227,6 @@ public class As2CppConverter extends As2WhateverConverter
 		}
 		
 		hdr.writeln();
-		writeFilesIncludes(hdr, headerTypes);
-		
-		hdr.writeln();
 		hdr.writeln("#endif // " + defGuardName);
 		
 		if (shouldWriteClassToFile(bcClass, hdrFile))
@@ -278,8 +276,15 @@ public class As2CppConverter extends As2WhateverConverter
 				}
 				else
 				{
+					String guardName = headerDefguard(type(bcType));
 					String defineName = bcType.getClassNode().isInterface() ? defineRef : defineClass;
+
+					defineDest.writeln();
+					defineDest.writelnf("#ifndef %s", guardName);
+					defineDest.writeln(getCodeHelper().include(type(bcType) + ".h"));
+					defineDest.writeln("#else");
 					defineDest.writelnf("%s(%s);", defineName, type(bcType));
+					defineDest.writelnf("#endif // %s", guardName);
 				}
 			}
 		}
@@ -982,14 +987,15 @@ public class As2CppConverter extends As2WhateverConverter
 	{
 		if (canBeClass(type))
 		{
-			if (type instanceof BcVectorTypeNode)
-			{
-				BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
-				tryAddUniqueType(types, vectorType.getGeneric());
-			}
 			if (!types.contains(type))
 			{
 				types.add(type);
+				
+				if (type instanceof BcVectorTypeNode)
+				{
+					BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
+					tryAddUniqueType(types, vectorType.getGeneric());
+				}
 			}
 		}
 	}
@@ -1039,6 +1045,23 @@ public class As2CppConverter extends As2WhateverConverter
 		else if (typeEquals(type, classXMLList))
 		{
 			return defineXmlForeach;
+		}
+		else
+		{
+			assert false : type.getName();
+		}
+		return null;
+	}
+	
+	private BcTypeNode foreachIterType(BcTypeNode type)
+	{
+		if (type instanceof BcVectorTypeNode)
+		{
+			return ((BcVectorTypeNode) type).getGeneric();
+		}
+		else if (typeEquals(type, classXMLList))
+		{
+			return BcTypeNode.create(classXML);
 		}
 		else
 		{
