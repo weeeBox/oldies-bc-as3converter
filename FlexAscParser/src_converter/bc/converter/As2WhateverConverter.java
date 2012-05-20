@@ -1064,7 +1064,7 @@ public abstract class As2WhateverConverter
 		
 		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 		{
-			dest.writef("[%s]", identifier);
+			dest.write(indexerGetter(identifier));
 		}
 		else if (accessingDynamicProperty)
 		{
@@ -1467,7 +1467,7 @@ public abstract class As2WhateverConverter
 		{
 			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 			{
-				dest.writef("[%s](%s)", identifier, argsDest);
+				dest.writef("%s(%s)", indexerGetter(identifier), argsDest);
 			}
 			else
 			{
@@ -1507,11 +1507,11 @@ public abstract class As2WhateverConverter
 				{
 					if (needCast)
 					{
-						dest.writef("[%s] = %s", identifier, cast(argsDest, argType, selectorType));
+						dest.write(indexerSetter(identifier, cast(argsDest, argType, selectorType)));
 					}
 					else
 					{
-						dest.writef("[%s] = %s", identifier, argsDest);
+						dest.write(indexerSetter(identifier, argsDest));
 					}
 				}
 				else
@@ -3457,6 +3457,28 @@ public abstract class As2WhateverConverter
 	public String memberCall(Object target, Object selector, Object... args)
 	{
 		return memberSelector(target, String.format("%s(%s)", selector, BcStringUtils.commaSeparated(args)));
+	}
+	
+	public String indexerGetter(Object expr)
+	{
+		assert expr != null;
+		return String.format("[%s]", expr);
+	}
+	
+	public String indexerSetter(Object expr, Object value)
+	{
+		assert expr != null;
+		return String.format("[%s] = %s", expr, value);
+	}
+	
+	public String propertyGetter(Object expr)
+	{
+		return indexerGetter(expr);
+	}
+	
+	public String propertySetter(Object expr, Object value)
+	{
+		return indexerSetter(expr, value);
 	}
 	
 	public String cast(Object expr, BcTypeNode type)

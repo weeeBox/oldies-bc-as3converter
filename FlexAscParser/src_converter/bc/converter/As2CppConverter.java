@@ -64,16 +64,6 @@ public class As2CppConverter extends As2WhateverConverter
 	private ListWriteDestination impl;
 	private BcCppDefines defines;
 
-	private static Set<String> definedTypes; // this types shouldn't be redefined
-	static
-	{
-		definedTypes = new HashSet<String>();
-		definedTypes.add("Object");
-		definedTypes.add("String");
-		definedTypes.add("Function");
-		definedTypes.add("Vector");
-	}
-	
 	public As2CppConverter()
 	{
 		super(new CppCodeHelper());
@@ -270,14 +260,14 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 			else
 			{
-				if (definedTypes.contains(bcType.getName()))
+				if (isPlatformClass(bcType.getClassNode()))
 				{
 					includeDest.writeln(getCodeHelper().include(type(bcType) + ".h"));
 				}
 				else
 				{
 					String guardName = headerDefguard(type(bcType));
-					String defineName = bcType.getClassNode().isInterface() ? defineRef : defineClass;
+					String defineName = bcType.isInterface() ? defineRef : defineClass;
 
 					includeDest.writeln();
 					includeDest.writelnf("#ifndef %s", guardName);
@@ -869,19 +859,6 @@ public class As2CppConverter extends As2WhateverConverter
 		hdr.writeln();
 		hdr.writelnf("inline %s %s() { return new %s(this); }", typeRef(baseName), boxName, interfaceWrapperName);
 		hdr.writelnf("inline static %s* %s(%s* obj) { return ((%s*)obj)->%s; }", className, classInterfaceUnbox, baseName, interfaceWrapperName, targetFieldName);
-	}
-	
-	private void writeFilesIncludes(ListWriteDestination dest, List<BcTypeNode> types)
-	{
-		for (BcTypeNode bcType : types)
-		{
-			if (!definedTypes.contains(bcType.getName()))
-			{
-				dest.writelnf("#ifndef %s", headerDefguard(type(bcType)));
-				dest.writeln(getCodeHelper().include(type(bcType) + ".h"));
-				dest.writeln("#endif");
-			}
-		}
 	}
 	
 	private List<BcTypeNode> getHeaderTypedefs(BcClassDefinitionNode bcClass)
