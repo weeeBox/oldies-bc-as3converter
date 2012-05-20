@@ -34,6 +34,7 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String definePrimitiveVector = "AS_VECTOR_PRIMITIVE_REF";
 	private static final String defineForeach = "AS_FOREACH";
 	private static final String definePrimitiveForeach = "AS_PRIMITIVE_FOREACH";
+	private static final String defineXmlForeach = "AS_XML_FOREACH";
 	private static final String defineForeachEnd = "AS_FOREACH_END";
 	
 	private static final String defineObject = "AS_OBJ";
@@ -116,7 +117,15 @@ public class As2CppConverter extends As2WhateverConverter
 	{	
 		String defineName = foreachNameForType(collectionType);
 		
-		writeDefine(dest, defineName, type(loopVarType), loopVarName, collection);		
+		if (defineName.equals(defineXmlForeach))
+		{
+			writeDefine(dest, defineName, loopVarName, collection);
+		}
+		else
+		{
+			writeDefine(dest, defineName, type(loopVarType), loopVarName, collection);
+		}
+		
 		dest.writeln(body);
 		writeDefine(dest, defineForeachEnd);
 	}
@@ -1029,7 +1038,7 @@ public class As2CppConverter extends As2WhateverConverter
 		}
 		else if (typeEquals(type, classXMLList))
 		{
-			return defineForeach;
+			return defineXmlForeach;
 		}
 		else
 		{
