@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -80,6 +81,7 @@ import macromedia.asc.util.ContextStatics;
 import macromedia.asc.util.ObjectList;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
+import bc.error.ConverterException;
 import bc.help.BcCodeHelper;
 import bc.help.BcNodeHelper;
 import bc.help.BcStringUtils;
@@ -230,7 +232,7 @@ public abstract class As2WhateverConverter
 				if (metadata.def != null)
 				{
 					BcMetadata bcMetadata = BcNodeHelper.extractBcMetadata(metadata);
-					assert bcMetadata != null;
+					failConversionUnless(bcMetadata != null, "Can't parse top level metadata");
 					
 					bcMetadataMap.put(metadata.def, bcMetadata);
 				}
@@ -280,7 +282,7 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{
-					assert false;
+					failConversion("Unexpected interface element: " + node.getClass());
 				}
 			}		
 		}
@@ -354,18 +356,18 @@ public abstract class As2WhateverConverter
 				if (metadata.def != null)
 				{
 					BcMetadata bcMetadata = BcNodeHelper.extractBcMetadata(metadata);
-					assert bcMetadata != null;
+					failConversionUnless(bcMetadata != null, "Failed to extract metadata");
 					
 					bcMetadataMap.put(metadata.def, bcMetadata);
 				}
 			}
 			else if (node instanceof ExpressionStatementNode)
 			{
-				assert false : "Top level ExpressionStatementNode";
+				failConversion("Unsupported top level expression found");
 			}
 			else
 			{
-				assert false : node.getClass();
+				failConversion("Unexpected top level class element found: " + node.getClass());
 			}
 		}		
 		
@@ -551,7 +553,7 @@ public abstract class As2WhateverConverter
 			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(initializer));
 			
 			BcTypeNode initializerType = evaluateType(initializer);
-			assert initializerType != null;
+			failConversionUnless(initializerType != null, "Unable to evaluate initializer type: %s = %s", varDecl(varType, varId), initializerDest);
 			
 			if (needExplicitCast(initializerType, varType))
 			{
@@ -636,7 +638,7 @@ public abstract class As2WhateverConverter
 		else if (node instanceof FunctionCommonNode)
 			process((FunctionCommonNode)node);
 		else
-			assert false : node.getClass();
+			failConversion("Unsupported node class: %s", node.getClass());
 	}
 	
 	private void process(StatementListNode statementsNode)
@@ -680,9 +682,8 @@ public abstract class As2WhateverConverter
 	}
 	
 	private void process(FunctionCommonNode node)
-	{
-		System.err.println("Fix me!!! FunctionCommonNode");
-		assert false;
+	{		
+		failConversion("Unexpected function common node");
 	}
 	
 	private BcVariableDeclaration process(VariableDefinitionNode node)
@@ -711,7 +712,7 @@ public abstract class As2WhateverConverter
 			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(varBindNode.initializer));
 			
 			BcTypeNode initializerType = evaluateType(varBindNode.initializer);
-			assert initializerType != null;
+			failConversionUnless(initializerType != null, "Unable to evaluate initializer's type: %s = %s", varDecl(varType, bcIdentifier), initializer);
 			
 			if (needExplicitCast(initializerType, varType))
 			{
@@ -755,7 +756,7 @@ public abstract class As2WhateverConverter
 			pushDest(baseDest);
 			
 			lastBcMemberType = evaluateType(base);
-			assert lastBcMemberType != null;
+			failConversionUnless(lastBcMemberType != null, "Unable to evaluate base member's type");
 			
 			baseType = lastBcMemberType;
 			
@@ -816,7 +817,7 @@ public abstract class As2WhateverConverter
 			{
 				SetExpressionNode setExpr = (SetExpressionNode) selector;
 				
-				assert setExpr.args != null;				
+				failConversionUnless(setExpr.args != null, "Set expression with no args: %s", exprDest);				
 				
 				ListWriteDestination argsDest = new ListWriteDestination();
 				pushDest(argsDest);
@@ -831,12 +832,12 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				assert false;
+				failConversion("Unexpected selector for 'object-as-dictionary' call: type=%s expr=%s", selector.getClass(), exprDest);
 			}
 		}
 		else if (stringCall)	
 		{
-			assert selector instanceof CallExpressionNode;
+			failConversionUnless(selector instanceof CallExpressionNode, "'call' expression is expected: type=%s base=%s selecto=%s", selector.getClass(), baseDest, selectorDest);
 			CallExpressionNode callExpr = (CallExpressionNode) selector;
 			
 			ListWriteDestination argsDest = new ListWriteDestination();
@@ -848,7 +849,7 @@ public abstract class As2WhateverConverter
 			}
 			
 			IdentifierNode funcIndentifierNode = BcNodeHelper.tryExtractIdentifier(selector);
-			assert funcIndentifierNode != null;
+			failConversionUnless(funcIndentifierNode != null, "Unable to extract identifier from: %s", selectorDest);
 			
 			String funcName = getCodeHelper().identifier(funcIndentifierNode);
 			if (callExpr.args != null)
@@ -872,12 +873,12 @@ public abstract class As2WhateverConverter
 					}
 					else if (base instanceof ThisExpressionNode)
 					{
-						assert lastBcClass != null;
+						failConversionUnless(lastBcClass != null, "Try to use 'this' without of a class: base=%s selector=%s", baseDest, selectorDest);
 						dest.write(thisSelector(lastBcClass, selectorDest));
 					}
 					else if (base instanceof SuperExpressionNode)
 					{
-						assert lastBcClass != null;
+						failConversionUnless(lastBcClass != null, "Try to use 'super' without of a class: base=%s selector=%s", baseDest, selectorDest);
 						dest.write(superSelector(lastBcClass, selectorDest));
 					}
 					else
@@ -915,7 +916,7 @@ public abstract class As2WhateverConverter
 		else if (node instanceof IncrementNode)
 			process((IncrementNode)node);
 		else 
-			assert false : node.getClass();
+			failConversion("Unexpected selector class: %s", node.getClass());
 	}
 	
 	private void process(DeleteExpressionNode node)
@@ -925,8 +926,8 @@ public abstract class As2WhateverConverter
 		process(node.expr);
 		popDest();
 		
-		assert node.getMode() == Tokens.LEFTBRACKET_TOKEN;
-		dest.writef(".remove(%s)", expr);
+		failConversionUnless(node.getMode() == Tokens.LEFTBRACKET_TOKEN, "LEFTBRACKET_TOKEN expected for 'delete' expression node");
+		dest.writef(".remove(%s)", expr); // fix me for member call
 	}
 	
 	private void process(GetExpressionNode node)
@@ -949,11 +950,11 @@ public abstract class As2WhateverConverter
 			if (lastBcMemberType != null)
 			{
 				bcClass = lastBcMemberType.getClassNode();
-				assert bcClass != null;
+				failConversionUnless(bcClass != null, "Class type undefined: %s", expr);
 			}
 			else
 			{
-				assert lastBcClass != null;
+				failConversionUnless(lastBcClass != null, "'get' expression might appear outside of the class: %s", expr);
 				bcClass = lastBcClass;
 				needLocalVars = true;
 			}
@@ -962,7 +963,7 @@ public abstract class As2WhateverConverter
 			if (bcStaticClass != null)
 			{
 				lastBcMemberType = bcStaticClass.getClassType();
-				assert lastBcMemberType != null;
+				failConversionUnless(lastBcMemberType != null, "Static class type undefined: %s", expr);
 				
 				addToImport(lastBcMemberType);
 			}
@@ -972,7 +973,7 @@ public abstract class As2WhateverConverter
 				if (localVar != null)
 				{
 					lastBcMemberType = localVar.getType();
-					assert lastBcMemberType != null;
+					failConversionUnless(lastBcMemberType != null, "Local variable's type undefined: %s" + expr);
 				}
 				else
 				{
@@ -980,7 +981,7 @@ public abstract class As2WhateverConverter
 					if (bcFunc != null)
 					{
 						BcTypeNode funcType = bcFunc.getReturnType();
-						assert funcType != null : identifier;
+						failConversionUnless(funcType != null, "Function return type undefined: %s", expr);
 						
 						lastBcMemberType = funcType;
 						if (classEquals(bcClass, classString) && identifier.equals("length") && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
@@ -1001,7 +1002,7 @@ public abstract class As2WhateverConverter
 						if (bcVar != null)
 						{
 							lastBcMemberType = bcVar.getType();
-							assert lastBcMemberType != null;
+							failConversionUnless(lastBcMemberType != null, "Field's type undefined: %s", expr);
 						}
 						else
 						{
@@ -1041,12 +1042,12 @@ public abstract class As2WhateverConverter
 		}
 		else if (node.expr instanceof ArgumentListNode)
 		{
-			assert lastBcMemberType != null;
+			failConversionUnless(lastBcMemberType != null, "Argument list found without owning type: %s", expr);
 			if (lastBcMemberType instanceof BcVectorTypeNode)
 			{
 				BcVectorTypeNode vectorType = (BcVectorTypeNode) lastBcMemberType;
 				lastBcMemberType = vectorType.getGeneric();
-				assert lastBcMemberType != null;
+				failConversionUnless(lastBcMemberType != null, "Can't detect vector's generic type: %s", expr);
 			}
 			else if (typeEquals(lastBcMemberType, classXMLList))
 			{
@@ -1059,7 +1060,7 @@ public abstract class As2WhateverConverter
 		}
 		else
 		{
-			assert false;
+			failConversion("Unexpected node for 'get' expression: " + node.expr.getClass());
 		}
 		
 		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
@@ -1147,7 +1148,7 @@ public abstract class As2WhateverConverter
 		boolean isGlobalCalled = false;
 		
 		BcTypeNode type = extractBcType(node.expr);
-		assert type != null : node.expr.getClass();
+		failConversionUnless(type != null, "Can't detect expression's type: ", exprDest);
 		
 		if (node.expr instanceof IdentifierNode)
 		{
@@ -1163,7 +1164,7 @@ public abstract class As2WhateverConverter
 						if (bcFunc.hasReturnType())
 						{
 							lastBcMemberType = bcFunc.getReturnType();
-							assert lastBcMemberType != null;
+							failConversionUnless(lastBcMemberType != null, "Can't get function's return type: %s", exprDest);
 						}
 						
 						isGlobalCalled = bcFunc.isGlobal();
@@ -1171,9 +1172,9 @@ public abstract class As2WhateverConverter
 					else if (node.is_new)
 					{
 						BcClassDefinitionNode bcNewClass = findClass(identifier);
-						assert bcNewClass != null : bcNewClass;
+						failConversionUnless(bcNewClass != null, "Can't create undefined class instance: %s", exprDest);
 						BcTypeNode bcClassType = bcNewClass.getClassType();
-						assert bcClassType != null : identifier;
+						failConversionUnless(bcClassType != null, "Can't create class instance without class type: %s", exprDest);
 						
 						lastBcMemberType = bcClassType;
 						
@@ -1192,7 +1193,7 @@ public abstract class As2WhateverConverter
 			else
 			{
 				BcClassDefinitionNode bcClass = lastBcMemberType.getClassNode();
-				assert bcClass != null;
+				failConversionUnless(bcClass != null, "Class type is undefined: " + exprDest);
 				
 				BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier);
 				if (bcFunc != null)
@@ -1221,12 +1222,12 @@ public abstract class As2WhateverConverter
 						}
 						else
 						{
-							assert false : identifier;
+							failConversion("Identifier is supposed to be 'Function' type: '" + identifier + "'");
 						}
 					}
 					else
 					{
-						assert false : identifier;
+						failConversion("'Function' type not found: '" + identifier + "'");
 					}
 				}
 			}
@@ -1234,11 +1235,11 @@ public abstract class As2WhateverConverter
 		else if (node.expr instanceof MemberExpressionNode)
 		{
 			lastBcMemberType = evaluateType(node.expr);
-			assert lastBcMemberType != null;
+			failConversionUnless(lastBcMemberType != null, "Unable to evaluate member expression type: " + exprDest);
 		}
 		else
 		{
-			assert false : node;
+			failConversion("Unexpected node type for 'call' expression: %s expr: %s", node.expr.getClass(), exprDest);
 		}
 		
 		BcArgumentsList argsList;
@@ -1251,7 +1252,7 @@ public abstract class As2WhateverConverter
 				List<BcFuncParam> params = calledFunction.getParams();
 				ObjectList<Node> args = node.args.items;
 				
-				assert params.size() >= args.size();
+				failConversionUnless(params.size() >= args.size(), "Function args and params count doesn't match: %d >= %d", params.size(), args.size());
 				
 				int argIndex = 0;
 				for (Node arg : args)
@@ -3504,5 +3505,24 @@ public abstract class As2WhateverConverter
 	public String throwStatment(Object expr)
 	{
 		return "throw " + expr;
+	}
+	
+	private void failConversion(String format, Object...args)
+	{
+		failConversionUnless(false, format, args);
+	}
+	
+	private void failConversionUnless(boolean condition)
+	{
+		failConversionUnless(condition, "");
+	}
+	
+	private void failConversionUnless(boolean condition, String format, Object... args)
+	{
+		if (!condition)
+		{
+			String message = new Formatter().format(format, args).toString();
+			throw new ConverterException(message);
+		}
 	}
 }
