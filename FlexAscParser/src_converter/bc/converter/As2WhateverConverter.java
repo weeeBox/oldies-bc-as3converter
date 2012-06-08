@@ -390,7 +390,7 @@ public abstract class As2WhateverConverter
 	
 	private BcVariableDeclaration collect(VariableDefinitionNode node)
 	{
-		assert node.list.items.size() == 1 : node.list.items.size();
+		failConversionUnless(node.list.items.size() == 1, "Node list items size should be 1: %d", node.list.items.size());
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
 		BcTypeNode bcType = extractBcType(varBindNode.variable.type);
@@ -570,7 +570,7 @@ public abstract class As2WhateverConverter
 	
 	private void process(Node node)
 	{
-		assert node != null;
+		failConversionUnless(node != null, "Tried to process 'null' node");
 		
 		if (node instanceof MemberExpressionNode)
 			process((MemberExpressionNode)node);
@@ -655,7 +655,7 @@ public abstract class As2WhateverConverter
 			{
 				BcNodeHelper.extractBcMetadata((MetaDataNode) node);
 				
-				assert iter.hasNext();
+				failConversionUnless(iter.hasNext(), "Error processing metadata");
 				process(iter.next());
 			}
 			else
@@ -1263,7 +1263,7 @@ public abstract class As2WhateverConverter
 					popDest();					
 					
 					BcTypeNode argType = evaluateType(arg);
-					assert argType != null;
+					failConversionUnless(argType != null, "Unable to evaluate args's type: %s", argDest);
 					
 					BcTypeNode paramType = params.get(argIndex++).getType();
 					
@@ -1302,7 +1302,7 @@ public abstract class As2WhateverConverter
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
 		{
-			assert type instanceof BcVectorTypeNode : type;
+			failConversionUnless(type instanceof BcVectorTypeNode, "Vector type expected: %s", exprDest);
 			Node argNode = node.args.items.get(0);
 			
 			if (argNode instanceof LiteralArrayNode)
@@ -1314,13 +1314,13 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				BcTypeNode argType = evaluateType(argNode);
-				assert argType != null;
-				
 				ListWriteDestination argDest = new ListWriteDestination();
 				pushDest(argDest);
 				process(argNode);
 				popDest();
+				
+				BcTypeNode argType = evaluateType(argNode);
+				failConversionUnless(argType != null, "Unable to evaluate arg's type: %s", argDest);				
 				
 				dest.write(cast(argDest, argType, type));
 			}			
@@ -1329,14 +1329,14 @@ public abstract class As2WhateverConverter
 		{
 			if (isCast)
 			{			
-				assert node.args != null;
-				assert node.args.size() == 1;
+				failConversionUnless(node.args != null, "Cast should have args: %s", exprDest);
+				failConversionUnless(node.args.size() == 1, "Cast should have a single arg: %s", exprDest);
 				
 				Node argNode = node.args.items.get(0);
 				String argStr = argsList.get(0).toString();
 				
 				BcTypeNode argType = evaluateType(argNode);
-				assert argType != null;
+				failConversionUnless(argType != null, "Can't evaluate arg's type: %s", argStr);
 				
 				if (typeEquals(type, classString))
 				{					
@@ -1375,11 +1375,11 @@ public abstract class As2WhateverConverter
 			if (lastBcMemberType != null)
 			{
 				bcClass = lastBcMemberType.getClassNode();
-				assert bcClass != null;
+				failConversionUnless(bcClass != null, "Can't get last member type: %s", exprDest);
 			}
 			else
 			{
-				assert lastBcClass != null;
+				failConversionUnless(lastBcClass != null, "'set' expression might appear outside of a class: %s", exprDest);
 				bcClass = lastBcClass;
 			}
 			
@@ -1396,7 +1396,7 @@ public abstract class As2WhateverConverter
 			if (bcVar != null)
 			{
 				lastBcMemberType = bcVar.getType();
-				assert lastBcMemberType != null;
+				failConversionUnless(lastBcMemberType != null, "Can't get variable's type: %d", exprDest);
 			}
 			else
 			{
@@ -1427,7 +1427,7 @@ public abstract class As2WhateverConverter
 						}
 						else
 						{
-							assert false : identifierNode.name;
+							failConversion("Identifier is supposed to be an attribute: %s", exprDest);
 						}
 					}
 					else
@@ -1439,12 +1439,12 @@ public abstract class As2WhateverConverter
 		}
 		else if (node.expr instanceof ArgumentListNode)
 		{
-			assert lastBcMemberType != null;
+			failConversionUnless(lastBcMemberType != null, "Argument list without owning type: %s", exprDest);
 			if (lastBcMemberType instanceof BcVectorTypeNode)
 			{
 				BcVectorTypeNode vectorType = (BcVectorTypeNode) lastBcMemberType;
 				lastBcMemberType = vectorType.getGeneric();
-				assert lastBcMemberType != null;
+				failConversionUnless(lastBcMemberType != null, "Can't detect vector's generic type: %s", exprDest);
 			}
 			else
 			{
@@ -1454,7 +1454,7 @@ public abstract class As2WhateverConverter
 		}
 		else
 		{
-			assert false;
+			failConversion("Unexpected expr node: type=%s expr=%s", node.expr.getClass(), exprDest);
 		}
 		
 		BcTypeNode selectorType = lastBcMemberType;
@@ -1477,20 +1477,20 @@ public abstract class As2WhateverConverter
 		}
 		else
 		{
-			assert node.args.size() == 1 : node.args.size();
+			failConversionUnless(node.args.size() == 1, "'set' expression should have a single argument: %d", node.args.size());
 			
 			Node argNode = node.args.items.get(0);
 			
 			if (selectorType instanceof BcFunctionTypeNode)
 			{
 				BcTypeNode argType = evaluateType(argNode, true);
-				assert argType instanceof BcFunctionTypeNode;
+				failConversionUnless(argType instanceof BcFunctionTypeNode, "Selector should have 'Function' type: %s", exprDest);
 				
 				BcFunctionTypeNode funcType = (BcFunctionTypeNode) argType;
-				assert funcType.isComplete();
+				failConversionUnless(funcType.isComplete(), "Selector should have a complete 'Function' type: %s", exprDest);
 				
 				BcFunctionDeclaration func = funcType.getFunc();
-				assert func.hasOwner();
+				failConversionUnless(func.hasOwner(), "Selector is a 'Function' type but should have an owner: %s", exprDest);
 
 				func.setSelector();
 				
@@ -1500,7 +1500,7 @@ public abstract class As2WhateverConverter
 			else
 			{
 				BcTypeNode argType = evaluateType(argNode);
-				assert argType != null : argNode;
+				failConversionUnless(argType != null, "Can't evaluated arg's type: %d", argsDest);
 				
 				boolean needCast = !addToDictionary && needExplicitCast(argType, selectorType);
 				
@@ -1626,7 +1626,7 @@ public abstract class As2WhateverConverter
 		}
 		else if (node instanceof LiteralRegExpNode)
 		{
-			assert false : "LiteralRegExpNode";
+			failConversion("LiteralRegExpNode is not supported");
 		}
 		else if (node instanceof LiteralArrayNode)
 		{
@@ -1637,17 +1637,17 @@ public abstract class As2WhateverConverter
 		{
 			LiteralVectorNode vectorNode = (LiteralVectorNode) node;
 			BcTypeNode bcType = extractBcType(vectorNode.type);
-			assert bcType instanceof BcVectorTypeNode : bcType.getClass();
+			failConversionUnless(bcType instanceof BcVectorTypeNode, "Vector type expected: %s", bcType.getName());
 			
 			writeNewLiteralVector((BcVectorTypeNode) bcType, null);
 		}
 		else if (node instanceof LiteralObjectNode)
 		{
-			assert false : "LiteralObjectNode";
+			failConversion("Literal objects are not supported yet");
 		}
 		else 
 		{
-			assert false : node.getClass();
+			failConversion("Unexpected literal node: %d", node.getClass());
 		}
 	}
 	
@@ -1660,7 +1660,7 @@ public abstract class As2WhateverConverter
 		
 		String condString = condDest.toString();
 		
-		assert node.condition instanceof ListNode : node.condition;
+		failConversionUnless(node.condition instanceof ListNode, "'if' statement condition is supposed to be the ListNode: type=%s expr=%s", node.condition.getClass(), condDest);
 		ListNode listNode = (ListNode) node.condition;
 		
 		condString = createSafeConditionString(condString, listNode);
@@ -1692,7 +1692,7 @@ public abstract class As2WhateverConverter
 
 	private String createSafeConditionString(String condString, ListNode listNode) 
 	{
-		assert listNode.size() == 1 : listNode.size();
+		failConversionUnless(listNode.size() == 1, "Condition node should have a single item: %d", listNode.size());
 		Node condition = listNode.items.get(0);
 		
 		return createSafeConditionString(condString, condition);		
@@ -1747,7 +1747,7 @@ public abstract class As2WhateverConverter
 		
 		String condString = exprDest.toString();
 		
-		assert node.expr instanceof ListNode : node.expr;
+		failConversionUnless(node.expr instanceof ListNode, "'while' statement expression is supposed to be the ListNode: type=%s expr=%s", node.expr.getClass(), exprDest);
 		ListNode listNode = (ListNode) node.expr;
 		
 		condString = createSafeConditionString(condString, listNode);
@@ -1772,14 +1772,14 @@ public abstract class As2WhateverConverter
 		boolean isForEach = node.test instanceof HasNextNode;
 		if (isForEach)
 		{
-			assert lastBcClass != null;
+			failConversionUnless(lastBcClass != null, "For each is defined outside of a class");
 			
 			// get iterable collection expression
-			assert node.initialize != null;
-			assert node.initialize instanceof ListNode : node.initialize.getClass();
+			failConversionUnless(node.initialize != null, "For each should have initializer statement");
+			failConversionUnless(node.initialize instanceof ListNode, "For each initializer should be ListNode: %s", node.initialize.getClass());
 			
 			ListNode list = (ListNode) node.initialize;
-			assert list.items.size() == 2 : list.items.size();
+			failConversionUnless(list.items.size() == 2, "For each should have 2 items in initializer list", list.items.size());
 			
 			StoreRegisterNode register = (StoreRegisterNode) list.items.get(1);
 			CoerceNode coerce = (CoerceNode) register.expr;
@@ -1790,15 +1790,15 @@ public abstract class As2WhateverConverter
 			popDest();
 			
 			BcTypeNode collectionType = evaluateType(coerce.expr);
-			assert collectionType != null;
+			failConversionUnless(collectionType != null, "Can't evaluate for each collection's type: %s", collection);
 			
 			lastBcClass.addToImport(collectionType);
 			
-			assert node.statement != null;
-			assert node.statement instanceof StatementListNode : node.statement.getClass();
+			failConversionUnless(node.statement != null, "For each should have statement node");
+			failConversionUnless(node.statement instanceof StatementListNode, "For each statement should be StatementListNode: %s", node.statement.getClass());
 			
 			StatementListNode statements = (StatementListNode) node.statement;
-			assert statements.items.size() == 2;
+			failConversionUnless(statements.items.size() == 2, "For each should have 2 items in statement node: %d", statements.items.size());
 			
 			// get iteration
 			ExpressionStatementNode child1 = (ExpressionStatementNode) statements.items.get(0);
@@ -1817,11 +1817,11 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				assert false : child3.expr.getClass();
+				failConversion("Unexpected for each statement node: %s", child3.expr.getClass());
 			}
 			
 			BcVariableDeclaration loopVar = findDeclaredVar(loopVarName);
-			assert loopVar != null : loopVarName;
+			failConversionUnless(loopVar != null, "Unable to find for each loop var: %s", loopVarName);
 			
 			BcTypeNode loopVarType = loopVar.getType();
 			String loopVarString = varDecl(loopVarType, loopVarName);
@@ -1840,7 +1840,7 @@ public abstract class As2WhateverConverter
 			
 			if (bodyNode != null)
 			{
-				assert bodyNode instanceof StatementListNode : bodyNode.getClass();
+				failConversionUnless(bodyNode instanceof StatementListNode, "For each body should be StatementListNode: %s", bodyNode.getClass());
 				StatementListNode statementsNode = (StatementListNode) bodyNode;
 				
 				writeBlockOpen(dest);
@@ -1897,7 +1897,7 @@ public abstract class As2WhateverConverter
 	
 	private void process(DoStatementNode node)
 	{
-		assert false;
+		failConversion("'do' statement is not supported yet. Sorry");
 	}
 	
 	private void process(SwitchStatementNode node)
@@ -2005,7 +2005,7 @@ public abstract class As2WhateverConverter
 	
 	private void process(FinallyClauseNode node)
 	{
-		assert false;
+		failConversion("'finally' statement is not supported yet. Sorry");
 	}
 	
 	private void process(ThrowStatementNode node)
@@ -2114,7 +2114,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				assert false : node.expr;
+				failConversion("Unexpected expression for unary 'not' token: type=%s expr=%s", node.expr.getClass(), expr);
 			}
 			break;
 		}
@@ -2123,13 +2123,13 @@ public abstract class As2WhateverConverter
 			break;
 			
 		default:
-			assert false : node.op;
+			failConversion("Unsupported unary operation: token=%d expr=%s", node.op, expr);
 		}
 	}
 	
 	private void process(ReturnStatementNode node)
 	{
-		assert !node.finallyInserted;
+		failConversionUnless(!node.finallyInserted, "Return statement with finally inserted is not supported yet");
 		
 		dest.write("return");
 		if (node.expr != null)
@@ -2141,11 +2141,11 @@ public abstract class As2WhateverConverter
 			process(node.expr);
 			popDest();			
 			
-			assert lastBcFunction != null;
-			assert lastBcFunction.hasReturnType();
+			failConversionUnless(lastBcFunction != null, "'return' statemnt outside of a function: return %s", exprDest);
+			failConversionUnless(lastBcFunction.hasReturnType(), "'return' statement with expression inside 'void' function: return %s", exprDest);
 			
 			BcTypeNode returnValueType = evaluateType(node.expr);
-			assert returnValueType != null;
+			failConversionUnless(returnValueType != null, "Unable to evaluate return type from expression: %s", exprDest);
 			
 			BcTypeNode returnType = lastBcFunction.getReturnType();
 			if (needExplicitCast(returnValueType, returnType))
@@ -2250,7 +2250,7 @@ public abstract class As2WhateverConverter
 		if (!typeNode.isIntegral() && !typeNode.hasClassNode())
 		{
 			BcClassDefinitionNode classNode = findClass(typeNode.getNameEx());
-			assert classNode != null : typeNode.getNameEx();
+			failConversionUnless(classNode != null, "Can't find class: %s", typeNode.getNameEx());
 			typeNode.setClassNode(classNode);
 		}
 	}
@@ -2486,7 +2486,7 @@ public abstract class As2WhateverConverter
 	
 	private BcVariableDeclaration findDeclaredVar(String name)
 	{
-		assert declaredVars != null;
+		failConversionUnless(declaredVars != null, "Declared vars can't be 'null': %s", name);
 		
 		for (BcVariableDeclaration var : declaredVars)
 		{
@@ -2501,7 +2501,7 @@ public abstract class As2WhateverConverter
 	{
 		if (canBeClass(bcType))
 		{
-			assert lastBcClass != null;
+			failConversionUnless(lastBcClass != null, "Try to add import type without class: %s", bcType.getName());
 			lastBcClass.addToImport(bcType);
 		}
 	}
@@ -2602,7 +2602,7 @@ public abstract class As2WhateverConverter
 		for (BcMetadataNode funcMetadata : functions) 
 		{
 			String callbackName = funcMetadata.attribute("callback");
-			assert callbackName != null;
+			failConversionUnless(callbackName != null, "'callback' attribute is missing for 'FunctionType' metadata");
 			
 			BcFunctionDeclaration func = new BcFunctionDeclaration(callbackName);
 
@@ -2620,13 +2620,13 @@ public abstract class As2WhateverConverter
 				for (String token : tokens) 
 				{
 					int index = token.indexOf(":");
-					assert index != -1;
+					failConversionUnless(index != -1, "Can't parse param for 'FunctionType' metadata: %s", paramsString);
 					
-					String name = token.substring(0, index);
-					assert name != null;
+					String name = token.substring(0, index);					
+					failConversionUnless(name.length() > 0, "Can't parse param for 'FunctionType' metadata: %s", paramsString);
 					
-					String type = token.substring(index + 1);
-					assert type != null;
+					String type = token.substring(index + 1);					
+					failConversionUnless(type.length() > 0, "Can't parse param for 'FunctionType' metadata: %s", paramsString);
 					
 					func.addParam(new BcFuncParam(createBcType(type), getCodeHelper().identifier(name)));
 				}
@@ -2712,22 +2712,20 @@ public abstract class As2WhateverConverter
 		if (node instanceof ListNode)
 		{
 			ListNode listNode = (ListNode) node;
-			assert listNode.items.size() == 1;
+			failConversionUnless(listNode.items.size() == 1, "Can't evaluate ListNode's type");
 			
 			return evaluateType(listNode.items.get(0));
 		}
 		
 		if (node instanceof ThisExpressionNode)
 		{
-			assert lastBcClass != null;
+			failConversionUnless(lastBcClass != null, "Can't evaluate 'this' expression's type: class is missing");
 			return lastBcClass.getClassType();
 		}
 		
 		if (node instanceof SuperExpressionNode)
 		{
-			assert lastBcClass != null;
-			assert lastBcClass.hasExtendsType();
-			
+			failConversionUnless(lastBcClass != null, "Can't evaluate 'super' expression's type: class is missing");
 			return lastBcClass.getExtendsType();
 		}
 		
@@ -2740,7 +2738,7 @@ public abstract class As2WhateverConverter
 		if (node instanceof ArgumentListNode)
 		{
 			ArgumentListNode args = (ArgumentListNode) node;
-			assert args.size() == 1;
+			failConversionUnless(args.size() == 1, "Can't evaluate argument list type");
 			return evaluateType(args.items.get(0));
 		}
 
@@ -2804,7 +2802,7 @@ public abstract class As2WhateverConverter
 				return createBcType("long");
 			}
 			
-			assert false;
+			failConversion("Can't evaluate node's type: %s", node.getClass());
 		}
 		
 		if (node instanceof UnaryExpressionNode)
@@ -2824,7 +2822,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				assert false;
+				failConversion("Can't evaluate unary expression's type: %s", unary.expr.getClass());
 			}
 		}
 		
@@ -2837,7 +2835,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				assert false;
+				failConversion("Can't evaluate 'call' expression's type: %d", callExpr.expr.getClass());
 			}
 		}
 		
@@ -2850,7 +2848,7 @@ public abstract class As2WhateverConverter
 		{
 			ConditionalExpressionNode conditional = (ConditionalExpressionNode) node;
 			BcTypeNode thenType = evaluateType(conditional.thenexpr);
-			assert thenType != null;
+			failConversionUnless(thenType != null, "Conditional expression 'then' is 'null'");
 			
 			String classNull = getCodeHelper().literalNull();
 			
@@ -2860,7 +2858,7 @@ public abstract class As2WhateverConverter
 			}
 			
 			BcTypeNode elseType = evaluateType(conditional.elseexpr);
-			assert elseType != null;
+			failConversionUnless(elseType != null, "Conditional expression 'else' is 'null'");
 			
 			if (!typeEquals(elseType, classNull))
 			{
@@ -2876,7 +2874,7 @@ public abstract class As2WhateverConverter
 			return extractBcType(literalVector.type);
 		}
 		
-		assert false : node;
+		failConversion("Unable to evaluate node's type: %s", node.getClass());
 		return null;
 	}
 
@@ -2888,13 +2886,13 @@ public abstract class As2WhateverConverter
 		{
 			if (node.base instanceof MemberExpressionNode)
 			{
-				assert node.base instanceof MemberExpressionNode;			
+				failConversionUnless(node.base instanceof MemberExpressionNode, "Can't evaluate member expression. Base node is supposed to be a MemberExpressionNode: %s", node.base.getClass());			
 				BcTypeNode baseType = evaluateMemberExpression((MemberExpressionNode) node.base);
 				
-				assert baseType != null;
+				failConversionUnless(baseType != null, "Can't evaluate member expression. Base type is 'null'");
 				baseClass = baseType.getClassNode();
 
-				assert baseClass != null;
+				failConversionUnless(baseClass != null, "Can't evaluate member expression. Base class type is 'null'");
 			}
 			else if (node.base instanceof ThisExpressionNode)
 			{
@@ -2907,35 +2905,35 @@ public abstract class As2WhateverConverter
 			else if (node.base instanceof ListNode)
 			{
 				ListNode list = (ListNode) node.base;
-				assert list.size() == 1 : list.size();
+				failConversionUnless(list.size() == 1, "Can't evaluate ListNode. List size is supposed to have a single item: %d", list.size());
 				
 				Node firstItem = list.items.get(0);
 				if (firstItem instanceof MemberExpressionNode)
 				{
 					BcTypeNode baseType = evaluateMemberExpression((MemberExpressionNode) firstItem);
 					
-					assert baseType != null;
+					failConversionUnless(baseType != null, "Can't evaluate ListNode. Base type is 'null'");
 					baseClass = baseType.getClassNode();
 	
-					assert baseClass != null;
+					failConversionUnless(baseClass != null, "Can't evaluate ListNode. Base class type is 'null'");
 				}
 				else if (firstItem instanceof BinaryExpressionNode)
 				{
 					BcTypeNode baseType = evaluateType(firstItem);
 					
-					assert baseType != null;
+					failConversionUnless(baseType != null, "Can't evaluate BinaryExpressionNode. Base type is 'null'");
 					baseClass = baseType.getClassNode();
 	
-					assert baseClass != null;
+					failConversionUnless(baseClass != null, "Can't evaluate BinaryExpressionNode. Base class is 'null'");
 				}
 				else 
 				{
-					assert false;
+					failConversion("Can't evaluate ListNode. Unexpected node type: %s", firstItem.getClass());
 				}
 			}
 			else
 			{
-				assert false;
+				failConversion("Can't evaluate node's type: %s", node.base.getClass());
 			}			
 		}
 		
@@ -2991,12 +2989,12 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				assert false;
+				failConversion("Can't evaluate MemberExpressionNode. Selector's expression is unsupported: %s", selector.expr.getClass());
 			}
 		}			
 		else
 		{
-			assert false;
+			failConversion("Can't evaluate MemeberExpressionNode. Selector's node is unsupported: %s", node.selector.getClass());
 		}
 		
 		return null;
@@ -3303,7 +3301,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				assert false;
+				failConversion("Can't make a class cast from '%s' to '%s': %s", fromType.getName(), toType.getName(), expression);
 			}
 		}
 		
@@ -3462,13 +3460,13 @@ public abstract class As2WhateverConverter
 	
 	public String indexerGetter(Object expr)
 	{
-		assert expr != null;
+		failConversionUnless(expr != null, "Indexer getter's expression can't be 'null'");
 		return String.format("[%s]", expr);
 	}
 	
 	public String indexerSetter(Object expr, Object value)
 	{
-		assert expr != null;
+		failConversionUnless(expr != null, "Indexer setter's expression can't be 'null'");
 		return String.format("[%s] = %s", expr, value);
 	}
 	
@@ -3507,17 +3505,12 @@ public abstract class As2WhateverConverter
 		return "throw " + expr;
 	}
 	
-	private void failConversion(String format, Object...args)
+	protected void failConversion(String format, Object...args)
 	{
 		failConversionUnless(false, format, args);
 	}
 	
-	private void failConversionUnless(boolean condition)
-	{
-		failConversionUnless(condition, "");
-	}
-	
-	private void failConversionUnless(boolean condition, String format, Object... args)
+	protected void failConversionUnless(boolean condition, String format, Object... args)
 	{
 		if (!condition)
 		{

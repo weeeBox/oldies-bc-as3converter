@@ -103,7 +103,7 @@ public class As2CsConverter extends As2WhateverConverter
 		if (!srcFileDir.exists())
 		{
 			boolean successed = srcFileDir.mkdirs();
-			assert successed : srcFileDir.getAbsolutePath();
+			failConversionUnless(successed, "Can't make output dir: %s", srcFileDir.getAbsolutePath());
 		}
 		
 		File outputFile = new File(srcFileDir, className + ".cs");
@@ -407,10 +407,10 @@ public class As2CsConverter extends As2WhateverConverter
 		if (canBeClass(type))
 		{
 			BcClassDefinitionNode classNode = type.getClassNode();
-			assert classNode != null : type.getName();
+			failConversionUnless(classNode != null, "Can't add type to workspace: %s", type.getName());
 			
 			String packageName = classNode.getPackageName();
-			assert packageName != null : classNode.getName();
+			failConversionUnless(packageName != null, "Can't get class package: %d", classNode.getName());
 			
 			if (!imports.contains(packageName))
 			{
