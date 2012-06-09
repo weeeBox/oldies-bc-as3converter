@@ -38,6 +38,7 @@ package bc.flash.display
 		/** Helper objects. */
 		private static var sAncestors : Vector.<DisplayObject> = new <DisplayObject>[];
 		private static var sHelperRect : Rectangle = new Rectangle();
+		private static var sHelperPoint : Point = new Point();
 		private static var sHelperMatrix : Matrix = new Matrix();
 		private static var sTargetMatrix : Matrix = new Matrix();		
 
@@ -72,7 +73,7 @@ package bc.flash.display
 		/** Returns a rectangle that completely encloses the object as it appears in another 
 		 *  coordinate system. If you pass a 'resultRectangle', the result will be stored in this 
 		 *  rectangle instead of creating a new object. */
-		public function getBounds(targetSpace : DisplayObject, resultRect : Rectangle = null) : Rectangle
+		public virtual function getBounds(targetSpace : DisplayObject, resultRect : Rectangle = null) : Rectangle
 		{
 			throw new AbstractMethodError("Method needs to be implemented in subclass");
 		}
@@ -88,6 +89,22 @@ package bc.flash.display
 			// otherwise, check bounding box
 			if (getBounds(this, sHelperRect).containsPoint(localPoint)) return this;
 			else return null;
+		}
+		
+		/** Evaluates the display object to see if it overlaps or intersects with the point specified
+		 by the x and y parameters. The x and y parameters specify a point in the coordinate space of the Stage,
+		 not the display object container that contains the display object (unless that display object container is the Stage). */
+		public function hitTestPoint(x : Number, y : Number, shapeFlag : Boolean = false) : Boolean
+		{
+			if (shapeFlag)
+			{
+				throw new NotImplementedError();
+			}
+			
+			sHelperPoint.x = x;
+			sHelperPoint.y = y;
+			
+			return hitTest(sHelperPoint, true) != null;			
 		}
 
 		/** Creates a matrix that represents the transformation from the local coordinate system 

@@ -1,5 +1,6 @@
 package bc.flash.display
 {
+	import bc.flash.events.GamePadEvent;
 	import bc.flash.events.MouseEvent;
 	import flash.errors.IllegalOperationError;
 	import bc.flash.events.EnterFrameEvent;
@@ -237,6 +238,26 @@ package bc.flash.display
 		public function keyReleased(code : uint) : void
 		{
 			dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP, code));
+		}
+		
+		public function buttonPressed(playerIndex: uint, code : uint) : void
+		{
+			dispatchEvent(new GamePadEvent(GamePadEvent.BUTTON_DOWN, playerIndex, code));
+		}
+		
+		public function buttonReleased(playerIndex : uint, code : uint) : void
+		{
+			dispatchEvent(new GamePadEvent(GamePadEvent.BUTTON_UP, playerIndex, code));
+		}
+		
+		public function gamePadConnected(playerIndex : uint) : void
+		{
+			dispatchEvent(new GamePadEvent(GamePadEvent.CONNECTED, playerIndex));
+		}
+		
+		public function gamePadDisconnected(playerIndex : uint) : void
+		{
+			dispatchEvent(new GamePadEvent(GamePadEvent.DISCONNECTED, playerIndex));
 		}
 		
 		public function touchDown(x : Number, y : Number, touchId : int) : void
