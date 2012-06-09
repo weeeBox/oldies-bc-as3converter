@@ -108,6 +108,7 @@ public abstract class As2WhateverConverter
 	
 	protected static final String internalFieldInitializer = "__internalInitializeFields";
 	
+	protected static final String classGlobal = "Global";
 	protected static final String classObject = "Object";
 	protected static final String classString = "String";
 	protected static final String classVector = "Vector";
@@ -1168,6 +1169,10 @@ public abstract class As2WhateverConverter
 						}
 						
 						isGlobalCalled = bcFunc.isGlobal();
+						if (isGlobalCalled)
+						{
+							addToImport(BcTypeNode.create(classGlobal));
+						}
 					}
 					else if (node.is_new)
 					{
@@ -1349,7 +1354,7 @@ public abstract class As2WhateverConverter
 			}
 			else if (isGlobalCalled)
 			{
-				dest.writef(staticSelector(type("Global"), String.format("%s(%s)", identifier, argsList)));
+				dest.writef(staticSelector(type(classGlobal), String.format("%s(%s)", identifier, argsList)));
 			}
 			else
 			{
