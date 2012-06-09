@@ -80,12 +80,12 @@ public abstract class BcCodeHelper
 	
 	public String isZero(Object value)
 	{
-		return String.format("%s == 0", value);
+		return String.format("(%s) == 0", value);
 	}
 	
 	public String notZero(Object value)
 	{
-		return String.format("%s != 0", value);
+		return String.format("(%s) != 0", value);
 	}
 	
 	public String keywordSafe(String name)

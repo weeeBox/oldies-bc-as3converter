@@ -142,7 +142,7 @@ public abstract class As2WhateverConverter
 	
 	public void convert(File outputDir, String... filenames) throws IOException
 	{
-		bcPlatformClasses = collect("bc-platform/src");			
+		bcPlatformClasses = collect("bc-platform/src");
 		bcApiClasses = collect("bc-api/src");
 		bcClasses = collect(filenames);
 		
@@ -1932,14 +1932,7 @@ public abstract class As2WhateverConverter
 						popDest();
 						dest.writelnf("case %s:", caseDest);
 					}
-					
-					writeBlockOpen(dest);
-				}
-				else if (statement instanceof BreakStatementNode)
-				{
-					process(statement);
-					writeBlockClose(dest);
-				}
+				}				
 				else 
 				{
 					process(statement);
@@ -2497,7 +2490,7 @@ public abstract class As2WhateverConverter
 		return null;
 	}
 	
-	private void addToImport(BcTypeNode bcType) 
+	private void addToImport(BcTypeNode bcType)
 	{
 		if (canBeClass(bcType))
 		{
@@ -3515,7 +3508,9 @@ public abstract class As2WhateverConverter
 		if (!condition)
 		{
 			String message = new Formatter().format(format, args).toString();
-			throw new ConverterException(message);
+			String className = lastBcClass != null ? lastBcClass.getName() : null;
+			String functionName = lastBcFunction != null ? lastBcFunction.getName() : null;
+			throw new ConverterException(String.format("Conversion failed:\n\treason: %s\n\tclass: %s\n\tfunction: %s", message, className, functionName));
 		}
 	}
 }
