@@ -44,6 +44,12 @@ package bc.flash.events
 			mPlayerIndex = playerIndex;
 			mCode = code;
 		}
+		
+		public function update(playerIndex : uint, code : uint = Undefined) : void
+		{
+			mPlayerIndex = playerIndex;
+			mCode = code;
+		}
 
 		public function get playerIndex() : uint
 		{

@@ -49,6 +49,14 @@ package bc.flash.display
 		private var mTabChildren : Boolean;
 		
 		private static var mCurrentStage : Stage;
+		
+		private static var sEnterFrameEvent : EnterFrameEvent = new EnterFrameEvent(Event.ENTER_FRAME, 0);
+		private static var sKeyDownEvent : KeyboardEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN, 0);
+		private static var sKeyUpEvent : KeyboardEvent = new KeyboardEvent(KeyboardEvent.KEY_UP, 0);
+		private static var sButtonDownEvent : GamePadEvent = new GamePadEvent(GamePadEvent.BUTTON_DOWN, 0);
+		private static var sButtonUpEvent : GamePadEvent = new GamePadEvent(GamePadEvent.BUTTON_UP, 0);
+		private static var sGamePadConnectedEvent : GamePadEvent = new GamePadEvent(GamePadEvent.CONNECTED, 0);
+		private static var sGamePadDisconnectedEvent : GamePadEvent = new GamePadEvent(GamePadEvent.DISCONNECTED, 0);
 
 		/** @private */
 		public function Stage(width : int, height : int, color : uint = 0)
@@ -67,7 +75,8 @@ package bc.flash.display
 
 		public function tick(dt : Number) : void
 		{
-			dispatchEventOnChildren(new EnterFrameEvent(Event.ENTER_FRAME, dt));
+			sEnterFrameEvent.passedTime = dt;
+			dispatchEventOnChildren(sEnterFrameEvent);
 		}
 
 		/** Returns the object that is found topmost beneath a point in stage coordinates, or  
@@ -232,32 +241,38 @@ package bc.flash.display
 		
 		public function keyPressed(code : uint) : void
 		{
-			dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_DOWN, code));
+			sKeyDownEvent.update(code);
+			dispatchEvent(sKeyDownEvent);
 		}
 		
 		public function keyReleased(code : uint) : void
 		{
-			dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP, code));
+			sKeyUpEvent.update(code);
+			dispatchEvent(sKeyUpEvent);
 		}
 		
 		public function buttonPressed(playerIndex: uint, code : uint) : void
 		{
-			dispatchEvent(new GamePadEvent(GamePadEvent.BUTTON_DOWN, playerIndex, code));
+			sButtonDownEvent.update(playerIndex, code);
+			dispatchEvent(sButtonDownEvent);
 		}
 		
 		public function buttonReleased(playerIndex : uint, code : uint) : void
 		{
-			dispatchEvent(new GamePadEvent(GamePadEvent.BUTTON_UP, playerIndex, code));
+			sButtonUpEvent.update(playerIndex, code);
+			dispatchEvent(sButtonUpEvent);
 		}
 		
 		public function gamePadConnected(playerIndex : uint) : void
 		{
-			dispatchEvent(new GamePadEvent(GamePadEvent.CONNECTED, playerIndex));
+			sGamePadConnectedEvent.update(playerIndex);
+			dispatchEvent(sGamePadConnectedEvent);
 		}
 		
 		public function gamePadDisconnected(playerIndex : uint) : void
 		{
-			dispatchEvent(new GamePadEvent(GamePadEvent.DISCONNECTED, playerIndex));
+			sGamePadDisconnectedEvent.update(playerIndex);
+			dispatchEvent(sGamePadDisconnectedEvent);
 		}
 		
 		public function touchDown(x : Number, y : Number, touchId : int) : void
