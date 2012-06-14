@@ -19,9 +19,12 @@ import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.MetaDataNode;
 import macromedia.asc.parser.Node;
+import macromedia.asc.parser.ParameterNode;
+import macromedia.asc.parser.RestParameterNode;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
 import macromedia.asc.parser.TypeExpressionNode;
+import macromedia.asc.parser.TypedIdentifierNode;
 import macromedia.asc.util.ObjectList;
 import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
@@ -144,8 +147,7 @@ public class BcNodeHelper
 	public static BcTypeNode extractBcType(Node type)
 	{
 		if (type == null)
-		{
-			assert false : "Found * type";
+		{			
 			return new BcWildcardTypeNode();
 		}
 		
@@ -185,6 +187,21 @@ public class BcNodeHelper
 			
 			BcTypeNode genericType = extractBcType(typeArgs.items.get(0));
 			return new BcVectorTypeNode(typeName, genericType);
+		}
+		
+		if (type instanceof TypedIdentifierNode)
+		{			
+			return extractBcType(((TypedIdentifierNode) type).type);
+		}
+		
+		if (type instanceof RestParameterNode)
+		{
+			return BcTypeNode.createRestType();
+		}
+		
+		if (type instanceof ParameterNode)
+		{
+			return extractBcType(((ParameterNode) type).type);
 		}
 		
 		assert false : type.getClass();

@@ -32,6 +32,11 @@ public class BcTypeNode extends BcNode
 		return node;
 	}
 	
+	public static BcTypeNode createRestType()
+	{
+		return new BcRestTypeNode();
+	}
+	
 	public static void add(String name, BcTypeNode type)
 	{
 		uniqueTypes.put(name, type);

@@ -4,6 +4,6 @@ public class BcWildcardTypeNode extends BcTypeNode
 {
 	public BcWildcardTypeNode()
 	{
-		super("*");
+		super("Object");
 	}
 }

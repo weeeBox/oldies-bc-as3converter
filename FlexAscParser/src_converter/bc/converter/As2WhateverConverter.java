@@ -103,6 +103,7 @@ public abstract class As2WhateverConverter
 	private Stack<WriteDestination> destStack;
 	
 	private String packageName;
+	private String lastBcPath;
 	private BcClassDefinitionNode lastBcClass;
 	private BcFunctionDeclaration lastBcFunction;
 	
@@ -195,10 +196,12 @@ public abstract class As2WhateverConverter
 	
 	private void collectSource(File file) throws IOException
 	{
+		lastBcPath = file.getPath();
+		
 		ContextStatics statics = new ContextStatics();
 		Context cx = new Context(statics);
-		FileInputStream in = new FileInputStream(file);
-		Parser parser = new Parser(cx, in, file.getPath());
+		FileInputStream in = new FileInputStream(file);		
+		Parser parser = new Parser(cx, in, lastBcPath);
 
 		ProgramNode programNode = parser.parseProgram();
 		in.close();
@@ -394,7 +397,7 @@ public abstract class As2WhateverConverter
 		failConversionUnless(node.list.items.size() == 1, "Node list items size should be 1: %d", node.list.items.size());
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
-		BcTypeNode bcType = extractBcType(varBindNode.variable.type);
+		BcTypeNode bcType = extractBcType(varBindNode.variable);
 		String bcIdentifier = getCodeHelper().identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcType, bcIdentifier);
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
@@ -450,7 +453,7 @@ public abstract class As2WhateverConverter
 			ObjectList<ParameterNode> params = parameterNode.items;
 			for (ParameterNode param : params)
 			{
-				BcFuncParam bcParam = new BcFuncParam(extractBcType(param.type), getCodeHelper().identifier(param.identifier));
+				BcFuncParam bcParam = new BcFuncParam(extractBcType(param), getCodeHelper().identifier(param.identifier));
 				
 				if (param.init != null)
 				{
@@ -691,7 +694,7 @@ public abstract class As2WhateverConverter
 	{
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
-		BcTypeNode varType = extractBcType(varBindNode.variable.type);
+		BcTypeNode varType = extractBcType(varBindNode.variable);
 		addToImport(varType);
 		
 		String bcIdentifier = getCodeHelper().identifier(varBindNode.variable.identifier);	
