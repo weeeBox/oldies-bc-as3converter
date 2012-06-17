@@ -138,6 +138,10 @@ public class BcNodeHelper
 				assert false;
 			}
 		}
+		else if (node instanceof LiteralStringNode)
+		{
+			// ignore
+		}
 		else
 		{
 			assert false;

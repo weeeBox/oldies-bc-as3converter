@@ -9,7 +9,7 @@ public class BcTypeNode extends BcNode
 {
 	private String name;
 	private BcClassDefinitionNode classNode;
-	private boolean integral;
+	protected boolean integral;
 	
 	public static Map<String, BcTypeNode> uniqueTypes = new HashMap<String, BcTypeNode>();
 
@@ -91,6 +91,11 @@ public class BcTypeNode extends BcNode
 	public boolean isClass()
 	{
 		return !integral && classNode != null && !classNode.isInterface();
+	}
+	
+	public boolean isNull()
+	{
+		return name.equals("null");
 	}
 
 	@Override

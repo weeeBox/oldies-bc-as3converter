@@ -110,6 +110,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 	public void addFunctionType(BcFunctionTypeNode node)
 	{
 		functionTypes.add(node);
+		node.getFunc().setOwner(this);
 		
 		if (node.isUseByDefault())
 		{
@@ -356,6 +357,8 @@ public class BcClassDefinitionNode extends BcDeclaration
 		if (bcClass.hasExtendsType())
 		{
 			BcClassDefinitionNode bcSuperClass = bcClass.getExtendsType().getClassNode();
+			assert bcSuperClass != null : bcClass.getExtendsType().getName();
+			
 			return findFunction(bcSuperClass, name, mode);
 		}
 		

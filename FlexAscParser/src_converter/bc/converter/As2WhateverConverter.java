@@ -96,6 +96,7 @@ import bc.lang.BcMetadataNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
+import bc.lang.BcWildcardTypeNode;
 
 public abstract class As2WhateverConverter
 {
@@ -147,6 +148,7 @@ public abstract class As2WhateverConverter
 		bcPlatformClasses = collect("bc-platform/src");
 		bcApiClasses = collect("bc-api/src");
 		bcClasses = collect(filenames);
+		lastBcPath = null;		
 		
 		process();
 		
@@ -206,9 +208,6 @@ public abstract class As2WhateverConverter
 		ProgramNode programNode = parser.parseProgram();
 		in.close();
 		
-//		NodePrinter printer = new NodePrinter();
-//		printer.evaluate(cx, programNode);
-
 		packageName = null;
 		bcMetadataMap.clear();
 		
@@ -495,6 +494,12 @@ public abstract class As2WhateverConverter
 	{
 		for (BcClassDefinitionNode bcClass : classes)
 		{
+			if (bcClass.hasMetadata() && bcClass.getMetadata().contains("IgnoreConversion"))
+			{
+				System.err.println("Skipped class: " + bcClass.getName());
+				continue;
+			}
+			
 			bcMembersTypesStack = new Stack<BcTypeNode>();
 			dest = new ListWriteDestination();
 			destStack = new Stack<WriteDestination>();
@@ -1235,7 +1240,7 @@ public abstract class As2WhateverConverter
 					}
 					else
 					{
-						failConversion("'Function' type not found: '" + identifier + "'");
+						failConversion("'Function' type not found: class='%s' identifier='%s'", bcClass.getName(), identifier);
 					}
 				}
 			}
@@ -1492,18 +1497,27 @@ public abstract class As2WhateverConverter
 			if (selectorType instanceof BcFunctionTypeNode)
 			{
 				BcTypeNode argType = evaluateType(argNode, true);
-				failConversionUnless(argType instanceof BcFunctionTypeNode, "Selector should have 'Function' type: %s", exprDest);
-				
-				BcFunctionTypeNode funcType = (BcFunctionTypeNode) argType;
-				failConversionUnless(funcType.isComplete(), "Selector should have a complete 'Function' type: %s", exprDest);
-				
-				BcFunctionDeclaration func = funcType.getFunc();
-				failConversionUnless(func.hasOwner(), "Selector is a 'Function' type but should have an owner: %s", exprDest);
-
-				func.setSelector();
-				
-				BcClassDefinitionNode ownerClass = func.getOwner();				
-				dest.writef("%s = %s", identifier, selector(ownerClass, argsDest));
+				if (argType instanceof BcFunctionTypeNode)
+				{
+					BcFunctionTypeNode funcType = (BcFunctionTypeNode) argType;
+					failConversionUnless(funcType.isComplete(), "Selector should have a complete 'Function' type: %s", exprDest);
+					
+					BcFunctionDeclaration func = funcType.getFunc();
+					failConversionUnless(func.hasOwner(), "Selector is a 'Function' type but should have an owner: %s", exprDest);
+	
+					func.setSelector();
+					
+					BcClassDefinitionNode ownerClass = func.getOwner();				
+					dest.writef("%s = %s", identifier, selector(ownerClass, argsDest));
+				}
+				else if (argType.isNull())
+				{
+					dest.writef("%s = %s", identifier, argsDest);
+				}
+				else
+				{
+					failConversion("Unexpected argType: '%s' expr: %s", argType.getClass(), argsDest);
+				}
 			}
 			else
 			{
@@ -2250,7 +2264,7 @@ public abstract class As2WhateverConverter
 	{
 		if (!typeNode.isIntegral() && !typeNode.hasClassNode())
 		{
-			BcClassDefinitionNode classNode = findClass(typeNode.getNameEx());
+			BcClassDefinitionNode classNode = findClass(typeNode);
 			failConversionUnless(classNode != null, "Can't find class: %s", typeNode.getNameEx());
 			typeNode.setClassNode(classNode);
 		}
@@ -2266,6 +2280,21 @@ public abstract class As2WhateverConverter
 
 	protected void postProcess(BcClassDefinitionNode bcClass)
 	{
+	}
+	
+	private BcClassDefinitionNode findClass(BcTypeNode type)
+	{
+		if (type.isIntegral())
+		{
+			return null;
+		}
+		
+		if (type instanceof BcWildcardTypeNode)
+		{
+			return findClass(classObject);
+		}
+		
+		return findClass(type.getNameEx());
 	}
 	
 	private BcClassDefinitionNode findClass(String name)
