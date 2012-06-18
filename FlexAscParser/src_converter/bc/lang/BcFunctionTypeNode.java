@@ -6,6 +6,7 @@ public class BcFunctionTypeNode extends BcTypeNode
 {
 	private BcFunctionDeclaration func;
 	private boolean useByDefault;
+	private String attachedParam;
 
 	public BcFunctionTypeNode()
 	{
@@ -73,5 +74,20 @@ public class BcFunctionTypeNode extends BcTypeNode
 	public void setReturnType(BcTypeNode returnType)
 	{
 		func.setReturnType(returnType);
+	}
+
+	public String getAttachedParam()
+	{
+		return attachedParam;
+	}
+	
+	public void setAttachedParam(String attachedParam)
+	{
+		this.attachedParam = attachedParam;
+	}
+	
+	public boolean hasAttachedParam()
+	{
+		return attachedParam != null;
 	}
 }

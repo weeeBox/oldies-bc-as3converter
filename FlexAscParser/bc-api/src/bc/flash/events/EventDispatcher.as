@@ -31,7 +31,7 @@ package bc.flash.events
 		}
 
 		/** Removes an event listener from the object. */
-		public function removeEventListener(type : String, listener : Function) : void
+		public function removeEventListener(type : String, listener : Function, useCapture : Boolean = false) : void
 		{
 			if (mEventListeners)
 			{

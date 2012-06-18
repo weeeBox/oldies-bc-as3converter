@@ -415,6 +415,14 @@ public abstract class As2WhateverConverter
 		String name = getCodeHelper().identifier(functionNameNode.identifier);
 		BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);
 		
+		BcMetadata funcMetadata = findMetadata(functionDefinitionNode);
+		List<BcFunctionTypeNode> functionTypes = null;
+		if (funcMetadata != null)
+		{
+			bcFunc.setMetadata(funcMetadata);			
+			functionTypes = extractFunctionTypes(funcMetadata);			
+		}
+		
 		String typeString = BcNodeHelper.tryExtractFunctionType(functionDefinitionNode);
 		if (typeString != null)
 		{
@@ -452,8 +460,33 @@ public abstract class As2WhateverConverter
 			ObjectList<ParameterNode> params = parameterNode.items;
 			for (ParameterNode param : params)
 			{
-				BcFuncParam bcParam = new BcFuncParam(extractBcType(param), getCodeHelper().identifier(param.identifier));
+				BcTypeNode paramType = extractBcType(param);
+				String paramName = param.identifier.name;
 				
+				// search for func param in metadata
+				if (paramType instanceof BcFunctionTypeNode && functionTypes != null)
+				{
+					if (functionTypes.size() > 1)
+					{					
+						for (BcFunctionTypeNode funcType : functionTypes)
+						{	
+							if (funcType.hasAttachedParam() && funcType.getAttachedParam().equals(paramName))
+							{
+								paramType = funcType;
+								break;
+							}
+						}
+					}
+					else
+					{
+						paramType = functionTypes.get(0);
+					}
+					
+					BcFunctionTypeNode funcType = (BcFunctionTypeNode) paramType;
+					failConversionUnless(funcType.isComplete(), "Function param '%s' is incomplete. Please provide function metadata or global function metadata", paramName);
+				}
+				
+				BcFuncParam bcParam = new BcFuncParam(paramType, getCodeHelper().identifier(paramName));				
 				if (param.init != null)
 				{
 					bcParam.setDefaultInitializer(param.init);
@@ -463,7 +496,7 @@ public abstract class As2WhateverConverter
 				declaredVars.add(bcParam);
 			}
 		}
-	
+		
 		// get function return type
 		Node returnTypeNode = functionDefinitionNode.fexpr.signature.result;
 		if (returnTypeNode != null)
@@ -475,7 +508,7 @@ public abstract class As2WhateverConverter
 		bcFunc.setStatements(functionDefinitionNode.fexpr.body);
 		return bcFunc;
 	}
-	
+
 	private void process()
 	{
 		Collection<BcTypeNode> values = BcTypeNode.uniqueTypes.values();
@@ -2671,6 +2704,12 @@ public abstract class As2WhateverConverter
 
 			BcFunctionTypeNode funcType = new BcFunctionTypeNode(func);
 			funcType.setUseByDefault(useByDefault);
+			
+			String attachedParam = funcMetadata.attribute("attach");
+			if (attachedParam != null)
+			{
+				funcType.setAttachedParam(attachedParam);
+			}
 			
 			functionTypes.add(funcType);
 		}

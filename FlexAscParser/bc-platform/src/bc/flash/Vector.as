@@ -42,6 +42,7 @@ package bc.flash
 
 		/* public function some(callback : Function, thisObject : Object = null) : Boolean; */
 
+		[FunctionType(callback="ComparatorFunction", params="o1:Object,o2:Object")]
 		public function sort(compareFunction : Function) : Vector { throw new NotImplementedError(); }
 
 		public function splice(startIndex : int, deleteCount : uint, item : Object = null) : Vector { throw new NotImplementedError(); }

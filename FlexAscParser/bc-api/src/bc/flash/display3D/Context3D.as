@@ -12,7 +12,7 @@ package bc.flash.display3D
 	 * @author weee
 	 */
 	public class Context3D {
-		public function clear(red : Number = 0.0, green : Number = 0.0, blue : Number = 0.0, alpha : Number = 1.0, depth : Number = 1.0, stencil : uint = 0, mask : uint = 4.294967295E9) : void { throw new NotImplementedError(); }
+		public function clear(red : Number = 0.0, green : Number = 0.0, blue : Number = 0.0, alpha : Number = 1.0, depth : Number = 1.0, stencil : uint = 0, mask : uint = 0xffffffff) : void { throw new NotImplementedError(); }
 
 		public function configureBackBuffer(width : int, height : int, antiAlias : int, enableDepthAndStencil : Boolean = true) : void { throw new NotImplementedError(); }
 

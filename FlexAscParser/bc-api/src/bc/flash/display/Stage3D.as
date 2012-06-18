@@ -1,10 +1,11 @@
 package bc.flash.display {
+	import bc.flash.events.EventDispatcher;
 	import bc.flash.error.NotImplementedError;
 	import bc.flash.display3D.Context3D;
 	/**
 	 * @author weee
 	 */
-	public class Stage3D 
+	public class Stage3D extends EventDispatcher
 	{	
 		public function get context3D() : Context3D { throw new NotImplementedError(); }
 
