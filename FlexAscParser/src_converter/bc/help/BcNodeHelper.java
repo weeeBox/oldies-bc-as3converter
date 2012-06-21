@@ -19,6 +19,8 @@ import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.MetaDataNode;
 import macromedia.asc.parser.Node;
+import macromedia.asc.parser.PackageDefinitionNode;
+import macromedia.asc.parser.PackageNameNode;
 import macromedia.asc.parser.ParameterNode;
 import macromedia.asc.parser.RestParameterNode;
 import macromedia.asc.parser.SelectorNode;
@@ -34,6 +36,21 @@ import bc.lang.BcWildcardTypeNode;
 
 public class BcNodeHelper
 {
+	public static String tryExtractPackageName(ClassDefinitionNode classDefinitionNode)
+	{
+		PackageDefinitionNode pkgdef = classDefinitionNode.pkgdef;
+		if (pkgdef != null)
+		{
+			PackageNameNode packageNameNode = pkgdef.name;
+			if (packageNameNode != null)
+			{
+				return packageNameNode.id.pkg_part;
+			}
+		}		
+		
+		return null;
+	}
+	
 	public static List<String> extractModifiers(AttributeListNode attrs)
 	{
 		List<String> modifiers = new ArrayList<String>();

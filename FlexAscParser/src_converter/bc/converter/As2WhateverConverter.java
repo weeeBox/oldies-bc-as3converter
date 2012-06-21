@@ -103,7 +103,6 @@ public abstract class As2WhateverConverter
 	private WriteDestination dest;
 	private Stack<WriteDestination> destStack;
 	
-	private String packageName;
 	private String lastBcPath;
 	private BcClassDefinitionNode lastBcClass;
 	private BcFunctionDeclaration lastBcFunction;
@@ -208,7 +207,6 @@ public abstract class As2WhateverConverter
 		ProgramNode programNode = parser.parseProgram();
 		in.close();
 		
-		packageName = null;
 		bcMetadataMap.clear();
 		
 		for (Node node : programNode.statements.items)
@@ -220,14 +218,6 @@ public abstract class As2WhateverConverter
 			else if (node instanceof ClassDefinitionNode)
 			{
 				bcClasses.add(collect((ClassDefinitionNode) node));
-			}
-			else if (node instanceof PackageDefinitionNode)
-			{
-				if (packageName == null)
-				{
-					PackageDefinitionNode packageNode = (PackageDefinitionNode) node;
-					packageName = packageNode.name.id.pkg_part;
-				}
 			}
 			else if (node instanceof MetaDataNode)
 			{
@@ -241,6 +231,10 @@ public abstract class As2WhateverConverter
 				}
 			}
 			else if (node instanceof ImportDirectiveNode)
+			{
+				// nothing
+			}
+			else if (node instanceof PackageDefinitionNode)
 			{
 				// nothing
 			}
@@ -261,6 +255,9 @@ public abstract class As2WhateverConverter
 		
 		BcTypeNode interfaceType = createBcType(interfaceDeclaredName);
 		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);
+		
+		String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);
+		
 		bcInterface.setPackageName(packageName);
 		bcInterface.setDeclaredVars(declaredVars);
 		
@@ -302,6 +299,8 @@ public abstract class As2WhateverConverter
 		BcTypeNode classType = createBcType(classDeclaredName);
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.setFinal(BcNodeHelper.isFinal(classDefinitionNode));
+		
+		String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
 		
 		bcClass.setPackageName(packageName);
 		bcClass.setDeclaredVars(declaredVars);
