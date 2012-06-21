@@ -1,19 +1,19 @@
 package bc.flash.display
 {
-	import bc.flash.utils.MathHelper;
-	import bc.flash.geom.Matrix;
-	import bc.flash.error.NotImplementedError;
 	import bc.flash.core.RenderSupport;
-	import bc.flash.geom.Transform;
-	import bc.flash.error.AbstractClassError;
-	import bc.flash.error.AbstractMethodError;
+	import bc.flash.errors.AbstractClassError;
+	import bc.flash.errors.AbstractMethodError;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.events.Event;
 	import bc.flash.events.EventDispatcher;
 	import bc.flash.events.TouchEvent;
+	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Point;
 	import bc.flash.geom.Rectangle;
-
+	import bc.flash.geom.Transform;
+	import bc.flash.utils.MathHelper;
 	import flash.utils.getQualifiedClassName;
+
 
 	public class DisplayObject extends EventDispatcher implements IBitmapDrawable
 	{

@@ -1,7 +1,7 @@
 package bc.flash.xml
 {
-	import bc.flash.error.NotImplementedError;
-	import bc.flash.error.AbstractClassError;
+	import bc.flash.errors.AbstractClassError;
+	import bc.flash.errors.NotImplementedError;
 
 	[ConvertOnce]
 	public class XML extends Object

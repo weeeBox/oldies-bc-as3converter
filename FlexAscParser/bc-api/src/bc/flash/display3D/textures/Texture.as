@@ -1,6 +1,6 @@
 package bc.flash.display3D.textures {
 	import bc.flash.display.BitmapData;
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.utils.ByteArray;
 	/**
 	 * @author weee

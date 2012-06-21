@@ -1,7 +1,7 @@
 package bc.flash.geom
 {
+	import bc.flash.errors.NotImplementedError;
 	import flash.geom.Rectangle;
-	import bc.flash.error.NotImplementedError;
 
 	public class Rectangle extends Object
 	{

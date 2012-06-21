@@ -1,5 +1,5 @@
 package bc.flash.display3D.textures {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	/**
 	 * @author weee
 	 */

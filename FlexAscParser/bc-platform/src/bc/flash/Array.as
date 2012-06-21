@@ -1,6 +1,6 @@
 package bc.flash 
 {	
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	
 	[ConvertOnce]
 	public dynamic class Array extends Object 

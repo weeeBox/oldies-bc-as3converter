@@ -1,10 +1,11 @@
-package bc.flash.error
+package bc.flash.errors
 {
+	import bc.flash.Error;
 	/**
 	 * @author weee
 	 */
 	[ConvertOnce]
-	public class IllegalOperationError extends bc.flash.error.Error
+	public class IllegalOperationError extends bc.flash.Error
 	{
 		public function IllegalOperationError(message : String = null)
 		{

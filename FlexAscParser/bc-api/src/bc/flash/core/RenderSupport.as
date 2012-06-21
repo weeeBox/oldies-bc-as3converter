@@ -1,7 +1,7 @@
 package bc.flash.core 
 {
 	import bc.flash.display.BitmapData;
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.geom.Matrix;
 
 	/** A class that contains helper methods simplifying Stage3D rendering.

@@ -1,6 +1,6 @@
 package bc.flash.events 
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	public class MouseEvent extends Event 
 	{
 		public static const CLICK : String = "click";

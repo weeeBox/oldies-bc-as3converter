@@ -1,10 +1,10 @@
-package bc.flash.error
+package bc.flash
 {
 	/**
 	 * @author weee
 	 */
 	[ConvertOnce]
-	public class ArgumentError extends bc.flash.error.Error
+	public class ArgumentError extends bc.flash.Error
 	{
 		public function ArgumentError(message : String = "")
 		{

@@ -1,6 +1,6 @@
 package bc.flash 
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	
 	[NoConversion]
 	public final class String extends Object 

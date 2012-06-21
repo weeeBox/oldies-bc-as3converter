@@ -1,5 +1,5 @@
 package bc.flash.display3D {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.utils.ByteArray;
 	/**
 	 * @author weee

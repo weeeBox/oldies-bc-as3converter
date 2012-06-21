@@ -1,8 +1,8 @@
 package bc.flash.media
 {
-	import bc.flash.error.NotImplementedError;
-
+	import bc.flash.errors.NotImplementedError;
 	import flash.media.SoundTransform;
+
 
 	[ConvertOnce]
 	public final class SoundChannel /* extends EventDispatcher */

@@ -1,13 +1,13 @@
 package bc.flash.display3D 
 {
-	import bc.flash.geom.Rectangle;
-	import bc.flash.display3D.textures.TextureBase;
-	import bc.flash.geom.Matrix3D;
-	import bc.flash.utils.ByteArray;
 	import bc.flash.display.BitmapData;
-	import bc.flash.display3D.textures.Texture;
 	import bc.flash.display3D.textures.CubeTexture;
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.display3D.textures.Texture;
+	import bc.flash.display3D.textures.TextureBase;
+	import bc.flash.errors.NotImplementedError;
+	import bc.flash.geom.Matrix3D;
+	import bc.flash.geom.Rectangle;
+	import bc.flash.utils.ByteArray;
 	/**
 	 * @author weee
 	 */

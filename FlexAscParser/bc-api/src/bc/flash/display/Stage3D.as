@@ -1,7 +1,7 @@
 package bc.flash.display {
-	import bc.flash.events.EventDispatcher;
-	import bc.flash.error.NotImplementedError;
 	import bc.flash.display3D.Context3D;
+	import bc.flash.errors.NotImplementedError;
+	import bc.flash.events.EventDispatcher;
 	/**
 	 * @author weee
 	 */

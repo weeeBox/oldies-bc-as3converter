@@ -1,6 +1,6 @@
 package bc.flash.geom
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.utils.MathHelper;
 	import flash.errors.IllegalOperationError;
 

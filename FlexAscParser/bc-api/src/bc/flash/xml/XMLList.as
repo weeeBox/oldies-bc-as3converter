@@ -1,6 +1,6 @@
 package bc.flash.xml
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 
 	[ConvertOnce]
 	public class XMLList

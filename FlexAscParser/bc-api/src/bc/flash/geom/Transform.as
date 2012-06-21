@@ -1,7 +1,7 @@
 package bc.flash.geom
 {
-	import bc.flash.error.NotImplementedError;
 	import bc.flash.display.DisplayObject;
+	import bc.flash.errors.NotImplementedError;
 
 	public class Transform extends Object
 	{

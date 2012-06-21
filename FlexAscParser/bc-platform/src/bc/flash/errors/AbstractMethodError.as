@@ -1,10 +1,11 @@
-package bc.flash.error
+package bc.flash.errors
 {
+	import bc.flash.Error;
 	/**
 	 * @author weee
 	 */
 	[ConvertOnce]
-	public class AbstractMethodError extends bc.flash.error.Error
+	public class AbstractMethodError extends bc.flash.Error
 	{
 		public function AbstractMethodError(message : String = "")
 		{
