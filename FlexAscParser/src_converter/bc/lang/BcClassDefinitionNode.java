@@ -20,6 +20,8 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private List<BcFunctionDeclaration> functions;
 	private List<BcFunctionDeclaration> constructors;
 	
+	private BcImportList importList;
+	
 	private List<BcVariableDeclaration> declaredVars;
 	private List<BcTypeNode> additionalImports;
 	
@@ -207,6 +209,11 @@ public class BcClassDefinitionNode extends BcDeclaration
 		{
 			additionalImports.add(bcType);
 		}
+	}
+	
+	public void setImportList(BcImportList importList)
+	{
+		this.importList = importList;
 	}
 	
 	public List<BcVariableDeclaration> getFields()

@@ -6,7 +6,7 @@ import java.util.Map;
 public class BcImportList
 {
 	private static final String SYSTEM_PACKAGE_PREFIX = "__AS3__.";
-	private static final String BC_SYSTEM_PACKAGE = "bc.flash";
+	private static final String SYSTEM_REPLACEMENT_PACKAGE = "bc.flash";
 	
 	private Map<String, String> data;
 	
@@ -19,7 +19,7 @@ public class BcImportList
 	{
 		if (packageName.startsWith(SYSTEM_PACKAGE_PREFIX))
 		{
-			packageName = BC_SYSTEM_PACKAGE;
+			packageName = SYSTEM_REPLACEMENT_PACKAGE;
 		}
 		
 		if (data.containsKey(typeName))

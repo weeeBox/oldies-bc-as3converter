@@ -55,6 +55,8 @@ import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.MetaDataNode;
 import macromedia.asc.parser.Node;
 import macromedia.asc.parser.PackageDefinitionNode;
+import macromedia.asc.parser.PackageIdentifiersNode;
+import macromedia.asc.parser.PackageNameNode;
 import macromedia.asc.parser.ParameterListNode;
 import macromedia.asc.parser.ParameterNode;
 import macromedia.asc.parser.Parser;
@@ -90,6 +92,7 @@ import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
+import bc.lang.BcImportList;
 import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
@@ -106,6 +109,7 @@ public abstract class As2WhateverConverter
 	private String lastBcPath;
 	private BcClassDefinitionNode lastBcClass;
 	private BcFunctionDeclaration lastBcFunction;
+	private BcImportList lastBcImportList;
 	
 	protected static final String internalFieldInitializer = "__internalInitializeFields";
 	
@@ -198,6 +202,7 @@ public abstract class As2WhateverConverter
 	private void collectSource(File file) throws IOException
 	{
 		lastBcPath = file.getPath();
+		lastBcImportList = new BcImportList();
 		
 		ContextStatics statics = new ContextStatics();
 		Context cx = new Context(statics);
@@ -207,7 +212,7 @@ public abstract class As2WhateverConverter
 		ProgramNode programNode = parser.parseProgram();
 		in.close();
 		
-		bcMetadataMap.clear();
+		bcMetadataMap.clear();		
 		
 		for (Node node : programNode.statements.items)
 		{
@@ -232,7 +237,19 @@ public abstract class As2WhateverConverter
 			}
 			else if (node instanceof ImportDirectiveNode)
 			{
-				// nothing
+				ImportDirectiveNode importNode = (ImportDirectiveNode) node;
+				
+				PackageNameNode packageNameNode = importNode.name;
+				failConversionUnless(packageNameNode != null, "Error while parsing import directive: packageNameNode is null");
+				
+				PackageIdentifiersNode packageIdentifierNode = packageNameNode.id;
+				failConversionUnless(packageIdentifierNode != null, "Error while parsing import directive: packageIdentifierNode is null");
+				
+				String typeName = packageIdentifierNode.def_part;
+				String packageName = packageIdentifierNode.pkg_part;
+				
+				boolean added = lastBcImportList.add(typeName, packageName);
+				failConversionUnless(added, "Duplicate import directive: %s.%s", packageName, typeName);
 			}
 			else if (node instanceof PackageDefinitionNode)
 			{
@@ -260,6 +277,7 @@ public abstract class As2WhateverConverter
 		
 		bcInterface.setPackageName(packageName);
 		bcInterface.setDeclaredVars(declaredVars);
+		bcInterface.setImportList(lastBcImportList);
 		
 		lastBcClass = bcInterface;
 		
@@ -304,6 +322,7 @@ public abstract class As2WhateverConverter
 		
 		bcClass.setPackageName(packageName);
 		bcClass.setDeclaredVars(declaredVars);
+		bcClass.setImportList(lastBcImportList);
 		
 		lastBcClass = bcClass;
 		
