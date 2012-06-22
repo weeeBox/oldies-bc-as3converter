@@ -22,6 +22,7 @@ import macromedia.asc.parser.Node;
 import macromedia.asc.parser.PackageDefinitionNode;
 import macromedia.asc.parser.PackageNameNode;
 import macromedia.asc.parser.ParameterNode;
+import macromedia.asc.parser.QualifiedIdentifierNode;
 import macromedia.asc.parser.RestParameterNode;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
@@ -193,9 +194,11 @@ public class BcNodeHelper
 		if (type instanceof GetExpressionNode)
 		{
 			GetExpressionNode selector = (GetExpressionNode) type;
-			String name = ((IdentifierNode)selector.expr).name;
+			QualifiedIdentifierNode identifier = (QualifiedIdentifierNode)selector.expr;
+			String name = identifier.name;
+			String qualifier = identifier.qualifier != null ? ((LiteralStringNode)identifier.qualifier).value : null;			 
 			
-			return BcTypeNode.create(name);
+			return BcTypeNode.create(name, qualifier);
 		}
 		
 		if (type instanceof ApplyTypeExprNode)

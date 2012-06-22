@@ -8,6 +8,8 @@ import bc.help.BcCodeHelper;
 public class BcTypeNode extends BcNode
 {
 	private String name;
+	private String qualifier;
+	
 	private BcClassDefinitionNode classNode;
 	protected boolean integral;
 	
@@ -19,6 +21,16 @@ public class BcTypeNode extends BcNode
 	}
 	
 	public static BcTypeNode create(String name, boolean registerType)
+	{
+		return create(name, null, registerType);
+	}
+	
+	public static BcTypeNode create(String name, String qualifier)
+	{
+		return create(name, qualifier, true);
+	}
+	
+	public static BcTypeNode create(String name, String quialifier, boolean registerType)
 	{
 		BcTypeNode node = uniqueTypes.get(name);
 		if (node == null)
@@ -44,7 +56,13 @@ public class BcTypeNode extends BcNode
 	
 	protected BcTypeNode(String name)
 	{
+		this(name, null);
+	}
+	
+	protected BcTypeNode(String name, String qualifier)
+	{
 		this.name = name;
+		this.qualifier = qualifier;
 		integral = BcCodeHelper.isIntegralType(name);
 	}
 	
@@ -56,6 +74,26 @@ public class BcTypeNode extends BcNode
 	public String getName()
 	{
 		return name;
+	}
+	
+	public boolean hasQualifier()
+	{
+		return qualifier != null;
+	}
+	
+	public void setQualifier(String qualifier)
+	{
+		this.qualifier = qualifier;
+	}
+	
+	public String getQualifier()
+	{
+		return qualifier;
+	}
+	
+	public String getQualifiedName()
+	{
+		return qualifier != null ? (qualifier + "." + name) : name;
 	}
 	
 	public String getNameEx()

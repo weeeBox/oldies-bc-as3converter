@@ -2060,7 +2060,7 @@ public abstract class As2WhateverConverter
 	
 	private void process(ParameterNode node)
 	{
-		BcTypeNode type = BcNodeHelper.extractBcType(node.type);
+		BcTypeNode type = extractBcType(node.type);
 		addToImport(type);
 		
 		String identifier = getCodeHelper().identifier(node.identifier);
@@ -3137,7 +3137,7 @@ public abstract class As2WhateverConverter
 	
 	private BcTypeNode extractBcType(Node node)
 	{
-		BcTypeNode bcType = BcNodeHelper.extractBcType(node);		
+		BcTypeNode bcType = BcNodeHelper.extractBcType(node);
 		if (bcType instanceof BcVectorTypeNode)
 		{
 			BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
