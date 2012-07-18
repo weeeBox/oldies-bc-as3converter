@@ -96,6 +96,7 @@ import bc.lang.BcImportList;
 import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
+import bc.lang.BcModuleEntry;
 import bc.lang.BcNullType;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
@@ -148,16 +149,27 @@ public abstract class As2WhateverConverter
 	}
 	
 	private List<BcClassDefinitionNode> collect(String... filenames) throws IOException
-	{		
-		BcGlobal.bcClasses = new ArrayList<BcClassDefinitionNode>();
+	{
+		// first we collect and register all the top level types (with qualified names)
+		List<BcModuleEntry> modules = new ArrayList<BcModuleEntry>();
 		for (int i = 0; i < filenames.length; ++i)
 		{
-			collect(new File(filenames[i]));
+			collectModules(new File(filenames[i]), modules);
 		}
+		
+		// then we collect the stuff as usual
+		// probably not a good idea, but who cares
+		BcGlobal.bcClasses = new ArrayList<BcClassDefinitionNode>();
+		
+		for (BcModuleEntry module : modules)
+		{
+			collect(module);
+		}
+		
 		return BcGlobal.bcClasses;
 	}
 	
-	private void collect(File file) throws IOException
+	private void collectModules(File file, List<BcModuleEntry> modules) throws IOException
 	{
 		if (file.isDirectory())
 		{
@@ -176,32 +188,61 @@ public abstract class As2WhateverConverter
 			
 			for (File child : files) 
 			{
-				collect(child);
+				collectModules(child, modules);
 			}
 		}
 		else
 		{
-			collectSource(file);
-		}
-		
+			modules.add(collectModule(file));
+		}		
 	}
 	
-	private void collectSource(File file) throws IOException
+	private BcModuleEntry collectModule(File file) throws IOException
 	{
-		BcGlobal.lastBcPath = file.getPath();
-		BcGlobal.lastBcImportList = new BcImportList();
-		
 		ContextStatics statics = new ContextStatics();
 		Context cx = new Context(statics);
 		FileInputStream in = new FileInputStream(file);		
-		Parser parser = new Parser(cx, in, BcGlobal.lastBcPath);
+		Parser parser = new Parser(cx, in, file.getAbsolutePath());
 
 		ProgramNode programNode = parser.parseProgram();
 		in.close();
 		
+		ObjectList<Node> items = programNode.statements.items;
+		for (Node node : items)
+		{
+			if (node instanceof InterfaceDefinitionNode)
+			{
+				InterfaceDefinitionNode interfaceDefinitionNode = (InterfaceDefinitionNode) node;
+				String interfaceDeclaredName = getCodeHelper().identifier(interfaceDefinitionNode .name);
+				
+				String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);		
+				createBcType(interfaceDeclaredName, packageName);
+			}
+			else if (node instanceof ClassDefinitionNode)
+			{
+				ClassDefinitionNode classDefinitionNode = (ClassDefinitionNode) node;
+				
+				String classDeclaredName = getCodeHelper().identifier(classDefinitionNode.name);
+				String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
+				
+				createBcType(classDeclaredName, packageName);				
+			}
+		}
+		
+		return new BcModuleEntry(file, items);
+	}
+	
+	private void collect(BcModuleEntry module) throws IOException
+	{
+		File file = module.getFile();
+		
+		BcGlobal.lastBcPath = file.getPath();
+		BcGlobal.lastBcImportList = new BcImportList();
+		
 		BcGlobal.bcMetadataMap.clear();		
 		
-		for (Node node : programNode.statements.items)
+		ObjectList<Node> items = module.getItems();		
+		for (Node node : items)
 		{
 			if (node instanceof InterfaceDefinitionNode)
 			{
@@ -260,10 +301,10 @@ public abstract class As2WhateverConverter
 		
 		BcGlobal.declaredVars = new ArrayList<BcVariableDeclaration>();
 		
-		BcTypeNode interfaceType = createBcType(interfaceDeclaredName);
-		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);
+		String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);		
+		BcTypeNode interfaceType = createBcType(interfaceDeclaredName, packageName);
 		
-		String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);
+		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);		
 		
 		bcInterface.setPackageName(packageName);
 		bcInterface.setDeclaredVars(BcGlobal.declaredVars);
@@ -3160,8 +3201,6 @@ public abstract class As2WhateverConverter
 		{
 			return getDefaultFunctionType();
 		}
-		
-		BcTypeNode.add(bcType.getNameEx(), bcType);
 		
 		return bcType;
 	}

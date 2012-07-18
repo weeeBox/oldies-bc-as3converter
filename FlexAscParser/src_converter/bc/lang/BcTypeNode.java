@@ -1,9 +1,14 @@
 package bc.lang;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import bc.help.BcCodeHelper;
+import bc.help.BcGlobal;
+import bc.help.BcNodeHelper;
 
 public class BcTypeNode extends BcNode
 {
@@ -36,24 +41,51 @@ public class BcTypeNode extends BcNode
 		BcTypeNode node = uniqueTypes.get(typeName);
 		if (node == null)
 		{
-			node = name.equals("Function") ? new BcFunctionTypeNode() : new BcTypeNode(typeName);
-			System.out.println("Add type: " + typeName.getQualifiedName());
-			if (registerType)
-			{
-				uniqueTypes.put(typeName, node);
+			node = findByName(name);
+			if (node == null)
+			{			
+				node = name.equals("Function") ? new BcFunctionTypeNode() : new BcTypeNode(typeName);
+				System.out.println("Add type: " + typeName.getQualifiedName());
+				if (registerType)
+				{
+					uniqueTypes.put(typeName, node);
+				}
 			}
 		}
 		return node;
 	}
 	
+	private static BcTypeNode findByName(String name)
+	{
+		Collection<BcTypeNode> types = uniqueTypes.values();
+		List<BcTypeNode> foundTypes = new ArrayList<BcTypeNode>();
+		
+		for (BcTypeNode type : types)
+		{
+			if (type.getName().equals(name))
+			{
+				foundTypes.add(type);
+			}
+		}
+		
+		if (foundTypes.isEmpty())
+		{
+			return null;
+		}
+		
+		if (foundTypes.size() == 1)
+		{
+			return foundTypes.get(0);
+		}
+		
+		assert false;
+		
+		return null;
+	}
+	
 	public static BcTypeNode createRestType()
 	{
 		return new BcRestTypeNode();
-	}
-	
-	public static void add(String name, BcTypeNode type)
-	{		
-		uniqueTypes.put(new BcTypeName(name), type);
 	}
 	
 	protected BcTypeNode(String name)
