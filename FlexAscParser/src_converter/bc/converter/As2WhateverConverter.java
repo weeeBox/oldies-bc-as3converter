@@ -13,7 +13,6 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 import macromedia.asc.parser.ApplyTypeExprNode;
@@ -85,6 +84,7 @@ import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.error.ConverterException;
 import bc.help.BcCodeHelper;
+import bc.help.BcGlobal;
 import bc.help.BcNodeHelper;
 import bc.help.BcStringUtils;
 import bc.lang.BcArgumentsList;
@@ -107,11 +107,6 @@ public abstract class As2WhateverConverter
 	private WriteDestination dest;
 	private Stack<WriteDestination> destStack;
 	
-	private String lastBcPath;
-	private BcClassDefinitionNode lastBcClass;
-	private BcFunctionDeclaration lastBcFunction;
-	private BcImportList lastBcImportList;
-	
 	protected static final String internalFieldInitializer = "__internalInitializeFields";
 	
 	protected static final String classGlobal = "Global";
@@ -125,15 +120,6 @@ public abstract class As2WhateverConverter
 	protected static final String classXMLList = "XMLList";
 	protected static final String classBoolean = "Boolean";
 	
-	private List<BcVariableDeclaration> declaredVars;
-	
-	private List<BcClassDefinitionNode> bcPlatformClasses;
-	private List<BcClassDefinitionNode> bcApiClasses;
-	private List<BcClassDefinitionNode> bcClasses;
-	private List<BcFunctionDeclaration> bcGlobalFunctions;
-	
-	private Map<DefinitionNode, BcMetadata> bcMetadataMap;
-	
 	protected boolean needFieldsInitializer;
 	private BcCodeHelper codeHelper;
 
@@ -141,34 +127,34 @@ public abstract class As2WhateverConverter
 	
 	public As2WhateverConverter(BcCodeHelper codeHelper)
 	{
-		bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
-		bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
+		BcGlobal.bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
+		BcGlobal.bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
 		
 		this.codeHelper = codeHelper;
 	}
 	
 	public void convert(File outputDir, String... filenames) throws IOException
 	{
-		bcPlatformClasses = collect("bc-platform/src");
-		bcApiClasses = collect("bc-api/src");
-		bcClasses = collect(filenames);
-		lastBcPath = null;		
+		BcGlobal.bcPlatformClasses = collect("bc-platform/src");
+		BcGlobal.bcApiClasses = collect("bc-api/src");
+		BcGlobal.bcClasses = collect(filenames);
+		BcGlobal.lastBcPath = null;		
 		
 		process();
 		
-		write(new File(outputDir, "Platform"), bcPlatformClasses);
-		write(new File(outputDir, "Api"), bcApiClasses);
-		write(new File(outputDir, "Converted"), bcClasses);
+		write(new File(outputDir, "Platform"), BcGlobal.bcPlatformClasses);
+		write(new File(outputDir, "Api"), BcGlobal.bcApiClasses);
+		write(new File(outputDir, "Converted"), BcGlobal.bcClasses);
 	}
 	
 	private List<BcClassDefinitionNode> collect(String... filenames) throws IOException
 	{		
-		bcClasses = new ArrayList<BcClassDefinitionNode>();
+		BcGlobal.bcClasses = new ArrayList<BcClassDefinitionNode>();
 		for (int i = 0; i < filenames.length; ++i)
 		{
 			collect(new File(filenames[i]));
 		}
-		return bcClasses;
+		return BcGlobal.bcClasses;
 	}
 	
 	private void collect(File file) throws IOException
@@ -202,28 +188,28 @@ public abstract class As2WhateverConverter
 	
 	private void collectSource(File file) throws IOException
 	{
-		lastBcPath = file.getPath();
-		lastBcImportList = new BcImportList();
+		BcGlobal.lastBcPath = file.getPath();
+		BcGlobal.lastBcImportList = new BcImportList();
 		
 		ContextStatics statics = new ContextStatics();
 		Context cx = new Context(statics);
 		FileInputStream in = new FileInputStream(file);		
-		Parser parser = new Parser(cx, in, lastBcPath);
+		Parser parser = new Parser(cx, in, BcGlobal.lastBcPath);
 
 		ProgramNode programNode = parser.parseProgram();
 		in.close();
 		
-		bcMetadataMap.clear();		
+		BcGlobal.bcMetadataMap.clear();		
 		
 		for (Node node : programNode.statements.items)
 		{
 			if (node instanceof InterfaceDefinitionNode)
 			{
-				bcClasses.add(collect((InterfaceDefinitionNode) node));
+				BcGlobal.bcClasses.add(collect((InterfaceDefinitionNode) node));
 			}
 			else if (node instanceof ClassDefinitionNode)
 			{
-				bcClasses.add(collect((ClassDefinitionNode) node));
+				BcGlobal.bcClasses.add(collect((ClassDefinitionNode) node));
 			}
 			else if (node instanceof MetaDataNode)
 			{
@@ -233,7 +219,7 @@ public abstract class As2WhateverConverter
 					BcMetadata bcMetadata = BcNodeHelper.extractBcMetadata(metadata);
 					failConversionUnless(bcMetadata != null, "Can't parse top level metadata");
 					
-					bcMetadataMap.put(metadata.def, bcMetadata);
+					BcGlobal.bcMetadataMap.put(metadata.def, bcMetadata);
 				}
 			}
 			else if (node instanceof ImportDirectiveNode)
@@ -249,7 +235,7 @@ public abstract class As2WhateverConverter
 				String typeName = packageIdentifierNode.def_part;
 				String packageName = packageIdentifierNode.pkg_part;
 				
-				boolean added = lastBcImportList.add(typeName, packageName);
+				boolean added = BcGlobal.lastBcImportList.add(typeName, packageName);
 				failConversionUnless(added, "Duplicate import directive: %s.%s", packageName, typeName);
 			}
 			else if (node instanceof PackageDefinitionNode)
@@ -260,19 +246,19 @@ public abstract class As2WhateverConverter
 			{
 				BcFunctionDeclaration bcFunc = collect((FunctionDefinitionNode)node);
 				bcFunc.setGlobal();
-				bcGlobalFunctions.add(bcFunc);
+				BcGlobal.bcGlobalFunctions.add(bcFunc);
 			}
 		}
 		
-		lastBcPath = null;
-		lastBcImportList = null;
+		BcGlobal.lastBcPath = null;
+		BcGlobal.lastBcImportList = null;
 	}
 
 	private BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
 	{
 		String interfaceDeclaredName = getCodeHelper().identifier(interfaceDefinitionNode.name);
 		
-		declaredVars = new ArrayList<BcVariableDeclaration>();
+		BcGlobal.declaredVars = new ArrayList<BcVariableDeclaration>();
 		
 		BcTypeNode interfaceType = createBcType(interfaceDeclaredName);
 		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);
@@ -280,10 +266,10 @@ public abstract class As2WhateverConverter
 		String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);
 		
 		bcInterface.setPackageName(packageName);
-		bcInterface.setDeclaredVars(declaredVars);
-		bcInterface.setImportList(lastBcImportList);
+		bcInterface.setDeclaredVars(BcGlobal.declaredVars);
+		bcInterface.setImportList(BcGlobal.lastBcImportList);
 		
-		lastBcClass = bcInterface;
+		BcGlobal.lastBcClass = bcInterface;
 		
 		BcMetadata metadata = findMetadata(interfaceDefinitionNode);
 		if (metadata != null)
@@ -308,7 +294,7 @@ public abstract class As2WhateverConverter
 				}
 			}		
 		}
-		lastBcClass = null;
+		BcGlobal.lastBcClass = null;
 		
 		return bcInterface;
 	}
@@ -316,7 +302,7 @@ public abstract class As2WhateverConverter
 	private BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
 	{
 		String classDeclaredName = getCodeHelper().identifier(classDefinitionNode.name);
-		declaredVars = new ArrayList<BcVariableDeclaration>();
+		BcGlobal.declaredVars = new ArrayList<BcVariableDeclaration>();
 		
 		String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
 		
@@ -325,10 +311,10 @@ public abstract class As2WhateverConverter
 		bcClass.setFinal(BcNodeHelper.isFinal(classDefinitionNode));
 		
 		bcClass.setPackageName(packageName);
-		bcClass.setDeclaredVars(declaredVars);
-		bcClass.setImportList(lastBcImportList);
+		bcClass.setDeclaredVars(BcGlobal.declaredVars);
+		bcClass.setImportList(BcGlobal.lastBcImportList);
 		
-		lastBcClass = bcClass;
+		BcGlobal.lastBcClass = bcClass;
 		
 		// collect metadata
 		BcMetadata classMetadata = findMetadata(classDefinitionNode);
@@ -383,7 +369,7 @@ public abstract class As2WhateverConverter
 					BcMetadata bcMetadata = BcNodeHelper.extractBcMetadata(metadata);
 					failConversionUnless(bcMetadata != null, "Failed to extract metadata");
 					
-					bcMetadataMap.put(metadata.def, bcMetadata);
+					BcGlobal.bcMetadataMap.put(metadata.def, bcMetadata);
 				}
 			}
 			else if (node instanceof ExpressionStatementNode)
@@ -396,8 +382,8 @@ public abstract class As2WhateverConverter
 			}
 		}		
 		
-		lastBcClass = null;
-		declaredVars = null;
+		BcGlobal.lastBcClass = null;
+		BcGlobal.declaredVars = null;
 		
 		return bcClass;
 	}
@@ -426,7 +412,7 @@ public abstract class As2WhateverConverter
 
 		bcVar.setInitializerNode(varBindNode.initializer);
 		
-		declaredVars.add(bcVar);
+		BcGlobal.declaredVars.add(bcVar);
 		
 		return bcVar;
 	}
@@ -467,7 +453,7 @@ public abstract class As2WhateverConverter
 			bcFunc.setSetter();
 		}
 		
-		boolean isConstructor = lastBcClass != null && name.equals(lastBcClass.getName());
+		boolean isConstructor = BcGlobal.lastBcClass != null && name.equals(BcGlobal.lastBcClass.getName());
 		bcFunc.setConstructorFlag(isConstructor);
 	
 		bcFunc.setModifiers(BcNodeHelper.extractModifiers(functionDefinitionNode.attrs));		
@@ -539,10 +525,10 @@ public abstract class As2WhateverConverter
 			process(type);
 		}
 				
-		process(new ArrayList<BcClassDefinitionNode>(bcPlatformClasses));
-		process(bcApiClasses);
-		process(bcClasses);
-		postProcess(bcClasses);
+		process(new ArrayList<BcClassDefinitionNode>(BcGlobal.bcPlatformClasses));
+		process(BcGlobal.bcApiClasses);
+		process(BcGlobal.bcClasses);
+		postProcess(BcGlobal.bcClasses);
 	}
 
 	private void process(List<BcClassDefinitionNode> classes) 
@@ -572,18 +558,18 @@ public abstract class As2WhateverConverter
 
 	private void process(BcInterfaceDefinitionNode bcInterface)
 	{
-		declaredVars = bcInterface.getDeclaredVars();
+		BcGlobal.declaredVars = bcInterface.getDeclaredVars();
 	}
 	
 	private void process(BcClassDefinitionNode bcClass)
 	{
 		System.out.println("Process: " + bcClass.getName());
 		
-		declaredVars = bcClass.getDeclaredVars();
-		lastBcClass = bcClass;
-		lastBcImportList = bcClass.getImportList();
+		BcGlobal.declaredVars = bcClass.getDeclaredVars();
+		BcGlobal.lastBcClass = bcClass;
+		BcGlobal.lastBcImportList = bcClass.getImportList();
 		
-		failConversionUnless(lastBcImportList != null, "Class import list is 'null'. Class: '%s'", bcClass.getName());
+		failConversionUnless(BcGlobal.lastBcImportList != null, "Class import list is 'null'. Class: '%s'", bcClass.getName());
 
 		List<BcVariableDeclaration> fields = bcClass.getFields();
 		for (BcVariableDeclaration bcField : fields)
@@ -597,9 +583,9 @@ public abstract class As2WhateverConverter
 			process(bcFunc, bcClass);
 		}
 		
-		lastBcClass = null;
-		lastBcImportList = null;
-		declaredVars = null;
+		BcGlobal.lastBcClass = null;
+		BcGlobal.lastBcImportList = null;
+		BcGlobal.declaredVars = null;
 	}
 	
 	private void process(BcVariableDeclaration bcVar)
@@ -791,13 +777,13 @@ public abstract class As2WhateverConverter
 				dest.write(" = " + initializer);
 			}
 		}
-		else if (lastBcFunction != null)
+		else if (BcGlobal.lastBcFunction != null)
 		{
 			dest.write(" = " + typeDefault(varType));
 		}
 		dest.writeln(";");
 		
-		declaredVars.add(bcVar);
+		BcGlobal.declaredVars.add(bcVar);
 		
 		return bcVar;
 	}
@@ -941,13 +927,13 @@ public abstract class As2WhateverConverter
 					}
 					else if (base instanceof ThisExpressionNode)
 					{
-						failConversionUnless(lastBcClass != null, "Try to use 'this' without of a class: base=%s selector=%s", baseDest, selectorDest);
-						dest.write(thisSelector(lastBcClass, selectorDest));
+						failConversionUnless(BcGlobal.lastBcClass != null, "Try to use 'this' without of a class: base=%s selector=%s", baseDest, selectorDest);
+						dest.write(thisSelector(BcGlobal.lastBcClass, selectorDest));
 					}
 					else if (base instanceof SuperExpressionNode)
 					{
-						failConversionUnless(lastBcClass != null, "Try to use 'super' without of a class: base=%s selector=%s", baseDest, selectorDest);
-						dest.write(superSelector(lastBcClass, selectorDest));
+						failConversionUnless(BcGlobal.lastBcClass != null, "Try to use 'super' without of a class: base=%s selector=%s", baseDest, selectorDest);
+						dest.write(superSelector(BcGlobal.lastBcClass, selectorDest));
 					}
 					else
 					{
@@ -1022,8 +1008,8 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				failConversionUnless(lastBcClass != null, "'get' expression might appear outside of the class: %s", expr);
-				bcClass = lastBcClass;
+				failConversionUnless(BcGlobal.lastBcClass != null, "'get' expression might appear outside of the class: %s", expr);
+				bcClass = BcGlobal.lastBcClass;
 				needLocalVars = true;
 			}
 			
@@ -1178,7 +1164,7 @@ public abstract class As2WhateverConverter
 	
 	private BcVariableDeclaration findVariable(String name)
 	{
-		return findVariable(lastBcClass, name);
+		return findVariable(BcGlobal.lastBcClass, name);
 	}
 
 	private BcVariableDeclaration findVariable(BcClassDefinitionNode bcClass, String name) 
@@ -1194,12 +1180,12 @@ public abstract class As2WhateverConverter
 	
 	private BcVariableDeclaration findLocalVar(String name)
 	{
-		if (lastBcFunction == null)
+		if (BcGlobal.lastBcFunction == null)
 		{
 			return null;
 		}
 		
-		return lastBcFunction.findVariable(name);
+		return BcGlobal.lastBcFunction.findVariable(name);
 	}
 
 	private void process(CallExpressionNode node)
@@ -1460,8 +1446,8 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				failConversionUnless(lastBcClass != null, "'set' expression might appear outside of a class: %s", exprDest);
-				bcClass = lastBcClass;
+				failConversionUnless(BcGlobal.lastBcClass != null, "'set' expression might appear outside of a class: %s", exprDest);
+				bcClass = BcGlobal.lastBcClass;
 			}
 			
 			BcVariableDeclaration bcVar = null;
@@ -1862,7 +1848,7 @@ public abstract class As2WhateverConverter
 		boolean isForEach = node.test instanceof HasNextNode;
 		if (isForEach)
 		{
-			failConversionUnless(lastBcClass != null, "For each is defined outside of a class");
+			failConversionUnless(BcGlobal.lastBcClass != null, "For each is defined outside of a class");
 			
 			// get iterable collection expression
 			failConversionUnless(node.initialize != null, "For each should have initializer statement");
@@ -1882,7 +1868,7 @@ public abstract class As2WhateverConverter
 			BcTypeNode collectionType = evaluateType(coerce.expr);
 			failConversionUnless(collectionType != null, "Can't evaluate for each collection's type: %s", collection);
 			
-			lastBcClass.addToImport(collectionType);
+			BcGlobal.lastBcClass.addToImport(collectionType);
 			
 			failConversionUnless(node.statement != null, "For each should have statement node");
 			failConversionUnless(node.statement instanceof StatementListNode, "For each statement should be StatementListNode: %s", node.statement.getClass());
@@ -2082,7 +2068,7 @@ public abstract class As2WhateverConverter
 		
 		String identifier = getCodeHelper().identifier(node.identifier);
 		
-		declaredVars.add(new BcVariableDeclaration(type, identifier));		
+		BcGlobal.declaredVars.add(new BcVariableDeclaration(type, identifier));		
 		dest.write(paramDecl(type, identifier));
 	}
 	
@@ -2224,13 +2210,13 @@ public abstract class As2WhateverConverter
 			process(node.expr);
 			popDest();			
 			
-			failConversionUnless(lastBcFunction != null, "'return' statemnt outside of a function: return %s", exprDest);
-			failConversionUnless(lastBcFunction.hasReturnType(), "'return' statement with expression inside 'void' function: return %s", exprDest);
+			failConversionUnless(BcGlobal.lastBcFunction != null, "'return' statemnt outside of a function: return %s", exprDest);
+			failConversionUnless(BcGlobal.lastBcFunction.hasReturnType(), "'return' statement with expression inside 'void' function: return %s", exprDest);
 			
 			BcTypeNode returnValueType = evaluateType(node.expr);
 			failConversionUnless(returnValueType != null, "Unable to evaluate return type from expression: %s", exprDest);
 			
-			BcTypeNode returnType = lastBcFunction.getReturnType();
+			BcTypeNode returnType = BcGlobal.lastBcFunction.getReturnType();
 			if (needExplicitCast(returnValueType, returnType))
 			{
 				dest.write(cast(exprDest, returnValueType, returnType));
@@ -2291,9 +2277,9 @@ public abstract class As2WhateverConverter
 	
 	private void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
 	{
-		List<BcVariableDeclaration> oldDeclaredVars = declaredVars;
-		lastBcFunction = bcFunc;
-		declaredVars = bcFunc.getDeclaredVars();
+		List<BcVariableDeclaration> oldDeclaredVars = BcGlobal.declaredVars;
+		BcGlobal.lastBcFunction = bcFunc;
+		BcGlobal.declaredVars = bcFunc.getDeclaredVars();
 
 		// get function statements
 		ListWriteDestination body = new ListWriteDestination();
@@ -2309,8 +2295,8 @@ public abstract class As2WhateverConverter
 		}
 		
 		bcFunc.setBody(body);
-		declaredVars = oldDeclaredVars;
-		lastBcFunction = null;
+		BcGlobal.declaredVars = oldDeclaredVars;
+		BcGlobal.lastBcFunction = null;
 	}
 	
 	private void process(ExpressionStatementNode node)
@@ -2368,17 +2354,17 @@ public abstract class As2WhateverConverter
 	private BcClassDefinitionNode findClass(String name)
 	{
 		BcClassDefinitionNode bcClass;
-		if ((bcClass = findClass(bcPlatformClasses, name)) != null)
+		if ((bcClass = findClass(BcGlobal.bcPlatformClasses, name)) != null)
 		{
 			return bcClass;
 		}
 		
-		if ((bcClass = findClass(bcApiClasses, name)) != null)
+		if ((bcClass = findClass(BcGlobal.bcApiClasses, name)) != null)
 		{
 			return bcClass;
 		}
 		
-		return findClass(bcClasses, name);
+		return findClass(BcGlobal.bcClasses, name);
 	}
 
 	private BcClassDefinitionNode findClass(List<BcClassDefinitionNode> classes, String name) 
@@ -2555,7 +2541,7 @@ public abstract class As2WhateverConverter
 	
 	private BcFunctionDeclaration findFunction(String name)
 	{
-		return findFunction(lastBcClass, name);
+		return findFunction(BcGlobal.lastBcClass, name);
 	}
 	
 	private BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name)
@@ -2571,7 +2557,7 @@ public abstract class As2WhateverConverter
 	
 	private BcFunctionDeclaration findGlobalFunction(String name)
 	{
-		for (BcFunctionDeclaration bcFunc : bcGlobalFunctions) 
+		for (BcFunctionDeclaration bcFunc : BcGlobal.bcGlobalFunctions) 
 		{
 			if (bcFunc.getName().equals(name))
 			{
@@ -2584,9 +2570,9 @@ public abstract class As2WhateverConverter
 	
 	private BcVariableDeclaration findDeclaredVar(String name)
 	{
-		failConversionUnless(declaredVars != null, "Declared vars can't be 'null': %s", name);
+		failConversionUnless(BcGlobal.declaredVars != null, "Declared vars can't be 'null': %s", name);
 		
-		for (BcVariableDeclaration var : declaredVars)
+		for (BcVariableDeclaration var : BcGlobal.declaredVars)
 		{
 			if (var.getIdentifier().equals(name))
 				return var;
@@ -2599,8 +2585,8 @@ public abstract class As2WhateverConverter
 	{
 		if (canBeClass(bcType))
 		{
-			failConversionUnless(lastBcClass != null, "Try to add import type without class: %s", bcType.getName());
-			lastBcClass.addToImport(bcType);
+			failConversionUnless(BcGlobal.lastBcClass != null, "Try to add import type without class: %s", bcType.getName());
+			BcGlobal.lastBcClass.addToImport(bcType);
 		}
 	}
 	
@@ -2754,7 +2740,7 @@ public abstract class As2WhateverConverter
 	
 	protected BcFunctionTypeNode getDefaultFunctionType()
 	{
-		return lastBcClass != null && lastBcClass.hasDefaultFunctionType() ? lastBcClass.getDefaultFunctionType() : new BcFunctionTypeNode();
+		return BcGlobal.lastBcClass != null && BcGlobal.lastBcClass.hasDefaultFunctionType() ? BcGlobal.lastBcClass.getDefaultFunctionType() : new BcFunctionTypeNode();
 	}
 	
 	public BcTypeNode evaluateType(Node node)
@@ -2823,14 +2809,14 @@ public abstract class As2WhateverConverter
 		
 		if (node instanceof ThisExpressionNode)
 		{
-			failConversionUnless(lastBcClass != null, "Can't evaluate 'this' expression's type: class is missing");
-			return lastBcClass.getClassType();
+			failConversionUnless(BcGlobal.lastBcClass != null, "Can't evaluate 'this' expression's type: class is missing");
+			return BcGlobal.lastBcClass.getClassType();
 		}
 		
 		if (node instanceof SuperExpressionNode)
 		{
-			failConversionUnless(lastBcClass != null, "Can't evaluate 'super' expression's type: class is missing");
-			return lastBcClass.getExtendsType();
+			failConversionUnless(BcGlobal.lastBcClass != null, "Can't evaluate 'super' expression's type: class is missing");
+			return BcGlobal.lastBcClass.getExtendsType();
 		}
 		
 		if (node instanceof GetExpressionNode)
@@ -2984,7 +2970,7 @@ public abstract class As2WhateverConverter
 
 	private BcTypeNode evaluateMemberExpression(MemberExpressionNode node)
 	{
-		BcClassDefinitionNode baseClass = lastBcClass;		
+		BcClassDefinitionNode baseClass = BcGlobal.lastBcClass;		
 		boolean hasCallTarget = node.base != null;
 		if (hasCallTarget)
 		{
@@ -3066,7 +3052,7 @@ public abstract class As2WhateverConverter
 					}
 					else if (getCodeHelper().identifier(identifier).equals(BcCodeHelper.thisCallMarker))
 					{
-						return lastBcClass.getClassType(); // this referes to the current class
+						return BcGlobal.lastBcClass.getClassType(); // this referes to the current class
 					}
 					else if (classEquals(baseClass, classObject))
 					{
@@ -3106,7 +3092,7 @@ public abstract class As2WhateverConverter
 
 	private BcMetadata findMetadata(Node node)
 	{
-		return bcMetadataMap.get(node);
+		return BcGlobal.bcMetadataMap.get(node);
 	}
 	
 	private BcTypeNode findIdentifierType(BcClassDefinitionNode baseClass, IdentifierNode identifier, boolean hasCallTarget)
@@ -3131,9 +3117,9 @@ public abstract class As2WhateverConverter
 		}
 		
 		// search for local variable
-		if (!hasCallTarget && lastBcFunction != null)
+		if (!hasCallTarget && BcGlobal.lastBcFunction != null)
 		{
-			BcVariableDeclaration bcVar = lastBcFunction.findVariable(name);
+			BcVariableDeclaration bcVar = BcGlobal.lastBcFunction.findVariable(name);
 			if (bcVar != null) return bcVar.getType();
 		}				
 		// search for function
@@ -3161,7 +3147,7 @@ public abstract class As2WhateverConverter
 			
 			BcClassDefinitionNode vectorGenericClass = findClass(classVector).clone();
 			vectorGenericClass.setClassType(bcType);
-			bcPlatformClasses.add(vectorGenericClass);
+			BcGlobal.bcPlatformClasses.add(vectorGenericClass);
 			
 			vectorType.setClassNode(vectorGenericClass);
 			BcTypeNode genericType = vectorType.getGeneric();
@@ -3307,7 +3293,7 @@ public abstract class As2WhateverConverter
 		BcTypeNode type = BcTypeNode.create(name, qualifier);
 		if (type instanceof BcFunctionTypeNode)
 		{
-			return lastBcClass != null && lastBcClass.hasDefaultFunctionType() ? lastBcClass.getDefaultFunctionType() : type;
+			return BcGlobal.lastBcClass != null && BcGlobal.lastBcClass.hasDefaultFunctionType() ? BcGlobal.lastBcClass.getDefaultFunctionType() : type;
 		}
 		
 		return type;
@@ -3315,8 +3301,8 @@ public abstract class As2WhateverConverter
 	
 	private String tryFindPackage(String typeName)
 	{
-		failConversionUnless(lastBcImportList != null, "Can't detect type's qualifier: import list is null. Type: '%s'", typeName);
-		return lastBcImportList.findPackage(typeName);
+		failConversionUnless(BcGlobal.lastBcImportList != null, "Can't detect type's qualifier: import list is null. Type: '%s'", typeName);
+		return BcGlobal.lastBcImportList.findPackage(typeName);
 	}
 
 	private boolean canBeClass(String name) 
@@ -3384,7 +3370,7 @@ public abstract class As2WhateverConverter
 	
 	protected boolean isPlatformClass(BcClassDefinitionNode bcClass)
 	{
-		return bcPlatformClasses.contains(bcClass);
+		return BcGlobal.bcPlatformClasses.contains(bcClass);
 	}
 	
 	protected boolean isKindOfClass(BcClassDefinitionNode childClass, BcClassDefinitionNode parentClass)
@@ -3635,8 +3621,8 @@ public abstract class As2WhateverConverter
 		if (!condition)
 		{
 			String message = new Formatter().format(format, args).toString();
-			String className = lastBcClass != null ? lastBcClass.getName() : null;
-			String functionName = lastBcFunction != null ? lastBcFunction.getName() : null;
+			String className = BcGlobal.lastBcClass != null ? BcGlobal.lastBcClass.getName() : null;
+			String functionName = BcGlobal.lastBcFunction != null ? BcGlobal.lastBcFunction.getName() : null;
 			String fullErrorMessage = String.format("Conversion failed:\n\treason: %s\n\tclass: %s\n\tfunction: %s", message, className, functionName);
 			throw new ConverterException(fullErrorMessage);
 		}
