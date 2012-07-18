@@ -211,6 +211,11 @@ public class BcClassDefinitionNode extends BcDeclaration
 		}
 	}
 	
+	public BcImportList getImportList()
+	{
+		return importList;
+	}
+	
 	public void setImportList(BcImportList importList)
 	{
 		this.importList = importList;
@@ -411,6 +416,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.extendsType = extendsType;
 		bcClass.packageName = packageName;
+		bcClass.importList = importList;
 		
 		bcClass.fields = fields;
 		bcClass.functions = functions;

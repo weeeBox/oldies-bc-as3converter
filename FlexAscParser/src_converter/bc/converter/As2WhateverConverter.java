@@ -96,6 +96,7 @@ import bc.lang.BcImportList;
 import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
+import bc.lang.BcNullType;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -262,6 +263,9 @@ public abstract class As2WhateverConverter
 				bcGlobalFunctions.add(bcFunc);
 			}
 		}
+		
+		lastBcPath = null;
+		lastBcImportList = null;
 	}
 
 	private BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
@@ -314,11 +318,11 @@ public abstract class As2WhateverConverter
 		String classDeclaredName = getCodeHelper().identifier(classDefinitionNode.name);
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 		
-		BcTypeNode classType = createBcType(classDeclaredName);
+		String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
+		
+		BcTypeNode classType = createBcType(classDeclaredName, packageName);
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.setFinal(BcNodeHelper.isFinal(classDefinitionNode));
-		
-		String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
 		
 		bcClass.setPackageName(packageName);
 		bcClass.setDeclaredVars(declaredVars);
@@ -577,6 +581,9 @@ public abstract class As2WhateverConverter
 		
 		declaredVars = bcClass.getDeclaredVars();
 		lastBcClass = bcClass;
+		lastBcImportList = bcClass.getImportList();
+		
+		failConversionUnless(lastBcImportList != null, "Class import list is 'null'. Class: '%s'", bcClass.getName());
 
 		List<BcVariableDeclaration> fields = bcClass.getFields();
 		for (BcVariableDeclaration bcField : fields)
@@ -591,6 +598,7 @@ public abstract class As2WhateverConverter
 		}
 		
 		lastBcClass = null;
+		lastBcImportList = null;
 		declaredVars = null;
 	}
 	
@@ -1207,9 +1215,6 @@ public abstract class As2WhateverConverter
 		boolean isCast = false;
 		boolean isGlobalCalled = false;
 		
-		BcTypeNode type = extractBcType(node.expr);
-		failConversionUnless(type != null, "Can't detect expression's type: ", exprDest);
-		
 		if (node.expr instanceof IdentifierNode)
 		{
 			if (lastBcMemberType == null)
@@ -1246,6 +1251,9 @@ public abstract class As2WhateverConverter
 					}
 					else
 					{
+						BcTypeNode type = extractBcType(node.expr);
+						failConversionUnless(type != null, "Can't detect cast's type: ", exprDest);
+						
 						isCast = type.isIntegral() || canBeClass(type);
 						if (isCast)
 						{
@@ -1362,10 +1370,16 @@ public abstract class As2WhateverConverter
 		
 		if (node.is_new)
 		{
+			BcTypeNode type = extractBcType(node.expr);
+			failConversionUnless(type != null, "Can't detect new's type: ", exprDest);
+			
 			dest.write(construct(type, argsList));
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
 		{
+			BcTypeNode type = extractBcType(node.expr);
+			failConversionUnless(type != null, "Can't detect vector's type: ", exprDest);
+			
 			failConversionUnless(type instanceof BcVectorTypeNode, "Vector type expected: %s", exprDest);
 			Node argNode = node.args.items.get(0);
 			
@@ -1401,6 +1415,9 @@ public abstract class As2WhateverConverter
 				
 				BcTypeNode argType = evaluateType(argNode);
 				failConversionUnless(argType != null, "Can't evaluate arg's type: %s", argStr);
+				
+				BcTypeNode type = extractBcType(node.expr);
+				failConversionUnless(type != null, "Can't detect cast's type: ", exprDest);
 				
 				if (typeEquals(type, classString))
 				{					
@@ -2793,7 +2810,7 @@ public abstract class As2WhateverConverter
 		
 		if (node instanceof LiteralNullNode)
 		{
-			return createBcType(getCodeHelper().literalNull());
+			return BcNullType.instance();
 		}
 		
 		if (node instanceof ListNode)
@@ -3275,15 +3292,31 @@ public abstract class As2WhateverConverter
 		return type == createBcType(name);
 	}
 
-	private BcTypeNode createBcType(String name) 
+	private BcTypeNode createBcType(String name)
 	{
-		BcTypeNode type = BcTypeNode.create(name);
+		return createBcType(name, null);
+	}
+	
+	private BcTypeNode createBcType(String name, String qualifier)
+	{
+		if (qualifier == null)
+		{
+			qualifier = tryFindPackage(name);
+		}
+		
+		BcTypeNode type = BcTypeNode.create(name, qualifier);
 		if (type instanceof BcFunctionTypeNode)
 		{
 			return lastBcClass != null && lastBcClass.hasDefaultFunctionType() ? lastBcClass.getDefaultFunctionType() : type;
 		}
 		
 		return type;
+	}
+	
+	private String tryFindPackage(String typeName)
+	{
+		failConversionUnless(lastBcImportList != null, "Can't detect type's qualifier: import list is null. Type: '%s'", typeName);
+		return lastBcImportList.findPackage(typeName);
 	}
 
 	private boolean canBeClass(String name) 
@@ -3604,7 +3637,8 @@ public abstract class As2WhateverConverter
 			String message = new Formatter().format(format, args).toString();
 			String className = lastBcClass != null ? lastBcClass.getName() : null;
 			String functionName = lastBcFunction != null ? lastBcFunction.getName() : null;
-			throw new ConverterException(String.format("Conversion failed:\n\treason: %s\n\tclass: %s\n\tfunction: %s", message, className, functionName));
+			String fullErrorMessage = String.format("Conversion failed:\n\treason: %s\n\tclass: %s\n\tfunction: %s", message, className, functionName);
+			throw new ConverterException(fullErrorMessage);
 		}
 	}
 }

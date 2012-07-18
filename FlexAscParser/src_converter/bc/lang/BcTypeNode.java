@@ -7,13 +7,12 @@ import bc.help.BcCodeHelper;
 
 public class BcTypeNode extends BcNode
 {
-	private String name;
-	private String qualifier;
+	private BcTypeName typeName;
 	
 	private BcClassDefinitionNode classNode;
 	protected boolean integral;
 	
-	public static Map<String, BcTypeNode> uniqueTypes = new HashMap<String, BcTypeNode>();
+	public static Map<BcTypeName, BcTypeNode> uniqueTypes = new HashMap<BcTypeName, BcTypeNode>();
 
 	public static BcTypeNode create(String name)
 	{
@@ -30,15 +29,18 @@ public class BcTypeNode extends BcNode
 		return create(name, qualifier, true);
 	}
 	
-	public static BcTypeNode create(String name, String quialifier, boolean registerType)
+	public static BcTypeNode create(String name, String qualifier, boolean registerType)
 	{
-		BcTypeNode node = uniqueTypes.get(name);
+		BcTypeName typeName = new BcTypeName(name, qualifier);
+		
+		BcTypeNode node = uniqueTypes.get(typeName);
 		if (node == null)
 		{
-			node = name.equals("Function") ? new BcFunctionTypeNode() : new BcTypeNode(name);
+			node = name.equals("Function") ? new BcFunctionTypeNode() : new BcTypeNode(typeName);
+			System.out.println("Add type: " + typeName.getQualifiedName());
 			if (registerType)
 			{
-				uniqueTypes.put(name, node);
+				uniqueTypes.put(typeName, node);
 			}
 		}
 		return node;
@@ -50,8 +52,8 @@ public class BcTypeNode extends BcNode
 	}
 	
 	public static void add(String name, BcTypeNode type)
-	{
-		uniqueTypes.put(name, type);
+	{		
+		uniqueTypes.put(new BcTypeName(name), type);
 	}
 	
 	protected BcTypeNode(String name)
@@ -61,39 +63,38 @@ public class BcTypeNode extends BcNode
 	
 	protected BcTypeNode(String name, String qualifier)
 	{
-		this.name = name;
-		this.qualifier = qualifier;
-		integral = BcCodeHelper.isIntegralType(name);
+		this(new BcTypeName(name, qualifier));
 	}
 	
-	public void setName(String name)
+	protected BcTypeNode(BcTypeName typeName)
 	{
-		this.name = name;
+		this.typeName = typeName;
+		integral = BcCodeHelper.isIntegralType(typeName.getName());
 	}
 	
 	public String getName()
 	{
-		return name;
+		return typeName.getName();
 	}
 	
 	public boolean hasQualifier()
 	{
-		return qualifier != null;
+		return typeName.hasQualifier();
 	}
 	
 	public void setQualifier(String qualifier)
 	{
-		this.qualifier = qualifier;
+		typeName.setQualifier(qualifier);
 	}
 	
 	public String getQualifier()
 	{
-		return qualifier;
+		return typeName.getQualifier();
 	}
 	
 	public String getQualifiedName()
 	{
-		return qualifier != null ? (qualifier + "." + name) : name;
+		return typeName.getQualifiedName();
 	}
 	
 	public String getNameEx()
@@ -133,7 +134,7 @@ public class BcTypeNode extends BcNode
 	
 	public boolean isNull()
 	{
-		return name.equals("null");
+		return getName().equals("null");
 	}
 
 	@Override
@@ -141,7 +142,7 @@ public class BcTypeNode extends BcNode
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((typeName == null) ? 0 : typeName.hashCode());
 		return result;
 	}
 
@@ -155,12 +156,94 @@ public class BcTypeNode extends BcNode
 		if (getClass() != obj.getClass())
 			return false;
 		BcTypeNode other = (BcTypeNode) obj;
+		if (typeName == null)
+		{
+			if (other.typeName != null)
+				return false;
+		}
+		else if (!typeName.equals(other.typeName))
+			return false;
+		return true;
+	}
+}
+
+class BcTypeName
+{
+	private String name;
+	private String qualifier;
+
+	public BcTypeName(String name)
+	{
+		this(name, null);
+	}
+	
+	public BcTypeName(String name, String qualifier)
+	{
+		this.name = name;
+		this.qualifier = qualifier;
+	}
+	
+	public String getName()
+	{
+		return name;
+	}
+	
+	public String getQualifier()
+	{
+		return qualifier;
+	}
+	
+	public void setQualifier(String qualifier)
+	{
+		this.qualifier = qualifier;
+	}
+	
+	public boolean hasQualifier()
+	{
+		return qualifier != null;
+	}
+	
+	public String getQualifiedName()
+	{
+		if (hasQualifier())
+			return getQualifier() + "." + getName();
+		
+		return getName();
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((qualifier == null) ? 0 : qualifier.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BcTypeName other = (BcTypeName) obj;
 		if (name == null)
 		{
 			if (other.name != null)
 				return false;
 		}
 		else if (!name.equals(other.name))
+			return false;
+		if (qualifier == null)
+		{
+			if (other.qualifier != null)
+				return false;
+		}
+		else if (!qualifier.equals(other.qualifier))
 			return false;
 		return true;
 	}

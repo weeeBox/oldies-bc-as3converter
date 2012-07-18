@@ -194,11 +194,21 @@ public class BcNodeHelper
 		if (type instanceof GetExpressionNode)
 		{
 			GetExpressionNode selector = (GetExpressionNode) type;
-			QualifiedIdentifierNode identifier = (QualifiedIdentifierNode)selector.expr;
-			String name = identifier.name;
-			String qualifier = identifier.qualifier != null ? ((LiteralStringNode)identifier.qualifier).value : null;			 
+			if (selector.expr instanceof QualifiedIdentifierNode)
+			{
+				QualifiedIdentifierNode identifier = (QualifiedIdentifierNode)selector.expr;
+				String name = identifier.name;
+				String qualifier = identifier.qualifier != null ? ((LiteralStringNode)identifier.qualifier).value : null;			 
+				
+				return BcTypeNode.create(name, qualifier);
+			}
+			if (selector.expr instanceof IdentifierNode)
+			{
+				return extractBcType(selector.expr);
+			}
 			
-			return BcTypeNode.create(name, qualifier);
+			assert false;
+			return null;
 		}
 		
 		if (type instanceof ApplyTypeExprNode)
