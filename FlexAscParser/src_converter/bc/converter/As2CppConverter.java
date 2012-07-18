@@ -3,9 +3,7 @@ package bc.converter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
@@ -23,6 +21,7 @@ import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcTypeNode;
+import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 
@@ -151,10 +150,10 @@ public class As2CppConverter extends As2WhateverConverter
 		hdr.writelnf(getCodeHelper().include(classExtends + ".h"));
 		if (bcClass.hasInterfaces())
 		{
-			List<BcTypeNode> interfaces = bcClass.getInterfaces();
-			for (BcTypeNode bcInterface : interfaces)
+			List<BcTypeNodeInstance> interfaces = bcClass.getInterfaces();
+			for (BcTypeNodeInstance bcInterface : interfaces)
 			{
-				hdr.writeln(getCodeHelper().include(type(bcInterface) + ".h"));
+				hdr.writeln(getCodeHelper().include(type(bcInterface.getType()) + ".h"));
 			}
 		}
 		
@@ -797,10 +796,10 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private void writeBoxingInterfaces(BcClassDefinitionNode bcClass)
 	{
-		List<BcTypeNode> interfaces = bcClass.getInterfaces();
-		for (BcTypeNode bcInterface : interfaces)
+		List<BcTypeNodeInstance> interfaces = bcClass.getInterfaces();
+		for (BcTypeNodeInstance bcInterface : interfaces)
 		{
-			BcClassDefinitionNode interfaceClass = bcInterface.getClassNode();
+			BcClassDefinitionNode interfaceClass = bcInterface.getType().getClassNode();
 			assert interfaceClass != null : bcInterface.getName();
 			
 			writeBoxingInterface(bcClass, interfaceClass);

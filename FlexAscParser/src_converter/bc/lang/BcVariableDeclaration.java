@@ -5,17 +5,22 @@ import bc.code.ListWriteDestination;
 
 public class BcVariableDeclaration extends BcDeclaration
 {
-	private BcTypeNode type;
+	private BcTypeNodeInstance typeInstance;
 	private String identifier;
 	private ListWriteDestination initializer;
 	private boolean integralInitializerFlag;
 	
 	private Node initializerNode;
 	
-	public BcVariableDeclaration(BcTypeNode type, String identifier)
+	public BcVariableDeclaration(BcTypeNode type, String identifier, boolean qualified)
 	{
-		this.type = type;
 		this.identifier = identifier;
+		typeInstance = new BcTypeNodeInstance(type, qualified);
+	}
+	
+	public boolean isQualified()
+	{
+		return typeInstance.isQualified();
 	}
 	
 	public void setInitializerNode(Node initializerNode)
@@ -30,12 +35,7 @@ public class BcVariableDeclaration extends BcDeclaration
 	
 	public BcTypeNode getType()
 	{
-		return type;
-	}
-	
-	public void setType(BcTypeNode type)
-	{
-		this.type = type;
+		return typeInstance.getType();
 	}
 	
 	public String getIdentifier()

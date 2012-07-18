@@ -99,6 +99,7 @@ import bc.lang.BcMetadataNode;
 import bc.lang.BcModuleEntry;
 import bc.lang.BcNullType;
 import bc.lang.BcTypeNode;
+import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 import bc.lang.BcWildcardTypeNode;
@@ -371,13 +372,14 @@ public abstract class As2WhateverConverter
 			BcTypeNode typeObject = createBcType(classObject);
 			if (classType != typeObject)
 			{
-				bcClass.setExtendsType(typeObject);
+				bcClass.setExtendsType(typeObject.createTypeInstance());
 			}
 		}
 		else
 		{
 			BcTypeNode bcSuperType = extractBcType(baseclass);
-			bcClass.setExtendsType(bcSuperType);
+			boolean qualified = isTypeQualified(baseclass);
+			bcClass.setExtendsType(bcSuperType.createTypeInstance(qualified));
 		}
 		
 		// interfaces
@@ -386,7 +388,8 @@ public abstract class As2WhateverConverter
 			for (Node interfaceNode : classDefinitionNode.interfaces.items)
 			{
 				BcTypeNode interfaceType = extractBcType(interfaceNode);
-				bcClass.addInterface(interfaceType);
+				boolean qualified = isTypeQualified(interfaceNode);
+				bcClass.addInterface(interfaceType.createTypeInstance(qualified));
 			}
 		}
 		
@@ -446,8 +449,9 @@ public abstract class As2WhateverConverter
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
 		BcTypeNode bcType = extractBcType(varBindNode.variable);
+		boolean qualified = isTypeQualified(varBindNode.variable);
 		String bcIdentifier = getCodeHelper().identifier(varBindNode.variable.identifier);	
-		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcType, bcIdentifier);
+		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcType, bcIdentifier, qualified);
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
 
@@ -510,6 +514,8 @@ public abstract class As2WhateverConverter
 			for (ParameterNode param : params)
 			{
 				BcTypeNode paramType = extractBcType(param);
+				boolean qualified = isTypeQualified(param);
+				
 				String paramName = param.identifier.name;
 				
 				// search for func param in metadata
@@ -535,7 +541,7 @@ public abstract class As2WhateverConverter
 					failConversionUnless(funcType.isComplete(), "Function param '%s' is incomplete. Please provide function metadata or global function metadata", paramName);
 				}
 				
-				BcFuncParam bcParam = new BcFuncParam(paramType, getCodeHelper().identifier(paramName));				
+				BcFuncParam bcParam = new BcFuncParam(paramType, getCodeHelper().identifier(paramName), qualified);				
 				if (param.init != null)
 				{
 					bcParam.setDefaultInitializer(param.init);
@@ -786,10 +792,12 @@ public abstract class As2WhateverConverter
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 		
 		BcTypeNode varType = extractBcType(varBindNode.variable);
+		boolean qualified = isTypeQualified(varBindNode.variable);
+		
 		addToImport(varType);
 		
 		String bcIdentifier = getCodeHelper().identifier(varBindNode.variable.identifier);	
-		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier);
+		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier, qualified);
 		
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
@@ -2105,14 +2113,16 @@ public abstract class As2WhateverConverter
 	private void process(ParameterNode node)
 	{
 		BcTypeNode type = extractBcType(node.type);
+		boolean qualified = isTypeQualified(node.type);
+		
 		addToImport(type);
 		
 		String identifier = getCodeHelper().identifier(node.identifier);
 		
-		BcGlobal.declaredVars.add(new BcVariableDeclaration(type, identifier));		
+		BcGlobal.declaredVars.add(new BcVariableDeclaration(type, identifier, qualified));		
 		dest.write(paramDecl(type, identifier));
 	}
-	
+
 	private void process(FinallyClauseNode node)
 	{
 		failConversion("'finally' statement is not supported yet. Sorry");
@@ -2753,7 +2763,7 @@ public abstract class As2WhateverConverter
 					String type = token.substring(index + 1);					
 					failConversionUnless(type.length() > 0, "Can't parse param for 'FunctionType' metadata: %s", paramsString);
 					
-					func.addParam(new BcFuncParam(createBcType(type), getCodeHelper().identifier(name)));
+					func.addParam(new BcFuncParam(createBcType(type), getCodeHelper().identifier(name), false));
 				}
 			}
 			
@@ -3205,6 +3215,11 @@ public abstract class As2WhateverConverter
 		return bcType;
 	}
 	
+	private boolean isTypeQualified(Node type)
+	{
+		return BcNodeHelper.isTypeQualified(type);
+	}
+	
 	private BcArgumentsList getArgs(ArgumentListNode args)
 	{
 		return args.items == null ? new BcArgumentsList() : getArgs(args.items);
@@ -3470,6 +3485,11 @@ public abstract class As2WhateverConverter
 	protected abstract String vectorType(BcVectorTypeNode vectorType);
 	public abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);
 	public abstract String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args);
+	
+	public String type(BcTypeNodeInstance bcTypeInstance)
+	{
+		return type(bcTypeInstance.getType());
+	}
 	
 	public String type(BcTypeNode bcType)
 	{

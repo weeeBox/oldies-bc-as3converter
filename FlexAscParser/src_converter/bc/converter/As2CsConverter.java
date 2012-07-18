@@ -17,6 +17,7 @@ import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcTypeNode;
+import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 
@@ -166,9 +167,9 @@ public class As2CsConverter extends As2WhateverConverter
 			
 			if (hasInterfaces)
 			{
-				List<BcTypeNode> interfaces = bcClass.getInterfaces();
+				List<BcTypeNodeInstance> interfaces = bcClass.getInterfaces();
 				int interfaceIndex= 0;
-				for (BcTypeNode bcInterface : interfaces) 
+				for (BcTypeNodeInstance bcInterface : interfaces) 
 				{					
 					String interfaceType = type(bcInterface);
 					src.write(++interfaceIndex == interfaces.size() ? interfaceType : (interfaceType + ", "));
@@ -362,10 +363,10 @@ public class As2CsConverter extends As2WhateverConverter
 		
 		if (bcClass.hasInterfaces())
 		{
-			List<BcTypeNode> interfaces = bcClass.getInterfaces();
-			for (BcTypeNode bcInterface : interfaces)
+			List<BcTypeNodeInstance> interfaces = bcClass.getInterfaces();
+			for (BcTypeNodeInstance bcInterface : interfaces)
 			{
-				tryAddUniqueNamespace(imports, bcInterface);
+				tryAddUniqueNamespace(imports, bcInterface.getType());
 			}
 		}
 		

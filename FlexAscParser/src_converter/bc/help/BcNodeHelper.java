@@ -241,6 +241,60 @@ public class BcNodeHelper
 		assert false : type.getClass();
 		return null;
 	}
+	
+	public static boolean isTypeQualified(Node type)
+	{
+		if (type == null)
+		{			
+			return false;
+		}
+		
+		if (type instanceof IdentifierNode)
+		{
+			return false;
+		}
+		
+		if (type instanceof TypeExpressionNode)
+		{
+			TypeExpressionNode typeNode = (TypeExpressionNode) type;
+			return isTypeQualified(typeNode.expr);
+		}
+		
+		if (type instanceof MemberExpressionNode)
+		{
+			MemberExpressionNode expr = (MemberExpressionNode) type;
+			return isTypeQualified(expr.selector);
+		}
+		
+		if (type instanceof GetExpressionNode)
+		{
+			GetExpressionNode selector = (GetExpressionNode) type;
+			return selector.expr instanceof QualifiedIdentifierNode;
+		}
+		
+		if (type instanceof ApplyTypeExprNode)
+		{
+			return false;
+		}
+		
+		if (type instanceof TypedIdentifierNode)
+		{			
+			return isTypeQualified(((TypedIdentifierNode) type).type);
+		}
+		
+		if (type instanceof RestParameterNode)
+		{
+			return false;
+		}
+		
+		if (type instanceof ParameterNode)
+		{
+			return isTypeQualified(((ParameterNode) type).type);
+		}
+		
+		assert false : type.getClass();
+		return false;
+	}
 		
 	public static IdentifierNode tryExtractIdentifier(SelectorNode selector)
 	{

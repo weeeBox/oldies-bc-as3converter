@@ -104,6 +104,16 @@ public class BcTypeNode extends BcNode
 		integral = BcCodeHelper.isIntegralType(typeName.getName());
 	}
 	
+	public BcTypeNodeInstance createTypeInstance()
+	{
+		return createTypeInstance(false);
+	}
+	
+	public BcTypeNodeInstance createTypeInstance(boolean qualified)
+	{
+		return new BcTypeNodeInstance(this, qualified);
+	}
+	
 	public String getName()
 	{
 		return typeName.getName();

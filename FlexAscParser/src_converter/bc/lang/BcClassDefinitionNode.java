@@ -25,8 +25,8 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private List<BcVariableDeclaration> declaredVars;
 	private List<BcTypeNode> additionalImports;
 	
-	private BcTypeNode extendsType;
-	private List<BcTypeNode> interfaces;
+	private BcTypeNodeInstance extendsType;
+	private List<BcTypeNodeInstance> interfaces;
 
 	private List<Node> statements;
 	private List<BcFunctionTypeNode> functionTypes;
@@ -39,7 +39,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 		functions = new ArrayList<BcFunctionDeclaration>();
 		constructors = new ArrayList<BcFunctionDeclaration>();
 		statements = new ArrayList<Node>();
-		interfaces = new ArrayList<BcTypeNode>();
+		interfaces = new ArrayList<BcTypeNodeInstance>();
 		additionalImports = new ArrayList<BcTypeNode>();
 		functionTypes = new ArrayList<BcFunctionTypeNode>();
 	}
@@ -91,10 +91,10 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public BcTypeNode getExtendsType()
 	{
-		return extendsType;
+		return extendsType.getType();
 	}
 	
-	public void setExtendsType(BcTypeNode extendsType)
+	public void setExtendsType(BcTypeNodeInstance extendsType)
 	{
 		this.extendsType = extendsType;
 	}
@@ -106,7 +106,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public BcClassDefinitionNode getExtendsClass()
 	{
-		return hasExtendsType() ? extendsType.getClassNode() : null;
+		return hasExtendsType() ? extendsType.getType().getClassNode() : null;
 	}
 	
 	public void addFunctionType(BcFunctionTypeNode node)
@@ -140,7 +140,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 				return funcType;
 			}
 		}
-		return extendsType != null ? extendsType.getClassNode().findFunctionType(name) : null;
+		return extendsType != null ? extendsType.getType().getClassNode().findFunctionType(name) : null;
 	}
 	
 	public boolean hasFunctionTypes()
@@ -153,12 +153,12 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return functionTypes;
 	}
 	
-	public void addInterface(BcTypeNode interfaceType)
+	public void addInterface(BcTypeNodeInstance interfaceType)
 	{
 		interfaces.add(interfaceType);
 	}
 	
-	public List<BcTypeNode> getInterfaces()
+	public List<BcTypeNodeInstance> getInterfaces()
 	{
 		return interfaces;
 	}
