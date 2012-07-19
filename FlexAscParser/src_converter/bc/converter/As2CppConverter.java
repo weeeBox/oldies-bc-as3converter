@@ -102,9 +102,9 @@ public class As2CppConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	protected void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNode loopVarType, Object collection, BcTypeNode collectionType, Object body)
+	protected void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNodeInstance loopVarTypeInstance, Object collection, BcTypeNodeInstance collectionTypeInstance, Object body)
 	{	
-		String defineName = foreachNameForType(collectionType);
+		String defineName = foreachNameForType(collectionTypeInstance.getType());
 		
 		if (defineName.equals(defineXmlForeach))
 		{
@@ -112,8 +112,8 @@ public class As2CppConverter extends As2WhateverConverter
 		}
 		else
 		{
-			BcTypeNode iterType = foreachIterType(collectionType);
-			writeDefine(dest, defineName, type(loopVarType), loopVarName, type(iterType), collection);
+			BcTypeNode iterType = foreachIterType(collectionTypeInstance.getType());
+			writeDefine(dest, defineName, type(loopVarTypeInstance), loopVarName, type(iterType), collection);
 		}
 		
 		dest.writeln(body);
@@ -385,7 +385,7 @@ public class As2CppConverter extends As2WhateverConverter
 				}				
 			}
 			
-			hdr.write(varDecl(bcField.getType(), name));
+			hdr.write(varDecl(bcField.getTypeInstance(), name));
 			if (canBeInitializedInHeader(bcField))
 			{
 				hdr.writef(" = %s", bcField.getInitializer());
@@ -1170,6 +1170,11 @@ public class As2CppConverter extends As2WhateverConverter
 		return type(type) + "*";
 	}
 	
+	public String typeRef(BcTypeNodeInstance bcTypeInstance)
+	{
+		return typeRef(bcTypeInstance.getType());
+	}
+	
 	public String typeRef(BcTypeNode bcType)
 	{
 		if (bcType instanceof BcVectorTypeNode)
@@ -1190,7 +1195,7 @@ public class As2CppConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	public String paramDecl(BcTypeNode type, String identifier)
+	public String paramDecl(BcTypeNodeInstance type, String identifier)
 	{
 		if (BcCodeHelper.isBasicType(type))
 		{
@@ -1200,7 +1205,7 @@ public class As2CppConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	public String varDecl(BcTypeNode type, String identifier)
+	public String varDecl(BcTypeNodeInstance type, String identifier)
 	{
 		return String.format("%s %s", typeRef(type), getCodeHelper().identifier(identifier));
 	}	

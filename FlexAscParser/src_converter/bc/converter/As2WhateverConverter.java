@@ -125,7 +125,7 @@ public abstract class As2WhateverConverter
 	protected boolean needFieldsInitializer;
 	private BcCodeHelper codeHelper;
 
-	protected abstract void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNode loopVarType, Object collection, BcTypeNode collectionType, Object body);
+	protected abstract void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNodeInstance loopVarTypeInstance, Object collection, BcTypeNodeInstance collectionTypeInstance, Object body);
 	
 	public As2WhateverConverter(BcCodeHelper codeHelper)
 	{
@@ -637,10 +637,12 @@ public abstract class As2WhateverConverter
 	
 	private void process(BcVariableDeclaration bcVar)
 	{
-		BcTypeNode varType = bcVar.getType();
+		BcTypeNodeInstance varTypeInstance = bcVar.getTypeInstance();
+		BcTypeNode varType = varTypeInstance.getType();
+		
 		String varId = bcVar.getIdentifier();
 		
-		dest.write(varDecl(varType, varId));
+		dest.write(varDecl(varTypeInstance, varId));
 		
 		Node initializer = bcVar.getInitializerNode();
 		if (initializer != null)
@@ -654,7 +656,7 @@ public abstract class As2WhateverConverter
 			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(initializer));
 			
 			BcTypeNode initializerType = evaluateType(initializer);
-			failConversionUnless(initializerType != null, "Unable to evaluate initializer type: %s = %s", varDecl(varType, varId), initializerDest);
+			failConversionUnless(initializerType != null, "Unable to evaluate initializer type: %s = %s", varDecl(varTypeInstance, varId), initializerDest);
 			
 			if (needExplicitCast(initializerType, varType))
 			{
@@ -798,11 +800,12 @@ public abstract class As2WhateverConverter
 		
 		String bcIdentifier = getCodeHelper().identifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier, qualified);
+		BcTypeNodeInstance varTypeInstance = bcVar.getTypeInstance();
 		
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
 		
-		dest.write(varDecl(varType, bcIdentifier));
+		dest.write(varDecl(varTypeInstance, bcIdentifier));
 		
 		if (varBindNode.initializer != null)
 		{
@@ -815,7 +818,7 @@ public abstract class As2WhateverConverter
 			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(varBindNode.initializer));
 			
 			BcTypeNode initializerType = evaluateType(varBindNode.initializer);
-			failConversionUnless(initializerType != null, "Unable to evaluate initializer's type: %s = %s", varDecl(varType, bcIdentifier), initializer);
+			failConversionUnless(initializerType != null, "Unable to evaluate initializer's type: %s = %s", varDecl(varTypeInstance, bcIdentifier), initializer);
 			
 			if (needExplicitCast(initializerType, varType))
 			{
@@ -1915,6 +1918,8 @@ public abstract class As2WhateverConverter
 			popDest();
 			
 			BcTypeNode collectionType = evaluateType(coerce.expr);
+			BcTypeNodeInstance collectionTypeInstance = collectionType.createTypeInstance(); // hack
+			
 			failConversionUnless(collectionType != null, "Can't evaluate for each collection's type: %s", collection);
 			
 			BcGlobal.lastBcClass.addToImport(collectionType);
@@ -1949,8 +1954,10 @@ public abstract class As2WhateverConverter
 			failConversionUnless(loopVar != null, "Unable to find for each loop var: %s", loopVarName);
 			
 			BcTypeNode loopVarType = loopVar.getType();
-			String loopVarString = varDecl(loopVarType, loopVarName);
-			String loopVarStringGenerated = loopVarString + " = " + typeDefault(loopVar.getType()) + ";";
+			BcTypeNodeInstance loopVarTypeInstance = loopVar.getTypeInstance();
+			
+			String loopVarString = varDecl(loopVarTypeInstance, loopVarName);
+			String loopVarStringGenerated = loopVarString + " = " + typeDefault(loopVarType) + ";";
 			
 			ListWriteDestination listDest = (ListWriteDestination) dest;
 			if (listDest.peekLine().trim().equals(loopVarStringGenerated))
@@ -1984,7 +1991,7 @@ public abstract class As2WhateverConverter
 			}
 			popDest();
 			
-			writeForeach(dest, loopVarName, loopVarType, collection, collectionType, bodyDest);
+			writeForeach(dest, loopVarName, loopVarTypeInstance, collection, collectionTypeInstance, bodyDest);
 		}
 		else
 		{
@@ -2119,8 +2126,10 @@ public abstract class As2WhateverConverter
 		
 		String identifier = getCodeHelper().identifier(node.identifier);
 		
-		BcGlobal.declaredVars.add(new BcVariableDeclaration(type, identifier, qualified));		
-		dest.write(paramDecl(type, identifier));
+		BcVariableDeclaration parameterVar = new BcVariableDeclaration(type, identifier, qualified);
+		
+		BcGlobal.declaredVars.add(parameterVar);		
+		dest.write(paramDecl(parameterVar.getTypeInstance(), identifier));
 	}
 
 	private void process(FinallyClauseNode node)
@@ -3488,7 +3497,13 @@ public abstract class As2WhateverConverter
 	
 	public String type(BcTypeNodeInstance bcTypeInstance)
 	{
-		return type(bcTypeInstance.getType());
+		String typeName = type(bcTypeInstance.getType());
+		if (bcTypeInstance.isQualified())
+		{
+			return bcTypeInstance.getQualified() + "." + typeName;
+		}
+		
+		return typeName;
 	}
 	
 	public String type(BcTypeNode bcType)
@@ -3556,9 +3571,9 @@ public abstract class As2WhateverConverter
 		return staticCall("AsString", "parse" + typeString, expr);
 	}
 	
-	public String varDecl(BcTypeNode type, String identifier)
+	public String varDecl(BcTypeNodeInstance typeInstance, String identifier)
 	{
-		return String.format("%s %s", type(type), getCodeHelper().identifier(identifier));
+		return String.format("%s %s", type(typeInstance), getCodeHelper().identifier(identifier));
 	}
 	
 	public String paramsDef(List<BcFuncParam> params)
@@ -3568,7 +3583,7 @@ public abstract class As2WhateverConverter
 		int paramIndex = 0;
 		for (BcVariableDeclaration bcParam : params)
 		{
-			buffer.append(paramDecl(bcParam.getType(), bcParam.getIdentifier()));
+			buffer.append(paramDecl(bcParam.getTypeInstance(), bcParam.getIdentifier()));
 			if (++paramIndex < params.size())
 			{
 				buffer.append(", ");
@@ -3593,9 +3608,9 @@ public abstract class As2WhateverConverter
 		return buffer.toString();
 	}
 	
-	public String paramDecl(BcTypeNode type, String identifier)
+	public String paramDecl(BcTypeNodeInstance typeInstance, String identifier)
 	{
-		return varDecl(type, identifier);
+		return varDecl(typeInstance, identifier);
 	}
 	
 	public String selector(BcClassDefinitionNode bcClass, Object funcExp)

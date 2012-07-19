@@ -5,6 +5,7 @@ import java.util.Map;
 
 import macromedia.asc.parser.IdentifierNode;
 import bc.lang.BcTypeNode;
+import bc.lang.BcTypeNodeInstance;
 
 public abstract class BcCodeHelper
 {
@@ -100,6 +101,11 @@ public abstract class BcCodeHelper
 		}
 		
 		return name;
+	}
+	
+	public static boolean isBasicType(BcTypeNodeInstance typeInstance)
+	{
+		return isBasicType(typeInstance.getType());
 	}
 	
 	public static boolean isBasicType(BcTypeNode type)

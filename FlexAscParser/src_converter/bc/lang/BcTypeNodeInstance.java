@@ -15,6 +15,16 @@ public class BcTypeNodeInstance
 	{
 		return type;
 	}
+	
+	public String getQualified()
+	{
+		return type.getQualifier();
+	}
+	
+	public String getQualifiedName()
+	{
+		return type.getQualifiedName();
+	}
 
 	public String getName()
 	{

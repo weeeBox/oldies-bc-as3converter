@@ -31,13 +31,13 @@ public class As2CsConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	protected void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNode loopVarType, Object collection, BcTypeNode collectionType, Object body)
+	protected void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNodeInstance loopVarTypeInstance, Object collection, BcTypeNodeInstance collectionTypeInstance, Object body)
 	{
 		final String collectionTemp = "__" + loopVarName + "s_";
-		dest.writelnf("%s %s = %s;", type(collectionType), collectionTemp, collection);
+		dest.writelnf("%s %s = %s;", type(collectionTypeInstance), collectionTemp, collection);
 		dest.writelnf("if (%s != %s)", collectionTemp, getCodeHelper().literalNull());
 		dest.writeBlockOpen();
-		dest.writelnf("foreach (%s %s in %s)", type(loopVarType), loopVarName, collectionTemp);		
+		dest.writelnf("foreach (%s %s in %s)", type(loopVarTypeInstance), loopVarName, collectionTemp);		
 		dest.writeln(body);		
 		dest.writeBlockClose();
 	}
@@ -74,7 +74,7 @@ public class As2CsConverter extends As2WhateverConverter
 			int paramIndex = 0;
 			for (BcFuncParam bcParam : params)
 			{
-				String paramType = type(bcParam.getType());
+				String paramType = type(bcParam.getTypeInstance());
 				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(paramName);
@@ -220,7 +220,7 @@ public class As2CsConverter extends As2WhateverConverter
 		
 		for (BcVariableDeclaration bcField : fields)
 		{
-			String type = type(bcField.getType());
+			String type = type(bcField.getTypeInstance());
 			String name = getCodeHelper().identifier(bcField.getIdentifier());
 						
 			src.write(bcField.getVisiblity() + " ");
