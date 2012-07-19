@@ -249,6 +249,11 @@ public class BcNodeHelper
 			return false;
 		}
 		
+		if (type instanceof QualifiedIdentifierNode)
+		{
+			return true;
+		}
+		
 		if (type instanceof IdentifierNode)
 		{
 			return false;

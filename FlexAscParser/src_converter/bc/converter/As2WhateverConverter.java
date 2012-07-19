@@ -1409,9 +1409,12 @@ public abstract class As2WhateverConverter
 		if (node.is_new)
 		{
 			BcTypeNode type = extractBcType(node.expr);
+			boolean qualified = isTypeQualified(node.expr);
+			BcTypeNodeInstance typeInstance = type.createTypeInstance(qualified);
+			
 			failConversionUnless(type != null, "Can't detect new's type: ", exprDest);
 			
-			dest.write(construct(type, argsList));
+			dest.write(construct(typeInstance, argsList));
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
 		{
@@ -3274,7 +3277,7 @@ public abstract class As2WhateverConverter
 	{
 		if (args == null)
 		{
-			dest.write(construct(vectorType));
+			dest.write(construct(vectorType.createTypeInstance()));
 		}
 		else
 		{
@@ -3549,20 +3552,20 @@ public abstract class As2WhateverConverter
 		return TYPE_PREFIX + name;
 	}
 	
-	public String construct(BcTypeNode type)
+	public String construct(BcTypeNodeInstance typeInstance)
 	{
-		return construct(type, emptyInitializer);
+		return construct(typeInstance, emptyInitializer);
 	}
 	
-	public String construct(BcTypeNode type, BcArgumentsList argsList)
+	public String construct(BcTypeNodeInstance typeInstance, BcArgumentsList argsList)
 	{
+		BcTypeNode type = typeInstance.getType();
 		if (type instanceof BcVectorTypeNode)
 		{
 			return constructVector((BcVectorTypeNode)type, argsList);
 		}
-		return construct(type.getName(), argsList);
-	}
-	
+		return construct(type(typeInstance), argsList);
+	}	
 	
 	public String parseString(Object expr, BcTypeNode exprType)
 	{

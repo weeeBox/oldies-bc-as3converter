@@ -463,7 +463,7 @@ public class As2CsConverter extends As2WhateverConverter
 	@Override
 	public String construct(String type, Object initializer)
 	{
-		return NEW + " " + type(type) + "(" + initializer + ")";
+		return NEW + " " + type + "(" + initializer + ")";
 	}
 	
 	@Override
