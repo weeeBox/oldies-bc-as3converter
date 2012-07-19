@@ -19,7 +19,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 {
 	private List<BcFuncParam> params;
 	
-	private BcTypeNode returnType;
+	private BcTypeNodeInstance returnTypeInstance;
 	private String name;
 	private boolean isConstructor;
 	private boolean isOverridenConstructor;
@@ -102,9 +102,9 @@ public class BcFunctionDeclaration extends BcDeclaration
 		return null;
 	}
 	
-	public void setReturnType(BcTypeNode returnType)
+	public void setReturnType(BcTypeNodeInstance returnType)
 	{
-		this.returnType = returnType;
+		this.returnTypeInstance = returnType;
 	}
 	
 	public void setBody(ListWriteDestination body)
@@ -112,14 +112,19 @@ public class BcFunctionDeclaration extends BcDeclaration
 		this.body = body;
 	}
 	
+	public BcTypeNodeInstance getReturnTypeInstance()
+	{
+		return returnTypeInstance;
+	}
+	
 	public BcTypeNode getReturnType()
 	{
-		return returnType;
+		return returnTypeInstance != null ? returnTypeInstance.getType() : null;
 	}
 	
 	public boolean hasReturnType()
 	{
-		return returnType != null;
+		return returnTypeInstance != null;
 	}
 	
 	public void setConstructorFlag(boolean flag)
@@ -251,7 +256,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 		
 		bcFunc.isConstructor = isConstructor;
 		bcFunc.isOverridenConstructor = isConstructor;
-		bcFunc.returnType = returnType;
+		bcFunc.returnTypeInstance = returnTypeInstance;
 		bcFunc.kind = kind;
 		bcFunc.declaredVars = new ArrayList<BcVariableDeclaration>(declaredVars);
 		bcFunc.modifiers = modifiers;

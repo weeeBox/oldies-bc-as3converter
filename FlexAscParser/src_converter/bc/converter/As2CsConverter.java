@@ -289,7 +289,7 @@ public class As2CsConverter extends As2WhateverConverter
 					src.write("virtual ");
 				}
 				
-				String type = bcFunc.hasReturnType() ? type(bcFunc.getReturnType()) : "void";
+				String type = bcFunc.hasReturnType() ? type(bcFunc.getReturnTypeInstance()) : "void";
 				String name = getCodeHelper().identifier(bcFunc.getName());			
 				
 				if (bcFunc.isGetter())

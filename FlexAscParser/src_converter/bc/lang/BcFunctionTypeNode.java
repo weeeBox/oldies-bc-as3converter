@@ -71,7 +71,7 @@ public class BcFunctionTypeNode extends BcTypeNode
 		return func.hasReturnType();
 	}
 
-	public void setReturnType(BcTypeNode returnType)
+	public void setReturnType(BcTypeNodeInstance returnType)
 	{
 		func.setReturnType(returnType);
 	}

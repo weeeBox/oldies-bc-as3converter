@@ -557,7 +557,9 @@ public abstract class As2WhateverConverter
 		if (returnTypeNode != null)
 		{
 			BcTypeNode bcReturnType = extractBcType(returnTypeNode);
-			bcFunc.setReturnType(bcReturnType);
+			boolean qualified = isTypeQualified(returnTypeNode);
+			
+			bcFunc.setReturnType(bcReturnType.createTypeInstance(qualified));
 		}
 	
 		bcFunc.setStatements(functionDefinitionNode.fexpr.body);
@@ -2757,7 +2759,7 @@ public abstract class As2WhateverConverter
 			if (returnTypeString != null)
 			{
 				BcTypeNode returnType = createBcType(returnTypeString);
-				func.setReturnType(returnType);
+				func.setReturnType(returnType.createTypeInstance()); // TODO: handle qualified types
 			}
 			
 			String paramsString = funcMetadata.attribute("params");
