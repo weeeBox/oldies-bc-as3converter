@@ -38,7 +38,7 @@ public class BcImportList
 	{
 		for (BcImportEntry entry : entriesList)
 		{
-			if (packageName.equals(entry.getQualifier()))
+			if (entry.isWildcardMask() && packageName.equals(entry.getQualifier()))
 			{
 				return true;
 			}
@@ -65,6 +65,11 @@ public class BcImportList
 		public String getQualifier()
 		{
 			return qualifier;
+		}
+		
+		public boolean isWildcardMask()
+		{
+			return type.length() == 0;
 		}
 
 		@Override

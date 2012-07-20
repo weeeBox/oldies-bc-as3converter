@@ -83,6 +83,17 @@ public class BcTypeNode extends BcNode
 		
 		if (BcGlobal.lastBcImportList != null)
 		{
+			// search current package
+			if (BcGlobal.lastBcPackageName != null)
+			{
+				BcTypeName typeName = new BcTypeName(name, BcGlobal.lastBcPackageName);
+				BcTypeNode type = uniqueTypes.get(typeName);
+				if (type != null)
+				{
+					return type;
+				}
+			}
+			
 			// find imported type
 			String packageName = BcGlobal.lastBcImportList.findPackage(name);
 			if (packageName != null)
@@ -97,11 +108,16 @@ public class BcTypeNode extends BcNode
 			}
 			
 			// try to select by wildcard import mask
-			for (BcTypeNode type : types)
+			for (BcTypeNode foundType : foundTypes)
 			{
-				if (BcGlobal.lastBcImportList.hasWildcardMaskPackage(type.getQualifier()))
+				String qualifier = foundType.getQualifier();
+				if (BcGlobal.lastBcImportList.hasWildcardMaskPackage(qualifier))
 				{
-					return type;
+					BcTypeName typeName = new BcTypeName(name, qualifier);
+					if (uniqueTypes.containsKey(typeName))
+					{
+						return foundType;
+					}
 				}
 			}
 		}

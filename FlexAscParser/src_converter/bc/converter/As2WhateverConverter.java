@@ -303,12 +303,12 @@ public abstract class As2WhateverConverter
 
 	private BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
 	{
-		BcTypeName interfaceDeclaredName = getCodeHelper().extractTypeName(interfaceDefinitionNode.name);
+		String interfaceDeclaredName = getCodeHelper().extractIdentifier(interfaceDefinitionNode.name);
+		String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);
 		
 		BcGlobal.declaredVars = new ArrayList<BcVariableDeclaration>();
 		
-		BcTypeNode interfaceType = createBcType(interfaceDeclaredName);
-		
+		BcTypeNode interfaceType = createBcType(interfaceDeclaredName, packageName);
 		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);		
 		
 		bcInterface.setDeclaredVars(BcGlobal.declaredVars);
@@ -348,10 +348,11 @@ public abstract class As2WhateverConverter
 	
 	private BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
 	{
-		BcTypeName classDeclaredName = getCodeHelper().extractTypeName(classDefinitionNode.name);
+		String classDeclaredName = getCodeHelper().extractIdentifier(classDefinitionNode.name);
+		String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
 		BcGlobal.declaredVars = new ArrayList<BcVariableDeclaration>();
 		
-		BcTypeNode classType = createBcType(classDeclaredName);
+		BcTypeNode classType = createBcType(classDeclaredName, packageName);
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.setFinal(BcNodeHelper.isFinal(classDefinitionNode));
 		

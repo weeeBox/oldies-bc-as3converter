@@ -32,6 +32,9 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public BcClassDefinitionNode(BcTypeNode classType)
 	{
+		assert !classType.hasClassNode() || classType.getName().equals("Vector"); // hack: we create a class for each generic version
+		classType.setClassNode(this);
+		
 		this.classType = classType;
 		fields = new ArrayList<BcVariableDeclaration>();
 		functions = new ArrayList<BcFunctionDeclaration>();
