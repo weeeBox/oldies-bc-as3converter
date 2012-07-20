@@ -12,8 +12,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 {
 	private BcTypeNode classType;
 	
-	private String packageName;
-	
 	private boolean isFinal;
 	
 	private List<BcVariableDeclaration> fields;
@@ -79,14 +77,9 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return classType;
 	}
 	
-	public void setPackageName(String packageName) 
-	{
-		this.packageName = packageName;
-	}
-	
 	public String getPackageName() 
 	{
-		return packageName;
+		return classType.getQualifier();
 	}
 	
 	public BcTypeNode getExtendsType()
@@ -415,7 +408,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 	{
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.extendsType = extendsType;
-		bcClass.packageName = packageName;
 		bcClass.importList = importList;
 		
 		bcClass.fields = fields;

@@ -42,4 +42,10 @@ public class CsCodeHelper extends BcCodeHelper
 	{
 		return "null";
 	}
+	
+	@Override
+	public String literalBool()
+	{
+		return "Boolean";
+	}
 }

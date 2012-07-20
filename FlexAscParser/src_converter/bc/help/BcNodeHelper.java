@@ -45,11 +45,23 @@ public class BcNodeHelper
 			PackageNameNode packageNameNode = pkgdef.name;
 			if (packageNameNode != null)
 			{
-				return packageNameNode.id.pkg_part;
+				return safeQualifier(packageNameNode.id.pkg_part);
 			}
 		}		
 		
 		return null;
+	}
+	
+	public static String safeQualifier(String qualifier)
+	{
+		if (qualifier != null && qualifier.startsWith("flash."))
+		{
+			// replace Flash api class usage with bc platform class usage
+			// in order to avoid issues with unique reference types
+			return "bc." + qualifier;
+		}
+		
+		return qualifier;
 	}
 	
 	public static List<String> extractModifiers(AttributeListNode attrs)
@@ -200,7 +212,7 @@ public class BcNodeHelper
 				String name = identifier.name;
 				String qualifier = identifier.qualifier != null ? ((LiteralStringNode)identifier.qualifier).value : null;			 
 				
-				return BcTypeNode.create(name, qualifier);
+				return BcTypeNode.create(name, safeQualifier(qualifier));
 			}
 			if (selector.expr instanceof IdentifierNode)
 			{

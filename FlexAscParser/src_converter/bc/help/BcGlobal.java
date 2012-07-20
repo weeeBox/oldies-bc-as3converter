@@ -13,6 +13,8 @@ import bc.lang.BcVariableDeclaration;
 public class BcGlobal
 {
 	public static String lastBcPath;
+	public static String lastBcPackageName;
+	
 	public static BcClassDefinitionNode lastBcClass;
 	public static BcFunctionDeclaration lastBcFunction;
 	public static BcImportList lastBcImportList;

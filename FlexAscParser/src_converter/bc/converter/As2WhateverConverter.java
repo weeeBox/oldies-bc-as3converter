@@ -98,6 +98,7 @@ import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
 import bc.lang.BcModuleEntry;
 import bc.lang.BcNullType;
+import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcVariableDeclaration;
@@ -151,12 +152,17 @@ public abstract class As2WhateverConverter
 	
 	private List<BcClassDefinitionNode> collect(String... filenames) throws IOException
 	{
+		// hack: set empty import list to avoid crashes while creating types
+		BcGlobal.lastBcImportList = new BcImportList();
+		
 		// first we collect and register all the top level types (with qualified names)
 		List<BcModuleEntry> modules = new ArrayList<BcModuleEntry>();
 		for (int i = 0; i < filenames.length; ++i)
 		{
 			collectModules(new File(filenames[i]), modules);
 		}
+		
+		BcGlobal.lastBcImportList = null;
 		
 		// then we collect the stuff as usual
 		// probably not a good idea, but who cares
@@ -214,7 +220,7 @@ public abstract class As2WhateverConverter
 			if (node instanceof InterfaceDefinitionNode)
 			{
 				InterfaceDefinitionNode interfaceDefinitionNode = (InterfaceDefinitionNode) node;
-				String interfaceDeclaredName = getCodeHelper().identifier(interfaceDefinitionNode .name);
+				String interfaceDeclaredName = getCodeHelper().extractIdentifier(interfaceDefinitionNode .name);
 				
 				String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);		
 				createBcType(interfaceDeclaredName, packageName);
@@ -223,7 +229,7 @@ public abstract class As2WhateverConverter
 			{
 				ClassDefinitionNode classDefinitionNode = (ClassDefinitionNode) node;
 				
-				String classDeclaredName = getCodeHelper().identifier(classDefinitionNode.name);
+				String classDeclaredName = getCodeHelper().extractIdentifier(classDefinitionNode.name);
 				String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
 				
 				createBcType(classDeclaredName, packageName);				
@@ -275,10 +281,13 @@ public abstract class As2WhateverConverter
 				failConversionUnless(packageIdentifierNode != null, "Error while parsing import directive: packageIdentifierNode is null");
 				
 				String typeName = packageIdentifierNode.def_part;
-				String packageName = packageIdentifierNode.pkg_part;
+				String packageName = BcNodeHelper.safeQualifier(packageIdentifierNode.pkg_part);
 				
-				boolean added = BcGlobal.lastBcImportList.add(typeName, packageName);
-				failConversionUnless(added, "Duplicate import directive: %s.%s", packageName, typeName);
+				if (typeName != null && typeName.length() > 0)
+				{
+					boolean added = BcGlobal.lastBcImportList.add(typeName, packageName);
+					failConversionUnless(added, "Duplicate import directive: %s.%s", packageName, typeName);
+				}
 			}
 			else if (node instanceof PackageDefinitionNode)
 			{
@@ -298,20 +307,19 @@ public abstract class As2WhateverConverter
 
 	private BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
 	{
-		String interfaceDeclaredName = getCodeHelper().identifier(interfaceDefinitionNode.name);
+		BcTypeName interfaceDeclaredName = getCodeHelper().extractTypeName(interfaceDefinitionNode.name);
 		
 		BcGlobal.declaredVars = new ArrayList<BcVariableDeclaration>();
 		
-		String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);		
-		BcTypeNode interfaceType = createBcType(interfaceDeclaredName, packageName);
+		BcTypeNode interfaceType = createBcType(interfaceDeclaredName);
 		
 		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);		
 		
-		bcInterface.setPackageName(packageName);
 		bcInterface.setDeclaredVars(BcGlobal.declaredVars);
 		bcInterface.setImportList(BcGlobal.lastBcImportList);
 		
 		BcGlobal.lastBcClass = bcInterface;
+		BcGlobal.lastBcPackageName = bcInterface.getPackageName();
 		
 		BcMetadata metadata = findMetadata(interfaceDefinitionNode);
 		if (metadata != null)
@@ -337,26 +345,25 @@ public abstract class As2WhateverConverter
 			}		
 		}
 		BcGlobal.lastBcClass = null;
+		BcGlobal.lastBcPackageName = null;
 		
 		return bcInterface;
 	}
 	
 	private BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
 	{
-		String classDeclaredName = getCodeHelper().identifier(classDefinitionNode.name);
+		BcTypeName classDeclaredName = getCodeHelper().extractTypeName(classDefinitionNode.name);
 		BcGlobal.declaredVars = new ArrayList<BcVariableDeclaration>();
 		
-		String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
-		
-		BcTypeNode classType = createBcType(classDeclaredName, packageName);
+		BcTypeNode classType = createBcType(classDeclaredName);
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.setFinal(BcNodeHelper.isFinal(classDefinitionNode));
 		
-		bcClass.setPackageName(packageName);
 		bcClass.setDeclaredVars(BcGlobal.declaredVars);
 		bcClass.setImportList(BcGlobal.lastBcImportList);
 		
 		BcGlobal.lastBcClass = bcClass;
+		BcGlobal.lastBcPackageName = bcClass.getPackageName();
 		
 		// collect metadata
 		BcMetadata classMetadata = findMetadata(classDefinitionNode);
@@ -427,6 +434,7 @@ public abstract class As2WhateverConverter
 		}		
 		
 		BcGlobal.lastBcClass = null;
+		BcGlobal.lastBcPackageName = null;
 		BcGlobal.declaredVars = null;
 		
 		return bcClass;
@@ -450,7 +458,7 @@ public abstract class As2WhateverConverter
 		
 		BcTypeNode bcType = extractBcType(varBindNode.variable);
 		boolean qualified = isTypeQualified(varBindNode.variable);
-		String bcIdentifier = getCodeHelper().identifier(varBindNode.variable.identifier);	
+		String bcIdentifier = getCodeHelper().extractIdentifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcType, bcIdentifier, qualified);
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));		
@@ -465,7 +473,7 @@ public abstract class As2WhateverConverter
 	private BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode)
 	{
 		FunctionNameNode functionNameNode = functionDefinitionNode.name;
-		String name = getCodeHelper().identifier(functionNameNode.identifier);
+		String name = getCodeHelper().extractIdentifier(functionNameNode.identifier);
 		BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);
 		
 		BcMetadata funcMetadata = findMetadata(functionDefinitionNode);
@@ -616,6 +624,7 @@ public abstract class As2WhateverConverter
 		
 		BcGlobal.declaredVars = bcClass.getDeclaredVars();
 		BcGlobal.lastBcClass = bcClass;
+		BcGlobal.lastBcPackageName = bcClass.getPackageName();
 		BcGlobal.lastBcImportList = bcClass.getImportList();
 		
 		failConversionUnless(BcGlobal.lastBcImportList != null, "Class import list is 'null'. Class: '%s'", bcClass.getName());
@@ -633,6 +642,7 @@ public abstract class As2WhateverConverter
 		}
 		
 		BcGlobal.lastBcClass = null;
+		BcGlobal.lastBcPackageName = null;
 		BcGlobal.lastBcImportList = null;
 		BcGlobal.declaredVars = null;
 	}
@@ -800,7 +810,7 @@ public abstract class As2WhateverConverter
 		
 		addToImport(varType);
 		
-		String bcIdentifier = getCodeHelper().identifier(varBindNode.variable.identifier);	
+		String bcIdentifier = getCodeHelper().extractIdentifier(varBindNode.variable.identifier);	
 		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier, qualified);
 		BcTypeNodeInstance varTypeInstance = bcVar.getTypeInstance();
 		
@@ -959,7 +969,7 @@ public abstract class As2WhateverConverter
 			IdentifierNode funcIndentifierNode = BcNodeHelper.tryExtractIdentifier(selector);
 			failConversionUnless(funcIndentifierNode != null, "Unable to extract identifier from: %s", selectorDest);
 			
-			String funcName = getCodeHelper().identifier(funcIndentifierNode);
+			String funcName = getCodeHelper().extractIdentifier(funcIndentifierNode);
 			if (callExpr.args != null)
 			{
 				dest.write(staticCall("AsString", funcName, baseDest, argsDest));
@@ -1291,13 +1301,29 @@ public abstract class As2WhateverConverter
 					}
 					else
 					{
-						BcTypeNode type = extractBcType(node.expr);
-						failConversionUnless(type != null, "Can't detect cast's type: ", exprDest);
-						
-						isCast = type.isIntegral() || canBeClass(type);
-						if (isCast)
+						BcVariableDeclaration bcFuncVar = findVariable(identifier);
+						if (bcFuncVar != null)
 						{
-							addToImport(type);
+							if (typeEquals(bcFuncVar.getType(), classFunction))
+							{
+								System.err.println("Warning! Function type: " + identifier);
+								lastBcMemberType = bcFuncVar.getType();
+							}
+							else
+							{
+								failConversion("Identifier is supposed to be 'Function' type: '" + identifier + "'");
+							}
+						}
+						else
+						{						
+							BcTypeNode type = extractBcType(node.expr);
+							failConversionUnless(type != null, "Can't detect cast's type: ", exprDest);
+							
+							isCast = type.isIntegral() || canBeClass(type);
+							if (isCast)
+							{
+								addToImport(type);
+							}
 						}
 					}
 				}
@@ -1324,6 +1350,7 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{
+					// TODO: remove code duplication
 					BcVariableDeclaration bcFuncVar = findVariable(bcClass, identifier);
 					if (bcFuncVar != null)
 					{
@@ -1670,7 +1697,7 @@ public abstract class As2WhateverConverter
 		process(node.expr);
 		popDest();
 		
-		String typeName = getCodeHelper().identifier((IdentifierNode)node.expr);
+		String typeName = getCodeHelper().extractIdentifier((IdentifierNode)node.expr); // TODO: handle qualifier here
 		StringBuilder typeBuffer = new StringBuilder(typeName);
 		
 		ListNode typeArgs = node.typeArgs;
@@ -1718,12 +1745,12 @@ public abstract class As2WhateverConverter
 		if (node.isAttr())
 		{
 			dest.write("attributeValue(\"");
-			dest.write(getCodeHelper().identifier(node));
+			dest.write(getCodeHelper().extractIdentifier(node));
 			dest.write("\")");
 		}
 		else
 		{
-			dest.write(getCodeHelper().identifier(node));
+			dest.write(getCodeHelper().extractIdentifier(node));
 		}
 	}
 	
@@ -1943,12 +1970,12 @@ public abstract class As2WhateverConverter
 			if (child3.expr instanceof QualifiedIdentifierNode)
 			{
 				QualifiedIdentifierNode identifier = (QualifiedIdentifierNode) child3.expr;
-				loopVarName = getCodeHelper().identifier(identifier);
+				loopVarName = getCodeHelper().extractIdentifier(identifier);
 			}
 			else if (child3.expr instanceof IdentifierNode)
 			{
 				IdentifierNode identifier = (IdentifierNode) child3.expr;
-				loopVarName = getCodeHelper().identifier(identifier);
+				loopVarName = getCodeHelper().extractIdentifier(identifier);
 			}
 			else
 			{
@@ -2129,7 +2156,7 @@ public abstract class As2WhateverConverter
 		
 		addToImport(type);
 		
-		String identifier = getCodeHelper().identifier(node.identifier);
+		String identifier = getCodeHelper().extractIdentifier(node.identifier);
 		
 		BcVariableDeclaration parameterVar = new BcVariableDeclaration(type, identifier, qualified);
 		
@@ -2300,7 +2327,7 @@ public abstract class As2WhateverConverter
 		dest.write("break");
 		if (node.id != null)
 		{
-			String id = getCodeHelper().identifier(node.id);
+			String id = getCodeHelper().extractIdentifier(node.id);
 			dest.write(" " + id);
 		}
 		dest.writeln(";");
@@ -2413,30 +2440,80 @@ public abstract class As2WhateverConverter
 			return findClass(classObject);
 		}
 		
-		return findClass(type.getNameEx());
+		return findClass(type.getTypeName());
 	}
 	
 	private BcClassDefinitionNode findClass(String name)
 	{
-		BcClassDefinitionNode bcClass;
-		if ((bcClass = findClass(BcGlobal.bcPlatformClasses, name)) != null)
-		{
-			return bcClass;
-		}
-		
-		if ((bcClass = findClass(BcGlobal.bcApiClasses, name)) != null)
-		{
-			return bcClass;
-		}
-		
-		return findClass(BcGlobal.bcClasses, name);
+		return findClass(name, null);
 	}
-
-	private BcClassDefinitionNode findClass(List<BcClassDefinitionNode> classes, String name) 
+	
+	private BcClassDefinitionNode findClass(BcTypeName typeName)
 	{
+		return findClass(typeName.getName(), typeName.getQualifier());
+	}
+	
+	private BcClassDefinitionNode findClass(String name, String packageName)
+	{
+		BcClassDefinitionNode bcClass;
+		List<BcClassDefinitionNode> foundClasses = new ArrayList<BcClassDefinitionNode>();
+		
+		if ((bcClass = findClass(BcGlobal.bcPlatformClasses, name, packageName)) != null)
+		{
+			foundClasses.add(bcClass);
+		}
+		
+		if ((bcClass = findClass(BcGlobal.bcApiClasses, name, packageName)) != null)
+		{
+			foundClasses.add(bcClass);
+		}
+		
+		if ((bcClass = findClass(BcGlobal.bcClasses, name, packageName)) != null)
+		{
+			foundClasses.add(bcClass);
+		}
+		
+		if (foundClasses.isEmpty())
+		{
+			return null;
+		}
+		
+		if (foundClasses.size() == 1)
+		{
+			return foundClasses.get(0);
+		}
+		
+		if (packageName == null)
+		{
+			packageName = tryFindPackage(name);
+		}
+		
+		if (packageName != null)
+		{
+			for (BcClassDefinitionNode foundClass : foundClasses)
+			{
+				if (packageName.equals(foundClass.getPackageName()))
+				{
+					return foundClass;
+				}
+			}
+		}
+		
+		failConversion("Can't detect type's class: '%s'", name);
+		return null;
+	}
+	
+	private BcClassDefinitionNode findClass(List<BcClassDefinitionNode> classes, String name, String packageName) 
+	{
+		if (classes == null)
+		{
+			return null;
+		}
+		
 		for (BcClassDefinitionNode bcClass : classes)
 		{
-			if (bcClass.getClassType().getName().equals(name))
+			BcTypeNode classType = bcClass.getClassType();
+			if (name.equals(classType.getName()) && (packageName == null || packageName.equals(classType.getQualifier())))
 			{
 				return bcClass;
 			}
@@ -2699,7 +2776,7 @@ public abstract class As2WhateverConverter
 						IdentifierNode argIdentifier = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode)argItem);
 						if (argIdentifier != null)
 						{
-							BcVariableDeclaration bcUsedField = bcClass.findField(getCodeHelper().identifier(argIdentifier));
+							BcVariableDeclaration bcUsedField = bcClass.findField(getCodeHelper().extractIdentifier(argIdentifier));
 							if (bcUsedField != null && !bcUsedField.isStatic())
 							{
 								return false;
@@ -2840,7 +2917,7 @@ public abstract class As2WhateverConverter
 		if (node instanceof IdentifierNode)
 		{
 			IdentifierNode identifier = (IdentifierNode) node;
-			return findIdentifierType(getCodeHelper().identifier(identifier));
+			return findIdentifierType(getCodeHelper().extractIdentifier(identifier));
 		}
 		
 		if (node instanceof LiteralNumberNode)
@@ -2856,7 +2933,7 @@ public abstract class As2WhateverConverter
 		
 		if (node instanceof LiteralBooleanNode)
 		{
-			return createBcType("BOOL");
+			return createBcType(getCodeHelper().literalBool());
 		}
 		
 		if (node instanceof LiteralNullNode)
@@ -3115,7 +3192,7 @@ public abstract class As2WhateverConverter
 						
 						return createBcType(classXMLList); // dirty hack
 					}
-					else if (getCodeHelper().identifier(identifier).equals(BcCodeHelper.thisCallMarker))
+					else if (getCodeHelper().extractIdentifier(identifier).equals(BcCodeHelper.thisCallMarker))
 					{
 						return BcGlobal.lastBcClass.getClassType(); // this referes to the current class
 					}
@@ -3167,19 +3244,22 @@ public abstract class As2WhateverConverter
 			return createBcType(classString); // hack
 		}
 		
-		String name = getCodeHelper().identifier(identifier);
+		BcTypeName typeName = getCodeHelper().extractTypeName(identifier);
 		
 		// check if it's class
-		BcClassDefinitionNode bcClass = findClass(name);
+		BcClassDefinitionNode bcClass = findClass(typeName);
 		if (bcClass != null)
 		{
 			return bcClass.getClassType();
 		}
 		
-		if (BcCodeHelper.isBasicType(name))
+		if (BcCodeHelper.isBasicType(typeName))
 		{			
-			return createBcType(name);
+			return createBcType(typeName);
 		}
+		
+		// search as identifier
+		String name = typeName.getName();
 		
 		// search for local variable
 		if (!hasCallTarget && BcGlobal.lastBcFunction != null)
@@ -3351,6 +3431,11 @@ public abstract class As2WhateverConverter
 		return createBcType(name, null);
 	}
 	
+	private BcTypeNode createBcType(BcTypeName typeName)
+	{
+		return createBcType(typeName.getName(), typeName.getQualifier());
+	}
+	
 	private BcTypeNode createBcType(String name, String qualifier)
 	{
 		if (qualifier == null)
@@ -3369,18 +3454,35 @@ public abstract class As2WhateverConverter
 	
 	private String tryFindPackage(String typeName)
 	{
+		if (BcCodeHelper.isIntegralType(typeName) || typeName.equals(getCodeHelper().literalNull()))
+		{
+			return null;
+		}
+		
 		failConversionUnless(BcGlobal.lastBcImportList != null, "Can't detect type's qualifier: import list is null. Type: '%s'", typeName);
-		return BcGlobal.lastBcImportList.findPackage(typeName);
+		
+		String packageFromImport = BcGlobal.lastBcImportList.findPackage(typeName);
+		if (packageFromImport != null)
+		{
+			return packageFromImport;
+		}
+		
+		return null;
 	}
 
-	private boolean canBeClass(String name) 
+	private boolean canBeClass(String name)
 	{
-		return findClass(name) != null;
+		return canBeClass(name, null);
+	}
+	
+	private boolean canBeClass(String name, String packageName) 
+	{
+		return findClass(name, packageName) != null;
 	}
 	
 	protected boolean canBeClass(BcTypeNode type) 
 	{
-		return canBeClass(type.getName());
+		return canBeClass(type.getName(), type.getQualifier());
 	}
 	
 	protected String typeDefault(BcTypeNode type)
