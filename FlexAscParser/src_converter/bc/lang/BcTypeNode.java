@@ -35,7 +35,7 @@ public class BcTypeNode extends BcNode
 	
 	public static BcTypeNode create(String name, String qualifier, boolean registerType)
 	{
-		BcTypeName typeName = new BcTypeName(name, qualifier);
+		BcTypeName typeName = new BcTypeName(qualifier, name);
 		
 		BcTypeNode node = uniqueTypes.get(typeName);
 		if (node == null)
@@ -86,7 +86,7 @@ public class BcTypeNode extends BcNode
 			// search current package
 			if (BcGlobal.lastBcPackageName != null)
 			{
-				BcTypeName typeName = new BcTypeName(name, BcGlobal.lastBcPackageName);
+				BcTypeName typeName = new BcTypeName(BcGlobal.lastBcPackageName, name);
 				BcTypeNode type = uniqueTypes.get(typeName);
 				if (type != null)
 				{
@@ -113,7 +113,7 @@ public class BcTypeNode extends BcNode
 				String qualifier = foundType.getQualifier();
 				if (BcGlobal.lastBcImportList.hasWildcardMaskPackage(qualifier))
 				{
-					BcTypeName typeName = new BcTypeName(name, qualifier);
+					BcTypeName typeName = new BcTypeName(qualifier, name);
 					if (uniqueTypes.containsKey(typeName))
 					{
 						return foundType;
@@ -138,7 +138,7 @@ public class BcTypeNode extends BcNode
 	
 	protected BcTypeNode(String name, String qualifier)
 	{
-		this(new BcTypeName(name, qualifier));
+		this(new BcTypeName(qualifier, name));
 	}
 	
 	protected BcTypeNode(BcTypeName typeName)

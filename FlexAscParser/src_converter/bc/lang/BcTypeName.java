@@ -7,10 +7,10 @@ public class BcTypeName
 
 	public BcTypeName(String name)
 	{
-		this(name, null);
+		this(null, name);
 	}
 	
-	public BcTypeName(String name, String qualifier)
+	public BcTypeName(String qualifier, String name)
 	{
 		this.name = name;
 		this.qualifier = qualifier;

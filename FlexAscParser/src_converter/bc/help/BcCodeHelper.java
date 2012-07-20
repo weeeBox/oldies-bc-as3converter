@@ -160,7 +160,7 @@ public abstract class BcCodeHelper
 			if (qualifier instanceof LiteralStringNode)
 			{
 				String qualifierName = ((LiteralStringNode)qualifier).value;
-				return new BcTypeName(name, BcNodeHelper.safeQualifier(qualifierName));
+				return new BcTypeName(BcNodeHelper.safeQualifier(qualifierName), name);
 			}
 			
 			return new BcTypeName(name);
