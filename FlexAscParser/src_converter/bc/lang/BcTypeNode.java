@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import bc.help.BcCodeHelper;
+import bc.help.BcGlobal;
 
 public class BcTypeNode extends BcNode
 {
@@ -80,8 +81,32 @@ public class BcTypeNode extends BcNode
 			return foundTypes.get(0);
 		}
 		
-		assert false;
+		if (BcGlobal.lastBcImportList != null)
+		{
+			// find imported type
+			String packageName = BcGlobal.lastBcImportList.findPackage(name);
+			if (packageName != null)
+			{
+				for (BcTypeNode type : types)
+				{
+					if (packageName.equals(type.getQualifier()))
+					{
+						return type;
+					}
+				}
+			}
+			
+			// try to select by wildcard import mask
+			for (BcTypeNode type : types)
+			{
+				if (BcGlobal.lastBcImportList.hasWildcardMaskPackage(type.getQualifier()))
+				{
+					return type;
+				}
+			}
+		}
 		
+		assert false : name;		
 		return null;
 	}
 	

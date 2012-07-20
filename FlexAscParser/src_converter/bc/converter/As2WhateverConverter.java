@@ -283,11 +283,7 @@ public abstract class As2WhateverConverter
 				String typeName = packageIdentifierNode.def_part;
 				String packageName = BcNodeHelper.safeQualifier(packageIdentifierNode.pkg_part);
 				
-				if (typeName != null && typeName.length() > 0)
-				{
-					boolean added = BcGlobal.lastBcImportList.add(typeName, packageName);
-					failConversionUnless(added, "Duplicate import directive: %s.%s", packageName, typeName);
-				}
+				BcGlobal.lastBcImportList.add(typeName, packageName);
 			}
 			else if (node instanceof PackageDefinitionNode)
 			{

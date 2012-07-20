@@ -1,38 +1,107 @@
 package bc.lang;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BcImportList
 {
-	private static final String SYSTEM_PACKAGE_PREFIX = "__AS3__.";
-	private static final String SYSTEM_REPLACEMENT_PACKAGE = "bc.flash";
-	
-	private Map<String, String> data;
+	private List<BcImportEntry> entriesList;
 	
 	public BcImportList()
 	{
-		data = new HashMap<String, String>();
+		entriesList = new ArrayList<BcImportList.BcImportEntry>();
 	}
 	
-	public boolean add(String typeName, String packageName)
+	public void add(String typeName, String packageName)
 	{
-		if (packageName.startsWith(SYSTEM_PACKAGE_PREFIX))
+		BcImportEntry entry = new BcImportEntry(typeName, packageName);		
+		if (!entriesList.contains(entry))
 		{
-			packageName = SYSTEM_REPLACEMENT_PACKAGE;
+			entriesList.add(entry);		
 		}
-		
-		if (data.containsKey(typeName))
-		{
-			return data.get(typeName).equals(packageName);
-		}
-		
-		data.put(typeName, packageName);		
-		return true;
 	}
 	
 	public String findPackage(String typeName)
 	{
-		return data.get(typeName);
+		for (BcImportEntry entry : entriesList)
+		{
+			if (entry.getType().equals(typeName))
+			{
+				return entry.getQualifier();
+			}
+		}
+		
+		return null;
+	}
+	
+	public boolean hasWildcardMaskPackage(String packageName)
+	{
+		for (BcImportEntry entry : entriesList)
+		{
+			if (packageName.equals(entry.getQualifier()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static class BcImportEntry
+	{
+		private String type;
+		private String qualifier;
+
+		public BcImportEntry(String type, String qualifier)
+		{
+			this.type = type;
+			this.qualifier = qualifier;
+		}
+		
+		public String getType()
+		{
+			return type;
+		}
+		
+		public String getQualifier()
+		{
+			return qualifier;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((qualifier == null) ? 0 : qualifier.hashCode());
+			result = prime * result + ((type == null) ? 0 : type.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			BcImportEntry other = (BcImportEntry) obj;
+			if (qualifier == null)
+			{
+				if (other.qualifier != null)
+					return false;
+			}
+			else if (!qualifier.equals(other.qualifier))
+				return false;
+			if (type == null)
+			{
+				if (other.type != null)
+					return false;
+			}
+			else if (!type.equals(other.type))
+				return false;
+			return true;
+		}
 	}
 }

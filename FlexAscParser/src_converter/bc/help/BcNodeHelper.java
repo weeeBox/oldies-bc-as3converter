@@ -54,11 +54,19 @@ public class BcNodeHelper
 	
 	public static String safeQualifier(String qualifier)
 	{
-		if (qualifier != null && qualifier.startsWith("flash."))
+		if (qualifier != null)
 		{
-			// replace Flash api class usage with bc platform class usage
-			// in order to avoid issues with unique reference types
-			return "bc." + qualifier;
+			if (qualifier.startsWith("flash."))
+			{
+				// replace Flash api class usage with bc platform class usage
+				// in order to avoid issues with unique reference types
+				return "bc." + qualifier;
+			}
+			
+			if (qualifier.startsWith("__AS3__."))
+			{
+				return "bc.flash";
+			}
 		}
 		
 		return qualifier;
