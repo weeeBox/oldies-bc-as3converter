@@ -72,4 +72,10 @@ public class BcVariableDeclaration extends BcDeclaration
 	{
 		return initializer;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return typeInstance.getQualifiedName() + " " + getIdentifier();
+	}
 }

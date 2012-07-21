@@ -80,4 +80,10 @@ public class BcTypeName
 			return false;
 		return true;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return getQualifiedName();
+	}
 }

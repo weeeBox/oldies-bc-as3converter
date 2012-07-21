@@ -313,4 +313,42 @@ public class BcFunctionDeclaration extends BcDeclaration
 		
 		return bcFunc;
 	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder result = new StringBuilder();
+		if (returnTypeInstance != null)
+		{
+			result.append(returnTypeInstance.getQualifiedName());
+		}
+		else
+		{
+			result.append("void");
+		}
+		
+		result.append(" ");
+		
+		if (owner != null)
+		{
+			result.append(owner + "::");
+		}
+		
+		result.append(name);
+		result.append("(");
+		
+		int paramIndex = 0;
+		for (BcFuncParam param : params)
+		{
+			result.append(param.getTypeInstance().getQualifiedName());
+			if (++paramIndex < params.size())
+			{
+				result.append(",");
+			}
+		}
+		
+		result.append(")");
+		
+		return result.toString();
+	}
 }

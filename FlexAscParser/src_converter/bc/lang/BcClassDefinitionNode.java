@@ -428,4 +428,10 @@ public class BcClassDefinitionNode extends BcDeclaration
 	{
 		boolean accept(BcVariableDeclaration bcVar);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return getClassType().getQualifiedName();
+	}
 }

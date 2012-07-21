@@ -81,24 +81,14 @@ public class BcTypeNode extends BcNode
 			return foundTypes.get(0);
 		}
 		
+		// search imported type
 		if (BcGlobal.lastBcImportList != null)
 		{
-			// search current package
-			if (BcGlobal.lastBcPackageName != null)
-			{
-				BcTypeName typeName = new BcTypeName(BcGlobal.lastBcPackageName, name);
-				BcTypeNode type = uniqueTypes.get(typeName);
-				if (type != null)
-				{
-					return type;
-				}
-			}
-			
 			// find imported type
 			String packageName = BcGlobal.lastBcImportList.findPackage(name);
 			if (packageName != null)
 			{
-				for (BcTypeNode type : types)
+				for (BcTypeNode type : foundTypes)
 				{
 					if (packageName.equals(type.getQualifier()))
 					{
@@ -119,6 +109,17 @@ public class BcTypeNode extends BcNode
 						return foundType;
 					}
 				}
+			}
+		}
+		
+		// search current package
+		if (BcGlobal.lastBcPackageName != null)
+		{
+			BcTypeName typeName = new BcTypeName(BcGlobal.lastBcPackageName, name);
+			BcTypeNode type = uniqueTypes.get(typeName);
+			if (type != null)
+			{
+				return type;
 			}
 		}
 		
@@ -254,5 +255,11 @@ public class BcTypeNode extends BcNode
 		else if (!typeName.equals(other.typeName))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return typeName.toString();
 	}
 }
