@@ -2274,6 +2274,10 @@ public abstract class As2WhateverConverter
 					dest.writef("!(%s)", expr);
 				}
 			}
+			else if (node.expr instanceof ListNode)
+			{
+				process((ListNode)node.expr);
+			}
 			else
 			{
 				failConversion("Unexpected expression for unary 'not' token: type=%s expr=%s", node.expr.getClass(), expr);
