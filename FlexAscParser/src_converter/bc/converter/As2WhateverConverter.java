@@ -1364,7 +1364,7 @@ public abstract class As2WhateverConverter
 				List<BcFuncParam> params = calledFunction.getParams();
 				ObjectList<Node> args = node.args.items;
 
-				failConversionUnless(params.size() >= args.size(), "Function args and params count doesn't match: %d >= %d", params.size(), args.size());
+				failConversionUnless(params.size() >= args.size(), "Function args and params count doesn't match: %d >= %d. Function: %s", params.size(), args.size(), calledFunction);
 
 				int argIndex = 0;
 				for (Node arg : args)
