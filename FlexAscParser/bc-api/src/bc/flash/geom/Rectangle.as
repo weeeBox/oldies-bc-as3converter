@@ -154,6 +154,14 @@ package bc.flash.geom
 			x = value.x;
 			y = value.y;
 		}
+		
+		public function setTo(xa : Number, ya : Number, widtha : Number, heighta : Number) : void
+		{
+			x = xa;
+			y = ya;
+			width = widtha;
+			height = heighta;
+		}
 
 		public function union(toUnion : Rectangle) : Rectangle
 		{
