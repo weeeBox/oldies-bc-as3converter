@@ -1,5 +1,6 @@
 package bc.flash.display
 {
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.events.GamePadEvent;
 	import bc.flash.events.MouseEvent;
 	import flash.errors.IllegalOperationError;
@@ -71,6 +72,11 @@ package bc.flash.display
 		public static function getInstance() : Stage
 		{
 			return mCurrentStage;
+		}
+		
+		public function get stage3Ds() : Vector.<Stage3D>
+		{
+			throw new NotImplementedError();
 		}
 
 		public function tick(dt : Number) : void

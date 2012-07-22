@@ -1,5 +1,6 @@
 package bc.flash.ui
 {
+	import bc.flash.errors.NotImplementedError;
 	/**
 	 * @author weee
 	 */
@@ -33,8 +34,10 @@ package bc.flash.ui
 			mHidden = false;
 		}
 		
-		/* [Version("10.1")] */
-		/* public static function get supportsCursor() : Boolean; */
+		public static function get supportsCursor() : Boolean
+		{
+			throw new NotImplementedError();
+		}
 
 		/* [API("670")] */
 		/* public static function get supportsNativeCursor() : Boolean; */
