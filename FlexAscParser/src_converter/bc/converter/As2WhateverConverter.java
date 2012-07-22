@@ -3146,6 +3146,11 @@ public abstract class As2WhateverConverter
 			LiteralVectorNode literalVector = (LiteralVectorNode) node;
 			return extractBcType(literalVector.type);
 		}
+		
+		if (node instanceof LiteralObjectNode)
+		{
+			return createBcType(classObject);
+		}
 
 		failConversion("Unable to evaluate node's type: %s", node.getClass());
 		return null;
