@@ -25,6 +25,7 @@ import macromedia.asc.parser.CatchClauseNode;
 import macromedia.asc.parser.ClassDefinitionNode;
 import macromedia.asc.parser.CoerceNode;
 import macromedia.asc.parser.ConditionalExpressionNode;
+import macromedia.asc.parser.ContinueStatementNode;
 import macromedia.asc.parser.DefinitionNode;
 import macromedia.asc.parser.DeleteExpressionNode;
 import macromedia.asc.parser.DoStatementNode;
@@ -734,6 +735,8 @@ public abstract class As2WhateverConverter
 			process((ReturnStatementNode) node);
 		else if (node instanceof BreakStatementNode)
 			process((BreakStatementNode) node);
+		else if (node instanceof ContinueStatementNode)
+			process((ContinueStatementNode) node);
 		else if (node instanceof ThisExpressionNode)
 			process((ThisExpressionNode) node);
 		else if (node instanceof SuperExpressionNode)
@@ -2355,6 +2358,13 @@ public abstract class As2WhateverConverter
 		}
 		dest.writeln(";");
 	}
+	
+	private void process(ContinueStatementNode node)
+	{
+		failConversionUnless(node.block == null, "ContinueStatementNode has not null block");
+		dest.write("continue");
+		dest.writeln(";");
+	}
 
 	protected void process(ThisExpressionNode node)
 	{
@@ -3051,7 +3061,8 @@ public abstract class As2WhateverConverter
 				binaryNode.op == Tokens.GREATERTHANOREQUALS_TOKEN ||
 				binaryNode.op == Tokens.LESSTHAN_TOKEN ||
 				binaryNode.op == Tokens.LESSTHANOREQUALS_TOKEN ||
-				binaryNode.op == Tokens.IS_TOKEN)
+				binaryNode.op == Tokens.IS_TOKEN ||
+				binaryNode.op == Tokens.IN_TOKEN)
 			{
 				return createBcType(classBoolean);
 			}

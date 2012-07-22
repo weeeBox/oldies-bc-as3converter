@@ -11,11 +11,14 @@ package bc.flash
 
 		public function charAt(i : uint) : String { throw new NotImplementedError(); }
 
-		/* public function charCodeAt(i : uint) : Number; */
+		public function charCodeAt(i : uint) : Number { throw new NotImplementedError(); }
 
 		/* public function concat(...args : *) : String; */
 
-		/* static public function fromCharCode(...args : *) : String; */
+		static public function fromCharCode(...args : Number) : String
+		{
+			throw new NotImplementedError();
+		}
 
 		public function indexOf(s : String, i : uint = 0) : int { throw new NotImplementedError(); }
 
