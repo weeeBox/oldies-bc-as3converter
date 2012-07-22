@@ -695,8 +695,6 @@ public abstract class As2WhateverConverter
 			process((IdentifierNode) node);
 		else if (node instanceof ExpressionStatementNode)
 			process((ExpressionStatementNode) node);
-		else if (node instanceof VariableBindingNode)
-			process((VariableBindingNode) node);
 		else if (node instanceof VariableDefinitionNode)
 			process((VariableDefinitionNode) node);
 		else if (node instanceof LiteralNumberNode ||
@@ -801,55 +799,25 @@ public abstract class As2WhateverConverter
 		failConversion("Unexpected function common node");
 	}
 
-	private BcVariableDeclaration process(VariableDefinitionNode node)
+	private List<BcVariableDeclaration> process(VariableDefinitionNode node)
 	{
-		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
-
-		BcTypeNode varType = extractBcType(varBindNode.variable);
-		boolean qualified = isTypeQualified(varBindNode.variable);
-
-		addToImport(varType);
-
-		String bcIdentifier = getCodeHelper().extractIdentifier(varBindNode.variable.identifier);	
-		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier, qualified);
-		BcTypeNodeInstance varTypeInstance = bcVar.getTypeInstance();
-
-		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
-		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));
-
-		dest.write(varDecl(varTypeInstance, bcIdentifier));
-
-		if (varBindNode.initializer != null)
+		ObjectList<Node> varBindings = node.list.items;
+		List<BcVariableDeclaration> vars = new ArrayList<BcVariableDeclaration>(varBindings.size());
+		
+		for (Node varNode : varBindings)
 		{
-			ListWriteDestination initializer = new ListWriteDestination();
-			pushDest(initializer);
-			process(varBindNode.initializer);
-			popDest();
-
-			bcVar.setInitializer(initializer);
-			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(varBindNode.initializer));
-
-			BcTypeNode initializerType = evaluateType(varBindNode.initializer);
-			failConversionUnless(initializerType != null, "Unable to evaluate initializer's type: %s = %s", varDecl(varTypeInstance, bcIdentifier), initializer);
-
-			if (needExplicitCast(initializerType, varType))
-			{
-				dest.writef(" = %s", cast(initializer, initializerType, varType));
+			if (varNode instanceof VariableBindingNode)
+			{			
+				BcVariableDeclaration varDeclaration = process((VariableBindingNode) varNode);
+				vars.add(varDeclaration);
 			}
 			else
 			{
-				dest.write(" = " + initializer);
-			}
-		}
-		else if (BcGlobal.lastBcFunction != null)
-		{
-			dest.write(" = " + typeDefault(varType));
-		}
-		dest.writeln(";");
-
-		BcGlobal.declaredVars.add(bcVar);
-
-		return bcVar;
+				failConversion("Unexpected node in variable definition: %s", varNode.getClass());
+			}			
+		}		
+		
+		return vars;
 	}
 
 	// dirty hack: we need to check the recursion depth
@@ -1756,9 +1724,53 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(VariableBindingNode node)
+	private BcVariableDeclaration process(VariableBindingNode node)
 	{
-		System.err.println("Fix me!!! VariableBindingNode");
+		BcTypeNode varType = extractBcType(node.variable);
+		boolean qualified = isTypeQualified(node.variable);
+
+		addToImport(varType);
+
+		String bcIdentifier = getCodeHelper().extractIdentifier(node.variable.identifier);	
+		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier, qualified);
+		BcTypeNodeInstance varTypeInstance = bcVar.getTypeInstance();
+
+		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
+		bcVar.setModifiers(BcNodeHelper.extractModifiers(node.attrs));
+
+		dest.write(varDecl(varTypeInstance, bcIdentifier));
+
+		if (node.initializer != null)
+		{
+			ListWriteDestination initializer = new ListWriteDestination();
+			pushDest(initializer);
+			process(node.initializer);
+			popDest();
+
+			bcVar.setInitializer(initializer);
+			bcVar.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(node.initializer));
+
+			BcTypeNode initializerType = evaluateType(node.initializer);
+			failConversionUnless(initializerType != null, "Unable to evaluate initializer's type: %s = %s", varDecl(varTypeInstance, bcIdentifier), initializer);
+
+			if (needExplicitCast(initializerType, varType))
+			{
+				dest.writef(" = %s", cast(initializer, initializerType, varType));
+			}
+			else
+			{
+				dest.write(" = " + initializer);
+			}
+		}
+		else if (BcGlobal.lastBcFunction != null)
+		{
+			dest.write(" = " + typeDefault(varType));
+		}
+		dest.writeln(";");
+
+		BcGlobal.declaredVars.add(bcVar);
+
+		return bcVar;
 	}
 
 	private void processLiteral(Node node)
@@ -3128,7 +3140,7 @@ public abstract class As2WhateverConverter
 		{
 			ConditionalExpressionNode conditional = (ConditionalExpressionNode) node;
 			BcTypeNode thenType = evaluateType(conditional.thenexpr);
-			failConversionUnless(thenType != null, "Conditional expression 'then' is 'null'");
+			failConversionUnless(thenType != null, "Can't evaluate 'then' conditional type");
 
 			String classNull = getCodeHelper().literalNull();
 
@@ -3903,8 +3915,8 @@ public abstract class As2WhateverConverter
 		if (!condition)
 		{
 			String message = new Formatter().format(format, args).toString();
-			String className = BcGlobal.lastBcClass != null ? BcGlobal.lastBcClass.getName() : null;
-			String functionName = BcGlobal.lastBcFunction != null ? BcGlobal.lastBcFunction.getName() : null;
+			String className = BcGlobal.lastBcClass != null ? BcGlobal.lastBcClass.toString() : null;
+			String functionName = BcGlobal.lastBcFunction != null ? BcGlobal.lastBcFunction.toString() : null;
 			String fullErrorMessage = String.format("Conversion failed:\n\treason: %s\n\tclass: %s\n\tfunction: %s", message, className, functionName);
 			throw new ConverterException(fullErrorMessage);
 		}
