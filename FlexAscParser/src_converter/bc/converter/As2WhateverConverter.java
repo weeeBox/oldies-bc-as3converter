@@ -44,6 +44,7 @@ import macromedia.asc.parser.InterfaceDefinitionNode;
 import macromedia.asc.parser.ListNode;
 import macromedia.asc.parser.LiteralArrayNode;
 import macromedia.asc.parser.LiteralBooleanNode;
+import macromedia.asc.parser.LiteralFieldNode;
 import macromedia.asc.parser.LiteralNullNode;
 import macromedia.asc.parser.LiteralNumberNode;
 import macromedia.asc.parser.LiteralObjectNode;
@@ -311,6 +312,7 @@ public abstract class As2WhateverConverter
 		BcTypeNode interfaceType = createBcType(interfaceDeclaredName, packageName);
 		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);
 
+		bcInterface.setPackageName(packageName);
 		bcInterface.setDeclaredVars(BcGlobal.declaredVars);
 		bcInterface.setImportList(BcGlobal.lastBcImportList);
 
@@ -356,6 +358,7 @@ public abstract class As2WhateverConverter
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.setFinal(BcNodeHelper.isFinal(classDefinitionNode));
 
+		bcClass.setPackageName(packageName);
 		bcClass.setDeclaredVars(BcGlobal.declaredVars);
 		bcClass.setImportList(BcGlobal.lastBcImportList);
 
@@ -1799,7 +1802,7 @@ public abstract class As2WhateverConverter
 		}
 		else if (node instanceof LiteralObjectNode)
 		{
-			failConversion("Literal objects are not supported yet");
+			writeLiteralObject((LiteralObjectNode)node);
 		}
 		else
 		{
@@ -3434,6 +3437,46 @@ public abstract class As2WhateverConverter
 				dest.write(constructLiteralVector(vectorType, getArgs(args)));
 			}
 		}
+	}
+	
+	private void writeLiteralObject(LiteralObjectNode node)
+	{
+		failConversionUnless(node.block == null, "Literal objects with blocks are not supported yet");
+		
+		ArgumentListNode fieldlist = node.fieldlist;
+		failConversionUnless(fieldlist != null, "Literal object is expected to have fields list");
+	
+		int itemsCount = fieldlist.items.size();
+		Object[] args = new Object[2 * itemsCount]; // name + value
+		
+		int itemIndex = 0;
+		for (Node arg : fieldlist.items)
+		{
+			if (arg instanceof LiteralFieldNode)
+			{		
+				LiteralFieldNode field = (LiteralFieldNode) arg;
+				
+				failConversionUnless(field.block == null, "Literal objects with blocks not supported");
+				failConversionUnless(field.name != null, "Literal field should have name");
+				failConversionUnless(field.value != null, "Literal field should have value");
+				
+				ListWriteDestination nameDest = new ListWriteDestination();
+				pushDest(nameDest);
+				process(field.name);
+				popDest();
+				
+				args[itemIndex++] = nameDest;
+				
+				ListWriteDestination valueDest = new ListWriteDestination();
+				pushDest(valueDest);
+				process(field.value);
+				popDest();
+				
+				args[itemIndex++] = valueDest;
+			}
+		}
+		
+		dest.write(staticCall(type(classObject), "createLiteralObject", args));		
 	}
 
 	protected boolean classEquals(BcClassDefinitionNode classNode, String name)

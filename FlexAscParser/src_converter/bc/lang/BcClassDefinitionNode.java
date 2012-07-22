@@ -11,6 +11,7 @@ import macromedia.asc.parser.Node;
 public class BcClassDefinitionNode extends BcDeclaration
 {
 	private BcTypeNode classType;
+	private String classPackage;
 	
 	private boolean isFinal;
 	
@@ -82,7 +83,17 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public String getPackageName() 
 	{
-		return classType.getQualifier();
+		if (classType.hasQualifier())
+		{
+			return classType.getQualifier();
+		}
+		
+		return classPackage;
+	}
+	
+	public void setPackageName(String packageName)
+	{
+		this.classPackage = packageName;
 	}
 	
 	public BcTypeNode getExtendsType()
@@ -420,6 +431,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 		bcClass.interfaces = interfaces;
 		bcClass.statements = statements;
 		bcClass.metadata = metadata;
+		bcClass.classPackage = classPackage;
 		
 		return bcClass;
 	}
