@@ -842,8 +842,13 @@ public abstract class As2WhateverConverter
 		{
 			pushDest(baseDest);
 
+			ListWriteDestination baseExpr = new ListWriteDestination();
+			pushDest(baseExpr);
+			process(base);
+			popDest();
+			
 			lastBcMemberType = evaluateType(base);
-			failConversionUnless(lastBcMemberType != null, "Unable to evaluate base member's type");
+			failConversionUnless(lastBcMemberType != null, "Unable to evaluate expression: %s", baseExpr);
 
 			baseType = lastBcMemberType;
 
@@ -852,10 +857,6 @@ public abstract class As2WhateverConverter
 			{
 				staticCall = true;
 
-				ListWriteDestination baseExpr = new ListWriteDestination();
-				pushDest(baseExpr);
-				process(base);
-				popDest();
 				
 				dest.write(classType(baseExpr.toString()));
 			}
@@ -1119,6 +1120,8 @@ public abstract class As2WhateverConverter
 								IdentifierNode identifierNode = (IdentifierNode) node.expr;
 								if (!identifierNode.isAttr())
 								{
+									failConversionUnless(lastBcMemberType != null, "Identifier not recognized: '%s'", identifier);
+									
 									System.err.println("Warning! Dymaic property: " + identifier);
 									accessingDynamicProperty = true;
 								}
