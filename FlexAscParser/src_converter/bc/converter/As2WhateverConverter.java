@@ -114,6 +114,7 @@ public abstract class As2WhateverConverter
 	protected static final String internalFieldInitializer = "__internalInitializeFields";
 
 	protected static final String classGlobal = "Global";
+	protected static final String classNumber = "Number";
 	protected static final String classObject = "Object";
 	protected static final String classString = "String";
 	protected static final String classVector = "Vector";
@@ -862,6 +863,7 @@ public abstract class As2WhateverConverter
 		lastBcMemberType = null;
 		BcTypeNode baseType = null;
 		boolean staticCall = false;
+		boolean numberMemberCall = false; // блинчик-пончик-сюрприз Ж)
 
 		Node base = node.base;
 		SelectorNode selector = node.selector;
@@ -886,11 +888,12 @@ public abstract class As2WhateverConverter
 				pushDest(baseExpr);
 				process(base);
 				popDest();
-
-				dest.write(type(baseExpr.toString()));
+				
+				dest.write(classType(baseExpr.toString()));
 			}
 			else
 			{
+				numberMemberCall = typeEquals(baseType, classNumber);
 				process(base);
 			}
 
@@ -952,7 +955,7 @@ public abstract class As2WhateverConverter
 				failConversion("Unexpected selector for 'object-as-dictionary' call: type=%s expr=%s", selector.getClass(), exprDest);
 			}
 		}
-		else if (stringCall)
+		else if (stringCall || numberMemberCall)
 		{
 			failConversionUnless(selector instanceof CallExpressionNode, "'call' expression is expected: type=%s base=%s selecto=%s", selector.getClass(), baseDest, selectorDest);
 			CallExpressionNode callExpr = (CallExpressionNode) selector;
@@ -971,11 +974,11 @@ public abstract class As2WhateverConverter
 			String funcName = getCodeHelper().extractIdentifier(funcIndentifierNode);
 			if (callExpr.args != null)
 			{
-				dest.write(staticCall("AsString", funcName, baseDest, argsDest));
+				dest.write(staticCall(classType(baseType), funcName, baseDest, argsDest));
 			}
 			else
 			{
-				dest.write(staticCall("AsString", funcName, baseDest));
+				dest.write(staticCall(classType(baseType), funcName, baseDest));
 			}
 		}
 		else
@@ -3740,6 +3743,11 @@ public abstract class As2WhateverConverter
 		return classType(name);
 	}
 
+	protected String classType(BcTypeNode type)
+	{
+		return classType(type.getName());
+	}
+	
 	protected String classType(String name)
 	{
 		if (name.startsWith(TYPE_PREFIX))
@@ -3768,7 +3776,7 @@ public abstract class As2WhateverConverter
 	{
 		String typeString = type(exprType);
 		typeString = Character.toUpperCase(typeString.charAt(0)) + typeString.substring(1);
-		return staticCall("AsString", "parse" + typeString, expr);
+		return staticCall(classType(classString), "parse" + typeString, expr);
 	}
 
 	public String varDecl(BcTypeNodeInstance typeInstance, String identifier)
