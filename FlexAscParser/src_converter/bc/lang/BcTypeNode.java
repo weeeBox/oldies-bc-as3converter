@@ -144,6 +144,22 @@ public class BcTypeNode extends BcNode
 		return new BcRestTypeNode(type);
 	}
 	
+	public static List<BcTypeNode> typesForPackage(String packageName)
+	{
+		Collection<BcTypeNode> types = uniqueTypes.values();
+		List<BcTypeNode> foundTypes = new ArrayList<BcTypeNode>();
+		
+		for (BcTypeNode bcType : types)
+		{
+			if (packageName.equals(bcType.getQualifier()))
+			{
+				foundTypes.add(bcType);
+			}
+		}
+		
+		return foundTypes;
+	}
+	
 	protected BcTypeNode(String name)
 	{
 		this(name, null);

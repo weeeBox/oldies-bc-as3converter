@@ -1,9 +1,12 @@
 package bc.lang;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BcVectorTypeNode extends BcTypeNode
 {
 	private BcTypeNode generic;
-
+	
 	protected BcVectorTypeNode(BcTypeName name, BcTypeNode generic)
 	{
 		super(name);
@@ -26,6 +29,12 @@ public class BcVectorTypeNode extends BcTypeNode
 		return getName() + "<" + generic.getName() + ">";
 	}
 
+	@Override
+	public String toString()
+	{
+		return super.toString() + "<" + getGeneric() + ">";
+	}
+	
 	@Override
 	public int hashCode()
 	{

@@ -3492,7 +3492,6 @@ public abstract class As2WhateverConverter
 
 			BcClassDefinitionNode vectorGenericClass = findClass(BcTypeNode.typeVector).clone();
 			vectorGenericClass.setClassType(bcType);
-			BcGlobal.bcPlatformClasses.add(vectorGenericClass);
 
 			vectorType.setClassNode(vectorGenericClass);
 			BcTypeNode genericType = vectorType.getGeneric();
@@ -3500,8 +3499,11 @@ public abstract class As2WhateverConverter
 			{
 				vectorType.setGeneric(getDefaultFunctionType());
 			}
+			
+			return vectorType;
 		}
-		else if (bcType instanceof BcFunctionTypeNode)
+		
+		if (bcType instanceof BcFunctionTypeNode)
 		{
 			return getDefaultFunctionType();
 		}

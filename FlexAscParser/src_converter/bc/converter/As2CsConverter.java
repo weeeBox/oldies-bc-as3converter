@@ -55,6 +55,15 @@ public class As2CsConverter extends As2WhateverConverter
 			dest.writelnf("using %s;", importString);
 		}
 	}
+	
+	private void writeUsings(ListWriteDestination dest, List<BcTypeNode> types)
+	{
+		for (BcTypeNode type : types)
+		{
+			String classType = classType(type);
+			dest.writelnf("using %s = %s.%s;", classType, type.getQualifier(), classType);
+		}
+	}
 
 	private void writeInterfaceFunctions(BcClassDefinitionNode bcClass)
 	{
@@ -122,7 +131,10 @@ public class As2CsConverter extends As2WhateverConverter
 		src.writeln("using System;");
 		writeBlankLine(src);
 		
-		writeImports(src, getImports(bcClass));
+		CsImportsData importsData = getImports(bcClass);
+		
+		writeImports(src, importsData.getNamespaces());
+		writeUsings(src, importsData.getUsingTypes());
 		writeBlankLine(src);
 		
 		src.writeln("namespace " + getCodeHelper().namespace(bcClass.getPackageName()));
@@ -360,13 +372,13 @@ public class As2CsConverter extends As2WhateverConverter
 		src.writeln(new ListWriteDestination(lines));
 	}
 	
-	private List<String> getImports(BcClassDefinitionNode bcClass)
+	private CsImportsData getImports(BcClassDefinitionNode bcClass)
 	{
-		List<String> imports = new ArrayList<String>();
+		CsImportsData importsData = new CsImportsData();
 		
 		if (bcClass.hasExtendsType())
 		{
-			tryAddUniqueNamespace(imports, bcClass.getExtendsType());
+			tryAddUniqueNamespace(importsData, bcClass.getExtendsType());
 		}
 		
 		if (bcClass.hasInterfaces())
@@ -374,7 +386,7 @@ public class As2CsConverter extends As2WhateverConverter
 			List<BcTypeNodeInstance> interfaces = bcClass.getInterfaces();
 			for (BcTypeNodeInstance bcInterface : interfaces)
 			{
-				tryAddUniqueNamespace(imports, bcInterface.getType());
+				tryAddUniqueNamespace(importsData, bcInterface.getType());
 			}
 		}
 		
@@ -382,7 +394,7 @@ public class As2CsConverter extends As2WhateverConverter
 		for (BcVariableDeclaration bcVar : classVars)
 		{
 			BcTypeNode type = bcVar.getType();
-			tryAddUniqueNamespace(imports, type);
+			tryAddUniqueNamespace(importsData, type);
 		}
 		
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
@@ -391,40 +403,31 @@ public class As2CsConverter extends As2WhateverConverter
 			if (bcFunc.hasReturnType())
 			{
 				BcTypeNode returnType = bcFunc.getReturnType();
-				tryAddUniqueNamespace(imports, returnType);
+				tryAddUniqueNamespace(importsData, returnType);
 			}
 			
 			List<BcFuncParam> params = bcFunc.getParams();
 			for (BcFuncParam param : params)
 			{
 				BcTypeNode type = param.getType();
-				tryAddUniqueNamespace(imports, type);
+				tryAddUniqueNamespace(importsData, type);
 			}
 		}
 		
 		List<BcTypeNode> additionalImports = bcClass.getAdditionalImports();
 		for (BcTypeNode bcType : additionalImports) 
 		{
-			tryAddUniqueNamespace(imports, bcType);
+			tryAddUniqueNamespace(importsData, bcType);
 		}
 		
-		return imports;
+		return importsData;
 	}
-	
-	private void tryAddUniqueNamespace(List<String> imports, BcTypeNode type)
+		
+	private void tryAddUniqueNamespace(CsImportsData importsData, BcTypeNode type)
 	{
 		if (canBeClass(type))
 		{
-			BcClassDefinitionNode classNode = type.getClassNode();
-			failConversionUnless(classNode != null, "Can't add type to workspace: %s", type.getName());
-			
-			String packageName = classNode.getPackageName();
-			failConversionUnless(packageName != null, "Can't get class package: %s", classNode.getName());
-			
-			if (!imports.contains(packageName))
-			{
-				imports.add(packageName);
-			}
+			importsData.addType(type);
 			
 			if (type instanceof BcVectorTypeNode)
 			{
@@ -432,7 +435,7 @@ public class As2CsConverter extends As2WhateverConverter
 				BcTypeNode generic = vectorType.getGeneric();
 				if (generic != null)
 				{
-					tryAddUniqueNamespace(imports, generic);
+					tryAddUniqueNamespace(importsData, generic);
 				}
 			}
 		}
@@ -503,5 +506,67 @@ public class As2CsConverter extends As2WhateverConverter
 	public String toString(Object expr)
 	{
 		return memberCall(expr, "ToString");
+	}
+	
+	private class CsImportsData
+	{
+		private List<String> namespaces;
+		private List<BcTypeNode> uniqueTypes;
+
+		public CsImportsData()
+		{
+			namespaces = new ArrayList<String>();
+			uniqueTypes = new ArrayList<BcTypeNode>();
+		}
+		
+		public void addType(BcTypeNode type)
+		{
+			BcClassDefinitionNode classNode = type.getClassNode();
+			failConversionUnless(classNode != null, "Can't add type to workspace: %s", type.getName());
+			
+			String packageName = classNode.getPackageName();
+			failConversionUnless(packageName != null, "Can't get class package: %s", classNode.getName());
+			
+			if (!namespaces.contains(packageName))
+			{
+				namespaces.add(packageName);
+			}
+			
+			if (!uniqueTypes.contains(type))
+			{
+				uniqueTypes.add(type);
+			}
+		}
+		
+		public List<String> getNamespaces()
+		{
+			return namespaces;
+		}
+		
+		public List<BcTypeNode> getUsingTypes()
+		{
+			List<BcTypeNode> usingTypes = new ArrayList<BcTypeNode>();
+			for (String namespace : namespaces)
+			{
+				List<BcTypeNode> packageTypes = BcTypeNode.typesForPackage(namespace);
+				for (BcTypeNode uniqueType : uniqueTypes)
+				{
+					String typeName = uniqueType.getName();
+					String typeQualifier = uniqueType.getQualifier();
+					
+					for (BcTypeNode packageType : packageTypes)
+					{
+						if (typeName.equals(packageType.getName()) && !typeQualifier.equals(packageType.getQualifier()))
+						{
+							if (!usingTypes.contains(uniqueType))
+							{
+								usingTypes.add(uniqueType);
+							}
+						}
+					}
+				}
+			}
+			return usingTypes;
+		}
 	}
 }
