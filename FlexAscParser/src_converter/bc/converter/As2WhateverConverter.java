@@ -223,6 +223,8 @@ public abstract class As2WhateverConverter
 		List<BcModuleDeclarationEntry> entries = new ArrayList<BcModuleDeclarationEntry>();
 		
 		BcImportList importList = new BcImportList();
+		String modulePackageName = null;
+		
 		Map<DefinitionNode, BcMetadata> metadataMap = new HashMap<DefinitionNode, BcMetadata>();
 
 		ObjectList<Node> items = programNode.statements.items;
@@ -239,6 +241,11 @@ public abstract class As2WhateverConverter
 				
 				String interfaceDeclaredName = getCodeHelper().extractIdentifier(interfaceDefinitionNode.name);
 				String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);
+				if (packageName == null)
+				{
+					packageName = modulePackageName;
+					failConversionUnless(packageName != null, "Can't detect interface package: '%s'", interfaceDeclaredName);
+				}
 				
 				BcTypeNode interfaceType = createBcType(interfaceDeclaredName, packageName);
 				BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);
@@ -260,6 +267,11 @@ public abstract class As2WhateverConverter
 				
 				String classDeclaredName = getCodeHelper().extractIdentifier(classDefinitionNode.name);
 				String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
+				if (packageName == null)
+				{
+					packageName = modulePackageName;
+					failConversionUnless(packageName != null, "Can't detect class package: '%s'", classDeclaredName);
+				}
 				
 				BcTypeNode classType = createBcType(classDeclaredName, packageName);
 				BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
@@ -301,7 +313,10 @@ public abstract class As2WhateverConverter
 			}
 			else if (node instanceof PackageDefinitionNode)
 			{
-				// nothing
+				PackageDefinitionNode pkgNode = (PackageDefinitionNode) node;
+				String oldModulePackage = modulePackageName;
+				modulePackageName = BcNodeHelper.tryExtractPackageName(pkgNode.name);
+				failConversionUnless(oldModulePackage == null || oldModulePackage.equals(modulePackageName), "Conflicting package declarations: '%s' '%s'", oldModulePackage, modulePackageName);
 			}
 			else if (node instanceof FunctionDefinitionNode)
 			{

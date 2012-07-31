@@ -42,13 +42,18 @@ public class BcNodeHelper
 		PackageDefinitionNode pkgdef = classDefinitionNode.pkgdef;
 		if (pkgdef != null)
 		{
-			PackageNameNode packageNameNode = pkgdef.name;
-			if (packageNameNode != null)
-			{
-				return safeQualifier(packageNameNode.id.pkg_part);
-			}
+			return tryExtractPackageName(pkgdef.name);
 		}		
 		
+		return null;
+	}
+
+	public static String tryExtractPackageName(PackageNameNode packageNameNode)
+	{
+		if (packageNameNode != null)
+		{
+			return safeQualifier(packageNameNode.id.pkg_part);
+		}
 		return null;
 	}
 	
