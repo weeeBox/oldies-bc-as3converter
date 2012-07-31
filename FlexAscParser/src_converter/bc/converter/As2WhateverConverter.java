@@ -13,6 +13,7 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import macromedia.asc.parser.ApplyTypeExprNode;
@@ -91,6 +92,7 @@ import bc.help.BcNodeHelper;
 import bc.help.BcStringUtils;
 import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
+import bc.lang.BcDeclaration;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
@@ -98,6 +100,7 @@ import bc.lang.BcImportList;
 import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
+import bc.lang.BcModuleDeclarationEntry;
 import bc.lang.BcModuleEntry;
 import bc.lang.BcNullType;
 import bc.lang.BcTypeName;
@@ -190,7 +193,7 @@ public abstract class As2WhateverConverter
 				{
 					String filename = pathname.getName();
 					if (pathname.isDirectory())
-						return !filename.equals(".svn");
+						return !filename.equals(".svn") && !filename.equals(".git");
 
 					return filename.endsWith(".as");
 				}
@@ -216,6 +219,11 @@ public abstract class As2WhateverConverter
 
 		ProgramNode programNode = parser.parseProgram();
 		in.close();
+		
+		List<BcModuleDeclarationEntry> entries = new ArrayList<BcModuleDeclarationEntry>();
+		
+		BcImportList importList = new BcImportList();
+		Map<DefinitionNode, BcMetadata> metadataMap = new HashMap<DefinitionNode, BcMetadata>();
 
 		ObjectList<Node> items = programNode.statements.items;
 		for (Node node : items)
@@ -223,44 +231,47 @@ public abstract class As2WhateverConverter
 			if (node instanceof InterfaceDefinitionNode)
 			{
 				InterfaceDefinitionNode interfaceDefinitionNode = (InterfaceDefinitionNode) node;
+				BcMetadata metadata = metadataMap.get(interfaceDefinitionNode);
+				if (shouldIgnoreDeclaration(metadata))
+				{
+					continue;
+				}
+				
 				String interfaceDeclaredName = getCodeHelper().extractIdentifier(interfaceDefinitionNode.name);
-
 				String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);
-				createBcType(interfaceDeclaredName, packageName);
+				
+				BcTypeNode interfaceType = createBcType(interfaceDeclaredName, packageName);
+				BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);
+				
+				bcInterface.setPackageName(packageName);
+				bcInterface.setImportList(importList);
+				bcInterface.setMetadata(metadata);
+				
+				entries.add(new BcModuleDeclarationEntry(bcInterface, interfaceDefinitionNode));
 			}
 			else if (node instanceof ClassDefinitionNode)
 			{
 				ClassDefinitionNode classDefinitionNode = (ClassDefinitionNode) node;
-
+				BcMetadata metadata = metadataMap.get(classDefinitionNode);
+				if (shouldIgnoreDeclaration(metadata))
+				{
+					continue;
+				}
+				
 				String classDeclaredName = getCodeHelper().extractIdentifier(classDefinitionNode.name);
 				String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
-
-				createBcType(classDeclaredName, packageName);
-			}
-		}
-
-		return new BcModuleEntry(file, items);
-	}
-
-	private void collect(BcModuleEntry module) throws IOException
-	{
-		File file = module.getFile();
-
-		BcGlobal.lastBcPath = file.getPath();
-		BcGlobal.lastBcImportList = new BcImportList();
-
-		BcGlobal.bcMetadataMap.clear();
-
-		ObjectList<Node> items = module.getItems();
-		for (Node node : items)
-		{
-			if (node instanceof InterfaceDefinitionNode)
-			{
-				BcGlobal.bcClasses.add(collect((InterfaceDefinitionNode) node));
-			}
-			else if (node instanceof ClassDefinitionNode)
-			{
-				BcGlobal.bcClasses.add(collect((ClassDefinitionNode) node));
+				
+				BcTypeNode classType = createBcType(classDeclaredName, packageName);
+				BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
+				bcClass.setFinal(BcNodeHelper.isFinal(classDefinitionNode));
+				
+				bcClass.setPackageName(packageName);
+				bcClass.setImportList(importList);
+				
+				// collect metadata
+				bcClass.setMetadata(metadata);				
+				
+				entries.add(new BcModuleDeclarationEntry(bcClass, classDefinitionNode));
 			}
 			else if (node instanceof MetaDataNode)
 			{
@@ -270,7 +281,7 @@ public abstract class As2WhateverConverter
 					BcMetadata bcMetadata = BcNodeHelper.extractBcMetadata(metadata);
 					failConversionUnless(bcMetadata != null, "Can't parse top level metadata");
 
-					BcGlobal.bcMetadataMap.put(metadata.def, bcMetadata);
+					metadataMap.put(metadata.def, bcMetadata);
 				}
 			}
 			else if (node instanceof ImportDirectiveNode)
@@ -286,7 +297,7 @@ public abstract class As2WhateverConverter
 				String typeName = packageIdentifierNode.def_part;
 				String packageName = BcNodeHelper.safeQualifier(packageIdentifierNode.pkg_part);
 
-				BcGlobal.lastBcImportList.add(typeName, packageName);
+				importList.add(typeName, packageName);
 			}
 			else if (node instanceof PackageDefinitionNode)
 			{
@@ -294,38 +305,92 @@ public abstract class As2WhateverConverter
 			}
 			else if (node instanceof FunctionDefinitionNode)
 			{
-				BcFunctionDeclaration bcFunc = collect((FunctionDefinitionNode) node);
+				FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) node;
+				BcMetadata metadata = metadataMap.get(functionDefinitionNode);
+				if (shouldIgnoreDeclaration(metadata))
+				{
+					continue;
+				}
+				
+				FunctionNameNode functionNameNode = functionDefinitionNode.name;
+				String name = getCodeHelper().extractIdentifier(functionNameNode.identifier);
+				BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);
+
+				String typeString = BcNodeHelper.tryExtractFunctionType(functionDefinitionNode);
+				if (typeString != null)
+				{
+					if (typeString.equals("virtual"))
+					{
+						bcFunc.setVirtual();
+					}
+					else if (typeString.equals("override"))
+					{
+						bcFunc.setOverride();
+					}
+				}
+				
+				if (functionNameNode.kind == Tokens.GET_TOKEN)
+				{
+					bcFunc.setGetter();
+				}
+				else if (functionNameNode.kind == Tokens.SET_TOKEN)
+				{
+					bcFunc.setSetter();
+				}
+				
+				bcFunc.setModifiers(BcNodeHelper.extractModifiers(functionDefinitionNode.attrs));
 				bcFunc.setGlobal();
-				BcGlobal.bcGlobalFunctions.add(bcFunc);
+				bcFunc.setImportList(importList);
+				bcFunc.setMetadata(metadata);
+				
+				entries.add(new BcModuleDeclarationEntry(bcFunc, functionDefinitionNode));
 			}
 		}
 
-		BcGlobal.lastBcPath = null;
-		BcGlobal.lastBcImportList = null;
+		return new BcModuleEntry(file, entries);
 	}
 
-	private BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode)
+	private void collect(BcModuleEntry module) throws IOException
 	{
-		String interfaceDeclaredName = getCodeHelper().extractIdentifier(interfaceDefinitionNode.name);
-		String packageName = BcNodeHelper.tryExtractPackageName(interfaceDefinitionNode);
+		File file = module.getFile();
 
-		BcGlobal.declaredVars = new ArrayList<BcVariableDeclaration>();
+		BcGlobal.lastBcPath = file.getPath();
 
-		BcTypeNode interfaceType = createBcType(interfaceDeclaredName, packageName);
-		BcInterfaceDefinitionNode bcInterface = new BcInterfaceDefinitionNode(interfaceType);
+		List<BcModuleDeclarationEntry> entries = module.getEntries();
+		for (BcModuleDeclarationEntry entry : entries)
+		{
+			BcDeclaration declaration = entry.getDeclaration();
+			DefinitionNode definition = entry.getDefinition();
+			
+			BcGlobal.lastBcImportList = declaration.getImportList();
+			
+			if (definition instanceof InterfaceDefinitionNode)
+			{
+				BcGlobal.bcClasses.add(collect((InterfaceDefinitionNode) definition, (BcInterfaceDefinitionNode) declaration));
+			}
+			else if (definition instanceof ClassDefinitionNode)
+			{
+				BcGlobal.bcClasses.add(collect((ClassDefinitionNode) definition, (BcClassDefinitionNode) declaration));
+			}
+			else if (definition instanceof FunctionDefinitionNode)
+			{
+				BcGlobal.bcGlobalFunctions.add(collect((FunctionDefinitionNode) definition, (BcFunctionDeclaration) declaration));
+			}
+			else
+			{
+				failConversion("Unexpected definition: %s", definition.getClass());
+			}
+		}
 
-		bcInterface.setPackageName(packageName);
-		bcInterface.setDeclaredVars(BcGlobal.declaredVars);
-		bcInterface.setImportList(BcGlobal.lastBcImportList);
+		BcGlobal.lastBcImportList = null;
+		BcGlobal.lastBcPath = null;
+	}
 
+	private BcInterfaceDefinitionNode collect(InterfaceDefinitionNode interfaceDefinitionNode, BcInterfaceDefinitionNode bcInterface)
+	{
+		BcGlobal.declaredVars = bcInterface.getDeclaredVars();
 		BcGlobal.lastBcClass = bcInterface;
 		BcGlobal.lastBcPackageName = bcInterface.getPackageName();
-
-		BcMetadata metadata = findMetadata(interfaceDefinitionNode);
-		if (metadata != null)
-		{
-			collectClassMetadata(bcInterface, metadata);
-		}
 
 		if (interfaceDefinitionNode.statements != null)
 		{
@@ -350,30 +415,19 @@ public abstract class As2WhateverConverter
 		return bcInterface;
 	}
 
-	private BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode)
+	private BcClassDefinitionNode collect(ClassDefinitionNode classDefinitionNode, BcClassDefinitionNode bcClass)
 	{
-		String classDeclaredName = getCodeHelper().extractIdentifier(classDefinitionNode.name);
-		String packageName = BcNodeHelper.tryExtractPackageName(classDefinitionNode);
-		BcGlobal.declaredVars = new ArrayList<BcVariableDeclaration>();
-
-		BcTypeNode classType = createBcType(classDeclaredName, packageName);
-		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
-		bcClass.setFinal(BcNodeHelper.isFinal(classDefinitionNode));
-
-		bcClass.setPackageName(packageName);
-		bcClass.setDeclaredVars(BcGlobal.declaredVars);
-		bcClass.setImportList(BcGlobal.lastBcImportList);
-
+		BcGlobal.declaredVars = bcClass.getDeclaredVars();
 		BcGlobal.lastBcClass = bcClass;
 		BcGlobal.lastBcPackageName = bcClass.getPackageName();
 
-		// collect metadata
-		BcMetadata classMetadata = findMetadata(classDefinitionNode);
-		if (classMetadata != null)
+		BcTypeNode classType = bcClass.getClassType();
+		
+		if (bcClass.hasMetadata())
 		{
-			collectClassMetadata(bcClass, classMetadata);
+			collectClassMetadata(bcClass);
 		}
-
+		
 		// super type
 		Node baseclass = classDefinitionNode.baseclass;
 		if (baseclass == null)
@@ -441,11 +495,80 @@ public abstract class As2WhateverConverter
 
 		return bcClass;
 	}
-
-	protected void collectClassMetadata(BcClassDefinitionNode bcClass, BcMetadata bcMetadata)
+	
+	private BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode, BcFunctionDeclaration bcFunc)
 	{
-		bcClass.setMetadata(bcMetadata);
+		List<BcFunctionTypeNode> functionTypes = null;
+		BcMetadata funcMetadata = bcFunc.getMetadata();
+		if (funcMetadata != null)
+		{
+			functionTypes = extractFunctionTypes(funcMetadata);
+		}
 
+		// get function params
+		ParameterListNode parameterNode = functionDefinitionNode.fexpr.signature.parameter;
+		if (parameterNode != null)
+		{
+			ObjectList<ParameterNode> params = parameterNode.items;
+			for (ParameterNode param : params)
+			{
+				BcTypeNode paramType = extractBcType(param);
+				boolean qualified = isTypeQualified(param);
+
+				String paramName = param.identifier.name;
+
+				// search for func param in metadata
+				if (paramType instanceof BcFunctionTypeNode && functionTypes != null)
+				{
+					if (functionTypes.size() > 1)
+					{
+						for (BcFunctionTypeNode funcType : functionTypes)
+						{
+							if (funcType.hasAttachedParam() && funcType.getAttachedParam().equals(paramName))
+							{
+								paramType = funcType;
+								break;
+							}
+						}
+					}
+					else
+					{
+						paramType = functionTypes.get(0);
+					}
+
+					BcFunctionTypeNode funcType = (BcFunctionTypeNode) paramType;
+					failConversionUnless(funcType.isComplete(), "Function param '%s' is incomplete. Please provide function metadata or global function metadata", paramName);
+				}
+
+				BcFuncParam bcParam = new BcFuncParam(paramType, getCodeHelper().identifier(paramName), qualified);
+				if (param.init != null)
+				{
+					bcParam.setDefaultInitializer(param.init);
+				}
+
+				bcFunc.addParam(bcParam);
+				bcFunc.getDeclaredVars().add(bcParam);
+			}
+		}
+
+		// get function return type
+		Node returnTypeNode = functionDefinitionNode.fexpr.signature.result;
+		if (returnTypeNode != null)
+		{
+			BcTypeNode bcReturnType = extractBcType(returnTypeNode);
+			boolean qualified = isTypeQualified(returnTypeNode);
+
+			bcFunc.setReturnType(bcReturnType.createTypeInstance(qualified));
+		}
+
+		bcFunc.setStatements(functionDefinitionNode.fexpr.body);
+		return bcFunc;
+	}
+
+	protected void collectClassMetadata(BcClassDefinitionNode bcClass)
+	{
+		BcMetadata bcMetadata = bcClass.getMetadata();
+		
 		List<BcFunctionTypeNode> functionTypes = extractFunctionTypes(bcMetadata);
 		for (BcFunctionTypeNode funcType : functionTypes)
 		{
@@ -513,9 +636,6 @@ public abstract class As2WhateverConverter
 
 		bcFunc.setModifiers(BcNodeHelper.extractModifiers(functionDefinitionNode.attrs));
 
-		ArrayList<BcVariableDeclaration> declaredVars = new ArrayList<BcVariableDeclaration>();
-		bcFunc.setDeclaredVars(declaredVars);
-
 		// get function params
 		ParameterListNode parameterNode = functionDefinitionNode.fexpr.signature.parameter;
 		if (parameterNode != null)
@@ -558,7 +678,7 @@ public abstract class As2WhateverConverter
 				}
 
 				bcFunc.addParam(bcParam);
-				declaredVars.add(bcParam);
+				bcFunc.getDeclaredVars().add(bcParam);
 			}
 		}
 
@@ -2653,6 +2773,11 @@ public abstract class As2WhateverConverter
 		}
 
 		return true;
+	}
+	
+	protected boolean shouldIgnoreDeclaration(BcMetadata metadata)
+	{
+		return metadata != null && metadata.contains("IgnoreConversion");
 	}
 
 	protected void writeDestToFile(ListWriteDestination src, File file) throws IOException

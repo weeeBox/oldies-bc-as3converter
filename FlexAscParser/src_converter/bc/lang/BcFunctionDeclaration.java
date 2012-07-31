@@ -49,6 +49,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 	{
 		this.name = name;
 		params = new ArrayList<BcFuncParam>();
+		declaredVars = new ArrayList<BcVariableDeclaration>();
 	}
 	
 	public StatementListNode getStatements()

@@ -1,28 +1,26 @@
 package bc.lang;
 
 import java.io.File;
-
-import macromedia.asc.parser.Node;
-import macromedia.asc.util.ObjectList;
+import java.util.List;
 
 public class BcModuleEntry
 {
 	private File file;
-	private ObjectList<Node> items;
+	private List<BcModuleDeclarationEntry> entries;
 
-	public BcModuleEntry(File file, ObjectList<Node> items)
+	public BcModuleEntry(File file, List<BcModuleDeclarationEntry> entries)
 	{
 		this.file = file;
-		this.items = items;
+		this.entries = entries;
 	}
 	
 	public File getFile()
 	{
 		return file;
 	}
-	
-	public ObjectList<Node> getItems()
+
+	public List<BcModuleDeclarationEntry> getEntries()
 	{
-		return items;
+		return entries;
 	}
 }

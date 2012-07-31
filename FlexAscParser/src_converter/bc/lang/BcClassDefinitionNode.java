@@ -19,8 +19,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private List<BcFunctionDeclaration> functions;
 	private List<BcFunctionDeclaration> constructors;
 	
-	private BcImportList importList;
-	
 	private List<BcVariableDeclaration> declaredVars;
 	private List<BcTypeNode> additionalImports;
 	
@@ -44,6 +42,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 		interfaces = new ArrayList<BcTypeNodeInstance>();
 		additionalImports = new ArrayList<BcTypeNode>();
 		functionTypes = new ArrayList<BcFunctionTypeNode>();
+		declaredVars = new ArrayList<BcVariableDeclaration>();
 	}
 	
 	public boolean isFinal()
@@ -175,11 +174,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return interfaces.size() > 0;
 	}
 	
-	public void setDeclaredVars(List<BcVariableDeclaration> declaredVars)
-	{
-		this.declaredVars = declaredVars;
-	}
-	
 	public List<BcVariableDeclaration> getDeclaredVars()
 	{
 		return declaredVars;
@@ -216,16 +210,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 		{
 			additionalImports.add(bcType);
 		}
-	}
-	
-	public BcImportList getImportList()
-	{
-		return importList;
-	}
-	
-	public void setImportList(BcImportList importList)
-	{
-		this.importList = importList;
 	}
 	
 	public List<BcVariableDeclaration> getFields()

@@ -411,7 +411,7 @@ public class As2CsConverter extends As2WhateverConverter
 			failConversionUnless(classNode != null, "Can't add type to workspace: %s", type.getName());
 			
 			String packageName = classNode.getPackageName();
-			failConversionUnless(packageName != null, "Can't get class package: %d", classNode.getName());
+			failConversionUnless(packageName != null, "Can't get class package: %s", classNode.getName());
 			
 			if (!imports.contains(packageName))
 			{

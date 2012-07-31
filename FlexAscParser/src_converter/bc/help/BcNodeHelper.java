@@ -250,7 +250,11 @@ public class BcNodeHelper
 		
 		if (type instanceof RestParameterNode)
 		{
-			return BcTypeNode.createRestType();
+			RestParameterNode restTypeNode = (RestParameterNode) type;
+			BcTypeNode argType = extractBcType(restTypeNode.type);
+			assert argType != null;
+			
+			return BcTypeNode.createRestType(argType);
 		}
 		
 		if (type instanceof ParameterNode)

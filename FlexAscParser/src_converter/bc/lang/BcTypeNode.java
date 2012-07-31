@@ -127,9 +127,9 @@ public class BcTypeNode extends BcNode
 		return null;
 	}
 	
-	public static BcTypeNode createRestType()
+	public static BcTypeNode createRestType(BcTypeNode type)
 	{
-		return new BcRestTypeNode();
+		return new BcRestTypeNode(type);
 	}
 	
 	protected BcTypeNode(String name)
