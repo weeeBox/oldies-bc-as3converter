@@ -6,7 +6,13 @@ public class BcStringUtils
 {
 	public static String replaceEscapes(String str)
 	{
-		return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
+		str = str.replace("\n", "\\n");
+		str = str.replace("\b", "\\b");
+		str = str.replace("\f", "\\f");
+		str = str.replace("\n", "\\r");
+		str = str.replace("\t", "\\t");
+		
+		return str;
 	}
 	
 	public static <T> String commaSeparated(T... values)
