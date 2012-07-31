@@ -4,7 +4,7 @@ public class BcVectorTypeNode extends BcTypeNode
 {
 	private BcTypeNode generic;
 
-	public BcVectorTypeNode(String name, BcTypeNode generic)
+	protected BcVectorTypeNode(BcTypeName name, BcTypeNode generic)
 	{
 		super(name);
 		this.generic = generic;

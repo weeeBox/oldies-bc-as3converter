@@ -117,18 +117,6 @@ public abstract class As2WhateverConverter
 
 	protected static final String internalFieldInitializer = "__internalInitializeFields";
 
-	protected static final String classGlobal = "Global";
-	protected static final String classNumber = "Number";
-	protected static final String classObject = "Object";
-	protected static final String classString = "String";
-	protected static final String classVector = "Vector";
-	protected static final String classArray = "Array";
-	protected static final String classDictionary = "Dictionary";
-	protected static final String classFunction = "Function";
-	protected static final String classXML = "XML";
-	protected static final String classXMLList = "XMLList";
-	protected static final String classBoolean = "Boolean";
-
 	protected boolean needFieldsInitializer;
 	private BcCodeHelper codeHelper;
 
@@ -447,7 +435,7 @@ public abstract class As2WhateverConverter
 		Node baseclass = classDefinitionNode.baseclass;
 		if (baseclass == null)
 		{
-			BcTypeNode typeObject = createBcType(classObject);
+			BcTypeNode typeObject = createBcType(BcTypeNode.typeObject);
 			if (classType != typeObject)
 			{
 				bcClass.setExtendsType(typeObject.createTypeInstance());
@@ -729,12 +717,6 @@ public abstract class As2WhateverConverter
 	{
 		for (BcClassDefinitionNode bcClass : classes)
 		{
-			if (bcClass.hasMetadata() && bcClass.getMetadata().contains("IgnoreConversion"))
-			{
-				System.err.println("Skipped class: " + bcClass.getName());
-				continue;
-			}
-
 			bcMembersTypesStack = new Stack<BcTypeNode>();
 			dest = new ListWriteDestination();
 			destStack = new Stack<WriteDestination>();
@@ -1000,7 +982,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				numberMemberCall = typeEquals(baseType, classNumber);
+				numberMemberCall = typeEquals(baseType, BcTypeNode.typeNumber);
 				process(base);
 			}
 
@@ -1023,10 +1005,10 @@ public abstract class As2WhateverConverter
 		{
 			if (selector.getMode() == Tokens.LEFTBRACKET_TOKEN)
 			{
-				objectAsDictionaryCall = !typeOneOf(baseType, classVector, classDictionary, classArray, classString, classXMLList);
+				objectAsDictionaryCall = !typeOneOf(baseType, BcTypeNode.typeVector, BcTypeNode.typeDictionary, BcTypeNode.typeArray, BcTypeNode.typeString, BcTypeNode.typeXMLList);
 			}
 
-			if (typeEquals(baseType, classString) && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
+			if (typeEquals(baseType, BcTypeNode.typeString) && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
 			{
 				String selectorCode = selectorDest.toString();
 				stringCall = !selectorCode.equals("ToString()") && !selectorCode.equals("Length");
@@ -1211,7 +1193,7 @@ public abstract class As2WhateverConverter
 						failConversionUnless(funcType != null, "Function return type undefined: %s", expr);
 
 						lastBcMemberType = funcType;
-						if (classEquals(bcClass, classString) && identifier.equals("length") && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
+						if (classEquals(bcClass, BcTypeNode.typeString) && identifier.equals("length") && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
 						{
 							// keep String.length property as a "Lenght" property
 							identifier = Character.toUpperCase(identifier.charAt(0)) + identifier.substring(1);
@@ -1237,18 +1219,18 @@ public abstract class As2WhateverConverter
 							if (bcFunction != null)
 							{
 								System.err.println("Warning! Function type: " + identifier);
-								lastBcMemberType = createBcType(classFunction);
+								lastBcMemberType = createBcType(BcTypeNode.typeFunction);
 							}
-							else if (classEquals(bcClass, classXML) || classEquals(bcClass, classXMLList))
+							else if (classEquals(bcClass, BcTypeNode.typeXML) || classEquals(bcClass, BcTypeNode.typeXMLList))
 							{
 								IdentifierNode identifierNode = (IdentifierNode) node.expr;
 								if (identifierNode.isAttr())
 								{
-									lastBcMemberType = createBcType(classString);
+									lastBcMemberType = createBcType(BcTypeNode.typeString);
 								}
 								else
 								{
-									lastBcMemberType = createBcType(classXMLList);
+									lastBcMemberType = createBcType(BcTypeNode.typeXMLList);
 									accessingDynamicXMLList = true;
 									System.err.println("Warning! Dynamic XMLList: " + identifier);
 								}
@@ -1278,13 +1260,13 @@ public abstract class As2WhateverConverter
 				lastBcMemberType = vectorType.getGeneric();
 				failConversionUnless(lastBcMemberType != null, "Can't detect vector's generic type: %s", expr);
 			}
-			else if (typeEquals(lastBcMemberType, classXMLList))
+			else if (typeEquals(lastBcMemberType, BcTypeNode.typeXMLList))
 			{
-				lastBcMemberType = createBcType(classXML);
+				lastBcMemberType = createBcType(BcTypeNode.typeXML);
 			}
 			else
 			{
-				lastBcMemberType = createBcType(classObject);
+				lastBcMemberType = createBcType(BcTypeNode.typeObject);
 			}
 		}
 		else
@@ -1396,7 +1378,7 @@ public abstract class As2WhateverConverter
 						isGlobalCalled = bcFunc.isGlobal();
 						if (isGlobalCalled)
 						{
-							addToImport(BcTypeNode.create(classGlobal));
+							addToImport(BcTypeNode.create(BcTypeNode.typeGlobal));
 						}
 					}
 					else if (node.is_new)
@@ -1415,7 +1397,7 @@ public abstract class As2WhateverConverter
 						BcVariableDeclaration bcFuncVar = findVariable(identifier);
 						if (bcFuncVar != null)
 						{
-							if (typeEquals(bcFuncVar.getType(), classFunction))
+							if (typeEquals(bcFuncVar.getType(), BcTypeNode.typeFunction))
 							{
 								System.err.println("Warning! Function type: " + identifier);
 								lastBcMemberType = bcFuncVar.getType();
@@ -1450,7 +1432,7 @@ public abstract class As2WhateverConverter
 					calledFunction = bcFunc;
 
 					lastBcMemberType = bcFunc.getReturnType();
-					if (classEquals(bcClass, classString) && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
+					if (classEquals(bcClass, BcTypeNode.typeString) && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
 					{
 						if (identifier.equals("toString"))
 						{
@@ -1465,7 +1447,7 @@ public abstract class As2WhateverConverter
 					BcVariableDeclaration bcFuncVar = findVariable(bcClass, identifier);
 					if (bcFuncVar != null)
 					{
-						if (typeEquals(bcFuncVar.getType(), classFunction))
+						if (typeEquals(bcFuncVar.getType(), BcTypeNode.typeFunction))
 						{
 							System.err.println("Warning! Function type: " + identifier);
 							lastBcMemberType = bcFuncVar.getType();
@@ -1600,7 +1582,7 @@ public abstract class As2WhateverConverter
 				BcTypeNode type = extractBcType(node.expr);
 				failConversionUnless(type != null, "Can't detect cast's type: ", exprDest);
 
-				if (typeEquals(type, classString))
+				if (typeEquals(type, BcTypeNode.typeString))
 				{
 					dest.writef(toString(argStr));
 				}
@@ -1611,7 +1593,7 @@ public abstract class As2WhateverConverter
 			}
 			else if (isGlobalCalled)
 			{
-				dest.writef(staticSelector(type(classGlobal), String.format("%s(%s)", identifier, argsList)));
+				dest.writef(staticSelector(type(BcTypeNode.typeGlobal), String.format("%s(%s)", identifier, argsList)));
 			}
 			else
 			{
@@ -1678,14 +1660,14 @@ public abstract class As2WhateverConverter
 					if (bcFunction != null)
 					{
 						System.err.println("Warning! Function type: " + identifier);
-						lastBcMemberType = createBcType(classFunction);
+						lastBcMemberType = createBcType(BcTypeNode.typeFunction);
 					}
-					else if (classEquals(bcClass, classXML))
+					else if (classEquals(bcClass, BcTypeNode.typeXML))
 					{
 						IdentifierNode identifierNode = (IdentifierNode) node.expr;
 						if (identifierNode.isAttribute())
 						{
-							lastBcMemberType = createBcType(classString);
+							lastBcMemberType = createBcType(BcTypeNode.typeString);
 						}
 						else
 						{
@@ -1710,7 +1692,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				lastBcMemberType = createBcType(classObject);
+				lastBcMemberType = createBcType(BcTypeNode.typeObject);
 				addToDictionary = true;
 			}
 		}
@@ -2018,7 +2000,7 @@ public abstract class As2WhateverConverter
 		BcTypeNode conditionType = evaluateType(condition);
 		failConversionUnless(conditionType != null, "Unable to evaluate condition expression's type: '%s'", condString);
 
-		if (!typeEquals(conditionType, classBoolean))
+		if (!typeEquals(conditionType, BcTypeNode.typeBoolean))
 		{
 			if (typeEquals(conditionType, "int") || typeEquals(conditionType, "uint"))
 			{
@@ -2358,7 +2340,7 @@ public abstract class As2WhateverConverter
 			BcTypeNode lshType = evaluateType(node.lhs);
 			BcTypeNode rshType = evaluateType(node.rhs);
 
-			if (!typeEquals(lshType, classBoolean))
+			if (!typeEquals(lshType, BcTypeNode.typeBoolean))
 			{
 				if (canBeClass(lshType))
 				{
@@ -2370,7 +2352,7 @@ public abstract class As2WhateverConverter
 				}
 			}
 
-			if (!typeEquals(rshType, classBoolean))
+			if (!typeEquals(rshType, BcTypeNode.typeBoolean))
 			{
 				if (canBeClass(rshType))
 				{
@@ -2421,7 +2403,7 @@ public abstract class As2WhateverConverter
 			if (node.expr instanceof MemberExpressionNode)
 			{
 				BcTypeNode memberType = evaluateType(node.expr);
-				if (!typeEquals(memberType, classBoolean))
+				if (!typeEquals(memberType, BcTypeNode.typeBoolean))
 				{
 					dest.writef("(%s)", getCodeHelper().isNull(expr));
 				}
@@ -2605,7 +2587,7 @@ public abstract class As2WhateverConverter
 
 		if (type instanceof BcWildcardTypeNode)
 		{
-			return findClass(classObject);
+			return findClass(BcTypeNode.typeObject);
 		}
 
 		return findClass(type.getTypeName());
@@ -3010,17 +2992,17 @@ public abstract class As2WhateverConverter
 
 	protected String getClassName(BcClassDefinitionNode bcClass)
 	{
-		return type(bcClass.getName());
+		return classType(bcClass.getClassType());
 	}
 
 	protected String getBaseClassName(BcClassDefinitionNode bcClass)
 	{
 		if (bcClass.hasExtendsType())
 		{
-			return type(bcClass.getExtendsType());
+			return classType(bcClass.getExtendsType());
 		}
 
-		return type(classObject);
+		return classType(BcTypeNode.typeObject);
 	}
 
 	protected BcTypeNode getBaseClassType(BcClassDefinitionNode bcClass)
@@ -3030,7 +3012,7 @@ public abstract class As2WhateverConverter
 			return bcClass.getExtendsType();
 		}
 
-		return BcTypeNode.create(classObject);
+		return BcTypeNode.create(BcTypeNode.typeObject);
 	}
 
 	protected List<BcFunctionTypeNode> extractFunctionTypes(BcMetadata metadata)
@@ -3141,7 +3123,7 @@ public abstract class As2WhateverConverter
 
 		if (node instanceof LiteralStringNode)
 		{
-			return createBcType(classString);
+			return createBcType(BcTypeNode.typeString);
 		}
 
 		if (node instanceof LiteralBooleanNode)
@@ -3204,7 +3186,7 @@ public abstract class As2WhateverConverter
 				binaryNode.op == Tokens.IS_TOKEN ||
 				binaryNode.op == Tokens.IN_TOKEN)
 			{
-				return createBcType(classBoolean);
+				return createBcType(BcTypeNode.typeBoolean);
 			}
 
 			if (binaryNode.op == Tokens.AS_TOKEN)
@@ -3212,9 +3194,9 @@ public abstract class As2WhateverConverter
 				return extractBcType(binaryNode.rhs);
 			}
 
-			if (typeEquals(lhsType, classString) || typeEquals(rhsType, classString))
+			if (typeEquals(lhsType, BcTypeNode.typeString) || typeEquals(rhsType, BcTypeNode.typeString))
 			{
-				return createBcType(classString);
+				return createBcType(BcTypeNode.typeString);
 			}
 
 			if (typeEquals(lhsType, "Number") || typeEquals(rhsType, "Number"))
@@ -3258,7 +3240,7 @@ public abstract class As2WhateverConverter
 			{
 				if (unary.op == Tokens.NOT_TOKEN)
 				{
-					return createBcType(classBoolean);
+					return createBcType(BcTypeNode.typeBoolean);
 				}
 				return evaluateMemberExpression((MemberExpressionNode) unary.expr);
 			}
@@ -3287,7 +3269,7 @@ public abstract class As2WhateverConverter
 
 		if (node instanceof LiteralArrayNode)
 		{
-			return createBcType(classArray);
+			return createBcType(BcTypeNode.typeArray);
 		}
 
 		if (node instanceof ConditionalExpressionNode)
@@ -3311,7 +3293,7 @@ public abstract class As2WhateverConverter
 				return elseType;
 			}
 
-			return createBcType(classObject);
+			return createBcType(BcTypeNode.typeObject);
 		}
 
 		if (node instanceof LiteralVectorNode)
@@ -3322,7 +3304,7 @@ public abstract class As2WhateverConverter
 		
 		if (node instanceof LiteralObjectNode)
 		{
-			return createBcType(classObject);
+			return createBcType(BcTypeNode.typeObject);
 		}
 
 		failConversion("Unable to evaluate node's type: %s", node.getClass());
@@ -3401,22 +3383,22 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{
-					if (classEquals(baseClass, classXML) || classEquals(baseClass, classXMLList))
+					if (classEquals(baseClass, BcTypeNode.typeXML) || classEquals(baseClass, BcTypeNode.typeXMLList))
 					{
 						if (identifier.isAttr())
 						{
-							return createBcType(classString);
+							return createBcType(BcTypeNode.typeString);
 						}
 
-						return createBcType(classXMLList); // dirty hack
+						return createBcType(BcTypeNode.typeXMLList); // dirty hack
 					}
 					else if (getCodeHelper().extractIdentifier(identifier).equals(BcCodeHelper.thisCallMarker))
 					{
 						return BcGlobal.lastBcClass.getClassType(); // this referes to the current class
 					}
-					else if (classEquals(baseClass, classObject))
+					else if (classEquals(baseClass, BcTypeNode.typeObject))
 					{
-						return createBcType(classObject);
+						return createBcType(BcTypeNode.typeObject);
 					}
 				}
 			}
@@ -3428,13 +3410,13 @@ public abstract class As2WhateverConverter
 					BcVectorTypeNode bcVector = (BcVectorTypeNode) baseClassType;
 					return bcVector.getGeneric();
 				}
-				else if (typeEquals(baseClassType, classXMLList))
+				else if (typeEquals(baseClassType, BcTypeNode.typeXMLList))
 				{
-					return createBcType(classXMLList);
+					return createBcType(BcTypeNode.typeXMLList);
 				}
 				else
 				{
-					return createBcType(classObject); // no generics
+					return createBcType(BcTypeNode.typeObject); // no generics
 				}
 			}
 			else
@@ -3459,7 +3441,7 @@ public abstract class As2WhateverConverter
 	{
 		if (identifier.isAttr())
 		{
-			return createBcType(classString); // hack
+			return createBcType(BcTypeNode.typeString); // hack
 		}
 
 		BcTypeName typeName = getCodeHelper().extractTypeName(identifier);
@@ -3508,7 +3490,7 @@ public abstract class As2WhateverConverter
 		{
 			BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
 
-			BcClassDefinitionNode vectorGenericClass = findClass(classVector).clone();
+			BcClassDefinitionNode vectorGenericClass = findClass(BcTypeNode.typeVector).clone();
 			vectorGenericClass.setClassType(bcType);
 			BcGlobal.bcPlatformClasses.add(vectorGenericClass);
 
@@ -3570,7 +3552,7 @@ public abstract class As2WhateverConverter
 		}
 		popDest();
 
-		dest.writef(construct(type(classArray), elementDest));
+		dest.writef(construct(type(BcTypeNode.typeArray), elementDest));
 	}
 
 	private void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
@@ -3654,7 +3636,7 @@ public abstract class As2WhateverConverter
 			}
 		}
 		
-		dest.write(staticCall(type(classObject), "createLiteralObject", args));		
+		dest.write(staticCall(type(BcTypeNode.typeObject), "createLiteralObject", args));		
 	}
 
 	protected boolean classEquals(BcClassDefinitionNode classNode, String name)
@@ -3676,12 +3658,12 @@ public abstract class As2WhateverConverter
 
 	protected boolean typeEquals(BcTypeNode type, String name)
 	{
-		if (name.equals(classVector) && type instanceof BcVectorTypeNode)
+		if (name.equals(BcTypeNode.typeVector) && type instanceof BcVectorTypeNode)
 		{
 			return true;
 		}
 
-		if (name.equals(classFunction) && type instanceof BcFunctionTypeNode)
+		if (name.equals(BcTypeNode.typeFunction) && type instanceof BcFunctionTypeNode)
 		{
 			return true;
 		}
@@ -3752,7 +3734,7 @@ public abstract class As2WhateverConverter
 	{
 		if (type.isIntegral())
 		{
-			if (typeEquals(type, classBoolean))
+			if (typeEquals(type, BcTypeNode.typeBoolean))
 			{
 				return "false";
 			}
@@ -3783,17 +3765,17 @@ public abstract class As2WhateverConverter
 			}
 		}
 
-		if (typeEquals(fromType, classObject))
+		if (typeEquals(fromType, BcTypeNode.typeObject))
 		{
 			return true;
 		}
 
-		if (toType.isIntegral() && typeEquals(fromType, classString))
+		if (toType.isIntegral() && typeEquals(fromType, BcTypeNode.typeString))
 		{
 			return true;
 		}
 
-		if (!toType.isIntegral() && typeEquals(fromType, classObject) && !typeEquals(toType, classObject))
+		if (!toType.isIntegral() && typeEquals(fromType, BcTypeNode.typeObject) && !typeEquals(toType, BcTypeNode.typeObject))
 		{
 			return true;
 		}
@@ -3823,7 +3805,7 @@ public abstract class As2WhateverConverter
 
 	private String cast(Object expression, BcTypeNode fromType, BcTypeNode toType)
 	{
-		if (toType.isIntegral() && typeEquals(fromType, classString))
+		if (toType.isIntegral() && typeEquals(fromType, BcTypeNode.typeString))
 		{
 			return parseString(expression, toType);
 		}
@@ -3895,7 +3877,7 @@ public abstract class As2WhateverConverter
 
 	public String type(String name)
 	{
-		if (name.equals(classFunction))
+		if (name.equals(BcTypeNode.typeFunction))
 		{
 			name = getDefaultFunctionType().getName();
 		}
@@ -3942,7 +3924,7 @@ public abstract class As2WhateverConverter
 	{
 		String typeString = type(exprType);
 		typeString = Character.toUpperCase(typeString.charAt(0)) + typeString.substring(1);
-		return staticCall(classType(classString), "parse" + typeString, expr);
+		return staticCall(classType(BcTypeNode.typeString), "parse" + typeString, expr);
 	}
 
 	public String varDecl(BcTypeNodeInstance typeInstance, String identifier)

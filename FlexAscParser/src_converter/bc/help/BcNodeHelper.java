@@ -241,11 +241,16 @@ public class BcNodeHelper
 			ApplyTypeExprNode selector = (ApplyTypeExprNode) type;
 			String typeName = ((IdentifierNode)selector.expr).name;
 			
+			BcTypeNode baseType = BcTypeNode.create(typeName);
+			assert baseType != null;
+			
 			ListNode typeArgs = selector.typeArgs;
 			assert typeArgs.size() == 1;
 			
 			BcTypeNode genericType = extractBcType(typeArgs.items.get(0));
-			return new BcVectorTypeNode(typeName, genericType);
+			assert genericType != null;
+			
+			return baseType.createGeneric(genericType);
 		}
 		
 		if (type instanceof TypedIdentifierNode)

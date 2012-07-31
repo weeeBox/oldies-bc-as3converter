@@ -11,6 +11,18 @@ import bc.help.BcGlobal;
 
 public class BcTypeNode extends BcNode
 {
+	public static final String typeGlobal = "Global";
+	public static final String typeNumber = "Number";
+	public static final String typeObject = "Object";
+	public static final String typeString = "String";
+	public static final String typeVector = "Vector";
+	public static final String typeArray = "Array";
+	public static final String typeDictionary = "Dictionary";
+	public static final String typeFunction = "Function";
+	public static final String typeXML = "XML";
+	public static final String typeXMLList = "XMLList";
+	public static final String typeBoolean = "Boolean";
+	
 	private BcTypeName typeName;
 	
 	private BcClassDefinitionNode classNode;
@@ -146,6 +158,17 @@ public class BcTypeNode extends BcNode
 	{
 		this.typeName = typeName;
 		integral = BcCodeHelper.isIntegralType(typeName.getName());
+	}
+	
+	public BcTypeNode createGeneric(BcTypeNode genericType)
+	{
+		if (getName().equals(typeVector))
+		{
+			BcVectorTypeNode vectorType = new BcVectorTypeNode(getTypeName(), genericType);
+			vectorType.setClassNode(getClassNode());
+			return vectorType;
+		}
+		return null;
 	}
 	
 	public BcTypeNodeInstance createTypeInstance()

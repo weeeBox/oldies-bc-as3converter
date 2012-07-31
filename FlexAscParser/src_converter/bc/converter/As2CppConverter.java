@@ -501,7 +501,7 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			if (constructorLine.contains(BcCodeHelper.superCallMarker))
 			{
-				if (!typeEquals(getBaseClassType(bcClass), classObject))
+				if (!typeEquals(getBaseClassType(bcClass), BcTypeNode.typeObject))
 				{
 					String constructorCall = classConstructor + getBaseClassName(bcClass);
 					String newConstructorLine = constructorLine.replace(BcCodeHelper.superCallMarker, constructorCall);
@@ -515,7 +515,7 @@ public class As2CppConverter extends As2WhateverConverter
 			}
 			else
 			{
-				if (!typeEquals(getBaseClassType(bcClass), classObject))
+				if (!typeEquals(getBaseClassType(bcClass), BcTypeNode.typeObject))
 				{
 					bodyLines.add(1, String.format("\t%s();", classConstructor + getBaseClassName(bcClass)));
 				}
@@ -580,7 +580,7 @@ public class As2CppConverter extends As2WhateverConverter
 		
 		impl.writelnf("%s = true;", staticInitFlagName);
 		
-		if (!typeEquals(getBaseClassType(bcClass), classObject))
+		if (!typeEquals(getBaseClassType(bcClass), BcTypeNode.typeObject))
 		{
 			impl.writelnf("%s();", classStaticInit + superClassName);
 		}
@@ -703,7 +703,7 @@ public class As2CppConverter extends As2WhateverConverter
 			String returnType = func.hasReturnType() ? typeRef(func.getReturnType()) : "void";
 			
 			List<BcFuncParam> params = func.getParams();
-			String targetParam = typePtr(classObject) + instanceName;
+			String targetParam = typePtr(BcTypeNode.typeObject) + instanceName;
 			String argsString = argsDef(params);
 			
 			if (params.size() > 0)
@@ -778,11 +778,11 @@ public class As2CppConverter extends As2WhateverConverter
 		String type = funcType.hasReturnType() ? typeRef(funcType.getReturnType()) : "void";
 		String name = typeRef(getCodeHelper().identifier(funcType.getName()));			
 
-		hdr.writelnf("class %s : public AsObjectRef<%s>", name, type(classFunction));
+		hdr.writelnf("class %s : public AsObjectRef<%s>", name, type(BcTypeNode.typeFunction));
 		hdr.writeBlockOpen();
 		
 		writeVisiblity("public", true);
-		writeDefine(hdr, defineObjectRefCommon, name, type(classFunction));
+		writeDefine(hdr, defineObjectRefCommon, name, type(BcTypeNode.typeFunction));
 		hdr.writeln();
 		
 		List<BcFuncParam> params = funcType.getParams();
@@ -1018,7 +1018,7 @@ public class As2CppConverter extends As2WhateverConverter
 			BcVectorTypeNode vectorType = (BcVectorTypeNode) type;		
 			return vectorType.getGeneric().isIntegral() ? definePrimitiveForeach : defineForeach;
 		}
-		else if (typeEquals(type, classXMLList))
+		else if (typeEquals(type, BcTypeNode.typeXMLList))
 		{
 			return defineXmlForeach;
 		}
@@ -1035,9 +1035,9 @@ public class As2CppConverter extends As2WhateverConverter
 		{
 			return ((BcVectorTypeNode) type).getGeneric();
 		}
-		else if (typeEquals(type, classXMLList))
+		else if (typeEquals(type, BcTypeNode.typeXMLList))
 		{
-			return BcTypeNode.create(classXML);
+			return BcTypeNode.create(BcTypeNode.typeXML);
 		}
 		else
 		{
@@ -1083,7 +1083,7 @@ public class As2CppConverter extends As2WhateverConverter
 	public String superSelector(BcClassDefinitionNode bcClass, Object selector)
 	{
 		BcClassDefinitionNode extendsClass = bcClass.getExtendsClass();
-		return staticSelector(extendsClass != null ? type(extendsClass.getClassType()) : type(classObject), selector);
+		return staticSelector(extendsClass != null ? type(extendsClass.getClassType()) : type(BcTypeNode.typeObject), selector);
 	}
 	
 	@Override
