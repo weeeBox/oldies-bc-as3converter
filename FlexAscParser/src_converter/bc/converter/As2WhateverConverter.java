@@ -2375,6 +2375,20 @@ public abstract class As2WhateverConverter
 			BcTypeNode castType = extractBcType(node.rhs);
 			dest.writef("((%s) ? (%s) : %s)", operatorIs(ldest, rdest), cast(lshString, castType), getCodeHelper().literalNull());
 		}
+		else if (node.op == Tokens.IN_TOKEN)
+		{
+			BcTypeNode rhsType = evaluateType(node.rhs);
+			failConversionUnless(rhsType != null, "Can't evaluate 'in' call target type: %s", rshString);
+			
+			if (typeEquals(rhsType, BcTypeNode.typeDictionary))
+			{			
+				dest.writef(memberCall(rshString, "containsKey", lshString));
+			}
+			else
+			{
+				dest.writef(memberCall(rshString, "contains", lshString));
+			}
+		}
 		else
 		{
 			if (BcNodeHelper.isBinaryOperandSetExpression(node.lhs))
