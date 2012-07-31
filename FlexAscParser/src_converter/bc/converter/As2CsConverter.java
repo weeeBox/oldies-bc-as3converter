@@ -13,6 +13,7 @@ import bc.help.CsCodeHelper;
 import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
+import bc.lang.BcFuncRegister;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcInterfaceDefinitionNode;
@@ -24,10 +25,12 @@ import bc.lang.BcVectorTypeNode;
 public class As2CsConverter extends As2WhateverConverter
 {
 	private ListWriteDestination src;
+	private BcFuncRegister funcRegister;
 	
 	public As2CsConverter()
 	{
 		super(new CsCodeHelper());
+		funcRegister = new BcFuncRegister();
 	}
 	
 	@Override
@@ -202,7 +205,12 @@ public class As2CsConverter extends As2WhateverConverter
 		List<BcFunctionTypeNode> functionTypes = bcClass.getFunctionTypes();
 		for (BcFunctionTypeNode funcType : functionTypes) 
 		{
-			writeFunctionType(bcClass, funcType);
+			String packageName = bcClass.getPackageName();
+			if (funcRegister.isRegistered(packageName, funcType))
+			{
+				writeFunctionType(bcClass, funcType);
+				funcRegister.register(packageName, funcType);
+			}
 		}
 	}
 
