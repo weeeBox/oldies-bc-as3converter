@@ -16,6 +16,7 @@ import bc.lang.BcFuncParam;
 import bc.lang.BcFuncRegister;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
+import bc.lang.BcImportList;
 import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
@@ -374,7 +375,7 @@ public class As2CsConverter extends As2WhateverConverter
 	
 	private CsImportsData getImports(BcClassDefinitionNode bcClass)
 	{
-		CsImportsData importsData = new CsImportsData();
+		CsImportsData importsData = new CsImportsData(bcClass);
 		
 		if (bcClass.hasExtendsType())
 		{
@@ -512,9 +513,11 @@ public class As2CsConverter extends As2WhateverConverter
 	{
 		private List<String> namespaces;
 		private List<BcTypeNode> uniqueTypes;
+		private BcClassDefinitionNode bcClass;
 
-		public CsImportsData()
+		public CsImportsData(BcClassDefinitionNode bcClass)
 		{
+			this.bcClass = bcClass;
 			namespaces = new ArrayList<String>();
 			uniqueTypes = new ArrayList<BcTypeNode>();
 		}
@@ -558,7 +561,21 @@ public class As2CsConverter extends As2WhateverConverter
 					{
 						if (typeName.equals(packageType.getName()) && !typeQualifier.equals(packageType.getQualifier()))
 						{
-							if (!usingTypes.contains(uniqueType))
+							BcTypeNode duplicateType;
+							if ((duplicateType = findDuplicateType(usingTypes, uniqueType.getName())) != null)
+							{
+								BcImportList classImportList = bcClass.getImportList();
+								if (!classImportList.containsType(duplicateType))
+								{
+									usingTypes.remove(duplicateType);
+								}
+								
+								if (classImportList.containsType(uniqueType))
+								{
+									usingTypes.add(uniqueType);
+								}
+							}
+							else
 							{
 								usingTypes.add(uniqueType);
 							}
@@ -567,6 +584,18 @@ public class As2CsConverter extends As2WhateverConverter
 				}
 			}
 			return usingTypes;
+		}
+		
+		private BcTypeNode findDuplicateType(List<BcTypeNode> types, String typeName)
+		{
+			for (BcTypeNode type : types)
+			{
+				if (typeName.equals(type.getName()))
+				{
+					return type;
+				}
+			}
+			return null;
 		}
 	}
 }

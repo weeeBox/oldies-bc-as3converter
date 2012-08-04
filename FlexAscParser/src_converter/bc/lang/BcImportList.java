@@ -46,6 +46,18 @@ public class BcImportList
 		return false;
 	}
 	
+	public boolean containsType(BcTypeNode type)
+	{
+		for (BcImportEntry entry : entriesList)
+		{
+			if (entry.getType().equals(type.getName()) && entry.getQualifier().equals(type.getQualifier()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private static class BcImportEntry
 	{
 		private String type;
