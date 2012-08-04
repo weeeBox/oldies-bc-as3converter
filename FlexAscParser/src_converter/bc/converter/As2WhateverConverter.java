@@ -2391,7 +2391,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				dest.writef(memberCall(rshString, "contains", lshString));
+				dest.writef(memberCall(rshString, "hasOwnProperty", lshString));
 			}
 		}
 		else
