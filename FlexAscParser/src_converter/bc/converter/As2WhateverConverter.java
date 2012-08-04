@@ -142,6 +142,8 @@ public abstract class As2WhateverConverter
 		write(new File(outputDir, "Platform"), BcGlobal.bcPlatformClasses);
 		write(new File(outputDir, "Api"), BcGlobal.bcApiClasses);
 		write(new File(outputDir, "Converted"), BcGlobal.bcClasses);
+		
+		postWrite(outputDir);
 	}
 
 	private List<BcClassDefinitionNode> collect(String... filenames) throws IOException
@@ -710,6 +712,9 @@ public abstract class As2WhateverConverter
 		process(new ArrayList<BcClassDefinitionNode>(BcGlobal.bcPlatformClasses));
 		process(BcGlobal.bcApiClasses);
 		process(BcGlobal.bcClasses);
+		
+		postProcess(BcGlobal.bcPlatformClasses);
+		postProcess(BcGlobal.bcApiClasses);
 		postProcess(BcGlobal.bcClasses);
 	}
 
@@ -2735,6 +2740,10 @@ public abstract class As2WhateverConverter
 	}
 
 	protected abstract void writeClassDefinition(BcClassDefinitionNode bcClass, File outputDir) throws IOException;
+	
+	protected void postWrite(File outputDir) throws IOException
+	{
+	}
 
 	protected void writeBlockOpen(WriteDestination dest)
 	{

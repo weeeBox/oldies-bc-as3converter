@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
@@ -14,6 +17,7 @@ import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFuncRegister;
+import bc.lang.BcFuncRegister.FuncList;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcImportList;
@@ -32,6 +36,23 @@ public class As2CsConverter extends As2WhateverConverter
 	{
 		super(new CsCodeHelper());
 		funcRegister = new BcFuncRegister();
+	}
+	
+	@Override
+	protected void postProcess(BcClassDefinitionNode bcClass)
+	{
+		if (bcClass.hasFunctionTypes())
+		{
+			List<BcFunctionTypeNode> functionTypes = bcClass.getFunctionTypes();
+			for (BcFunctionTypeNode funcType : functionTypes) 
+			{
+				String packageName = bcClass.getPackageName();
+				if (!funcRegister.isRegistered(packageName, funcType))
+				{
+					funcRegister.register(packageName, funcType);
+				}
+			}
+		}
 	}
 	
 	@Override
@@ -135,16 +156,11 @@ public class As2CsConverter extends As2WhateverConverter
 		CsImportsData importsData = getImports(bcClass);
 		
 		writeImports(src, importsData.getNamespaces());
-		writeUsings(src, importsData.getUsingTypes());
+		writeUsings(src, importsData.getUsingTypes(bcClass.getImportList()));
 		writeBlankLine(src);
 		
 		src.writeln("namespace " + getCodeHelper().namespace(bcClass.getPackageName()));
 		writeBlockOpen(src);
-		
-		if (bcClass.hasFunctionTypes())
-		{
-			writeFunctionTypes(bcClass);
-		}
 		
 		if (isInterface)
 		{
@@ -213,21 +229,7 @@ public class As2CsConverter extends As2WhateverConverter
 		writeDestToFile(src, outputFile);
 	}
 
-	private void writeFunctionTypes(BcClassDefinitionNode bcClass) 
-	{
-		List<BcFunctionTypeNode> functionTypes = bcClass.getFunctionTypes();
-		for (BcFunctionTypeNode funcType : functionTypes) 
-		{
-			String packageName = bcClass.getPackageName();
-			if (funcRegister.isRegistered(packageName, funcType))
-			{
-				writeFunctionType(bcClass, funcType);
-				funcRegister.register(packageName, funcType);
-			}
-		}
-	}
-
-	private void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
+	private void writeFunctionType(BcFunctionTypeNode funcType) 
 	{
 		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
 		String name = getCodeHelper().identifier(funcType.getName());			
@@ -373,9 +375,61 @@ public class As2CsConverter extends As2WhateverConverter
 		src.writeln(new ListWriteDestination(lines));
 	}
 	
+	@Override
+	protected void postWrite(File outputDir) throws IOException
+	{
+		Map<String, FuncList> data = funcRegister.data;
+		Set<Entry<String, FuncList>> entries = data.entrySet();
+		for (Entry<String, FuncList> entry : entries)
+		{
+			String packageName = entry.getKey();
+			FuncList funcList = entry.getValue();
+			
+			writeFunctionTypes(outputDir, packageName, funcList);
+		}
+	}
+	
+	private void writeFunctionTypes(File outputDir, String packageName, FuncList funcList) throws IOException
+	{
+		String subPath = packageName.replace(".", "/");
+		
+		File srcFileDir = new File(outputDir, subPath);
+		if (!srcFileDir.exists())
+		{
+			boolean successed = srcFileDir.mkdirs();
+			failConversionUnless(successed, "Can't make output dir: %s", srcFileDir.getAbsolutePath());
+		}
+		
+		File outputFile = new File(srcFileDir, "AsFunctions.cs");
+		
+		src = new ListWriteDestination();		
+		
+		src.writeln("using System;");
+		writeBlankLine(src);
+		
+		CsImportsData importsData = getImports(funcList);
+		
+		writeImports(src, importsData.getNamespaces());
+		// writeUsings(src, importsData.getUsingTypes()); TODO: handle conflicting names
+		writeBlankLine(src);
+		
+		src.writeln("namespace " + getCodeHelper().namespace(packageName));
+		writeBlockOpen(src);
+
+		List<BcFunctionTypeNode> funcTypes = funcList.getTypes();
+		for (BcFunctionTypeNode funcType : funcTypes)
+		{
+			writeFunctionType(funcType);
+		}
+		
+		writeBlockClose(src);
+		
+		writeDestToFile(src, outputFile);
+	}
+	
 	private CsImportsData getImports(BcClassDefinitionNode bcClass)
 	{
-		CsImportsData importsData = new CsImportsData(bcClass);
+		CsImportsData importsData = new CsImportsData();
 		
 		if (bcClass.hasExtendsType())
 		{
@@ -424,6 +478,31 @@ public class As2CsConverter extends As2WhateverConverter
 		return importsData;
 	}
 		
+	private CsImportsData getImports(FuncList funcList)
+	{
+		CsImportsData importsData = new CsImportsData();
+		
+		List<BcFunctionTypeNode> types = funcList.getTypes();
+		for (BcFunctionTypeNode funcType : types)
+		{
+			BcFunctionDeclaration bcFunc = funcType.getFunc();
+			if (bcFunc.hasReturnType())
+			{
+				BcTypeNode returnType = bcFunc.getReturnType();
+				tryAddUniqueNamespace(importsData, returnType);
+			}
+			
+			List<BcFuncParam> params = bcFunc.getParams();
+			for (BcFuncParam param : params)
+			{
+				BcTypeNode type = param.getType();
+				tryAddUniqueNamespace(importsData, type);
+			}
+		}
+		
+		return importsData;
+	}
+	
 	private void tryAddUniqueNamespace(CsImportsData importsData, BcTypeNode type)
 	{
 		if (canBeClass(type))
@@ -513,11 +592,9 @@ public class As2CsConverter extends As2WhateverConverter
 	{
 		private List<String> namespaces;
 		private List<BcTypeNode> uniqueTypes;
-		private BcClassDefinitionNode bcClass;
 
-		public CsImportsData(BcClassDefinitionNode bcClass)
+		public CsImportsData()
 		{
-			this.bcClass = bcClass;
 			namespaces = new ArrayList<String>();
 			uniqueTypes = new ArrayList<BcTypeNode>();
 		}
@@ -546,7 +623,7 @@ public class As2CsConverter extends As2WhateverConverter
 			return namespaces;
 		}
 		
-		public List<BcTypeNode> getUsingTypes()
+		public List<BcTypeNode> getUsingTypes(BcImportList classImportList)
 		{
 			List<BcTypeNode> usingTypes = new ArrayList<BcTypeNode>();
 			for (String namespace : namespaces)
@@ -564,7 +641,6 @@ public class As2CsConverter extends As2WhateverConverter
 							BcTypeNode duplicateType;
 							if ((duplicateType = findDuplicateType(usingTypes, uniqueType.getName())) != null)
 							{
-								BcImportList classImportList = bcClass.getImportList();
 								if (!classImportList.containsType(duplicateType))
 								{
 									usingTypes.remove(duplicateType);

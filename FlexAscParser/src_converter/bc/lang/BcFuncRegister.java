@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class BcFuncRegister
 {
-	private Map<String, FuncList> data;
+	public Map<String, FuncList> data;
 	
 	public BcFuncRegister()
 	{
@@ -37,7 +37,7 @@ public class BcFuncRegister
 		return false;
 	}
 	
-	private static class FuncList
+	public static class FuncList
 	{
 		private List<BcFunctionTypeNode> types;
 		
@@ -62,6 +62,11 @@ public class BcFuncRegister
 			}
 			
 			return false;
+		}
+		
+		public List<BcFunctionTypeNode> getTypes()
+		{
+			return types;
 		}
 	}
 }

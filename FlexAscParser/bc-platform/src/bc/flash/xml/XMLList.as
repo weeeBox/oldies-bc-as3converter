@@ -39,7 +39,7 @@ package bc.flash.xml
 			return mElements;
 		}
 
-		public function attribute(arg : String) : bc.flash.xml.XMLList
+		public function attribute(arg : String) : String
 		{
 			throw new NotImplementedError();
 		}
