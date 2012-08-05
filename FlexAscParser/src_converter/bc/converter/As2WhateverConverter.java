@@ -53,6 +53,7 @@ import macromedia.asc.parser.LiteralObjectNode;
 import macromedia.asc.parser.LiteralRegExpNode;
 import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.LiteralVectorNode;
+import macromedia.asc.parser.LoadRegisterNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.MetaDataNode;
 import macromedia.asc.parser.Node;
@@ -876,6 +877,10 @@ public abstract class As2WhateverConverter
 			process((ArgumentListNode) node);
 		else if (node instanceof FunctionCommonNode)
 			process((FunctionCommonNode) node);
+		else if (node instanceof StoreRegisterNode)
+			process((StoreRegisterNode) node);
+		else if (node instanceof LoadRegisterNode)
+			process((LoadRegisterNode) node);
 		else
 			failConversion("Unsupported node class: %s", node.getClass());
 	}
@@ -918,6 +923,16 @@ public abstract class As2WhateverConverter
 				dest.write(", ");
 			}
 		}
+	}
+	
+	private void process(StoreRegisterNode node)
+	{
+		process(node.expr);
+	}
+	
+	private void process(LoadRegisterNode node)
+	{
+		// do nothing
 	}
 
 	private void process(FunctionCommonNode node)
@@ -1702,6 +1717,25 @@ public abstract class As2WhateverConverter
 				addToDictionary = true;
 			}
 		}
+		else if (node.expr instanceof ListNode)
+		{
+			ListNode listNode = (ListNode) node.expr;
+			if (listNode.items.size() == 2)
+			{
+				if (listNode.items.get(0) instanceof StoreRegisterNode)
+				{
+					// do nothing
+				}
+				else
+				{
+					failConversion("Expected ListNode element");
+				}
+			}
+			else
+			{
+				failConversion("Unexpected ListNode: expr=%s", node.expr.getClass(), exprDest);
+			}
+		}
 		else
 		{
 			failConversion("Unexpected expr node: type=%s expr=%s", node.expr.getClass(), exprDest);
@@ -1934,7 +1968,14 @@ public abstract class As2WhateverConverter
 		else if (node instanceof LiteralArrayNode)
 		{
 			LiteralArrayNode arrayNode = (LiteralArrayNode) node;
-			writeNewLiteralArray(arrayNode.elementlist.items);
+			if (arrayNode.elementlist != null)
+			{
+				writeNewLiteralArray(arrayNode.elementlist.items);
+			}
+			else
+			{
+				dest.writef(construct(type(BcTypeNode.typeArray), ""));
+			}
 		}
 		else if (node instanceof LiteralVectorNode)
 		{
