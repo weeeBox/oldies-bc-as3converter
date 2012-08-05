@@ -1956,6 +1956,15 @@ public abstract class As2WhateverConverter
 
 	private void process(IfStatementNode node)
 	{
+		// TODO: make it right
+		boolean cutWithPreprocessor = BcNodeHelper.isPreprocessorConditionNode(node.condition);
+		
+		if (cutWithPreprocessor)
+		{
+			dest.writeln("// Block of code is cut here");
+		}
+		else
+		{
 			ListWriteDestination condDest = new ListWriteDestination();
 			pushDest(condDest);
 			process(node.condition);
@@ -1981,6 +1990,7 @@ public abstract class As2WhateverConverter
 			{
 				writeEmptyBlock();
 			}
+		}
 
 		if (node.elseactions != null)
 		{
@@ -1988,7 +1998,10 @@ public abstract class As2WhateverConverter
 			pushDest(elseDest);
 			process(node.elseactions);
 			popDest();
+			if (!cutWithPreprocessor)
+			{
 				dest.writeln("else");
+			}
 			dest.writeln(elseDest);
 		}
 	}
