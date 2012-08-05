@@ -355,14 +355,14 @@ public class BcNodeHelper
 		{
 			return null;
 		}
-		GetExpressionNode selector = (GetExpressionNode) memberNode.selector;
-		if (!(selector.expr instanceof IdentifierNode))
-		{
-			return null;
+			GetExpressionNode selector = (GetExpressionNode) memberNode.selector;
+			if (!(selector.expr instanceof IdentifierNode))
+			{
+				return null;
+			}
+			return (IdentifierNode) selector.expr;
 		}
-		return (IdentifierNode) selector.expr;
-	}
-	
+		
 	public static IdentifierNode tryExtractIdentifier(Node node)
 	{
 		if (node instanceof MemberExpressionNode)
@@ -466,6 +466,28 @@ public class BcNodeHelper
 				return true;
 			}
 		}
+		return false;
+	}
+	
+	public static boolean isPreprocessorConditionNode(Node node)
+	{
+		if (node instanceof ListNode)
+		{
+			ObjectList<Node> items = ((ListNode) node).items;
+			if (items.size() == 1 && items.get(0) instanceof MemberExpressionNode)
+			{
+				MemberExpressionNode memberNode = (MemberExpressionNode) items.get(0);
+				if (memberNode.selector instanceof CallExpressionNode)
+				{
+					CallExpressionNode callExp = (CallExpressionNode) memberNode.selector;
+					if (callExp.expr instanceof IdentifierNode)
+					{
+						return ((IdentifierNode) callExp.expr).name.equals("BC_AS3");
+					}
+				}
+			}
+		}
+		
 		return false;
 	}
 }

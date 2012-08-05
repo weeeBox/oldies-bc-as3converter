@@ -103,6 +103,7 @@ import bc.lang.BcMetadataNode;
 import bc.lang.BcModuleDeclarationEntry;
 import bc.lang.BcModuleEntry;
 import bc.lang.BcNullType;
+import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
@@ -1955,31 +1956,31 @@ public abstract class As2WhateverConverter
 
 	private void process(IfStatementNode node)
 	{
-		ListWriteDestination condDest = new ListWriteDestination();
-		pushDest(condDest);
-		process(node.condition);
-		popDest();
-
-		String condString = condDest.toString();
-
-		failConversionUnless(node.condition instanceof ListNode, "'if' statement condition is supposed to be the ListNode: type=%s expr=%s", node.condition.getClass(), condDest);
-		ListNode listNode = (ListNode) node.condition;
-
-		condString = createSafeConditionString(condString, listNode);
-		dest.writelnf("if(%s)", condString);
-
-		if (node.thenactions != null)
-		{
-			ListWriteDestination thenDest = new ListWriteDestination();
-			pushDest(thenDest);
-			process(node.thenactions);
+			ListWriteDestination condDest = new ListWriteDestination();
+			pushDest(condDest);
+			process(node.condition);
 			popDest();
-			dest.writeln(thenDest);
-		}
-		else
-		{
-			writeEmptyBlock();
-		}
+	
+			String condString = condDest.toString();
+	
+			failConversionUnless(node.condition instanceof ListNode, "'if' statement condition is supposed to be the ListNode: type=%s expr=%s", node.condition.getClass(), condDest);
+			ListNode listNode = (ListNode) node.condition;
+	
+			condString = createSafeConditionString(condString, listNode);
+			dest.writelnf("if(%s)", condString);
+	
+			if (node.thenactions != null)
+			{
+				ListWriteDestination thenDest = new ListWriteDestination();
+				pushDest(thenDest);
+				process(node.thenactions);
+				popDest();
+				dest.writeln(thenDest);
+			}
+			else
+			{
+				writeEmptyBlock();
+			}
 
 		if (node.elseactions != null)
 		{
@@ -1987,7 +1988,7 @@ public abstract class As2WhateverConverter
 			pushDest(elseDest);
 			process(node.elseactions);
 			popDest();
-			dest.writeln("else");
+				dest.writeln("else");
 			dest.writeln(elseDest);
 		}
 	}
@@ -3869,6 +3870,9 @@ public abstract class As2WhateverConverter
 	public abstract String toString(Object expr);
 
 	protected abstract String vectorType(BcVectorTypeNode vectorType);
+	protected abstract String restType(BcRestTypeNode type);
+	protected abstract String wildCardType(BcWildcardTypeNode type);
+	
 	public abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);
 	public abstract String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args);
 
@@ -3890,13 +3894,23 @@ public abstract class As2WhateverConverter
 			BcFunctionTypeNode funcType = (BcFunctionTypeNode) bcType;
 			bcType = funcType.isComplete() ? funcType : getDefaultFunctionType();
 		}
-
+		
+		if (bcType instanceof BcRestTypeNode)
+		{
+			return restType((BcRestTypeNode) bcType);
+		}
+		
+		if (bcType instanceof BcWildcardTypeNode)
+		{
+			return wildCardType((BcWildcardTypeNode) bcType);
+		}
+		
 		String typeName = bcType.getName();
 		if (bcType instanceof BcVectorTypeNode)
 		{
 			return vectorType((BcVectorTypeNode) bcType);
 		}
-
+		
 		return type(typeName);
 	}
 

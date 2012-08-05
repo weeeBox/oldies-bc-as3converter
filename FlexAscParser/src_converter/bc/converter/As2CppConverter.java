@@ -20,10 +20,12 @@ import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
+import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
+import bc.lang.BcWildcardTypeNode;
 
 public class As2CppConverter extends As2WhateverConverter
 {
@@ -1102,6 +1104,20 @@ public class As2CppConverter extends As2WhateverConverter
 	protected String vectorType(BcVectorTypeNode vectorType)
 	{
 		return type(vectorType.getName());
+	}
+	
+	@Override
+	protected String restType(BcRestTypeNode type)
+	{
+		failConversion("Implement me");
+		return null;
+	}
+	
+	@Override
+	protected String wildCardType(BcWildcardTypeNode type)
+	{
+		failConversion("Implement me");
+		return null;
 	}
 
 	@Override

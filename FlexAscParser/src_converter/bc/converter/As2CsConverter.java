@@ -22,10 +22,12 @@ import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcImportList;
 import bc.lang.BcInterfaceDefinitionNode;
+import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
+import bc.lang.BcWildcardTypeNode;
 
 public class As2CsConverter extends As2WhateverConverter
 {
@@ -564,6 +566,19 @@ public class As2CsConverter extends As2WhateverConverter
 	{
 		String genericName = type(vectorType.getGeneric());
 		return type(VECTOR_BC_TYPE) + "<" + genericName + ">";
+	}
+	
+	@Override
+	protected String restType(BcRestTypeNode type)
+	{
+		BcTypeNode restType = type.getRestType();
+		return String.format("params %s[]", type(restType));
+	}
+	
+	@Override
+	protected String wildCardType(BcWildcardTypeNode type)
+	{
+		return "Object";
 	}
 	
 	@Override

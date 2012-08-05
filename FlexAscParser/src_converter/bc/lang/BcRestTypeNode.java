@@ -2,16 +2,16 @@ package bc.lang;
 
 public class BcRestTypeNode extends BcTypeNode
 {
-	private BcTypeNode type;
+	private BcTypeNode restType;
 
-	protected BcRestTypeNode(BcTypeNode type)
+	protected BcRestTypeNode(BcTypeNode resType)
 	{
 		super("_AS_REST");
-		this.type = type;
+		this.restType = resType;
 	}
 	
-	public BcTypeNode getType()
+	public BcTypeNode getRestType()
 	{
-		return type;
+		return restType;
 	}
 }
