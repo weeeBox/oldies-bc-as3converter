@@ -12,7 +12,7 @@ package bc.flash
 		public static const NUMERIC : uint = 16;
 		/* public static const length : int = 1; */
 
-		/* public function concat(...args : *) : Array; */
+		public function concat(...args : *) : Array { throw new NotImplementedError(); }
 
 		/* public function every(callback : Function, thisObject : * = null) : Boolean { throw new NotImplementedError(); } */
 
