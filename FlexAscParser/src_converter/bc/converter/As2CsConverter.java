@@ -59,11 +59,13 @@ public class As2CsConverter extends As2WhateverConverter
 	protected void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNodeInstance loopVarTypeInstance, Object collection, BcTypeNodeInstance collectionTypeInstance, Object body)
 	{
 		final String collectionTemp = "__" + loopVarName + "s_";
+		dest.writeBlockOpen();
 		dest.writelnf("%s %s = %s;", type(collectionTypeInstance), collectionTemp, collection);
 		dest.writelnf("if (%s != %s)", collectionTemp, getCodeHelper().literalNull());
 		dest.writeBlockOpen();
 		dest.writelnf("foreach (%s %s in %s)", type(loopVarTypeInstance), loopVarName, collectionTemp);		
 		dest.writeln(body);		
+		dest.writeBlockClose();
 		dest.writeBlockClose();
 	}
 	
