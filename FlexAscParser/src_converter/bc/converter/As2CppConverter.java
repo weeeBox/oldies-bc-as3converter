@@ -214,7 +214,7 @@ public class As2CppConverter extends As2WhateverConverter
 		if (bcClass.isInterface())
 		{
 			hdr.writeln();
-			writeDefine(hdr, defineInterfaceRef, true, className);
+			writeDefine(hdr, true, defineInterfaceRef, className);
 		}
 		
 		hdr.writeln();
@@ -920,10 +920,10 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private void writeDefine(WriteDestination dest, String defineName, Object...args)
 	{
-		writeDefine(dest, defineName, false, args);
+		writeDefine(dest, false, defineName, args);
 	}
 	
-	private void writeDefine(WriteDestination dest, String defineName, boolean addSemicolon, Object...args)
+	private void writeDefine(WriteDestination dest, boolean addSemicolon, String defineName, Object...args)
 	{
 		BcCppDefine define = defines.find(defineName);
 		if (define != null)
