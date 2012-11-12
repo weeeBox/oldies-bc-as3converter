@@ -11,6 +11,9 @@ import bc.help.BcGlobal;
 
 public class BcTypeNode extends BcNode
 {
+	private static final String TYPE_FUNCTION = "Function";
+	private static final String TYPE_GENERIC = "_$_generic_$_";
+	
 	public static final String typeGlobal = "Global";
 	public static final String typeNumber = "Number";
 	public static final String typeObject = "Object";
@@ -59,7 +62,7 @@ public class BcTypeNode extends BcNode
 			
 			if (node == null)
 			{			
-				node = name.equals("Function") ? new BcFunctionTypeNode() : new BcTypeNode(typeName);
+				node = createTypeNode(typeName, name);
 				System.out.println("Add type: " + typeName.getQualifiedName());
 				if (registerType)
 				{
@@ -68,6 +71,19 @@ public class BcTypeNode extends BcNode
 			}
 		}
 		return node;
+	}
+
+	private static BcTypeNode createTypeNode(BcTypeName typeName, String name) 
+	{
+		if (name.equals(TYPE_FUNCTION)) {
+			return new BcFunctionTypeNode();
+		}
+		
+		if (name.equals(TYPE_GENERIC)) {
+			return new BcGenericTypeNode(typeName);
+		}
+		
+		return new BcTypeNode(typeName);
 	}
 	
 	private static BcTypeNode findByName(String name)
@@ -176,11 +192,11 @@ public class BcTypeNode extends BcNode
 		integral = BcCodeHelper.isIntegralType(typeName.getName());
 	}
 	
-	public BcTypeNode createGeneric(BcTypeNode genericType)
+	public BcTypeNode createGeneric(BcTypeNodeInstance typeInstance)
 	{
 		if (getName().equals(typeVector))
 		{
-			BcVectorTypeNode vectorType = new BcVectorTypeNode(getTypeName(), genericType);
+			BcVectorTypeNode vectorType = new BcVectorTypeNode(getTypeName(), typeInstance);
 			vectorType.setClassNode(getClassNode());
 			return vectorType;
 		}

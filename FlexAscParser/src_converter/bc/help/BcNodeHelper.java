@@ -247,10 +247,12 @@ public class BcNodeHelper
 			ListNode typeArgs = selector.typeArgs;
 			assert typeArgs.size() == 1;
 			
-			BcTypeNode genericType = extractBcType(typeArgs.items.get(0));
+			Node genericNode = typeArgs.items.get(0);
+			BcTypeNode genericType = extractBcType(genericNode);
 			assert genericType != null;
 			
-			return baseType.createGeneric(genericType);
+			boolean qualified = isTypeQualified(genericNode);
+			return baseType.createGeneric(genericType.createTypeInstance(qualified));
 		}
 		
 		if (type instanceof TypedIdentifierNode)

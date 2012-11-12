@@ -43,6 +43,11 @@ public class BcVariableDeclaration extends BcDeclaration
 		return typeInstance;
 	}
 	
+	public void setTypeInstance(BcTypeNodeInstance typeInstance) 
+	{
+		this.typeInstance = typeInstance;
+	}
+	
 	public String getIdentifier()
 	{
 		return identifier;

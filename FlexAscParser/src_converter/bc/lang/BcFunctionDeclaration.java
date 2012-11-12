@@ -251,6 +251,27 @@ public class BcFunctionDeclaration extends BcDeclaration
 		return body;
 	}
 	
+	public BcFunctionDeclaration clone() 
+	{
+		BcFunctionDeclaration func = new BcFunctionDeclaration(name);
+		
+		func.params = params;
+		func.returnTypeInstance = returnTypeInstance;
+		func.name = name;
+		func.isConstructor = isConstructor;
+		func.isOverridenConstructor = isOverridenConstructor;
+		func.defaultParamsCount = defaultParamsCount;
+		func.owner = owner;
+		func.declaredVars = declaredVars;
+		func.body = body;
+		func.type = type;
+		func.kind = kind;
+		func.statements = statements;
+		func.isSelector = isSelector;
+		
+		return func;
+	}
+	
 	public BcFunctionDeclaration createOverridenWithNumDefParams(int numParams)
 	{
 		BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);

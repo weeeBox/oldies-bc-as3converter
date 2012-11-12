@@ -97,6 +97,7 @@ import bc.lang.BcDeclaration;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
+import bc.lang.BcGenericTypeNode;
 import bc.lang.BcImportList;
 import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcMetadata;
@@ -2663,6 +2664,11 @@ public abstract class As2WhateverConverter
 		{
 			return findClass(BcTypeNode.typeObject);
 		}
+		
+		if (type instanceof BcGenericTypeNode)
+		{
+			return findClass(BcTypeNode.typeObject);
+		}
 
 		return findClass(type.getTypeName());
 	}
@@ -3568,7 +3574,8 @@ public abstract class As2WhateverConverter
 		{
 			BcVectorTypeNode vectorType = (BcVectorTypeNode) bcType;
 
-			BcClassDefinitionNode vectorGenericClass = findClass(BcTypeNode.typeVector).clone();
+			BcClassDefinitionNode vectorClass = findClass(BcTypeNode.typeVector);
+			BcClassDefinitionNode vectorGenericClass = vectorType.createGenericClass(vectorClass);
 			vectorGenericClass.setClassType(bcType);
 
 			vectorType.setClassNode(vectorGenericClass);

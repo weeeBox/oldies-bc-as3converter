@@ -245,6 +245,10 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return result;
 	}
 	
+	public void setFunctions(List<BcFunctionDeclaration> functions) 
+	{
+		this.functions = functions;
+	}
 	
 	public List<BcFunctionDeclaration> getConstructors()
 	{
@@ -402,7 +406,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return true;
 	}
 
-	public BcClassDefinitionNode clone()
+	public BcClassDefinitionNode clone(BcTypeNode classType)
 	{
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.extendsType = extendsType;

@@ -30,7 +30,7 @@ package bc.flash
 
 		/* public function map(callback : Function, thisObject : Object = null) : Vector { throw new NotImplementedError(); } */
 
-		public function pop() : Object { throw new NotImplementedError(); }
+		public function pop() : _$_generic_$_ { throw new NotImplementedError(); }
 
 		public function push(arg : Object) : uint { throw new NotImplementedError(); }
 
