@@ -32,7 +32,7 @@ package bc.flash
 
 		public function pop() : _$_generic_$_ { throw new NotImplementedError(); }
 
-		public function push(arg : Object) : uint { throw new NotImplementedError(); }
+		public function push(... arg) : uint { throw new NotImplementedError(); }
 
 		public function reverse() : Vector { throw new NotImplementedError(); }
 

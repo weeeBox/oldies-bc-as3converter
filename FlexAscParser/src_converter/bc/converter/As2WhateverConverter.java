@@ -1506,7 +1506,8 @@ public abstract class As2WhateverConverter
 				List<BcFuncParam> params = calledFunction.getParams();
 				ObjectList<Node> args = node.args.items;
 
-				failConversionUnless(params.size() >= args.size(), "Function args and params count doesn't match: %d >= %d. Function: %s", params.size(), args.size(), calledFunction);
+				boolean hasRestParams = calledFunction.hasRestParams();
+				failConversionUnless(hasRestParams || params.size() >= args.size() , "Function args and params count doesn't match: %d >= %d. Function: %s", params.size(), args.size(), calledFunction);
 
 				int argIndex = 0;
 				for (Node arg : args)
@@ -1519,7 +1520,9 @@ public abstract class As2WhateverConverter
 					BcTypeNode argType = evaluateType(arg);
 					failConversionUnless(argType != null, "Unable to evaluate args's type: %s", argDest);
 
-					BcTypeNode paramType = params.get(argIndex++).getType();
+					BcTypeNode paramType = argIndex >= params.size() && hasRestParams ? 
+							BcTypeNode.create(BcTypeNode.typeObject) : 
+							params.get(argIndex).getType();
 
 					if (needExplicitCast(argType, paramType))
 					{
@@ -1529,6 +1532,8 @@ public abstract class As2WhateverConverter
 					{
 						argsList.add(argDest);
 					}
+					
+					++argIndex;
 				}
 
 				if (calledFunction.getName().equals("hasOwnProperty") && argsList.size() == 1)
@@ -2366,17 +2371,21 @@ public abstract class As2WhateverConverter
 
 	private void process(FinallyClauseNode node)
 	{
-		failConversion("'finally' statement is not supported yet. Sorry");
+		dest.write("finally");
+		process(node.statements);
 	}
 
 	private void process(ThrowStatementNode node)
 	{
-		ListWriteDestination throwDest = new ListWriteDestination();
-		pushDest(throwDest);
-		process(node.expr);
-		popDest();
-
-		dest.writelnf("%s;", throwStatment(throwDest));
+		if (node.expr != null)
+		{
+			ListWriteDestination throwDest = new ListWriteDestination();
+			pushDest(throwDest);
+			process(node.expr);
+			popDest();
+	
+			dest.writelnf("%s;", throwStatment(throwDest));
+		}
 	}
 
 	private void process(BinaryExpressionNode node)
@@ -3256,8 +3265,14 @@ public abstract class As2WhateverConverter
 		if (node instanceof BinaryExpressionNode)
 		{
 			BinaryExpressionNode binaryNode = (BinaryExpressionNode) node;
-			BcTypeNode lhsType = evaluateType(binaryNode.lhs);
-			BcTypeNode rhsType = evaluateType(binaryNode.rhs);
+			
+			boolean returnFuncType = binaryNode.op == Tokens.LOGICALAND_TOKEN || 
+					binaryNode.op == Tokens.LOGICALOR_TOKEN || 
+					binaryNode.op == Tokens.EQUALS_TOKEN ||
+					binaryNode.op == Tokens.NOTEQUALS_TOKEN;
+			
+			BcTypeNode lhsType = evaluateType(binaryNode.lhs, returnFuncType);
+			BcTypeNode rhsType = evaluateType(binaryNode.rhs, returnFuncType);
 
 			if (binaryNode.op == Tokens.LOGICALAND_TOKEN || 
 				binaryNode.op == Tokens.LOGICALOR_TOKEN || 

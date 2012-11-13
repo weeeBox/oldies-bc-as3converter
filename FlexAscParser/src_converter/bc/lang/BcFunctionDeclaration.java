@@ -246,6 +246,12 @@ public class BcFunctionDeclaration extends BcDeclaration
 		return params;
 	}
 	
+	public boolean hasRestParams()
+	{
+		int paramsCount = params.size();
+		return paramsCount > 0 && params.get(paramsCount - 1).getType() instanceof BcRestTypeNode;
+	}
+	
 	public ListWriteDestination getBody()
 	{
 		return body;

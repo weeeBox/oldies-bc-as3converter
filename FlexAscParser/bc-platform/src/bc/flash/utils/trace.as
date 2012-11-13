@@ -5,7 +5,7 @@ package bc.flash.utils
 	/**
 	 * @author weee
 	 */
-	public function trace(str : String) : void
+	public function trace(... arguments) : void
 	{
 		throw new NotImplementedError();
 	}
