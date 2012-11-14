@@ -2012,7 +2012,7 @@ public abstract class As2WhateverConverter
 		
 		if (cutWithPreprocessor)
 		{
-			dest.writeln("// FIXME: Block of code is cut here");
+			dest.writeln("NOT.IMPLEMENTED();");
 		}
 		else
 		{
