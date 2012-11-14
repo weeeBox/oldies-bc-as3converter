@@ -11,7 +11,9 @@ import java.util.Set;
 
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
+import bc.error.ConverterException;
 import bc.help.BcCodeHelper;
+import bc.help.BcGlobal;
 import bc.help.CsCodeHelper;
 import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
@@ -389,7 +391,14 @@ public class As2CsConverter extends As2WhateverConverter
 			String packageName = entry.getKey();
 			FuncList funcList = entry.getValue();
 			
-			writeFunctionTypes(outputDir, packageName, funcList);
+			// we need to write function to one of sections, not just in the source root
+			String sectionName = findSectionName(packageName);
+			if (sectionName == null)
+			{
+				throw new ConverterException("Unable to detect package section name: " + packageName);
+			}
+			
+			writeFunctionTypes(new File(outputDir, sectionName), packageName, funcList);
 		}
 	}
 	
@@ -690,5 +699,38 @@ public class As2CsConverter extends As2WhateverConverter
 			}
 			return null;
 		}
+	}
+	
+	private String findSectionName(String packageName)
+	{
+		if (containsPackage(BcGlobal.bcClasses, packageName))
+		{
+			return SECTION_CONVERTED;
+		}
+
+		if (containsPackage(BcGlobal.bcApiClasses, packageName))
+		{
+			return SECTION_API;
+		}
+
+		if (containsPackage(BcGlobal.bcPlatformClasses, packageName))
+		{
+			return SECTION_PLATFORM;
+		}
+		
+		return null;
+	}
+	
+	private boolean containsPackage(List<BcClassDefinitionNode> classes, String packageName)
+	{
+		for (BcClassDefinitionNode bcClass : classes) 
+		{
+			if (packageName.equals(bcClass.getPackageName()))
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

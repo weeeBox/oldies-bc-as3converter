@@ -115,6 +115,10 @@ import bc.lang.BcWildcardTypeNode;
 
 public abstract class As2WhateverConverter
 {
+	protected static final String SECTION_PLATFORM = "Platform";
+	protected static final String SECTION_API = "Api";
+	protected static final String SECTION_CONVERTED = "Converted";
+	
 	private WriteDestination dest;
 	private Stack<WriteDestination> destStack;
 
@@ -142,9 +146,9 @@ public abstract class As2WhateverConverter
 
 		process();
 
-		write(new File(outputDir, "Platform"), BcGlobal.bcPlatformClasses);
-		write(new File(outputDir, "Api"), BcGlobal.bcApiClasses);
-		write(new File(outputDir, "Converted"), BcGlobal.bcClasses);
+		write(new File(outputDir, SECTION_PLATFORM), BcGlobal.bcPlatformClasses);
+		write(new File(outputDir, SECTION_API), BcGlobal.bcApiClasses);
+		write(new File(outputDir, SECTION_CONVERTED), BcGlobal.bcClasses);
 		
 		postWrite(outputDir);
 	}
@@ -2008,7 +2012,7 @@ public abstract class As2WhateverConverter
 		
 		if (cutWithPreprocessor)
 		{
-			dest.writeln("// Block of code is cut here");
+			dest.writeln("// FIXME: Block of code is cut here");
 		}
 		else
 		{
