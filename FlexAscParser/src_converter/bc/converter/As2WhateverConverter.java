@@ -1,13 +1,10 @@
 package bc.converter;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1249,7 +1246,8 @@ public abstract class As2WhateverConverter
 						}
 						else
 						{
-							BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
+							int argsCount = argsCount(node);
+							BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier, argsCount); // check if it's a function type
 							if (bcFunction != null)
 							{
 								System.err.println("Warning! Function type: " + identifier);
@@ -1344,7 +1342,7 @@ public abstract class As2WhateverConverter
 			return bcVar.getType();
 		}
 
-		BcFunctionDeclaration bcFunc = findFunction(name);
+		BcFunctionDeclaration bcFunc = findFunction(name, -1); // FIXME: pass args count
 		if (bcFunc != null)
 		{
 			return bcFunc.getReturnType();
@@ -1398,7 +1396,8 @@ public abstract class As2WhateverConverter
 			{
 				if (!(identifier.equals(BcCodeHelper.thisCallMarker) && identifier.equals(BcCodeHelper.thisCallMarker)))
 				{
-					BcFunctionDeclaration bcFunc = findFunction(identifier);
+					int argsCount = argsCount(node);
+					BcFunctionDeclaration bcFunc = findFunction(identifier, argsCount);
 					if (bcFunc != null)
 					{
 						calledFunction = bcFunc;
@@ -1460,7 +1459,8 @@ public abstract class As2WhateverConverter
 				BcClassDefinitionNode bcClass = lastBcMemberType.getClassNode();
 				failConversionUnless(bcClass != null, "Class type is undefined: " + exprDest);
 
-				BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier);
+				int argsCount = argsCount(node);
+				BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier, argsCount);
 				if (bcFunc != null)
 				{
 					calledFunction = bcFunc;
@@ -1695,7 +1695,8 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{
-					BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
+					int argsCount = argsCount(node);
+					BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier, argsCount); // check if it's a function type
 					if (bcFunction != null)
 					{
 						System.err.println("Warning! Function type: " + identifier);
@@ -2981,14 +2982,14 @@ public abstract class As2WhateverConverter
 	// /////////////////////////////////////////////////////////////
 	// Helpers
 
-	private BcFunctionDeclaration findFunction(String name)
+	private BcFunctionDeclaration findFunction(String name, int argsCount)
 	{
-		return findFunction(BcGlobal.lastBcClass, name);
+		return findFunction(BcGlobal.lastBcClass, name, argsCount);
 	}
 
-	private BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name)
+	private BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int argsCount)
 	{
-		BcFunctionDeclaration classFunc = bcClass.findFunction(name);
+		BcFunctionDeclaration classFunc = bcClass.findFunction(name, argsCount);
 		if (classFunc != null)
 		{
 			return classFunc;
@@ -3487,8 +3488,8 @@ public abstract class As2WhateverConverter
 			if (selector.expr instanceof IdentifierNode)
 			{
 				IdentifierNode identifier = (IdentifierNode) selector.expr;
-				boolean get = selector instanceof GetExpressionNode;
-				BcTypeNode identifierType = findIdentifierType(baseClass, identifier, hasCallTarget, get);
+				int argsCount = argsCount(selector);
+				BcTypeNode identifierType = findIdentifierType(baseClass, identifier, hasCallTarget, argsCount);
 				if (identifierType != null)
 				{
 					return identifierType;
@@ -3549,7 +3550,7 @@ public abstract class As2WhateverConverter
 		return BcGlobal.bcMetadataMap.get(node);
 	}
 
-	private BcTypeNode findIdentifierType(BcClassDefinitionNode baseClass, IdentifierNode identifier, boolean hasCallTarget, boolean isGet)
+	private BcTypeNode findIdentifierType(BcClassDefinitionNode baseClass, IdentifierNode identifier, boolean hasCallTarget, int argsCount)
 	{
 		if (identifier.isAttr())
 		{
@@ -3580,7 +3581,7 @@ public abstract class As2WhateverConverter
 			if (bcVar != null) return bcVar.getType();
 		}
 		// search for function
-		BcFunctionDeclaration bcFunc = isGet ? baseClass.findGetterFunction(name) : baseClass.findFunction(name);
+		BcFunctionDeclaration bcFunc = baseClass.findFunction(name, argsCount);
 		if (bcFunc != null || (bcFunc = findGlobalFunction(name)) != null)
 		{
 			return new BcFunctionTypeNode(bcFunc);
@@ -3828,6 +3829,43 @@ public abstract class As2WhateverConverter
 		}
 
 		return null;
+	}
+	
+	private int argsCount(SelectorNode selector) 
+	{
+		if (selector instanceof GetExpressionNode)
+		{
+			return 0;
+		}
+
+		if (selector instanceof CallExpressionNode)
+		{
+			CallExpressionNode call = (CallExpressionNode) selector;
+			ArgumentListNode args = call.args;
+			if (args == null)
+			{
+				return 0;
+			}
+			return args.items.size();
+		}
+		
+		if (selector instanceof SetExpressionNode)
+		{
+			SetExpressionNode set = (SetExpressionNode) selector;
+			if (set.args == null)
+			{
+				return 0;
+			}
+			return set.args.items.size();
+		}
+		
+		if (selector instanceof ApplyTypeExprNode)
+		{
+			return -1;
+		}
+		
+		assert false;
+		return -1;
 	}
 
 	private boolean canBeClass(String name)

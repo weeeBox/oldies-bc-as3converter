@@ -246,6 +246,11 @@ public class BcFunctionDeclaration extends BcDeclaration
 		return params;
 	}
 	
+	public int paramsCount()
+	{
+		return params != null ? params.size() : 0;
+	}
+	
 	public boolean hasRestParams()
 	{
 		int paramsCount = params.size();
