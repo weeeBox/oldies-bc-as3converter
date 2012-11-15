@@ -1247,7 +1247,7 @@ public abstract class As2WhateverConverter
 						else
 						{
 							int argsCount = argsCount(node);
-							BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier, argsCount); // check if it's a function type
+							BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier, -1); // check if it's a function type
 							if (bcFunction != null)
 							{
 								System.err.println("Warning! Function type: " + identifier);
@@ -3582,7 +3582,9 @@ public abstract class As2WhateverConverter
 		}
 		// search for function
 		BcFunctionDeclaration bcFunc = baseClass.findFunction(name, argsCount);
-		if (bcFunc != null || (bcFunc = findGlobalFunction(name)) != null)
+		if (bcFunc != null || 
+		   (argsCount != -1 && (bcFunc = baseClass.findFunction(name, -1)) != null) || 
+		   (bcFunc = findGlobalFunction(name)) != null)
 		{
 			return new BcFunctionTypeNode(bcFunc);
 		}
