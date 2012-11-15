@@ -1,11 +1,16 @@
 package bc.converter;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -112,6 +117,8 @@ import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 import bc.lang.BcWildcardTypeNode;
+import bc.preprocessor.Preprocessor;
+import bc.preprocessor.PreprocessorException;
 
 public abstract class As2WhateverConverter
 {
@@ -211,7 +218,8 @@ public abstract class As2WhateverConverter
 	{
 		ContextStatics statics = new ContextStatics();
 		Context cx = new Context(statics);
-		FileInputStream in = new FileInputStream(file);
+		
+		InputStream in = preprocess(file);
 		Parser parser = new Parser(cx, in, file.getAbsolutePath());
 
 		ProgramNode programNode = parser.parseProgram();
@@ -3479,7 +3487,8 @@ public abstract class As2WhateverConverter
 			if (selector.expr instanceof IdentifierNode)
 			{
 				IdentifierNode identifier = (IdentifierNode) selector.expr;
-				BcTypeNode identifierType = findIdentifierType(baseClass, identifier, hasCallTarget);
+				boolean get = selector instanceof GetExpressionNode;
+				BcTypeNode identifierType = findIdentifierType(baseClass, identifier, hasCallTarget, get);
 				if (identifierType != null)
 				{
 					return identifierType;
@@ -3540,7 +3549,7 @@ public abstract class As2WhateverConverter
 		return BcGlobal.bcMetadataMap.get(node);
 	}
 
-	private BcTypeNode findIdentifierType(BcClassDefinitionNode baseClass, IdentifierNode identifier, boolean hasCallTarget)
+	private BcTypeNode findIdentifierType(BcClassDefinitionNode baseClass, IdentifierNode identifier, boolean hasCallTarget, boolean isGet)
 	{
 		if (identifier.isAttr())
 		{
@@ -3571,7 +3580,7 @@ public abstract class As2WhateverConverter
 			if (bcVar != null) return bcVar.getType();
 		}
 		// search for function
-		BcFunctionDeclaration bcFunc = baseClass.findFunction(name);
+		BcFunctionDeclaration bcFunc = isGet ? baseClass.findGetterFunction(name) : baseClass.findFunction(name);
 		if (bcFunc != null || (bcFunc = findGlobalFunction(name)) != null)
 		{
 			return new BcFunctionTypeNode(bcFunc);
@@ -4175,5 +4184,29 @@ public abstract class As2WhateverConverter
 			String fullErrorMessage = String.format("Conversion failed:\n\treason: %s\n\tclass: %s\n\tfunction: %s", message, className, functionName);
 			throw new ConverterException(fullErrorMessage);
 		}
+	}
+	
+	private InputStream preprocess(File file) throws IOException 
+	{
+		try {
+			List<String> lines = readFile(file);
+			List<String> preprocessedLines = new Preprocessor().process(lines);
+			return toInputStream(preprocessedLines);
+		} catch (PreprocessorException e) {
+			throw new IOException(e.getMessage());
+		}
+	}
+
+	private InputStream toInputStream(List<String> lines)
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		PrintStream out = new PrintStream(bos);
+		for (String line : lines) 
+		{
+			out.println(line);
+		}
+		out.close();
+		byte[] byteArray = bos.toByteArray();
+		return new ByteArrayInputStream(byteArray);
 	}
 }
