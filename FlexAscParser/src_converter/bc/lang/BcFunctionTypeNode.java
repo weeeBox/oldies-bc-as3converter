@@ -43,6 +43,16 @@ public class BcFunctionTypeNode extends BcTypeNode
 		return func != null;
 	}
 	
+	public boolean isGetter()
+	{
+		return func != null && func.isGetter();
+	}
+	
+	public boolean isSetter()
+	{
+		return func != null && func.isSetter();
+	}
+	
 	public BcFunctionDeclaration getFunc()
 	{
 		return func;

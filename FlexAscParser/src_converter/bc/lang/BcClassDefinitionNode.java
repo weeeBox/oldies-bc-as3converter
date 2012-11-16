@@ -335,7 +335,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			if (bcFunc.getName().equals(name) && (paramsCount == -1 || bcFunc.paramsCount() == paramsCount))
+			if (bcFunc.getName().equals(name) && (paramsCount == -1 || bcFunc.paramsCount() == paramsCount || bcFunc.hasRestParams()))
 			{
 				if (bcFunc.isConstructor())
 				{

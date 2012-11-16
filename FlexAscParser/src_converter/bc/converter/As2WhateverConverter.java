@@ -998,10 +998,22 @@ public abstract class As2WhateverConverter
 			process(base);
 			popDest();
 			
-			lastBcMemberType = evaluateType(base);
+			// handle function type variables
+			boolean needFuncType = base instanceof MemberExpressionNode && 
+								   ((MemberExpressionNode)base).selector instanceof GetExpressionNode;
+			
+			baseType = evaluateType(base, needFuncType);
+			if (baseType instanceof BcFunctionTypeNode)
+			{
+				BcFunctionTypeNode funcType = (BcFunctionTypeNode) baseType;
+				if (funcType.isGetter()) 
+				{
+					baseType = funcType.getReturnType();
+				}
+			}
+			
+			lastBcMemberType = baseType;
 			failConversionUnless(lastBcMemberType != null, "Unable to evaluate expression: %s", baseExpr);
-
-			baseType = lastBcMemberType;
 
 			IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier(base);
 			if (identifierNode != null && canBeClass(identifierNode.name)) // is call?
@@ -1389,6 +1401,7 @@ public abstract class As2WhateverConverter
 
 		boolean isCast = false;
 		boolean isGlobalCalled = false;
+		boolean isFunctionApplyCall = false;
 
 		if (node.expr instanceof IdentifierNode)
 		{
@@ -1454,6 +1467,20 @@ public abstract class As2WhateverConverter
 					}
 				}
 			}
+			else if (lastBcMemberType instanceof BcFunctionTypeNode)
+			{
+				BcFunctionTypeNode funcType = (BcFunctionTypeNode) lastBcMemberType;
+				if (identifier.equals("apply"))
+				{
+					failConversionUnless(funcType.isComplete(), "Can't call incomplete function: %s", funcType);
+					calledFunction = funcType.getFunc();
+					isFunctionApplyCall = true;
+				}
+				else
+				{
+					assert false;
+				}
+			}
 			else
 			{
 				BcClassDefinitionNode bcClass = lastBcMemberType.getClassNode();
@@ -1511,51 +1538,36 @@ public abstract class As2WhateverConverter
 		BcArgumentsList argsList;
 		if (node.args != null)
 		{
-			if (calledFunction != null && !isCast)
+			if (isFunctionApplyCall)
 			{
-				argsList = new BcArgumentsList(node.args.size());
-
-				List<BcFuncParam> params = calledFunction.getParams();
 				ObjectList<Node> args = node.args.items;
-
-				boolean hasRestParams = calledFunction.hasRestParams();
-				failConversionUnless(hasRestParams || params.size() >= args.size() , "Function args and params count doesn't match: %d >= %d. Function: %s", params.size(), args.size(), calledFunction);
-
-				int argIndex = 0;
-				for (Node arg : args)
+				failConversionUnless(args.size() == 2, "Unexpected args list: %s", args);
+				
+				BcTypeNode firstArgType = evaluateType(args.get(0));
+				failConversionUnless(firstArgType != null, "Can't evaluate first arg of 'apply' call: %s", firstArgType);
+				boolean thisCall = firstArgType instanceof BcNullType;
+				
+				failConversionUnless(thisCall, "Only 'this' calls are supported for 'apply': %s", calledFunction);
+				
+				BcTypeNode secondArgType = evaluateType(args.get(1));
+				failConversionUnless(typeEquals(secondArgType, BcTypeNode.typeArray), "Unexpected second arg type for 'apply' call: %s", secondArgType);
+				
+				WriteDestination argDest = new ListWriteDestination();
+				pushDest(argDest);
+				process(args.get(1));
+				popDest();
+				
+				int paramsCount = calledFunction.paramsCount();
+				argsList = new BcArgumentsList(paramsCount);
+				for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
 				{
-					WriteDestination argDest = new ListWriteDestination();
-					pushDest(argDest);
-					process(arg);
-					popDest();
-
-					BcTypeNode argType = evaluateType(arg);
-					failConversionUnless(argType != null, "Unable to evaluate args's type: %s", argDest);
-
-					BcTypeNode paramType = argIndex >= params.size() && hasRestParams ? 
-							BcTypeNode.create(BcTypeNode.typeObject) : 
-							params.get(argIndex).getType();
-
-					if (needExplicitCast(argType, paramType))
-					{
-						argsList.add(cast(argDest, argType, paramType));
-					}
-					else
-					{
-						argsList.add(argDest);
-					}
-					
-					++argIndex;
+					argsList.add(argDest + indexerGetter(argIndex));
 				}
-
-				if (calledFunction.getName().equals("hasOwnProperty") && argsList.size() == 1)
-				{
-					String argString = argsList.get(0).toString();
-					if (argString.startsWith("\"@"))
-					{
-						argsList.set(0, getCodeHelper().literalString(argString.substring(2, argString.length() - 1)));
-					}
-				}
+				
+			}
+			else if (calledFunction != null && !isCast)
+			{
+				argsList = createArgsList(calledFunction, node.args.items);
 			}
 			else
 			{
@@ -3813,6 +3825,52 @@ public abstract class As2WhateverConverter
 		}
 
 		return type;
+	}
+	
+	private BcArgumentsList createArgsList(BcFunctionDeclaration function, ObjectList<Node> args) 
+	{
+		BcArgumentsList argsList = new BcArgumentsList(args.size());
+		
+		boolean hasRestParams = function.hasRestParams();
+		List<BcFuncParam> params = function.getParams();
+		failConversionUnless(hasRestParams || params.size() >= args.size() , "Function args and params count doesn't match: %d >= %d. Function: %s", params.size(), args.size(), function);
+
+		int argIndex = 0;
+		for (Node arg : args)
+		{
+			WriteDestination argDest = new ListWriteDestination();
+			pushDest(argDest);
+			process(arg);
+			popDest();
+
+			BcTypeNode argType = evaluateType(arg);
+			failConversionUnless(argType != null, "Unable to evaluate args's type: %s", argDest);
+
+			BcTypeNode paramType = argIndex >= params.size() && hasRestParams ? 
+					BcTypeNode.create(BcTypeNode.typeObject) : 
+					params.get(argIndex).getType();
+
+			if (needExplicitCast(argType, paramType))
+			{
+				argsList.add(cast(argDest, argType, paramType));
+			}
+			else
+			{
+				argsList.add(argDest);
+			}
+			
+			++argIndex;
+		}
+
+		if (function.getName().equals("hasOwnProperty") && argsList.size() == 1)
+		{
+			String argString = argsList.get(0).toString();
+			if (argString.startsWith("\"@"))
+			{
+				argsList.set(0, getCodeHelper().literalString(argString.substring(2, argString.length() - 1)));
+			}
+		}
+		return argsList;
 	}
 
 	private String tryFindPackage(String typeName)
