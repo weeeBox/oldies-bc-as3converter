@@ -55,6 +55,7 @@ import macromedia.asc.parser.LiteralObjectNode;
 import macromedia.asc.parser.LiteralRegExpNode;
 import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.LiteralVectorNode;
+import macromedia.asc.parser.LiteralXMLNode;
 import macromedia.asc.parser.LoadRegisterNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.MetaDataNode;
@@ -113,6 +114,7 @@ import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
+import bc.lang.BcUndefinedType;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 import bc.lang.BcWildcardTypeNode;
@@ -841,7 +843,8 @@ public abstract class As2WhateverConverter
 				node instanceof LiteralStringNode ||
 				node instanceof LiteralRegExpNode ||
 				node instanceof LiteralArrayNode ||
-				node instanceof LiteralVectorNode)
+				node instanceof LiteralVectorNode ||
+				node instanceof LiteralXMLNode)
 			processLiteral(node);
 		else if (node instanceof BinaryExpressionNode)
 			process((BinaryExpressionNode) node);
@@ -1305,14 +1308,18 @@ public abstract class As2WhateverConverter
 									System.err.println("Warning! Dynamic XMLList: " + identifier);
 								}
 							}
+							if (identifier.equals("arguments"))
+							{
+								lastBcMemberType = BcArgumentsType.instance();
+							}
+							else if (identifier.equals("undefined"))
+							{
+								lastBcMemberType = BcUndefinedType.instance();
+							}
 							else
 							{
 								IdentifierNode identifierNode = (IdentifierNode) node.expr;
-								if (identifierNode.name.equals("arguments"))
-								{
-									lastBcMemberType = BcArgumentsType.instance();
-								}
-								else if (!identifierNode.isAttr())
+								if (!identifierNode.isAttr())
 								{
 									failConversionUnless(lastBcMemberType != null, "Identifier not recognized: '%s'", identifier);
 									
@@ -2051,9 +2058,13 @@ public abstract class As2WhateverConverter
 		{
 			writeLiteralObject((LiteralObjectNode)node);
 		}
+		else if (node instanceof LiteralXMLNode)
+		{
+			writeLiteralXML((LiteralXMLNode)node);
+		}
 		else
 		{
-			failConversion("Unexpected literal node: %d", node.getClass());
+			failConversion("Unexpected literal node: %s", node.getClass());
 		}
 	}
 
@@ -3461,6 +3472,11 @@ public abstract class As2WhateverConverter
 		{
 			return createBcType(BcTypeNode.typeObject);
 		}
+		
+		if (node instanceof LiteralXMLNode)
+		{
+			return createBcType(BcTypeNode.typeXML);
+		}
 
 		failConversion("Unable to evaluate node's type: %s", node.getClass());
 		return null;
@@ -3803,6 +3819,12 @@ public abstract class As2WhateverConverter
 		}
 		
 		dest.write(staticCall(type(BcTypeNode.typeObject), "createLiteralObject", args));		
+	}
+	
+	private void writeLiteralXML(LiteralXMLNode node) 
+	{
+		String text = codeHelper.literalString(((LiteralStringNode)node.list.items.get(0)).value);
+		dest.write(construct(BcTypeNode.typeXML, text));
 	}
 
 	protected boolean classEquals(BcClassDefinitionNode classNode, String name)

@@ -71,7 +71,7 @@ public abstract class BcCodeHelper
 	
 	public String literalString(String value)
 	{
-		return String.format("\"%s\"", BcStringUtils.replaceEscapes(value));
+		return BcStringUtils.parentesis(value);
 	}
 	
 	public String isNull(Object value)

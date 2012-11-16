@@ -44,6 +44,16 @@ public class CsCodeHelper extends BcCodeHelper
 	}
 	
 	@Override
+	public String literalString(String value) 
+	{
+		if (BcStringUtils.needsEscaped(value))
+		{
+			return "@\"" + value + '"';
+		}
+		return '"' + value + '"';
+	}
+	
+	@Override
 	public String literalBool()
 	{
 		return "Boolean";
