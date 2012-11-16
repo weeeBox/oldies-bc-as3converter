@@ -89,11 +89,13 @@ import macromedia.asc.util.ObjectList;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.error.ConverterException;
+import bc.error.NotImplementedException;
 import bc.help.BcCodeHelper;
 import bc.help.BcGlobal;
 import bc.help.BcNodeHelper;
 import bc.help.BcStringUtils;
 import bc.lang.BcArgumentsList;
+import bc.lang.BcArgumentsType;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcDeclaration;
 import bc.lang.BcFuncParam;
@@ -1306,7 +1308,11 @@ public abstract class As2WhateverConverter
 							else
 							{
 								IdentifierNode identifierNode = (IdentifierNode) node.expr;
-								if (!identifierNode.isAttr())
+								if (identifierNode.name.equals("arguments"))
+								{
+									lastBcMemberType = BcArgumentsType.instance();
+								}
+								else if (!identifierNode.isAttr())
 								{
 									failConversionUnless(lastBcMemberType != null, "Identifier not recognized: '%s'", identifier);
 									
@@ -3631,6 +3637,11 @@ public abstract class As2WhateverConverter
 		{
 			return bcField.getType();
 		}
+		
+		if (identifier.name.equals("arguments"))
+		{
+			return BcArgumentsType.instance();
+		}
 
 		return null;
 	}
@@ -3870,7 +3881,15 @@ public abstract class As2WhateverConverter
 
 			BcTypeNode argType = evaluateType(arg);
 			failConversionUnless(argType != null, "Unable to evaluate args's type: %s", argDest);
-
+			
+			// duh
+			if (argType instanceof BcArgumentsType)
+			{
+				failConversionUnless(argIndex == 0, "Unexpected 'arguments' usage: %s", args);
+				failConversionUnless(BcGlobal.lastBcFunction != null, "Unable to detect enclosing function: %s", function);
+				return createArgsList(function, BcGlobal.lastBcFunction);
+			}
+			
 			BcTypeNode paramType = argIndex >= params.size() && hasRestParams ? 
 					BcTypeNode.create(BcTypeNode.typeObject) : 
 					params.get(argIndex).getType();
@@ -3896,6 +3915,26 @@ public abstract class As2WhateverConverter
 			}
 		}
 		return argsList;
+	}
+
+	private BcArgumentsList createArgsList(BcFunctionDeclaration targetFunction, BcFunctionDeclaration enclosingFunction) 
+	{
+		if (targetFunction.hasRestParams())
+		{
+			int paramsCount = targetFunction.paramsCount();
+			if (paramsCount == 1)
+			{
+				BcArgumentsList list = new BcArgumentsList(enclosingFunction.paramsCount());
+				List<BcFuncParam> args = enclosingFunction.getParams();
+				for (BcFuncParam arg : args) {
+					list.add(codeHelper.identifier(arg.getIdentifier()));
+				}
+				return list;
+			}
+			
+		}
+		
+		throw new NotImplementedException();
 	}
 
 	private String tryFindPackage(String typeName)

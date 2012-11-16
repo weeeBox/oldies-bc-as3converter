@@ -51,6 +51,6 @@ package bc.flash
 
 		public function toString() : String { throw new NotImplementedError(); }
 
-		public function unshift(arg : Object) : uint { throw new NotImplementedError(); }
+		public function unshift(... arg) : uint { throw new NotImplementedError(); }
 	}
 }
