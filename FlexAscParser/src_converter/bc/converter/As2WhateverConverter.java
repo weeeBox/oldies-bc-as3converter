@@ -1010,6 +1010,30 @@ public abstract class As2WhateverConverter
 				{
 					baseType = funcType.getReturnType();
 				}
+				else if (selector instanceof CallExpressionNode)
+				{
+					CallExpressionNode call = (CallExpressionNode) selector;
+					IdentifierNode identifier = BcNodeHelper.tryExtractIdentifier(call);
+					failConversionUnless(identifier != null, "Cannot extract function type call identifier: %s", funcType);
+					
+					String funcName = identifier.name;
+					if (funcName.equals("apply"))
+					{
+						Node target = call.args.items.get(0);
+						BcTypeNode targetType = evaluateType(target);
+						failConversionUnless(targetType != null, "Unable to evaluate 'call' target type: %s", funcType);
+						
+						boolean hasTarget = !(targetType instanceof BcNullType);
+						if (hasTarget)
+						{
+							base = target;
+						}
+					}
+					else
+					{
+						failConversion("Unexpected identifier: %s", funcName);
+					}
+				}
 			}
 			
 			lastBcMemberType = baseType;
@@ -1542,12 +1566,6 @@ public abstract class As2WhateverConverter
 			{
 				ObjectList<Node> args = node.args.items;
 				failConversionUnless(args.size() == 2, "Unexpected args list: %s", args);
-				
-				BcTypeNode firstArgType = evaluateType(args.get(0));
-				failConversionUnless(firstArgType != null, "Can't evaluate first arg of 'apply' call: %s", firstArgType);
-				boolean thisCall = firstArgType instanceof BcNullType;
-				
-				failConversionUnless(thisCall, "Only 'this' calls are supported for 'apply': %s", calledFunction);
 				
 				BcTypeNode secondArgType = evaluateType(args.get(1));
 				failConversionUnless(typeEquals(secondArgType, BcTypeNode.typeArray), "Unexpected second arg type for 'apply' call: %s", secondArgType);

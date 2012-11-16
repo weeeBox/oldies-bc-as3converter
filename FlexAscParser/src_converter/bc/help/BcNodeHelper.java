@@ -357,13 +357,14 @@ public class BcNodeHelper
 		{
 			return null;
 		}
-			GetExpressionNode selector = (GetExpressionNode) memberNode.selector;
-			if (!(selector.expr instanceof IdentifierNode))
-			{
-				return null;
-			}
-			return (IdentifierNode) selector.expr;
+		
+		GetExpressionNode selector = (GetExpressionNode) memberNode.selector;
+		if (!(selector.expr instanceof IdentifierNode))
+		{
+			return null;
 		}
+		return (IdentifierNode) selector.expr;
+	}
 		
 	public static IdentifierNode tryExtractIdentifier(Node node)
 	{
