@@ -1577,11 +1577,18 @@ public abstract class As2WhateverConverter
 				
 				int paramsCount = calledFunction.paramsCount();
 				argsList = new BcArgumentsList(paramsCount);
-				for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
+				if (calledFunction.hasRestParams())
 				{
-					argsList.add(argDest + indexerGetter(argIndex));
+					failConversionUnless(paramsCount == 1, "Can't make 'apply' call on function: %s", calledFunction);
+					argsList.add(argDest);
 				}
-				
+				else
+				{
+					for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
+					{
+						argsList.add(argDest + indexerGetter(argIndex));
+					}
+				}
 			}
 			else if (calledFunction != null && !isCast)
 			{
