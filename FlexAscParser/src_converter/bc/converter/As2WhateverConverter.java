@@ -2416,10 +2416,10 @@ public abstract class As2WhateverConverter
 			pushDest(paramDest);
 			process(node.parameter);
 			popDest();
+			
+			dest.writeln(catchClause(paramDest));
+			process(node.statements);
 		}
-
-		dest.writeln(catchClause(paramDest));
-		process(node.statements);
 	}
 
 	private void process(ParameterNode node)
@@ -2439,7 +2439,7 @@ public abstract class As2WhateverConverter
 
 	private void process(FinallyClauseNode node)
 	{
-		dest.write("finally");
+		dest.writeln(finallyClause());
 		process(node.statements);
 	}
 
@@ -4353,6 +4353,11 @@ public abstract class As2WhateverConverter
 	public String catchClause(ListWriteDestination paramDest)
 	{
 		return String.format("catch (%s)", paramDest);
+	}
+	
+	public String finallyClause()
+	{
+		return "finally";
 	}
 
 	public String throwStatment(Object expr)
