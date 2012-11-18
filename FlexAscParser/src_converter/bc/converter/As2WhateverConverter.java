@@ -124,9 +124,9 @@ import bc.utils.filesystem.FileUtils;
 
 public abstract class As2WhateverConverter
 {
-	protected static final String SECTION_PLATFORM = "Platform";
-	protected static final String SECTION_API = "Api";
-	protected static final String SECTION_CONVERTED = "Converted";
+	public static final String SECTION_PLATFORM = "Platform";
+	public static final String SECTION_API = "Api";
+	public static final String SECTION_CONVERTED = "Converted";
 	
 	private WriteDestination dest;
 	private Stack<WriteDestination> destStack;
@@ -136,6 +136,9 @@ public abstract class As2WhateverConverter
 	protected boolean needFieldsInitializer;
 	private BcCodeHelper codeHelper;
 
+	private File userDir;
+	private List<File> ignoreDirs;
+	
 	protected abstract void writeForeach(WriteDestination dest, Object loopVarName, BcTypeNodeInstance loopVarTypeInstance, Object collection, BcTypeNodeInstance collectionTypeInstance, Object body);
 
 	public As2WhateverConverter(BcCodeHelper codeHelper)
@@ -143,14 +146,19 @@ public abstract class As2WhateverConverter
 		BcGlobal.bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
 		BcGlobal.bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
 
+		userDir = new File(System.getProperty("user.dir"));
+		ignoreDirs = new ArrayList<File>();
+
 		this.codeHelper = codeHelper;
 	}
 
 	public void convert(File outputDir, String... filenames) throws IOException
 	{
-		BcGlobal.bcPlatformClasses = collect("bc-platform/src");
-		BcGlobal.bcApiClasses = collect("bc-api/src");
-		BcGlobal.bcClasses = collect(filenames);
+		File currentDir = new File(System.getProperty("user.dir"));
+		
+		BcGlobal.bcPlatformClasses = collect(userDir, "bc-platform/src");
+		BcGlobal.bcApiClasses = collect(userDir, "bc-api/src");
+		BcGlobal.bcClasses = collect(currentDir, filenames);
 		BcGlobal.lastBcPath = null;
 
 		process();
@@ -162,7 +170,7 @@ public abstract class As2WhateverConverter
 		postWrite(outputDir);
 	}
 
-	private List<BcClassDefinitionNode> collect(String... filenames) throws IOException
+	private List<BcClassDefinitionNode> collect(File userDir, String... filenames) throws IOException
 	{
 		// hack: set empty import list to avoid crashes while creating types
 		BcGlobal.lastBcImportList = new BcImportList();
@@ -171,7 +179,7 @@ public abstract class As2WhateverConverter
 		List<BcModuleEntry> modules = new ArrayList<BcModuleEntry>();
 		for (int i = 0; i < filenames.length; ++i)
 		{
-			collectModules(new File(filenames[i]), modules);
+			collectModules(new File(userDir, filenames[i]), modules);
 		}
 
 		BcGlobal.lastBcImportList = null;
@@ -1288,7 +1296,6 @@ public abstract class As2WhateverConverter
 						}
 						else
 						{
-							int argsCount = argsCount(node);
 							BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier, -1); // check if it's a function type
 							if (bcFunction != null)
 							{
@@ -1309,7 +1316,7 @@ public abstract class As2WhateverConverter
 									System.err.println("Warning! Dynamic XMLList: " + identifier);
 								}
 							}
-							if (identifier.equals("arguments"))
+							else if (identifier.equals("arguments"))
 							{
 								lastBcMemberType = BcArgumentsType.instance();
 							}
@@ -2871,9 +2878,12 @@ public abstract class As2WhateverConverter
 
 	private void write(File outputDir, List<BcClassDefinitionNode> classes) throws IOException
 	{
-		for (BcClassDefinitionNode bcClass : classes)
+		if (!shouldIgnoreFile(outputDir))
 		{
-			writeClassDefinition(bcClass, outputDir);
+			for (BcClassDefinitionNode bcClass : classes)
+			{
+				writeClassDefinition(bcClass, outputDir);
+			}
 		}
 	}
 
@@ -4404,5 +4414,44 @@ public abstract class As2WhateverConverter
 		out.close();
 		byte[] byteArray = bos.toByteArray();
 		return new ByteArrayInputStream(byteArray);
+	}
+	
+	public void addIgnoreFile(File file)
+	{
+		if (file.isFile())
+		{
+			throw new IllegalArgumentException("File is not a directory: " + file);
+		}
+		
+		ignoreDirs.add(file);
+	}
+	
+	protected boolean shouldIgnoreFile(File file)
+	{
+		if (ignoreDirs.isEmpty())
+		{
+			return false;
+		}
+		
+		if (file.isFile())
+		{
+			return shouldIgnoreFile(file.getParentFile());
+		}
+		
+		do
+		{
+			if (ignoreDirs.contains(file))
+			{
+				return true;
+			}
+		} 
+		while ((file = file.getParentFile()) != null);
+		
+		return false;
+	}
+	
+	public void setUserDir(File userDir) 
+	{
+		this.userDir = userDir;
 	}
 }

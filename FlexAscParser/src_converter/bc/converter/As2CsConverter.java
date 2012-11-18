@@ -396,7 +396,11 @@ public class As2CsConverter extends As2WhateverConverter
 				throw new ConverterException("Unable to detect package section name: " + packageName);
 			}
 			
-			writeFunctionTypes(new File(outputDir, sectionName), packageName, funcList);
+			File outputFile = new File(outputDir, sectionName);
+			if (!shouldIgnoreFile(outputFile))
+			{
+				writeFunctionTypes(outputFile, packageName, funcList);
+			}
 		}
 	}
 	
