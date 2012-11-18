@@ -98,6 +98,7 @@ import bc.help.BcStringUtils;
 import bc.lang.BcArgumentsList;
 import bc.lang.BcArgumentsType;
 import bc.lang.BcClassDefinitionNode;
+import bc.lang.BcClassList;
 import bc.lang.BcDeclaration;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
@@ -154,11 +155,9 @@ public abstract class As2WhateverConverter
 
 	public void convert(File outputDir, String... filenames) throws IOException
 	{
-		File currentDir = new File(System.getProperty("user.dir"));
-		
 		BcGlobal.bcPlatformClasses = collect(userDir, "bc-platform/src");
 		BcGlobal.bcApiClasses = collect(userDir, "bc-api/src");
-		BcGlobal.bcClasses = collect(currentDir, filenames);
+		BcGlobal.bcClasses = collect(null, filenames);
 		BcGlobal.lastBcPath = null;
 
 		process();
@@ -170,7 +169,7 @@ public abstract class As2WhateverConverter
 		postWrite(outputDir);
 	}
 
-	private List<BcClassDefinitionNode> collect(File userDir, String... filenames) throws IOException
+	private BcClassList collect(File userDir, String... filenames) throws IOException
 	{
 		// hack: set empty import list to avoid crashes while creating types
 		BcGlobal.lastBcImportList = new BcImportList();
@@ -179,14 +178,17 @@ public abstract class As2WhateverConverter
 		List<BcModuleEntry> modules = new ArrayList<BcModuleEntry>();
 		for (int i = 0; i < filenames.length; ++i)
 		{
-			collectModules(new File(userDir, filenames[i]), modules);
+			String filename = filenames[i];
+			File file = userDir != null ? new File(userDir, filename) : new File(filename);
+			
+			collectModules(file, modules);
 		}
 
 		BcGlobal.lastBcImportList = null;
 
 		// then we collect the stuff as usual
 		// probably not a good idea, but who cares
-		BcGlobal.bcClasses = new ArrayList<BcClassDefinitionNode>();
+		BcGlobal.bcClasses = new BcClassList();
 
 		for (BcModuleEntry module : modules)
 		{
@@ -734,7 +736,7 @@ public abstract class As2WhateverConverter
 			process(type);
 		}
 
-		process(new ArrayList<BcClassDefinitionNode>(BcGlobal.bcPlatformClasses));
+		process(BcGlobal.bcPlatformClasses);
 		process(BcGlobal.bcApiClasses);
 		process(BcGlobal.bcClasses);
 		
@@ -743,9 +745,9 @@ public abstract class As2WhateverConverter
 		postProcess(BcGlobal.bcClasses);
 	}
 
-	private void process(List<BcClassDefinitionNode> classes)
+	private void process(BcClassList classList)
 	{
-		for (BcClassDefinitionNode bcClass : classes)
+		for (BcClassDefinitionNode bcClass : classList)
 		{
 			bcMembersTypesStack = new Stack<BcTypeNode>();
 			dest = new ListWriteDestination();
@@ -2725,9 +2727,9 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void postProcess(List<BcClassDefinitionNode> classes)
+	private void postProcess(BcClassList classList)
 	{
-		for (BcClassDefinitionNode bcClass : classes)
+		for (BcClassDefinitionNode bcClass : classList)
 		{
 			postProcess(bcClass);
 		}
@@ -2857,14 +2859,14 @@ public abstract class As2WhateverConverter
 		return null;
 	}
 
-	private BcClassDefinitionNode findClass(List<BcClassDefinitionNode> classes, String name, String packageName)
+	private BcClassDefinitionNode findClass(BcClassList classList, String name, String packageName)
 	{
-		if (classes == null)
+		if (classList == null)
 		{
 			return null;
 		}
 
-		for (BcClassDefinitionNode bcClass : classes)
+		for (BcClassDefinitionNode bcClass : classList)
 		{
 			BcTypeNode classType = bcClass.getClassType();
 			if (name.equals(classType.getName()) && (packageName == null || packageName.equals(classType.getQualifier())))
@@ -2876,11 +2878,11 @@ public abstract class As2WhateverConverter
 		return null;
 	}
 
-	private void write(File outputDir, List<BcClassDefinitionNode> classes) throws IOException
+	private void write(File outputDir, BcClassList classList) throws IOException
 	{
 		if (!shouldIgnoreFile(outputDir))
 		{
-			for (BcClassDefinitionNode bcClass : classes)
+			for (BcClassDefinitionNode bcClass : classList)
 			{
 				writeClassDefinition(bcClass, outputDir);
 			}

@@ -17,6 +17,7 @@ import bc.help.BcGlobal;
 import bc.help.CsCodeHelper;
 import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
+import bc.lang.BcClassList;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFuncRegister;
 import bc.lang.BcFuncRegister.FuncList;
@@ -723,9 +724,9 @@ public class As2CsConverter extends As2WhateverConverter
 		return null;
 	}
 	
-	private boolean containsPackage(List<BcClassDefinitionNode> classes, String packageName)
+	private boolean containsPackage(BcClassList classesList, String packageName)
 	{
-		for (BcClassDefinitionNode bcClass : classes) 
+		for (BcClassDefinitionNode bcClass : classesList) 
 		{
 			if (packageName.equals(bcClass.getPackageName()))
 			{
