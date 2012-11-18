@@ -97,7 +97,7 @@ package bc.flash.display
 
 		/* public function setPixel32(x : int, y : int, color : uint) : void { throw new NotImplementedError(); } */
 
-		/* public function setPixels(rect : Rectangle, inputByteArray : ByteArray) : void { throw new NotImplementedError(); } */
+		public function setPixels(rect : Rectangle, inputByteArray : ByteArray) : void { throw new NotImplementedError(); }
 
 		/* [Version("10")] */
 		/* public function setVector(rect : Rectangle, inputVector : Vector.<uint>) : void { throw new NotImplementedError(); } */
