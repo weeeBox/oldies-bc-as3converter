@@ -120,6 +120,7 @@ import bc.lang.BcVectorTypeNode;
 import bc.lang.BcWildcardTypeNode;
 import bc.preprocessor.Preprocessor;
 import bc.preprocessor.PreprocessorException;
+import bc.utils.filesystem.FileUtils;
 
 public abstract class As2WhateverConverter
 {
@@ -2941,6 +2942,7 @@ public abstract class As2WhateverConverter
 	{
 		if (needUpldateFile(file, src))
 		{
+			FileUtils.moveToTrash(file);
 			writeFile(file, src);
 		}
 		else
@@ -4006,6 +4008,11 @@ public abstract class As2WhateverConverter
 		}
 		
 		if (selector instanceof ApplyTypeExprNode)
+		{
+			return -1;
+		}
+		
+		if (selector instanceof IncrementNode)
 		{
 			return -1;
 		}
