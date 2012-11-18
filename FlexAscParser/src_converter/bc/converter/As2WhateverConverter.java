@@ -134,6 +134,7 @@ public abstract class As2WhateverConverter
 
 	protected static final String internalFieldInitializer = "__internalInitializeFields";
 
+	// TODO: get rid of that
 	protected boolean needFieldsInitializer;
 	private BcCodeHelper codeHelper;
 
@@ -144,7 +145,6 @@ public abstract class As2WhateverConverter
 
 	public As2WhateverConverter(BcCodeHelper codeHelper)
 	{
-		BcGlobal.bcGlobalFunctions = new ArrayList<BcFunctionDeclaration>();
 		BcGlobal.bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
 
 		userDir = new File(System.getProperty("user.dir"));
@@ -155,6 +155,8 @@ public abstract class As2WhateverConverter
 
 	public void convert(File outputDir, String... filenames) throws IOException
 	{
+		clean();
+		
 		BcGlobal.bcPlatformClasses = collect(BcGlobal.bcPlatformClasses, userDir, "bc-platform/src");
 		BcGlobal.bcApiClasses = collect(BcGlobal.bcApiClasses, userDir, "bc-api/src");
 		BcGlobal.bcClasses = collect(filenames);
@@ -416,7 +418,7 @@ public abstract class As2WhateverConverter
 			}
 			else if (definition instanceof FunctionDefinitionNode)
 			{
-				BcGlobal.bcGlobalFunctions.add(collect((FunctionDefinitionNode) definition, (BcFunctionDeclaration) declaration));
+				BcGlobal.addGlobalFunction(collect((FunctionDefinitionNode) definition, (BcFunctionDeclaration) declaration));
 			}
 			else
 			{
@@ -738,6 +740,14 @@ public abstract class As2WhateverConverter
 		return bcFunc;
 	}
 
+	private void clean()
+	{
+		BcGlobal.clean();
+		
+		dest = null;
+		destStack = null;
+	}
+	
 	private void process()
 	{
 		Collection<BcTypeNode> values = BcTypeNode.uniqueTypes.values();
@@ -757,7 +767,7 @@ public abstract class As2WhateverConverter
 
 	private void process(BcClassList classList)
 	{
-		if (classList.isProcessed())
+		if (!classList.isProcessed())
 		{
 			for (BcClassDefinitionNode bcClass : classList)
 			{
@@ -3082,15 +3092,7 @@ public abstract class As2WhateverConverter
 
 	private BcFunctionDeclaration findGlobalFunction(String name)
 	{
-		for (BcFunctionDeclaration bcFunc : BcGlobal.bcGlobalFunctions)
-		{
-			if (bcFunc.getName().equals(name))
-			{
-				return bcFunc;
-			}
-		}
-
-		return null;
+		return BcGlobal.findGlobalFunction(name);
 	}
 
 	private BcVariableDeclaration findDeclaredVar(String name)

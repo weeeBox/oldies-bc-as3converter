@@ -7,11 +7,14 @@ import java.util.List;
 public class BcClassList implements Iterable<BcClassDefinitionNode> 
 {
 	private List<BcClassDefinitionNode> classes;
+	private List<BcFunctionDeclaration> globalFunctions;
+	
 	private boolean processed;
 	
 	public BcClassList()
 	{
 		classes = new ArrayList<BcClassDefinitionNode>();
+		globalFunctions = new ArrayList<BcFunctionDeclaration>();
 	}
 	
 	public void setProcessed() 
@@ -38,5 +41,16 @@ public class BcClassList implements Iterable<BcClassDefinitionNode>
 	public boolean contains(BcClassDefinitionNode bcClass) 
 	{
 		return classes.contains(bcClass);
+	}
+
+	public void addGlobalFunction(BcFunctionDeclaration bcFunc) 
+	{
+		// TODO: check if function is added twice
+		globalFunctions.add(bcFunc);
+	}
+	
+	public List<BcFunctionDeclaration> getGlobalFunctions() 
+	{
+		return globalFunctions;
 	}
 }
