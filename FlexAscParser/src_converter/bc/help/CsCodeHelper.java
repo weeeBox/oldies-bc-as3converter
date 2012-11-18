@@ -43,15 +43,16 @@ public class CsCodeHelper extends BcCodeHelper
 		return "null";
 	}
 	
-	@Override
-	public String literalString(String value) 
-	{
-		if (BcStringUtils.needsEscaped(value))
-		{
-			return "@\"" + value + '"';
-		}
-		return '"' + value + '"';
-	}
+	// FIXME: fix string literals
+//	@Override
+//	public String literalString(String value) 
+//	{
+//		if (BcStringUtils.needsEscaped(value))
+//		{
+//			return "@\"" + value + '"';
+//		}
+//		return '"' + value + '"';
+//	}
 	
 	@Override
 	public String literalBool()

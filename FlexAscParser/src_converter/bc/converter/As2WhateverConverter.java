@@ -3826,7 +3826,7 @@ public abstract class As2WhateverConverter
 	private void writeLiteralXML(LiteralXMLNode node) 
 	{
 		String text = codeHelper.literalString(((LiteralStringNode)node.list.items.get(0)).value);
-		dest.write(construct(BcTypeNode.typeXML, text));
+		dest.write(construct(type(BcTypeNode.typeXML), text));
 	}
 
 	protected boolean classEquals(BcClassDefinitionNode classNode, String name)
