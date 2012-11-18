@@ -155,9 +155,9 @@ public abstract class As2WhateverConverter
 
 	public void convert(File outputDir, String... filenames) throws IOException
 	{
-		BcGlobal.bcPlatformClasses = collect(userDir, "bc-platform/src");
-		BcGlobal.bcApiClasses = collect(userDir, "bc-api/src");
-		BcGlobal.bcClasses = collect(null, filenames);
+		BcGlobal.bcPlatformClasses = collect(BcGlobal.bcPlatformClasses, userDir, "bc-platform/src");
+		BcGlobal.bcApiClasses = collect(BcGlobal.bcApiClasses, userDir, "bc-api/src");
+		BcGlobal.bcClasses = collect(filenames);
 		BcGlobal.lastBcPath = null;
 
 		process();
@@ -169,7 +169,17 @@ public abstract class As2WhateverConverter
 		postWrite(outputDir);
 	}
 
-	private BcClassList collect(File userDir, String... filenames) throws IOException
+	private BcClassList collect(BcClassList classList, File userDir, String... filenames) throws IOException
+	{
+		return classList == null ? collect(userDir, filenames) : classList;
+	}
+
+	private BcClassList collect(String... filenames) throws IOException
+	{
+		return collect(null, filenames);
+	}
+	
+	private BcClassList collect(File userDir, String... filenames) throws IOException 
 	{
 		// hack: set empty import list to avoid crashes while creating types
 		BcGlobal.lastBcImportList = new BcImportList();
@@ -747,20 +757,24 @@ public abstract class As2WhateverConverter
 
 	private void process(BcClassList classList)
 	{
-		for (BcClassDefinitionNode bcClass : classList)
+		if (classList.isProcessed())
 		{
-			bcMembersTypesStack = new Stack<BcTypeNode>();
-			dest = new ListWriteDestination();
-			destStack = new Stack<WriteDestination>();
-
-			if (bcClass.isInterface())
+			for (BcClassDefinitionNode bcClass : classList)
 			{
-				process((BcInterfaceDefinitionNode) bcClass);
+				bcMembersTypesStack = new Stack<BcTypeNode>();
+				dest = new ListWriteDestination();
+				destStack = new Stack<WriteDestination>();
+	
+				if (bcClass.isInterface())
+				{
+					process((BcInterfaceDefinitionNode) bcClass);
+				}
+				else
+				{
+					process(bcClass);
+				}
 			}
-			else
-			{
-				process(bcClass);
-			}
+			classList.setProcessed();
 		}
 	}
 
