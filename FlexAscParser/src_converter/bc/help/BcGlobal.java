@@ -1,9 +1,9 @@
 package bc.help;
 
 import java.util.List;
-import java.util.Map;
 
 import macromedia.asc.parser.DefinitionNode;
+import macromedia.asc.parser.Node;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcClassList;
 import bc.lang.BcFunctionDeclaration;
@@ -25,8 +25,6 @@ public class BcGlobal
 	public static BcClassList bcPlatformClasses;
 	public static BcClassList bcApiClasses;
 	public static BcClassList bcClasses;
-	
-	public static Map<DefinitionNode, BcMetadata> bcMetadataMap;
 	
 	public static void clean()
 	{
@@ -62,17 +60,20 @@ public class BcGlobal
 			return bcFunc;
 		}
 		
-		if (bcApiClasses != bcClasses)
+		if ((bcFunc = findBuiltinGlobalFunction(bcApiClasses, name)) != null)
 		{
-			if ((bcFunc = findGlobalFunction(bcApiClasses, name)) != null)
-			{
-				return bcFunc;
-			}
+			return bcFunc;
 		}
 		
-		if (bcPlatformClasses != bcClasses)
+		return findBuiltinGlobalFunction(bcPlatformClasses, name);
+	}
+
+	private static BcFunctionDeclaration findBuiltinGlobalFunction(BcClassList classes, String name) 
+	{
+		BcFunctionDeclaration bcFunc;
+		if (classes != null && classes != bcClasses)
 		{
-			if ((bcFunc = findGlobalFunction(bcPlatformClasses, name)) != null)
+			if ((bcFunc = findGlobalFunction(classes, name)) != null)
 			{
 				return bcFunc;
 			}
@@ -91,6 +92,51 @@ public class BcGlobal
 				return bcFunc;
 			}
 		}
+		return null;
+	}
+
+	public static void addMetadata(DefinitionNode def, BcMetadata metadata) 
+	{
+		if (bcClasses == null)
+		{
+			throw new IllegalStateException("No class list selected. Unable to add metadata: " + metadata);
+		}
+		
+		bcClasses.addMetadata(def, metadata);
+	}
+
+	public static BcMetadata findMetadata(Node node) 
+	{
+		if (bcClasses == null)
+		{
+			throw new IllegalStateException("No class list selected. Unable to find metadata: " + node);
+		}
+		
+		BcMetadata metadata;
+		if ((metadata = bcClasses.findMetadata(node)) != null)
+		{
+			return metadata;
+		}
+		
+		if ((metadata = findMetadata(bcApiClasses, node)) != null)
+		{
+			return metadata;
+		}
+		
+		return findMetadata(bcPlatformClasses, node);
+	}
+
+	private static BcMetadata findMetadata(BcClassList classes, Node node) 
+	{
+		BcMetadata metadata;
+		if (classes != null && classes != bcClasses)
+		{
+			if ((metadata = classes.findMetadata(node)) != null)
+			{
+				return metadata;
+			}
+		}
+		
 		return null;
 	}
 }

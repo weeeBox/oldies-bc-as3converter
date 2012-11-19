@@ -145,8 +145,6 @@ public abstract class As2WhateverConverter
 
 	public As2WhateverConverter(BcCodeHelper codeHelper)
 	{
-		BcGlobal.bcMetadataMap = new HashMap<DefinitionNode, BcMetadata>();
-
 		userDir = new File(System.getProperty("user.dir"));
 		ignoreDirs = new ArrayList<File>();
 
@@ -520,7 +518,7 @@ public abstract class As2WhateverConverter
 					BcMetadata bcMetadata = BcNodeHelper.extractBcMetadata(metadata);
 					failConversionUnless(bcMetadata != null, "Failed to extract metadata");
 
-					BcGlobal.bcMetadataMap.put(metadata.def, bcMetadata);
+					BcGlobal.addMetadata(metadata.def, bcMetadata);
 				}
 			}
 			else if (node instanceof ExpressionStatementNode)
@@ -3636,7 +3634,7 @@ public abstract class As2WhateverConverter
 
 	private BcMetadata findMetadata(Node node)
 	{
-		return BcGlobal.bcMetadataMap.get(node);
+		return BcGlobal.findMetadata(node);
 	}
 
 	private BcTypeNode findIdentifierType(BcClassDefinitionNode baseClass, IdentifierNode identifier, boolean hasCallTarget, int argsCount)

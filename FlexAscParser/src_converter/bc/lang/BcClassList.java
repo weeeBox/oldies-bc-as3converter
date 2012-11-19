@@ -1,13 +1,19 @@
 package bc.lang;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import macromedia.asc.parser.DefinitionNode;
+import macromedia.asc.parser.Node;
 
 public class BcClassList implements Iterable<BcClassDefinitionNode> 
 {
 	private List<BcClassDefinitionNode> classes;
 	private List<BcFunctionDeclaration> globalFunctions;
+	private Map<DefinitionNode, BcMetadata> metadataMap;
 	
 	private boolean processed;
 	
@@ -15,6 +21,7 @@ public class BcClassList implements Iterable<BcClassDefinitionNode>
 	{
 		classes = new ArrayList<BcClassDefinitionNode>();
 		globalFunctions = new ArrayList<BcFunctionDeclaration>();
+		metadataMap = new HashMap<DefinitionNode, BcMetadata>();
 	}
 	
 	public void setProcessed() 
@@ -52,5 +59,15 @@ public class BcClassList implements Iterable<BcClassDefinitionNode>
 	public List<BcFunctionDeclaration> getGlobalFunctions() 
 	{
 		return globalFunctions;
+	}
+
+	public void addMetadata(DefinitionNode def, BcMetadata metadata) 
+	{
+		metadataMap.put(def, metadata);
+	}
+
+	public BcMetadata findMetadata(Node def) 
+	{
+		return metadataMap.get(def);
 	}
 }
