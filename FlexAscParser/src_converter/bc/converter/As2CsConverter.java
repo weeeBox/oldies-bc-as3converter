@@ -40,6 +40,12 @@ public class As2CsConverter extends As2WhateverConverter
 	public As2CsConverter()
 	{
 		super(new CsCodeHelper());
+	}
+	
+	@Override
+	protected void clean() 
+	{
+		super.clean();
 		funcRegister = new BcFuncRegister();
 	}
 	

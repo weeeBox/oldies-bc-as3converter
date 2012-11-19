@@ -738,7 +738,7 @@ public abstract class As2WhateverConverter
 		return bcFunc;
 	}
 
-	private void clean()
+	protected void clean()
 	{
 		BcGlobal.clean();
 		
