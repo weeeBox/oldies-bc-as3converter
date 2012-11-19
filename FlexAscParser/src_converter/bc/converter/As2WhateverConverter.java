@@ -13,9 +13,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 
 import macromedia.asc.parser.ApplyTypeExprNode;
@@ -744,6 +747,23 @@ public abstract class As2WhateverConverter
 		
 		dest = null;
 		destStack = null;
+		
+		Map<BcTypeName, BcTypeNode> uniqueTypes = BcTypeNode.uniqueTypes;
+		Set<Entry<BcTypeName, BcTypeNode>> entries = new HashSet<Map.Entry<BcTypeName,BcTypeNode>>(uniqueTypes.entrySet());
+		for (Entry<BcTypeName, BcTypeNode> entry : entries) 
+		{
+			BcTypeNode type = entry.getValue();
+			if (type.hasClassNode())
+			{
+				BcClassDefinitionNode classNode = type.getClassNode();
+				if (!isBuiltInClass(classNode))
+				{
+					BcTypeName typeName = entry.getKey();
+					uniqueTypes.remove(typeName);
+					System.out.println("Removed: " + typeName);
+				}
+			}
+		}
 	}
 	
 	private void process()
@@ -4115,9 +4135,24 @@ public abstract class As2WhateverConverter
 		return false;
 	}
 
+	protected boolean isBuiltInClass(BcClassDefinitionNode bcClass)
+	{
+		return isApiClass(bcClass) || isPlatformClass(bcClass);
+	}
+	
 	protected boolean isPlatformClass(BcClassDefinitionNode bcClass)
 	{
-		return BcGlobal.bcPlatformClasses.contains(bcClass);
+		return classBelongsToList(bcClass, BcGlobal.bcPlatformClasses);
+	}
+	
+	protected boolean isApiClass(BcClassDefinitionNode bcClass)
+	{
+		return classBelongsToList(bcClass, BcGlobal.bcApiClasses);
+	}
+	
+	private boolean classBelongsToList(BcClassDefinitionNode bcClass, BcClassList classes) 
+	{
+		return classes != null && classes.contains(bcClass);
 	}
 
 	protected boolean isKindOfClass(BcClassDefinitionNode childClass, BcClassDefinitionNode parentClass)
