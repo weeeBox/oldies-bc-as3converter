@@ -1,15 +1,17 @@
 package bc.tests;
 
-import static org.junit.Assert.fail;
+import org.junit.Assert;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import bc.converter.As2CsConverter;
 import bc.utils.filesystem.FileUtils;
+import bc.utils.filesystem.StringFilter;
 
 public class FunctionsTypesTest {
 
@@ -30,13 +32,13 @@ public class FunctionsTypesTest {
 		boolean succeed = FileUtils.delete(actualdDir);
 		if (!succeed)
 		{
-			fail("Unable to delete output directory: " + actualdDir.getAbsolutePath());
+			Assert.fail("Unable to delete output directory: " + actualdDir.getAbsolutePath());
 		}
 		
 		succeed = actualdDir.mkdir();
 		if (!succeed)
 		{
-			fail("Unable to create output directory: " + actualdDir.getAbsolutePath());
+			Assert.fail("Unable to create output directory: " + actualdDir.getAbsolutePath());
 		}
 		
 		converter = new As2CsConverter();
@@ -48,9 +50,102 @@ public class FunctionsTypesTest {
 	}
 
 	@Test
-	public void test() throws IOException 
+	public void testFunctionTypes() throws IOException 
 	{
 		converter.convert(actualdDir, DIR_TEST);
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/functions/AsFunctions.cs",
+			"Converted/bc/test/functions/AsFunctionsTypeTest.cs",
+		};
+		
+		assertExpectedAndActualEquals(filenames);
 	}
 
+	private void assertExpectedAndActualEquals(String[] filenames) throws IOException
+	{
+		File[] expectedFiles = createFiles(DIR_EXPECTED, filenames);
+		File[] actualFiles = createFiles(DIR_ACTUAL, filenames);
+		
+		assertEquals(expectedFiles, actualFiles);
+	}
+
+	private void assertEquals(File[] expectedFiles, File[] actualFiles) throws IOException
+	{
+		if (expectedFiles.length != actualFiles.length)
+		{
+			Assert.fail("Expected and actual files list sizes are differnt");
+		}
+		
+		for (int fileIndex = 0; fileIndex < actualFiles.length; fileIndex++) 
+		{
+			assertEquals(expectedFiles[fileIndex], actualFiles[fileIndex]);
+		}
+	}
+	
+	private void assertEquals(File expectedFile, File actualFile) throws IOException
+	{
+		if (!expectedFile.exists())
+		{
+			Assert.fail("Expected file doesn't exist: " + expectedFile);
+		}
+		
+		if (!actualFile.exists())
+		{
+			Assert.fail("Actual file doesn't exist: " + actualFile);
+		}
+		
+		StringFilter filter = new StringFilter() 
+		{
+			@Override
+			public String filter(String str) 
+			{
+				String trimmed = str.trim();
+				return trimmed.length() > 0 ? trimmed : null;
+			}
+		};
+		
+		List<String> expectedLines = FileUtils.readFile(expectedFile, filter);
+		List<String> actualLines = FileUtils.readFile(actualFile, filter);
+		
+		assertEquals(expectedLines, actualLines);
+	}
+
+	private void assertEquals(List<String> expectedLines, List<String> actualLines) 
+	{
+		if (expectedLines.size() != actualLines.size())
+		{
+			Assert.fail("Expected and actual lines lists have different sizes");
+		}
+		
+		for (int lineIndex = 0; lineIndex < expectedLines.size(); lineIndex++) 
+		{
+			String expectedLine = expectedLines.get(lineIndex);
+			String actualLine = actualLines.get(lineIndex);
+			
+			Assert.assertEquals(expectedLine, actualLine);
+		}
+	}
+	
+	private File[] createFiles(String baseDir, String[] filenames) 
+	{
+		File[] files = new File[filenames.length];
+		for (int nameIndex = 0; nameIndex < filenames.length; ++nameIndex) 
+		{
+			files[nameIndex] = new File(baseDir, filenames[nameIndex]);
+		}
+		
+		return files;
+	}
+	
+	private File createExpectedFile(String path) 
+	{
+		return new File(DIR_EXPECTED, path);
+	}
+	
+	private File createActualFile(String path) 
+	{
+		return new File(DIR_ACTUAL, path);
+	}
 }

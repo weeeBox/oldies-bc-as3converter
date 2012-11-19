@@ -8,7 +8,8 @@ package bc.test.functions
         public function FunctionsTypeTest()
         {
             accept(functionDefaultCallback);
-            functionDefaultCallback.apply(null, "This is string");
+            var args : Array = ["This is string"];
+            functionDefaultCallback.apply(null, args);
         }
 
         private function accept(func:Function) : void 

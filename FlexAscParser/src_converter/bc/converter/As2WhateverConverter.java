@@ -3041,26 +3041,7 @@ public abstract class As2WhateverConverter
 
 	private List<String> readFile(File file) throws IOException
 	{
-		BufferedReader reader = null;
-		try
-		{
-			reader = new BufferedReader(new FileReader(file));
-			List<String> lines = new ArrayList<String>();
-
-			String line;
-			while ((line = reader.readLine()) != null)
-			{
-				lines.add(line);
-			}
-			return lines;
-		}
-		finally
-		{
-			if (reader != null)
-			{
-				reader.close();
-			}
-		}
+		return FileUtils.readFile(file);
 	}
 
 	private void writeFile(File file, ListWriteDestination src) throws IOException
