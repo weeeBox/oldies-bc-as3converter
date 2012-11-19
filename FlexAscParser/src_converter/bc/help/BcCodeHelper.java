@@ -38,6 +38,7 @@ public abstract class BcCodeHelper
 		basicTypes.put("Boolean", "bool");
 		
 		integralTypes = new HashMap<String, String>();
+		integralTypes.put("void", "void");
 		integralTypes.put("uint", "uint");
 		integralTypes.put("int", "int");
 		integralTypes.put("long", "long");

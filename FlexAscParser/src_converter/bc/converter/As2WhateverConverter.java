@@ -768,11 +768,7 @@ public abstract class As2WhateverConverter
 	
 	private void process()
 	{
-		Collection<BcTypeNode> values = BcTypeNode.uniqueTypes.values();
-		for (BcTypeNode type : values)
-		{
-			process(type);
-		}
+		processUniqueTypes();
 
 		process(BcGlobal.bcPlatformClasses);
 		process(BcGlobal.bcApiClasses);
@@ -781,6 +777,17 @@ public abstract class As2WhateverConverter
 		postProcess(BcGlobal.bcPlatformClasses);
 		postProcess(BcGlobal.bcApiClasses);
 		postProcess(BcGlobal.bcClasses);
+		
+		processUniqueTypes(); // more unique types may appear
+	}
+
+	private void processUniqueTypes() 
+	{
+		Collection<BcTypeNode> values = BcTypeNode.uniqueTypes.values();
+		for (BcTypeNode type : values)
+		{
+			process(type);
+		}
 	}
 
 	private void process(BcClassList classList)
@@ -1548,6 +1555,7 @@ public abstract class As2WhateverConverter
 							failConversionUnless(type != null, "Can't detect cast's type: ", exprDest);
 
 							isCast = type.isIntegral() || canBeClass(type);
+							failConversionUnless(isCast, "Can't evaluate identifier type: %s", identifier);
 							if (isCast)
 							{
 								addToImport(type);
@@ -3949,7 +3957,7 @@ public abstract class As2WhateverConverter
 			process(arg);
 			popDest();
 
-			BcTypeNode argType = evaluateType(arg);
+			BcTypeNode argType = evaluateType(arg); // FIXME: should return function type
 			failConversionUnless(argType != null, "Unable to evaluate args's type: %s", argDest);
 			
 			// duh
