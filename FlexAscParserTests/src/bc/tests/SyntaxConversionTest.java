@@ -13,7 +13,7 @@ import bc.converter.As2CsConverter;
 import bc.utils.filesystem.FileUtils;
 import bc.utils.filesystem.StringFilter;
 
-public class FunctionsTypesTest {
+public class SyntaxConversionTest {
 
 	private static final String DIR_TEST = "code_test";
 	private static final String DIR_EXPECTED = "code_expected";
