@@ -138,14 +138,4 @@ public class FunctionsTypesTest {
 		
 		return files;
 	}
-	
-	private File createExpectedFile(String path) 
-	{
-		return new File(DIR_EXPECTED, path);
-	}
-	
-	private File createActualFile(String path) 
-	{
-		return new File(DIR_ACTUAL, path);
-	}
 }
