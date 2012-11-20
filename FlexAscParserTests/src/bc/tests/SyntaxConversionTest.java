@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import bc.converter.As2CsConverter;
+import bc.help.BcGlobal;
+import bc.lang.BcClassList;
 import bc.utils.filesystem.FileUtils;
 import bc.utils.filesystem.StringFilter;
 
@@ -45,6 +47,7 @@ public class SyntaxConversionTest {
 		converter.setUserDir(userDir);
 		converter.addIgnoreFile(new File(actualdDir, As2CsConverter.SECTION_PLATFORM));
 		converter.addIgnoreFile(new File(actualdDir, As2CsConverter.SECTION_API));
+		BcGlobal.bcApiClasses = new BcClassList();
 		
 		converter.convert(actualdDir);
 	}

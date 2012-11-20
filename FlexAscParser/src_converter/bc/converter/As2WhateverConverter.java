@@ -1,11 +1,9 @@
 package bc.converter;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -1048,6 +1046,7 @@ public abstract class As2WhateverConverter
 		BcTypeNode baseType = null;
 		boolean staticCall = false;
 		boolean numberMemberCall = false; // блинчик-пончик-сюрприз Ж)
+		boolean funcMemberCall = false; // Function.apply or Function.call
 
 		Node base = node.base;
 		SelectorNode selector = node.selector;
@@ -1081,6 +1080,8 @@ public abstract class As2WhateverConverter
 					IdentifierNode identifier = BcNodeHelper.tryExtractIdentifier(call);
 					failConversionUnless(identifier != null, "Cannot extract function type call identifier: %s", funcType);
 					
+					funcMemberCall = true;
+					
 					String funcName = identifier.name;
 					if (funcName.equals("apply"))
 					{
@@ -1108,8 +1109,6 @@ public abstract class As2WhateverConverter
 			if (identifierNode != null && canBeClass(identifierNode.name)) // is call?
 			{
 				staticCall = true;
-
-				
 				dest.write(classType(baseExpr.toString()));
 			}
 			else
@@ -1126,7 +1125,14 @@ public abstract class As2WhateverConverter
 		if (selector != null)
 		{
 			pushDest(selectorDest);
-			process(selector);
+			if (funcMemberCall)
+			{
+				processFuncMemberCall(lastBcMemberType, selector);
+			}
+			else
+			{
+				process(selector);
+			}
 			popDest();
 		}
 
@@ -1222,6 +1228,10 @@ public abstract class As2WhateverConverter
 						failConversionUnless(BcGlobal.lastBcClass != null, "Try to use 'super' without of a class: base=%s selector=%s", baseDest, selectorDest);
 						dest.write(superSelector(BcGlobal.lastBcClass, selectorDest));
 					}
+					else if (funcMemberCall)
+					{
+						dest.write(call(baseDest, selectorDest));
+					}
 					else
 					{
 						dest.write(memberSelector(baseDest, selectorDest));
@@ -1240,6 +1250,47 @@ public abstract class As2WhateverConverter
 		}
 
 		lastBcMemberType = bcMembersTypesStack.pop();
+	}
+
+	private void processFuncMemberCall(BcTypeNode baseType, SelectorNode selector) 
+	{
+		failConversionUnless(baseType instanceof BcFunctionTypeNode, "Unexcepted base type: %s", baseType);
+		
+		failConversionUnless(selector instanceof CallExpressionNode, "Unexpected selector type: %s", selector.getClass());
+		CallExpressionNode call = (CallExpressionNode) selector;
+		
+		failConversionUnless(call.args != null, "Can't get args");
+		
+		ObjectList<Node> args = call.args.items;
+		failConversionUnless(args.size() == 2, "Unexpected args list: %s", args);
+		
+		BcTypeNode secondArgType = evaluateType(args.get(1));
+		failConversionUnless(typeEquals(secondArgType, BcTypeNode.typeArray), "Unexpected second arg type for 'apply' call: %s", secondArgType);
+		
+		WriteDestination argDest = new ListWriteDestination();
+		pushDest(argDest);
+		process(args.get(1));
+		popDest();
+		
+		BcFunctionTypeNode bcFuncType = (BcFunctionTypeNode) baseType;
+		BcFunctionDeclaration calledFunction = bcFuncType.getFunc();
+		
+		int paramsCount = calledFunction.paramsCount();
+		BcArgumentsList argsList = new BcArgumentsList(paramsCount);
+		if (calledFunction.hasRestParams())
+		{
+			failConversionUnless(paramsCount == 1, "Can't make 'apply' call on function: %s", calledFunction);
+			argsList.add(argDest);
+		}
+		else
+		{
+			for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
+			{
+				argsList.add(argDest + indexerGetter(argIndex));
+			}
+		}
+		
+		dest.write(argsDef(argsList));
 	}
 
 	private void process(SelectorNode node)
@@ -1497,7 +1548,6 @@ public abstract class As2WhateverConverter
 
 		boolean isCast = false;
 		boolean isGlobalCalled = false;
-		boolean isFunctionApplyCall = false;
 
 		if (node.expr instanceof IdentifierNode)
 		{
@@ -1564,20 +1614,6 @@ public abstract class As2WhateverConverter
 					}
 				}
 			}
-			else if (lastBcMemberType instanceof BcFunctionTypeNode)
-			{
-				BcFunctionTypeNode funcType = (BcFunctionTypeNode) lastBcMemberType;
-				if (identifier.equals("apply"))
-				{
-					failConversionUnless(funcType.isComplete(), "Can't call incomplete function: %s", funcType);
-					calledFunction = funcType.getFunc();
-					isFunctionApplyCall = true;
-				}
-				else
-				{
-					assert false;
-				}
-			}
 			else
 			{
 				BcClassDefinitionNode bcClass = lastBcMemberType.getClassNode();
@@ -1635,35 +1671,7 @@ public abstract class As2WhateverConverter
 		BcArgumentsList argsList;
 		if (node.args != null)
 		{
-			if (isFunctionApplyCall)
-			{
-				ObjectList<Node> args = node.args.items;
-				failConversionUnless(args.size() == 2, "Unexpected args list: %s", args);
-				
-				BcTypeNode secondArgType = evaluateType(args.get(1));
-				failConversionUnless(typeEquals(secondArgType, BcTypeNode.typeArray), "Unexpected second arg type for 'apply' call: %s", secondArgType);
-				
-				WriteDestination argDest = new ListWriteDestination();
-				pushDest(argDest);
-				process(args.get(1));
-				popDest();
-				
-				int paramsCount = calledFunction.paramsCount();
-				argsList = new BcArgumentsList(paramsCount);
-				if (calledFunction.hasRestParams())
-				{
-					failConversionUnless(paramsCount == 1, "Can't make 'apply' call on function: %s", calledFunction);
-					argsList.add(argDest);
-				}
-				else
-				{
-					for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
-					{
-						argsList.add(argDest + indexerGetter(argIndex));
-					}
-				}
-			}
-			else if (calledFunction != null && !isCast)
+			if (calledFunction != null && !isCast)
 			{
 				argsList = createArgsList(calledFunction, node.args.items);
 			}
@@ -1742,11 +1750,11 @@ public abstract class As2WhateverConverter
 			}
 			else if (isGlobalCalled)
 			{
-				dest.writef(staticSelector(type(BcTypeNode.typeGlobal), String.format("%s(%s)", identifier, argsList)));
+				dest.writef(staticSelector(type(BcTypeNode.typeGlobal), call(identifier, argsList)));
 			}
 			else
 			{
-				dest.writef("%s(%s)", identifier, argsList);
+				dest.writef(call(identifier, argsList));
 			}
 		}
 	}
@@ -1881,11 +1889,11 @@ public abstract class As2WhateverConverter
 		{
 			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 			{
-				dest.writef("%s(%s)", indexerGetter(identifier), argsDest);
+				dest.writef(call(indexerGetter(identifier), argsDest));
 			}
 			else
 			{
-				dest.writef("%s(%s)", identifier, argsDest);
+				dest.writef(call(identifier, argsDest));
 			}
 		}
 		else
@@ -2725,7 +2733,7 @@ public abstract class As2WhateverConverter
 			popDest();
 		}
 
-		dest.writelnf("%s(%s);", BcCodeHelper.superCallMarker, argsDest);
+		dest.writelnf(call(BcCodeHelper.superCallMarker, argsDest));
 	}
 
 	private void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
@@ -4332,6 +4340,22 @@ public abstract class As2WhateverConverter
 		}
 		return buffer.toString();
 	}
+	
+	public String argsDef(BcArgumentsList argsList)
+	{
+		StringBuilder buffer = new StringBuilder();
+		
+		int paramIndex = 0;
+		for (Object arg : argsList)
+		{
+			buffer.append(getCodeHelper().identifier(arg.toString()));
+			if (++paramIndex < argsList.size())
+			{
+				buffer.append(", ");
+			}
+		}
+		return buffer.toString();
+	}
 
 	public String paramDecl(BcTypeNodeInstance typeInstance, String identifier)
 	{
@@ -4343,6 +4367,11 @@ public abstract class As2WhateverConverter
 		return funcExp.toString();
 	}
 
+	public String call(Object target, Object... args)
+	{
+		return String.format("%s(%s)", target, BcStringUtils.commaSeparated(args));
+	}
+	
 	public String memberSelector(Object target, Object selector)
 	{
 		return String.format("%s.%s", target, selector);
@@ -4355,12 +4384,12 @@ public abstract class As2WhateverConverter
 
 	public String staticCall(Object target, Object selector, Object... args)
 	{
-		return staticSelector(target, String.format("%s(%s)", selector, BcStringUtils.commaSeparated(args)));
+		return staticSelector(target, call(selector, args));
 	}
 
 	public String memberCall(Object target, Object selector, Object... args)
 	{
-		return memberSelector(target, String.format("%s(%s)", selector, BcStringUtils.commaSeparated(args)));
+		return memberSelector(target, call(selector, args));
 	}
 
 	public String indexerGetter(Object expr)
