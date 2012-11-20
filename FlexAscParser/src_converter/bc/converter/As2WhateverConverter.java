@@ -1275,7 +1275,9 @@ public abstract class As2WhateverConverter
 		BcFunctionTypeNode bcFuncType = (BcFunctionTypeNode) baseType;
 		BcFunctionDeclaration calledFunction = bcFuncType.getFunc();
 		
-		int paramsCount = calledFunction.paramsCount();
+		List<BcFuncParam> params = calledFunction.getParams();
+		int paramsCount = params.size();
+		
 		BcArgumentsList argsList = new BcArgumentsList(paramsCount);
 		if (calledFunction.hasRestParams())
 		{
@@ -1284,9 +1286,19 @@ public abstract class As2WhateverConverter
 		}
 		else
 		{
+			BcTypeNode objectType = BcTypeNode.create(BcTypeNode.typeObject);
 			for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
 			{
-				argsList.add(argDest + indexerGetter(argIndex));
+				BcTypeNode paramType = params.get(argIndex).getType();
+				String arg = argDest + indexerGetter(argIndex); // FIXME: won't work for language without indexer operator
+				if (needExplicitCast(objectType, paramType))
+				{
+					argsList.add(cast(arg, paramType));
+				}
+				else
+				{
+					argsList.add(arg);
+				}
 			}
 		}
 		
