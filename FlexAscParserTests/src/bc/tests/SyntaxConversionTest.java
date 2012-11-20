@@ -124,10 +124,10 @@ public class SyntaxConversionTest {
 		
 		for (int lineIndex = 0; lineIndex < expectedLines.size(); lineIndex++) 
 		{
-			String expectedLine = expectedLines.get(lineIndex);
-			String actualLine = actualLines.get(lineIndex);
+			String expectedLine = expectedLines.get(lineIndex).trim();
+			String actualLine = actualLines.get(lineIndex).trim();
 			
-			Assert.assertEquals(expectedLine, actualLine);
+			Assert.assertTrue(String.format("\nExpected: %s\n    Actual: %s",expectedLine, actualLine), expectedLine.equals(actualLine));
 		}
 	}
 	

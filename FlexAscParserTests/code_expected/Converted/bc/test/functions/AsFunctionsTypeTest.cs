@@ -11,7 +11,7 @@ namespace bc.test.functions
 		{
 			accept(functionDefaultCallback);
 			AsArray args = new AsArray("This is string");
-			functionDefaultCallback(args[0]);
+			functionDefaultCallback((String)(args[0]));
 		}
 		private void accept(AsFunctionDefaultCallback func)
 		{
