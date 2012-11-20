@@ -1265,12 +1265,7 @@ public abstract class As2WhateverConverter
 		failConversionUnless(args.size() == 2, "Unexpected args list: %s", args);
 		
 		BcTypeNode secondArgType = evaluateType(args.get(1));
-		failConversionUnless(typeEquals(secondArgType, BcTypeNode.typeArray), "Unexpected second arg type for 'apply' call: %s", secondArgType);
-		
-		WriteDestination argDest = new ListWriteDestination();
-		pushDest(argDest);
-		process(args.get(1));
-		popDest();
+		failConversionUnless(typeEquals(secondArgType, BcTypeNode.typeArray) || typeEquals(secondArgType, BcTypeNode.typeArguments), "Unexpected second arg type for 'apply' call: %s", secondArgType);
 		
 		BcFunctionTypeNode bcFuncType = (BcFunctionTypeNode) baseType;
 		BcFunctionDeclaration calledFunction = bcFuncType.getFunc();
@@ -1279,25 +1274,70 @@ public abstract class As2WhateverConverter
 		int paramsCount = params.size();
 		
 		BcArgumentsList argsList = new BcArgumentsList(paramsCount);
-		if (calledFunction.hasRestParams())
+		
+		if (secondArgType instanceof BcArgumentsType)
 		{
-			failConversionUnless(paramsCount == 1, "Can't make 'apply' call on function: %s", calledFunction);
-			argsList.add(argDest);
+			failConversionUnless(BcGlobal.lastBcFunction != null, "Unable to detect enclosing function");
+			BcFunctionDeclaration enclosingFunction = BcGlobal.lastBcFunction;
+			
+			List<BcFuncParam> enclosingParams = enclosingFunction.getParams();
+			
+			if (calledFunction.hasRestParams())
+			{
+				for (BcFuncParam param : enclosingParams) 
+				{
+					argsList.add(codeHelper.identifier(param.getIdentifier()));
+				}
+			}
+			else
+			{
+				failConversionUnless(calledFunction.paramsCount() == enclosingFunction.paramsCount(), "Enclosing function and called function are incompatible:\n%s\n%s", enclosingFunction, calledFunction);
+				
+				for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
+				{
+					BcFuncParam arg = enclosingParams.get(argIndex);
+					String identifier = codeHelper.identifier(arg.getIdentifier());
+					
+					BcTypeNode paramType = params.get(argIndex).getType();
+					BcTypeNode argType = arg.getType();
+					if (needExplicitCast(argType, paramType))
+					{
+						argsList.add(cast(identifier, paramType));
+					}
+					else
+					{
+						argsList.add(identifier);
+					}
+				}
+			}
 		}
 		else
 		{
-			BcTypeNode objectType = BcTypeNode.create(BcTypeNode.typeObject);
-			for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
+			WriteDestination argDest = new ListWriteDestination();
+			pushDest(argDest);
+			process(args.get(1));
+			popDest();
+			
+			if (calledFunction.hasRestParams())
 			{
-				BcTypeNode paramType = params.get(argIndex).getType();
-				String arg = argDest + indexerGetter(argIndex); // FIXME: won't work for language without indexer operator
-				if (needExplicitCast(objectType, paramType))
+				failConversionUnless(paramsCount == 1, "Can't make 'apply' call on function: %s", calledFunction);
+				argsList.add(argDest);
+			}
+			else
+			{
+				BcTypeNode objectType = BcTypeNode.create(BcTypeNode.typeObject);
+				for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
 				{
-					argsList.add(cast(arg, paramType));
-				}
-				else
-				{
-					argsList.add(arg);
+					BcTypeNode paramType = params.get(argIndex).getType();
+					String arg = argDest + indexerGetter(argIndex); // FIXME: won't work for language without indexer operator
+					if (needExplicitCast(objectType, paramType))
+					{
+						argsList.add(cast(arg, paramType));
+					}
+					else
+					{
+						argsList.add(arg);
+					}
 				}
 			}
 		}

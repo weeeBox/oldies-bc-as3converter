@@ -20,6 +20,7 @@ public class BcTypeNode extends BcNode
 	public static final String typeString = "String";
 	public static final String typeVector = "Vector";
 	public static final String typeArray = "Array";
+	public static final String typeArguments = "arguments";
 	public static final String typeDictionary = "Dictionary";
 	public static final String typeFunction = "Function";
 	public static final String typeXML = "XML";
