@@ -574,6 +574,17 @@ public class As2CsConverter extends As2WhateverConverter
 	}
 	
 	@Override
+	public String type(String name) 
+	{
+		if (name.equals("Object"))
+		{
+			return name;
+		}
+		
+		return super.type(name);
+	}
+	
+	@Override
 	public String construct(String type, Object initializer)
 	{
 		return NEW + " " + type + "(" + initializer + ")";
