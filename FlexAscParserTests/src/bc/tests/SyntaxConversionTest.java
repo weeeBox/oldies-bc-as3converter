@@ -133,7 +133,7 @@ public class SyntaxConversionTest {
 	{
 		if (expectedLines.size() != actualLines.size())
 		{
-			Assert.fail("Expected and actual lines lists have different sizes");
+			Assert.fail("Expected and actual lines lists have different sizes: " + expectedLines.size() + "!=" + actualLines.size());
 		}
 		
 		for (int lineIndex = 0; lineIndex < expectedLines.size(); lineIndex++) 

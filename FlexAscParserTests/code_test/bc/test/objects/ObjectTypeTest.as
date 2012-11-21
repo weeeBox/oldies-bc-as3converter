@@ -14,6 +14,13 @@ package bc.test.objects
             b = obj["b"];
             
             obj = "This is string";
+            
+            var foo : FooObjectClass = new FooObjectClass();
+            foo["a"] = a;
+            foo["b"] = b;
+            
+            a = foo["a"];
+            b = foo["b"];
         }
     }
 }

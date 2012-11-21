@@ -1,6 +1,7 @@
 using System;
  
 using bc.flash;
+using bc.test.objects;
  
 namespace bc.test.objects
 {
@@ -15,6 +16,11 @@ namespace bc.test.objects
 			a = (String)(((AsObject)(obj)).getOwnProperty("a"));
 			b = (int)(((AsObject)(obj)).getOwnProperty("b"));
 			obj = "This is string";
+			AsFooObjectClass foo = new AsFooObjectClass();
+			foo.setOwnProperty("a", a);
+			foo.setOwnProperty("b", b);
+			a = (String)(foo.getOwnProperty("a"));
+			b = (int)(foo.getOwnProperty("b"));
 		}
 	}
 }
