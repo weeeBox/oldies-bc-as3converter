@@ -10,10 +10,10 @@ namespace bc.test.objects
 		{
 			Object obj = null;
 			obj = AsObject.createLiteralObject("a", "This is string", "b", 10);
-			String a = (String)(AsObject.getOwnProperty(obj, "a"));
-			int b = (int)(AsObject.getOwnProperty(obj, "b"));
-            a = (String)(AsObject.getOwnProperty(obj, "a"));
-            b = (int)(AsObject.getOwnProperty(obj, "b"));
+			String a = (String)(((AsObject)obj).getOwnProperty("a"));
+			int b = (int)(((AsObject)obj).getOwnProperty("b"));
+			a = (String)(((AsObject)obj).getOwnProperty("a"));
+			b = (int)(((AsObject)obj).getOwnProperty("b"));
 			obj = "This is string";
 		}
 	}
