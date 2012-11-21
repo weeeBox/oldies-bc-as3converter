@@ -1171,11 +1171,11 @@ public abstract class As2WhateverConverter
 				process(setExpr.args);
 				popDest();
 
-				dest.write(memberCall(baseDest, "setOwnProperty", exprDest, argsDest));
+				writeMemberSelector(baseType, baseDest, call("setOwnProperty", exprDest, argsDest));
 			}
 			else if (selector instanceof GetExpressionNode)
 			{
-				dest.writef(memberCall(baseDest, "getOwnProperty", exprDest));
+				writeMemberSelector(baseType, baseDest, call("getOwnProperty", exprDest));
 			}
 			else
 			{
@@ -1234,15 +1234,7 @@ public abstract class As2WhateverConverter
 					}
 					else
 					{
-						if (typeEquals(baseType, BcTypeNode.typeObject))
-						{
-							String castString = cast(baseDest, BcTypeNode.create(BcTypeNode.typeObject));
-							dest.write(memberSelector(expr(castString), selectorDest));
-						}
-						else
-						{
-							dest.write(memberSelector(baseDest, selectorDest));
-						}
+						writeMemberSelector(baseType, baseDest, selectorDest);
 					}
 				}
 				else
@@ -1258,6 +1250,19 @@ public abstract class As2WhateverConverter
 		}
 
 		lastBcMemberType = bcMembersTypesStack.pop();
+	}
+
+	private void writeMemberSelector(BcTypeNode baseType, Object base, Object selector) 
+	{
+		if (typeEquals(baseType, BcTypeNode.typeObject))
+		{
+			String castString = cast(base, BcTypeNode.create(BcTypeNode.typeObject));
+			dest.write(memberSelector(expr(castString), selector));
+		}
+		else
+		{
+			dest.write(memberSelector(base, selector));
+		}
 	}
 
 	private void processFuncMemberCall(BcTypeNode baseType, SelectorNode selector) 
