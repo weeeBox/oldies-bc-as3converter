@@ -4330,6 +4330,11 @@ public abstract class As2WhateverConverter
 
 	protected String classType(BcTypeNode type)
 	{
+		if (type.isIntegral())
+		{
+			return type(type);
+		}
+		
 		return classType(type.getName());
 	}
 	
