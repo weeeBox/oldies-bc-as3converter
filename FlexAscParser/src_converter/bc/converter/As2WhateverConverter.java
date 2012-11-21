@@ -1234,7 +1234,15 @@ public abstract class As2WhateverConverter
 					}
 					else
 					{
-						dest.write(memberSelector(baseDest, selectorDest));
+						if (typeEquals(baseType, BcTypeNode.typeObject))
+						{
+							String castString = cast(baseDest, BcTypeNode.create(BcTypeNode.typeObject));
+							dest.write(memberSelector(expr(castString), selectorDest));
+						}
+						else
+						{
+							dest.write(memberSelector(baseDest, selectorDest));
+						}
 					}
 				}
 				else
@@ -4466,9 +4474,14 @@ public abstract class As2WhateverConverter
 		return indexerSetter(expr, value);
 	}
 
+	public String expr(Object expr)
+	{
+		return String.format("(%s)", expr);
+	}
+	
 	public String cast(Object expr, BcTypeNode type)
 	{
-		return String.format("(%s)(%s)", type(type), expr);
+		return String.format("(%s)(%s)", classType(type), expr);
 	}
 
 	public String castClass(Object expr, BcTypeNode fromType, BcTypeNode toType)
