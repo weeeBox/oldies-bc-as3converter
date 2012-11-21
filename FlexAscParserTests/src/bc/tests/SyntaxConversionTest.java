@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import bc.converter.As2CsConverter;
@@ -21,11 +22,11 @@ public class SyntaxConversionTest {
 	private static final String DIR_EXPECTED = "code_expected";
 	private static final String DIR_ACTUAL = "code_actual";
 	
-	private As2CsConverter converter;
-	private File actualdDir;
+	private static As2CsConverter converter;
+	private static File actualdDir;
 
-	@Before
-	public void setUp() throws IOException 
+	@BeforeClass
+	public static void setUp() throws IOException 
 	{
 		File currentDir = new File(System.getProperty("user.dir"));
 		File userDir = new File("../FlexAscParser");
@@ -55,12 +56,25 @@ public class SyntaxConversionTest {
 	@Test
 	public void testFunctionTypes() throws IOException 
 	{
-		converter.convert(actualdDir, DIR_TEST);
+		converter.convert(actualdDir, DIR_TEST + "/bc/test/functions");
 		
 		String[] filenames = 
 		{
 			"Converted/bc/test/functions/AsFunctions.cs",
 			"Converted/bc/test/functions/AsFunctionsTypeTest.cs",
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
+	public void testObjectClass() throws IOException
+	{
+		converter.convert(actualdDir, DIR_TEST + "/bc/test/objects");
+		
+		String[] filenames = 
+		{
+				"Converted/bc/test/objects/AsObjectTypeTest.cs",
 		};
 		
 		assertExpectedAndActualEquals(filenames);

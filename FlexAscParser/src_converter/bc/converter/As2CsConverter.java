@@ -201,7 +201,7 @@ public class As2CsConverter extends As2WhateverConverter
 			
 			if (hasExtendsType)
 			{
-				src.write(type(bcClass.getExtendsType()));
+				src.write(classType(bcClass.getExtendsType()));
 				if (hasInterfaces)
 				{
 					src.write(", ");

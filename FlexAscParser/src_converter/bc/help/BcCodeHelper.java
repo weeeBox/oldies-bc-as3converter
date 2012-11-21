@@ -70,6 +70,16 @@ public abstract class BcCodeHelper
 		return value ? "true" : "false";
 	}
 	
+	public String literalString(Object value)
+	{
+		if (value == null)
+		{
+			throw new IllegalArgumentException("Value is null");
+		}
+		
+		return literalString(value.toString());
+	}
+	
 	public String literalString(String value)
 	{
 		return BcStringUtils.parentesis(value);

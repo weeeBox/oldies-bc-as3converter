@@ -3904,7 +3904,7 @@ public abstract class As2WhateverConverter
 				process(field.name);
 				popDest();
 				
-				args[itemIndex++] = nameDest;
+				args[itemIndex++] = codeHelper.literalString(nameDest);
 				
 				ListWriteDestination valueDest = new ListWriteDestination();
 				pushDest(valueDest);
@@ -3915,7 +3915,7 @@ public abstract class As2WhateverConverter
 			}
 		}
 		
-		dest.write(staticCall(type(BcTypeNode.typeObject), "createLiteralObject", args));		
+		dest.write(staticCall(classType(BcTypeNode.typeObject), "createLiteralObject", args)); // FIXME: make a separate call for it		
 	}
 	
 	private void writeLiteralXML(LiteralXMLNode node) 
@@ -4168,7 +4168,7 @@ public abstract class As2WhateverConverter
 
 		if (typeEquals(fromType, BcTypeNode.typeObject))
 		{
-			return true;
+			return !typeEquals(toType, BcTypeNode.typeObject);
 		}
 
 		if (toType.isIntegral() && typeEquals(fromType, BcTypeNode.typeString))
