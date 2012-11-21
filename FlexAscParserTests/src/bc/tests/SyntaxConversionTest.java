@@ -1,12 +1,10 @@
 package bc.tests;
 
-import org.junit.Assert;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

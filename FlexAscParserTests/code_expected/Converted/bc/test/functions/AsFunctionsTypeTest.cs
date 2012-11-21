@@ -4,7 +4,7 @@ using bc.flash;
  
 namespace bc.test.functions
 {
-	public class AsFunctionsTypeTest : Object
+	public class AsFunctionsTypeTest : AsObject
 	{
 		private AsFunctionDefaultCallback mFunc;
 		public AsFunctionsTypeTest()
