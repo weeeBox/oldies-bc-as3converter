@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="updater" default="run">
+	<property name="dir.source" value="src_updater" />
+	<property name="dir.classes" value="bin" />
+	<property name="dir.lib" value="lib" />
+
+	<property name="project.dir" value="vs_project/vs_project" />
+	<property name="project.file" value="vs_project" />
+
+	<property name="dir.input" value="code_expected" />
+
+	<path id="libs">
+		<fileset dir="${dir.lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="${dir.classes}" />
+	</target>
+
+	<target name="build" depends="clean">
+		<mkdir dir="${dir.classes}" />
+		<javac destdir="${dir.classes}" debug="true" encoding="UTF-8">
+			<src path="${dir.source}" />
+			<classpath refid="libs" />
+		</javac>
+
+		<taskdef name="updater" classname="bc.ant.updater.VsProjectUpdaterTask">
+			<classpath refid="libs" />
+			<classpath path="${dir.classes}" />
+		</taskdef>
+	</target>
+
+	<target name="run" depends="build">
+		<updater projectfile="${project.dir}/${project.file}.csproj" sourcedir="${dir.input}" />
+	</target>
+</project>

@@ -134,6 +134,8 @@ public class VsProjectUpdaterTask extends Task
 		{
 			String path = FileUtils.makeRelativePath(projectDir, file);
 			element.addElement(ELEMENT_COMPILE).addAttribute(ATTRIBUTE_INCLUDE, path);
+			
+			System.out.println("Add source path: " + path);
 		}
 	}
 	
