@@ -2642,10 +2642,10 @@ public abstract class As2WhateverConverter
 		}
 		else if (node.op == Tokens.AS_TOKEN)
 		{
-			BcTypeNode toType = extractBcType(node.rhs);
+			BcTypeNode toType = evaluateType(node.rhs);
 			failConversionUnless(toType != null, "Can't detect to-cast type: '%s'", rshString);
 			
-			BcTypeNode fromType = extractBcType(node.lhs);
+			BcTypeNode fromType = evaluateType(node.lhs);
 			failConversionUnless(fromType != null, "Can't detect from-cast type: '%s'", lshString);
 			
 			dest.writef("((%s) ? (%s) : %s)", operatorIs(ldest, rdest), cast(lshString, fromType, toType), getCodeHelper().literalNull());
