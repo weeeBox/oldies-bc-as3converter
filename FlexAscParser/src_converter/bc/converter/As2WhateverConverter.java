@@ -1182,7 +1182,7 @@ public abstract class As2WhateverConverter
 				failConversion("Unexpected selector for 'object-as-dictionary' call: type=%s expr=%s", selector.getClass(), exprDest);
 			}
 		}
-		else if (stringCall || numberMemberCall)
+		else if (stringCall && !staticCall || numberMemberCall)
 		{
 			failConversionUnless(selector instanceof CallExpressionNode, "'call' expression is expected: type=%s base=%s selecto=%s", selector.getClass(), baseDest, selectorDest);
 			CallExpressionNode callExpr = (CallExpressionNode) selector;

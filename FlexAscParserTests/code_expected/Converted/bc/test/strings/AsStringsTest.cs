@@ -15,7 +15,7 @@ namespace bc.test.strings
 			int length = str.Length;
 			String chrString = AsString.charAt(str, 0);
 			float chrCode = AsString.charCodeAt(str, 0);
-			String fromCharCode = AsString.fromCharCode(str, 0);
+			String fromCharCode = AsString.fromCharCode(0);
 			int indexOf = AsString.indexOf(str, "string");
 			indexOf = AsString.indexOf(str, "string", 0);
 			String replace = AsString.replace(str, "string", "foo");
