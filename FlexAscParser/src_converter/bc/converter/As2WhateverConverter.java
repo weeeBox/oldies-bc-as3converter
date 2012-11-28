@@ -3650,6 +3650,10 @@ public abstract class As2WhateverConverter
 					failConversion("Can't evaluate ListNode. Unexpected node type: %s", firstItem.getClass());
 				}
 			}
+			else if (node.base instanceof LiteralStringNode)
+			{
+				baseClass = BcTypeNode.create(BcTypeNode.typeString).getClassNode();
+			}
 			else
 			{
 				failConversion("Can't evaluate node's type: %s", node.base.getClass());
