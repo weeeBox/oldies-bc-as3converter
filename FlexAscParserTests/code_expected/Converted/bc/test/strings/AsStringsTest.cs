@@ -32,6 +32,12 @@ namespace bc.test.strings
 			String toUpperCase = AsString.toUpperCase(str);
 			String toString = str.ToString();
 			String valueOf = AsString.valueOf(str);
+			float num = (AsString.parseFloat("10"));
+			int i = (AsString.parseInt("10"));
+			uint ui = (AsString.parseUint("10"));
+			bool b = (AsString.parseBool("true"));
+			length = "This is a string".Length;
+			replace = AsString.replace("This is a string", "string", "foo");
 		}
 	}
 }

@@ -4,11 +4,16 @@ package bc.test.strings
     {
         public function StringsTest()
         {
+            // literals
             var str : String = "This is a string";
             str = 'This is a string';
             str = "This is a string with \"escapes\"";
             str = 'This is a string with "escapes"';
+            
+            // length
             var length : int = str.length;
+            
+            // methods
             var chrString : String = str.charAt(0);
             var chrCode : Number = str.charCodeAt(0);
             
@@ -36,6 +41,16 @@ package bc.test.strings
             
             var toString : String = str.toString();
             var valueOf : String = str.valueOf();
+            
+            // parsing
+            var num : Number = Number("10");
+            var i : int = int("10");
+            var ui : uint = uint("10");
+            var b : Boolean = Boolean("true");
+            
+            // literal method call
+            length = "This is a string".length;
+            replace = "This is a string".replace("string", "foo");
         }
     }
 }
