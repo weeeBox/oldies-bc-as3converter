@@ -563,25 +563,20 @@ public class As2CsConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	protected String classType(String name)
-	{
-		if (name.equals("String"))
-		{
-			return name;
-		}
-		
-		return super.classType(name);
-	}
-	
-	@Override
 	public String type(String name) 
 	{
-		if (name.equals("Object"))
+		if (name.equals("Object") || name.equals("String"))
 		{
 			return name;
 		}
 		
 		return super.type(name);
+	}
+	
+	@Override
+	public String castString(Object expr, BcTypeNode fromType) 
+	{
+		return String.format("(%s)(%s)", type(BcTypeNode.typeString), expr);
 	}
 	
 	@Override

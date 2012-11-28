@@ -1256,7 +1256,7 @@ public abstract class As2WhateverConverter
 	{
 		if (typeEquals(baseType, BcTypeNode.typeObject))
 		{
-			String castString = cast(base, BcTypeNode.create(BcTypeNode.typeObject));
+			String castString = createCast(base, BcTypeNode.create(BcTypeNode.typeObject));
 			dest.write(memberSelector(expr(castString), selector));
 		}
 		else
@@ -1315,7 +1315,7 @@ public abstract class As2WhateverConverter
 					BcTypeNode argType = arg.getType();
 					if (needExplicitCast(argType, paramType))
 					{
-						argsList.add(cast(identifier, paramType));
+						argsList.add(cast(identifier, argType, paramType));
 					}
 					else
 					{
@@ -1345,7 +1345,7 @@ public abstract class As2WhateverConverter
 					String arg = argDest + indexerGetter(argIndex); // FIXME: won't work for language without indexer operator
 					if (needExplicitCast(objectType, paramType))
 					{
-						argsList.add(cast(arg, paramType));
+						argsList.add(cast(arg, objectType, paramType));
 					}
 					else
 					{
@@ -2642,8 +2642,13 @@ public abstract class As2WhateverConverter
 		}
 		else if (node.op == Tokens.AS_TOKEN)
 		{
-			BcTypeNode castType = extractBcType(node.rhs);
-			dest.writef("((%s) ? (%s) : %s)", operatorIs(ldest, rdest), cast(lshString, castType), getCodeHelper().literalNull());
+			BcTypeNode toType = extractBcType(node.rhs);
+			failConversionUnless(toType != null, "Can't detect to-cast type: '%s'", rshString);
+			
+			BcTypeNode fromType = extractBcType(node.lhs);
+			failConversionUnless(fromType != null, "Can't detect from-cast type: '%s'", lshString);
+			
+			dest.writef("((%s) ? (%s) : %s)", operatorIs(ldest, rdest), cast(lshString, fromType, toType), getCodeHelper().literalNull());
 		}
 		else if (node.op == Tokens.IN_TOKEN)
 		{
@@ -3874,7 +3879,7 @@ public abstract class As2WhateverConverter
 					BcTypeNode argType = evaluateType(elementNode);
 					if (argType != genericType)
 					{
-						argsList.add(cast(argDest, genericType));
+						argsList.add(cast(argDest, argType, genericType));
 					}
 					else
 					{
@@ -4243,6 +4248,11 @@ public abstract class As2WhateverConverter
 		{
 			if (fromType.isClass())
 			{
+				if (typeEquals(toType, BcTypeNode.typeString))
+				{
+					return castString(expression, fromType);
+				}
+				
 				return castClass(expression, fromType, toType);
 			}
 			else if (fromType.isInterface())
@@ -4255,7 +4265,7 @@ public abstract class As2WhateverConverter
 			}
 		}
 
-		return cast(expression, toType);
+		return createCast(expression, toType);
 	}
 
 	/* code helper */
@@ -4489,19 +4499,24 @@ public abstract class As2WhateverConverter
 		return String.format("(%s)", expr);
 	}
 	
-	public String cast(Object expr, BcTypeNode type)
+	public String createCast(Object expr, BcTypeNode type)
 	{
 		return String.format("(%s)(%s)", classType(type), expr);
 	}
 
+	public String castString(Object expr, BcTypeNode fromType)
+	{
+		return castClass(expr, fromType, BcTypeNode.create(BcTypeNode.typeString));
+	}
+	
 	public String castClass(Object expr, BcTypeNode fromType, BcTypeNode toType)
 	{
-		return cast(expr, toType);
+		return createCast(expr, toType);
 	}
 
 	public String castInterface(Object expr, BcTypeNode fromType, BcTypeNode toType)
 	{
-		return cast(expr, toType);
+		return createCast(expr, toType);
 	}
 
 	public String catchClause(ListWriteDestination paramDest)
