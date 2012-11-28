@@ -144,5 +144,6 @@
     <Compile Include="..\..\code_expected\Converted\bc\test\functions\AsFunctionsTypeTest.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\objects\AsFooObjectClass.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\objects\AsObjectTypeTest.cs"/>
+    <Compile Include="..\..\code_expected\Converted\bc\test\strings\AsStringsTest.cs"/>
   </ItemGroup> 
 </Project>

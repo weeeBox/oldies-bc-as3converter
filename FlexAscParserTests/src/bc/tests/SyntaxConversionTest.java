@@ -77,6 +77,19 @@ public class SyntaxConversionTest {
 		
 		assertExpectedAndActualEquals(filenames);
 	}
+	
+	@Test
+	public void testStrings() throws IOException
+	{
+		converter.convert(actualdDir, DIR_TEST + "/bc/test/strings");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/strings/AsStringsTest.cs"
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
 
 	private void assertExpectedAndActualEquals(String[] filenames) throws IOException
 	{
