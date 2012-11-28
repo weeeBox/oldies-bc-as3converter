@@ -133,7 +133,7 @@ namespace bc.flash
             throw new NotImplementedException();
         }
 
-        public static string fromCharCode(string str, int code)
+        public static string fromCharCode(int code)
         {
             throw new NotImplementedException();
         }
