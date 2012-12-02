@@ -4256,6 +4256,11 @@ public abstract class As2WhateverConverter
 			return parseString(expression, toType);
 		}
 
+		if (fromType.equals(toType))
+		{
+			return expression.toString();
+		}
+		
 		if (toType.isClass())
 		{
 			if (fromType.isClass())

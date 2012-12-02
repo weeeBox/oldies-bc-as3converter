@@ -80,6 +80,19 @@ public class SyntaxConversionTest {
 	}
 	
 	@Test
+	public void testArrays() throws IOException
+	{
+		converter.convert(actualdDir, DIR_TEST + "/bc/test/arrays");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/arrays/AsArraysTest.cs",
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
 	public void testFunctionTypes() throws IOException 
 	{
 		converter.convert(actualdDir, DIR_TEST + "/bc/test/functions");

@@ -140,6 +140,7 @@
     -->  
   <ItemGroup> 
     <!--Target group-->  
+    <Compile Include="..\..\code_expected\Converted\bc\test\arrays\AsArraysTest.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\fields\AsClassA.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\fields\AsClassB.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\inheritance\AsBaseClass.cs"/>
@@ -149,5 +150,6 @@
     <Compile Include="..\..\code_expected\Converted\bc\test\objects\AsFooObjectClass.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\objects\AsObjectTypeTest.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\strings\AsStringsTest.cs"/>
-  </ItemGroup> 
+  </ItemGroup>  
+  <ItemGroup/> 
 </Project>
