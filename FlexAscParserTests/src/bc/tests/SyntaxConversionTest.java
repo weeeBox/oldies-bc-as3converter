@@ -52,6 +52,34 @@ public class SyntaxConversionTest {
 	}
 
 	@Test
+	public void testInheritance() throws IOException
+	{
+		converter.convert(actualdDir, DIR_TEST + "/bc/test/basic/inheritance");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/basic/inheritance/AsBaseClass.cs",
+			"Converted/bc/test/basic/inheritance/AsChildClass.cs"
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
+	public void testFields() throws IOException
+	{
+		converter.convert(actualdDir, DIR_TEST + "/bc/test/basic/fields");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/basic/fields/AsClassA.cs",
+			"Converted/bc/test/basic/fields/AsClassB.cs"
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
 	public void testFunctionTypes() throws IOException 
 	{
 		converter.convert(actualdDir, DIR_TEST + "/bc/test/functions");

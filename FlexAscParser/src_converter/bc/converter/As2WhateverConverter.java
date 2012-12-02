@@ -3220,7 +3220,7 @@ public abstract class As2WhateverConverter
 
 	protected boolean isSafeInitialized(BcClassDefinitionNode bcClass, BcVariableDeclaration bcField)
 	{
-		if (bcField.isStatic() || bcField.getType().isIntegral())
+		if (bcField.isStatic() || bcField.hasInitializer() && bcField.isIntegralInitializerFlag())
 		{
 			return true;
 		}
@@ -3253,6 +3253,14 @@ public abstract class As2WhateverConverter
 							}
 						}
 					}
+				}
+			} 
+			else if (memberNode.selector instanceof GetExpressionNode)
+			{
+				GetExpressionNode getNode = (GetExpressionNode) memberNode.selector;
+				if (getNode.expr instanceof IdentifierNode)
+				{
+					return false;
 				}
 			}
 		}

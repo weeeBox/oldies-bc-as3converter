@@ -81,6 +81,17 @@ public class BcVariableDeclaration extends BcDeclaration
 	@Override
 	public String toString()
 	{
-		return typeInstance.getQualifiedName() + " " + getIdentifier();
+		StringBuilder result = new StringBuilder();
+		result.append(typeInstance.getQualifiedName());
+		result.append(" ");
+		result.append(getIdentifier());
+		
+		if (hasInitializer())
+		{
+			result.append(" = ");
+			result.append(getInitializer());
+		}
+		
+		return result.toString();
 	}
 }
