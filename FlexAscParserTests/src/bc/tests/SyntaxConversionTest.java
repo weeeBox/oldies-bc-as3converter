@@ -93,6 +93,19 @@ public class SyntaxConversionTest {
 	}
 	
 	@Test
+	public void testVectors() throws IOException
+	{
+		converter.convert(actualdDir, DIR_TEST + "/bc/test/vectors");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/vectors/AsVectorsTest.cs",
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
 	public void testFunctionTypes() throws IOException 
 	{
 		converter.convert(actualdDir, DIR_TEST + "/bc/test/functions");

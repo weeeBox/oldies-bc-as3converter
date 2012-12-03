@@ -13,7 +13,12 @@ namespace bc.flash
     {
         public List<T> internalList;
 
-        public AsVector(params T[] elements)
+        public static AsVector<T> create(params T[] elements)
+        {
+            return new AsVector<T>(elements);
+        }
+
+        private AsVector(T[] elements)
         {
             internalList = new List<T>(elements.Length);
             init(elements);

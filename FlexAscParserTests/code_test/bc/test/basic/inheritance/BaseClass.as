@@ -11,11 +11,6 @@ package bc.test.basic.inheritance
             
         }
         
-        public function func3() : void
-        {
-            
-        }
-        
         private function func2() : void
         {
             
