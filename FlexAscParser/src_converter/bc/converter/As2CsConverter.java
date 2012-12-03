@@ -614,7 +614,7 @@ public class As2CsConverter extends As2WhateverConverter
 	@Override
 	public String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args)
 	{
-		return constructVector(vectorType, args);
+		return staticCall(type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGeneric()) + ">", "create", args);
 	}
 	
 	@Override

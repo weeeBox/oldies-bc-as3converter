@@ -11,7 +11,7 @@ namespace bc.test.vectors
 			AsVector<String> v = new AsVector<String>();
 			v = new AsVector<String>();
 			v = new AsVector<String>();
-			v = new AsVector<String>("a", "b", "c");
+			v = AsVector<String>.create("a", "b", "c");
 			String _value = v[0];
 			v[0] = _value;
 		}
