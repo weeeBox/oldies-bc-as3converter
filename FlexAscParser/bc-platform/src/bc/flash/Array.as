@@ -34,13 +34,13 @@ package bc.flash
 
 		public function pop() : Object { throw new NotImplementedError(); }
 
-		public function push(arg : Object) : uint { throw new NotImplementedError(); }
+		public function push(... args) : uint { throw new NotImplementedError(); }
 
-		/* public function reverse() : Array; /*
+		public function reverse() : Array { throw new NotImplementedError(); }
 
-		/* public function shift() : *; */
+		public function shift() : * { throw new NotImplementedError(); }
 
-		/* public function slice(A : * = 0, B : * = 4.294967295E9) : Array; */
+		public function slice(startIndex:int = 0, endIndex:int = 16777215) : Array { throw new NotImplementedError(); }
 
 		/* public function some(callback : Function, thisObject : * = null) : Boolean; */
 
@@ -48,12 +48,12 @@ package bc.flash
 
 		/* public function sortOn(names : *, options : * = 0, ...args : *) : *; */
 
-		/* public function splice(...args : *) : *; */
+		public function splice(startIndex:int, deleteCount:uint, ... values) : Array { throw new NotImplementedError(); }
 
 		/* public function toLocaleString() : String; */
 
 		/* public function toString() : String */
 
-		/* ublic function unshift(...args : *) : uint; */
+		public function unshift(...args : *) : uint { throw new NotImplementedError(); }
 	}
 }

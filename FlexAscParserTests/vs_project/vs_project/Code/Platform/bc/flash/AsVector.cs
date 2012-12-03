@@ -135,9 +135,19 @@ namespace bc.flash
             internalList.RemoveAt(lastIndex);
             return lastElement;
         }
-        public virtual int push(T arg)
+        public virtual int push(params T[] args)
         {
-            internalList.Add(arg);
+            if (args.Length == 1)
+            {
+                internalList.Add(args[0]);
+            }
+            else if (args.Length > 1)
+            {
+                for (int i = 0; i < args.Length; ++i)
+                {
+                    internalList.Add(args[i]);
+                }
+            }
             return internalList.Count;
         }
         public virtual AsVector<T> reverse()
