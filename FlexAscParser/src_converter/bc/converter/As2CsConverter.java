@@ -527,6 +527,11 @@ public class As2CsConverter extends As2WhateverConverter
 	
 	private void tryAddUniqueNamespace(CsImportsData importsData, BcTypeNode type)
 	{
+		if (type instanceof BcUntypedTypeNode)
+		{
+			return;
+		}
+		
 		if (canBeClass(type))
 		{
 			importsData.addType(type);

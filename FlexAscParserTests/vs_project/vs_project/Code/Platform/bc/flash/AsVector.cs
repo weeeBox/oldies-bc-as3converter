@@ -18,7 +18,7 @@ namespace bc.flash
             return new AsVector<T>(elements);
         }
 
-        private AsVector(T[] elements)
+        protected AsVector(T[] elements)
         {
             internalList = new List<T>(elements.Length);
             init(elements);

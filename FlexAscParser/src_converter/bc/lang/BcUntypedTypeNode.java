@@ -4,6 +4,6 @@ public class BcUntypedTypeNode extends BcTypeNode
 {
 	public BcUntypedTypeNode()
 	{
-		super("*");
+		super(BcTypeNode.typeObject);
 	}
 }
