@@ -1,10 +1,10 @@
 package bc.flash.display
 {
-	import flash.errors.IllegalOperationError;
-	import flash.utils.ByteArray;
-	import flash.system.LoaderContext;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.net.URLRequest;
-	import bc.flash.error.NotImplementedError;
+	import flash.errors.IllegalOperationError;
+	import flash.system.LoaderContext;
+	import flash.utils.ByteArray;
 
 	/**
 	 * @author weee

@@ -1,11 +1,11 @@
 package bc.flash.utils
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	
 	/**
 	 * @author weee
 	 */
-	public function trace(str : String) : void
+	public function trace(... arguments) : void
 	{
 		throw new NotImplementedError();
 	}

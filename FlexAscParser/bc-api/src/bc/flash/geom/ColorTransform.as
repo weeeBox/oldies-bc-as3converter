@@ -1,6 +1,6 @@
 package bc.flash.geom
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 
 	public class ColorTransform extends Object
 	{

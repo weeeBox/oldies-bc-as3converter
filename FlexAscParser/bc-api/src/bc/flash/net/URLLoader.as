@@ -1,6 +1,6 @@
 package bc.flash.net
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.events.EventDispatcher;
 	/**
 	 * @author weee

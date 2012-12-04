@@ -1,6 +1,6 @@
 package bc.flash.utils
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	/**
 	 * @author weee
 	 */
@@ -11,7 +11,7 @@ package bc.flash.utils
 
 		public function clear() : void { throw new NotImplementedError(); }
 
-		/* public function compress(algorithm : String = "zlib") : void; */
+		public function compress(algorithm : String = "zlib") : void { throw new NotImplementedError(); }
 
 		public static function get defaultObjectEncoding() : uint { throw new NotImplementedError(); }
 
@@ -67,7 +67,7 @@ package bc.flash.utils
 
 		public function toString() : String { throw new NotImplementedError(); }
 
-		/* public function uncompress(algorithm : String = "zlib") : void; */
+		public function uncompress(algorithm : String = "zlib") : void { throw new NotImplementedError(); }
 
 		public function writeBoolean(value : Boolean) : void { throw new NotImplementedError(); }
 

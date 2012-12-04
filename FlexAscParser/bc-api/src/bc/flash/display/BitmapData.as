@@ -1,6 +1,8 @@
 package bc.flash.display 
 {
-	import bc.flash.error.AbstractClassError;
+	import bc.flash.geom.Point;
+	import bc.flash.errors.NotImplementedError;
+	import bc.flash.errors.AbstractClassError;
 	import bc.flash.geom.ColorTransform;
 	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Rectangle;
@@ -43,11 +45,14 @@ package bc.flash.display
 
 		/* public function compare(otherBitmapData : BitmapData) : Object; */
 
-		/* public function copyChannel(sourceBitmapData : BitmapData, sourceRect : Rectangle, destPoint : Point, sourceChannel : uint, destChannel : uint) :  : void { throw new NotImplementedError(); }
+		/* public function copyChannel(sourceBitmapData : BitmapData, sourceRect : Rectangle, destPoint : Point, sourceChannel : uint, destChannel : uint) :  : void { throw new NotImplementedError(); } */
 
-		/* public function copyPixels(sourceBitmapData : BitmapData, sourceRect : Rectangle, destPoint : Point, alphaBitmapData : BitmapData = null, alphaPoint : Point = null, mergeAlpha : Boolean = false) : void; */
+		public function copyPixels(sourceBitmapData : BitmapData, sourceRect : Rectangle, destPoint : Point, alphaBitmapData : BitmapData = null, alphaPoint : Point = null, mergeAlpha : Boolean = false) : void
+		{
+			throw new NotImplementedError();
+		}
 
-		/* public function fillRect(rect : Rectangle, color : uint) : void { throw new NotImplementedError(); } */
+		public function fillRect(rect : Rectangle, color : uint) : void { throw new NotImplementedError(); }
 
 		/* public function floodFill(x : int, y : int, color : uint) : void { throw new NotImplementedError(); } */
 
@@ -81,7 +86,10 @@ package bc.flash.display
 
 		/* public function pixelDissolve(sourceBitmapData : BitmapData, sourceRect : Rectangle, destPoint : Point, randomSeed : int = 0, numPixels : int = 0, fillColor : uint = 0) : int; */
 
-		/* public function get rect() : Rectangle; */
+		public function get rect() : Rectangle
+		{
+			throw new NotImplementedError();
+		}
 
 		/* public function scroll(x : int, y : int) : void { throw new NotImplementedError(); } */
 
@@ -89,7 +97,7 @@ package bc.flash.display
 
 		/* public function setPixel32(x : int, y : int, color : uint) : void { throw new NotImplementedError(); } */
 
-		/* public function setPixels(rect : Rectangle, inputByteArray : ByteArray) : void { throw new NotImplementedError(); } */
+		public function setPixels(rect : Rectangle, inputByteArray : ByteArray) : void { throw new NotImplementedError(); }
 
 		/* [Version("10")] */
 		/* public function setVector(rect : Rectangle, inputVector : Vector.<uint>) : void { throw new NotImplementedError(); } */

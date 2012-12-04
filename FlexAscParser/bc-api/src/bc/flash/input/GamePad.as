@@ -1,6 +1,5 @@
 package bc.flash.input
-{
-	import bc.flash.Vector;
+{	
 	/**
 	 * @author weee
 	 */

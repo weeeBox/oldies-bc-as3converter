@@ -33,6 +33,12 @@ public class CppCodeHelper extends BcCodeHelper
 	}
 	
 	@Override
+	public String literalBool()
+	{
+		return "BOOL";
+	}
+	
+	@Override
 	public String literalString(String value)
 	{
 		return String.format("%s(\"%s\")", STRING_LITERAL, BcStringUtils.replaceEscapes(value));

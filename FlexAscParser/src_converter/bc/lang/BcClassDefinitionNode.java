@@ -11,8 +11,7 @@ import macromedia.asc.parser.Node;
 public class BcClassDefinitionNode extends BcDeclaration
 {
 	private BcTypeNode classType;
-	
-	private String packageName;
+	private String classPackage;
 	
 	private boolean isFinal;
 	
@@ -23,8 +22,8 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private List<BcVariableDeclaration> declaredVars;
 	private List<BcTypeNode> additionalImports;
 	
-	private BcTypeNode extendsType;
-	private List<BcTypeNode> interfaces;
+	private BcTypeNodeInstance extendsType;
+	private List<BcTypeNodeInstance> interfaces;
 
 	private List<Node> statements;
 	private List<BcFunctionTypeNode> functionTypes;
@@ -32,14 +31,18 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public BcClassDefinitionNode(BcTypeNode classType)
 	{
+		assert !classType.hasClassNode() || classType.getName().equals("Vector"); // hack: we create a class for each generic version
+		classType.setClassNode(this);
+		
 		this.classType = classType;
 		fields = new ArrayList<BcVariableDeclaration>();
 		functions = new ArrayList<BcFunctionDeclaration>();
 		constructors = new ArrayList<BcFunctionDeclaration>();
 		statements = new ArrayList<Node>();
-		interfaces = new ArrayList<BcTypeNode>();
+		interfaces = new ArrayList<BcTypeNodeInstance>();
 		additionalImports = new ArrayList<BcTypeNode>();
 		functionTypes = new ArrayList<BcFunctionTypeNode>();
+		declaredVars = new ArrayList<BcVariableDeclaration>();
 	}
 	
 	public boolean isFinal()
@@ -77,22 +80,27 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return classType;
 	}
 	
-	public void setPackageName(String packageName) 
-	{
-		this.packageName = packageName;
-	}
-	
 	public String getPackageName() 
 	{
-		return packageName;
+		if (classType.hasQualifier())
+		{
+			return classType.getQualifier();
+		}
+		
+		return classPackage;
+	}
+	
+	public void setPackageName(String packageName)
+	{
+		this.classPackage = packageName;
 	}
 	
 	public BcTypeNode getExtendsType()
 	{
-		return extendsType;
+		return extendsType.getType();
 	}
 	
-	public void setExtendsType(BcTypeNode extendsType)
+	public void setExtendsType(BcTypeNodeInstance extendsType)
 	{
 		this.extendsType = extendsType;
 	}
@@ -104,12 +112,13 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public BcClassDefinitionNode getExtendsClass()
 	{
-		return hasExtendsType() ? extendsType.getClassNode() : null;
+		return hasExtendsType() ? extendsType.getType().getClassNode() : null;
 	}
 	
 	public void addFunctionType(BcFunctionTypeNode node)
 	{
 		functionTypes.add(node);
+		node.getFunc().setOwner(this);
 		
 		if (node.isUseByDefault())
 		{
@@ -137,7 +146,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 				return funcType;
 			}
 		}
-		return extendsType != null ? extendsType.getClassNode().findFunctionType(name) : null;
+		return extendsType != null ? extendsType.getType().getClassNode().findFunctionType(name) : null;
 	}
 	
 	public boolean hasFunctionTypes()
@@ -150,12 +159,12 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return functionTypes;
 	}
 	
-	public void addInterface(BcTypeNode interfaceType)
+	public void addInterface(BcTypeNodeInstance interfaceType)
 	{
 		interfaces.add(interfaceType);
 	}
 	
-	public List<BcTypeNode> getInterfaces()
+	public List<BcTypeNodeInstance> getInterfaces()
 	{
 		return interfaces;
 	}
@@ -163,11 +172,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 	public boolean hasInterfaces()
 	{
 		return interfaces.size() > 0;
-	}
-	
-	public void setDeclaredVars(List<BcVariableDeclaration> declaredVars)
-	{
-		this.declaredVars = declaredVars;
 	}
 	
 	public List<BcVariableDeclaration> getDeclaredVars()
@@ -241,6 +245,10 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return result;
 	}
 	
+	public void setFunctions(List<BcFunctionDeclaration> functions) 
+	{
+		this.functions = functions;
+	}
 	
 	public List<BcFunctionDeclaration> getConstructors()
 	{
@@ -307,27 +315,27 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private static final int FIND_GETTER = 1;
 	private static final int FIND_SETTER = 2;
 	
-	public BcFunctionDeclaration findFunction(String name)
+	public BcFunctionDeclaration findFunction(String name, int paramsCount)
 	{
-		return findFunction(this, name, FIND_NORMAL);
+		return findFunction(this, name, paramsCount, FIND_NORMAL);
 	}
 	
 	public BcFunctionDeclaration findGetterFunction(String name)
 	{
-		return findFunction(this, name, FIND_GETTER);
+		return findFunction(this, name, 0, FIND_GETTER);
 	}
 	
 	public BcFunctionDeclaration findSetterFunction(String name)
 	{
-		return findFunction(this, name, FIND_SETTER);
+		return findFunction(this, name, 1, FIND_SETTER);
 	}
 	
-	private static BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int mode)
+	private static BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int paramsCount, int mode)
 	{
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			if (bcFunc.getName().equals(name))
+			if (bcFunc.getName().equals(name) && (paramsCount == -1 || bcFunc.paramsCount() == paramsCount || bcFunc.hasRestParams()))
 			{
 				if (bcFunc.isConstructor())
 				{
@@ -356,7 +364,9 @@ public class BcClassDefinitionNode extends BcDeclaration
 		if (bcClass.hasExtendsType())
 		{
 			BcClassDefinitionNode bcSuperClass = bcClass.getExtendsType().getClassNode();
-			return findFunction(bcSuperClass, name, mode);
+			assert bcSuperClass != null : bcClass.getExtendsType().getName();
+			
+			return findFunction(bcSuperClass, name, paramsCount, mode);
 		}
 		
 		return null;
@@ -396,11 +406,11 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return true;
 	}
 
-	public BcClassDefinitionNode clone()
+	public BcClassDefinitionNode clone(BcTypeNode classType)
 	{
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
 		bcClass.extendsType = extendsType;
-		bcClass.packageName = packageName;
+		bcClass.importList = importList;
 		
 		bcClass.fields = fields;
 		bcClass.functions = functions;
@@ -409,6 +419,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 		bcClass.interfaces = interfaces;
 		bcClass.statements = statements;
 		bcClass.metadata = metadata;
+		bcClass.classPackage = classPackage;
 		
 		return bcClass;
 	}
@@ -416,5 +427,11 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private static interface BcVariableDeclarationFilter
 	{
 		boolean accept(BcVariableDeclaration bcVar);
+	}
+	
+	@Override
+	public String toString()
+	{
+		return getClassType().getQualifiedName();
 	}
 }

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Builder">
+	<property name="dir.lib" value="lib" />
+	<property name="dir.tmp" value="tmp" />
+	<property name="dir.source" value="src" />
+	<property name="dir.classes" value="${dir.tmp}/classes" />
+	<property name="dir.restmp" value="${dir.tmp}/res" />
+	<property name="dir.utils" value="D:\dev\java\workspaces\foospace\foo-utils"/> <!--Fix me!!!-->
+	<property name="dir.psd" value="${dir.utils}\PsdParser"/>
+	<property name="dir.swf" value="${dir.utils}\SwfExport"/>
+	
+	<path id="libs">
+		<fileset dir="${dir.lib}">
+			<include name="**/*.jar" /> 
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="${dir.tmp}" />
+	</target>
+	
+	<target name="cleanres">
+		<delete dir="${dir.restmp}" />
+	</target>
+	
+	<target name="build-classes">
+		<ant antfile="${dir.ext}/build.xml" target="build-classes" dir="${dir.ext}">
+			<property name="dir.output" value="${basedir}/${dir.classes}" />
+		</ant>
+	</target>
+	
+	<target name="build">
+		<!-- Build externals -->
+		<antcall target="build-classes">
+			<param name="dir.ext" value="${dir.psd}"/>
+		</antcall>
+		<antcall target="build-classes">
+			<param name="dir.ext" value="${dir.swf}"/>
+		</antcall>
+		
+		<!-- Build project -->
+		<mkdir dir="${dir.classes}"/>
+		<javac destdir="${dir.classes}" debug="true" encoding="UTF-8">
+		  	<src path="${dir.source}" /> 
+			<classpath refid="libs"/>
+		</javac>		
+		
+		<!-- Res output -->
+		<mkdir dir="${dir.restmp}"/>
+	</target>	
+</project>

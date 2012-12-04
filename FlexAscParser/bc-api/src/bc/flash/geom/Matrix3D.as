@@ -1,7 +1,7 @@
 package bc.flash.geom
 {
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.utils.MathHelper;
-	import bc.flash.error.NotImplementedError;
 	/**
 	 * @author weee
 	 */

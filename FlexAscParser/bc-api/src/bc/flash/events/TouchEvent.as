@@ -1,5 +1,6 @@
 package bc.flash.events
 {
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.display.DisplayObject;
 	import bc.flash.display.DisplayObjectContainer;
 	/**
@@ -30,6 +31,9 @@ package bc.flash.events
         private var mShiftKey:Boolean;
         private var mCtrlKey:Boolean;
         private var mTimestamp:Number;
+        private var mPressure:Number;
+        private var mSizeX:Number;
+        private var mSizeY:Number;
         
         /** Creates a new TouchEvent instance. */
         public function TouchEvent(type:String, touches:Vector.<Touch>, shiftKey:Boolean=false, 
@@ -104,5 +108,31 @@ package bc.flash.events
         
         /** Indicates if the ctrl key was pressed when the event occurred. (Mac OS: Cmd or Ctrl) */
         public function get ctrlKey():Boolean { return mCtrlKey; }
+        
+        public function get pressure():Number { return mPressure; }
+        
+        public function get sizeX():Number { return mSizeX; }
+        
+        public function get sizeY():Number { return mSizeY; }
+		
+		public function get stageX() : Number
+		{
+			throw new NotImplementedError();	
+		}
+
+		public function get stageY() : Number
+		{
+			throw new NotImplementedError();	
+		}
+		
+		public function get touchPointID() : int
+		{
+			throw new NotImplementedError();
+		}
+
+		public function set touchPointID(value : int) : void
+		{
+			throw new NotImplementedError();			
+		}
     }
 }

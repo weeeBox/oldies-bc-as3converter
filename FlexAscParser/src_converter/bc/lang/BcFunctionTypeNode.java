@@ -6,6 +6,7 @@ public class BcFunctionTypeNode extends BcTypeNode
 {
 	private BcFunctionDeclaration func;
 	private boolean useByDefault;
+	private String attachedParam;
 
 	public BcFunctionTypeNode()
 	{
@@ -42,6 +43,16 @@ public class BcFunctionTypeNode extends BcTypeNode
 		return func != null;
 	}
 	
+	public boolean isGetter()
+	{
+		return func != null && func.isGetter();
+	}
+	
+	public boolean isSetter()
+	{
+		return func != null && func.isSetter();
+	}
+	
 	public BcFunctionDeclaration getFunc()
 	{
 		return func;
@@ -70,8 +81,23 @@ public class BcFunctionTypeNode extends BcTypeNode
 		return func.hasReturnType();
 	}
 
-	public void setReturnType(BcTypeNode returnType)
+	public void setReturnType(BcTypeNodeInstance returnType)
 	{
 		func.setReturnType(returnType);
+	}
+
+	public String getAttachedParam()
+	{
+		return attachedParam;
+	}
+	
+	public void setAttachedParam(String attachedParam)
+	{
+		this.attachedParam = attachedParam;
+	}
+	
+	public boolean hasAttachedParam()
+	{
+		return attachedParam != null;
 	}
 }

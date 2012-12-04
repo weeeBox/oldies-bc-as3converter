@@ -4,9 +4,40 @@ import java.util.List;
 
 public class BcStringUtils
 {
+	private static final char[] ESCAPED_SYMBOLS = {
+		'\b', '\f', '\n', '\r', '\t', '"'
+	};
+	
 	public static String replaceEscapes(String str)
 	{
-		return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\b", "\\\b").replace("\f", "\\\f").replace("\n", "\\\n").replace("\r", "\\\r").replace("\t", "\\\t");
+		str = str.replace("\n", "\\n");
+		str = str.replace("\b", "\\b");
+		str = str.replace("\f", "\\f");
+		str = str.replace("\r", "\\r");
+		str = str.replace("\t", "\\t");
+		str = str.replace("\"", "\\\"");
+		
+		return str;
+	}
+	
+	public static boolean needsEscaped(String str)
+	{
+		if (str != null)
+		{
+			for (char ch : ESCAPED_SYMBOLS) 
+			{
+				if (str.indexOf(ch) != -1)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public static String parentesis(String str)
+	{
+		return '"' + replaceEscapes(str) + '"';
 	}
 	
 	public static <T> String commaSeparated(T... values)

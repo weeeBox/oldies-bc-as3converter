@@ -19,7 +19,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 {
 	private List<BcFuncParam> params;
 	
-	private BcTypeNode returnType;
+	private BcTypeNodeInstance returnTypeInstance;
 	private String name;
 	private boolean isConstructor;
 	private boolean isOverridenConstructor;
@@ -49,6 +49,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 	{
 		this.name = name;
 		params = new ArrayList<BcFuncParam>();
+		declaredVars = new ArrayList<BcVariableDeclaration>();
 	}
 	
 	public StatementListNode getStatements()
@@ -102,9 +103,9 @@ public class BcFunctionDeclaration extends BcDeclaration
 		return null;
 	}
 	
-	public void setReturnType(BcTypeNode returnType)
+	public void setReturnType(BcTypeNodeInstance returnType)
 	{
-		this.returnType = returnType;
+		this.returnTypeInstance = returnType;
 	}
 	
 	public void setBody(ListWriteDestination body)
@@ -112,14 +113,19 @@ public class BcFunctionDeclaration extends BcDeclaration
 		this.body = body;
 	}
 	
+	public BcTypeNodeInstance getReturnTypeInstance()
+	{
+		return returnTypeInstance;
+	}
+	
 	public BcTypeNode getReturnType()
 	{
-		return returnType;
+		return returnTypeInstance != null ? returnTypeInstance.getType() : null;
 	}
 	
 	public boolean hasReturnType()
 	{
-		return returnType != null;
+		return returnTypeInstance != null;
 	}
 	
 	public void setConstructorFlag(boolean flag)
@@ -240,9 +246,41 @@ public class BcFunctionDeclaration extends BcDeclaration
 		return params;
 	}
 	
+	public int paramsCount()
+	{
+		return params != null ? params.size() : 0;
+	}
+	
+	public boolean hasRestParams()
+	{
+		int paramsCount = params.size();
+		return paramsCount > 0 && params.get(paramsCount - 1).getType() instanceof BcRestTypeNode;
+	}
+	
 	public ListWriteDestination getBody()
 	{
 		return body;
+	}
+	
+	public BcFunctionDeclaration clone() 
+	{
+		BcFunctionDeclaration func = new BcFunctionDeclaration(name);
+		
+		func.params = params;
+		func.returnTypeInstance = returnTypeInstance;
+		func.name = name;
+		func.isConstructor = isConstructor;
+		func.isOverridenConstructor = isOverridenConstructor;
+		func.defaultParamsCount = defaultParamsCount;
+		func.owner = owner;
+		func.declaredVars = declaredVars;
+		func.body = body;
+		func.type = type;
+		func.kind = kind;
+		func.statements = statements;
+		func.isSelector = isSelector;
+		
+		return func;
 	}
 	
 	public BcFunctionDeclaration createOverridenWithNumDefParams(int numParams)
@@ -251,7 +289,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 		
 		bcFunc.isConstructor = isConstructor;
 		bcFunc.isOverridenConstructor = isConstructor;
-		bcFunc.returnType = returnType;
+		bcFunc.returnTypeInstance = returnTypeInstance;
 		bcFunc.kind = kind;
 		bcFunc.declaredVars = new ArrayList<BcVariableDeclaration>(declaredVars);
 		bcFunc.modifiers = modifiers;
@@ -307,5 +345,43 @@ public class BcFunctionDeclaration extends BcDeclaration
 		bcFunc.statements = newStatements;
 		
 		return bcFunc;
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder result = new StringBuilder();
+		if (returnTypeInstance != null)
+		{
+			result.append(returnTypeInstance.getQualifiedName());
+		}
+		else
+		{
+			result.append("void");
+		}
+		
+		result.append(" ");
+		
+		if (owner != null)
+		{
+			result.append(owner + "::");
+		}
+		
+		result.append(name);
+		result.append("(");
+		
+		int paramIndex = 0;
+		for (BcFuncParam param : params)
+		{
+			result.append(param.getTypeInstance().getQualifiedName());
+			if (++paramIndex < params.size())
+			{
+				result.append(",");
+			}
+		}
+		
+		result.append(")");
+		
+		return result.toString();
 	}
 }

@@ -1,7 +1,7 @@
 package bc.flash.events
 {
-	import bc.flash.error.NotImplementedError;
 	import bc.flash.display.DisplayObject;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Point;
 	public class Touch

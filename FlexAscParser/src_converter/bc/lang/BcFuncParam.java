@@ -6,9 +6,9 @@ public class BcFuncParam extends BcVariableDeclaration
 {
 	private Node defaultInitializer;
 	
-	public BcFuncParam(BcTypeNode type, String identifier)
+	public BcFuncParam(BcTypeNode type, String identifier, boolean qualified)
 	{
-		super(type, identifier);
+		super(type, identifier, qualified);
 	}
 	
 	public boolean hasDefaultInitializer()

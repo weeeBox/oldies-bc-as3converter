@@ -7,7 +7,9 @@ public class BcDeclaration extends BcNode
 	protected List<String> modifiers;
 	
 	protected boolean constant;
+	
 	protected BcMetadata metadata;
+	protected BcImportList importList;
 	
 	public void setMetadata(BcMetadata metadata) 
 	{
@@ -27,6 +29,16 @@ public class BcDeclaration extends BcNode
 	public void setModifiers(List<String> modifiers)
 	{
 		this.modifiers = modifiers;
+	}
+	
+	public void setImportList(BcImportList importList)
+	{
+		this.importList = importList;
+	}
+	
+	public BcImportList getImportList()
+	{
+		return importList;
 	}
 	
 	public boolean isStatic()

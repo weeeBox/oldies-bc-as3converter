@@ -5,17 +5,22 @@ import bc.code.ListWriteDestination;
 
 public class BcVariableDeclaration extends BcDeclaration
 {
-	private BcTypeNode type;
+	private BcTypeNodeInstance typeInstance;
 	private String identifier;
 	private ListWriteDestination initializer;
 	private boolean integralInitializerFlag;
 	
 	private Node initializerNode;
 	
-	public BcVariableDeclaration(BcTypeNode type, String identifier)
+	public BcVariableDeclaration(BcTypeNode type, String identifier, boolean qualified)
 	{
-		this.type = type;
 		this.identifier = identifier;
+		typeInstance = new BcTypeNodeInstance(type, qualified);
+	}
+	
+	public boolean isQualified()
+	{
+		return typeInstance.isQualified();
 	}
 	
 	public void setInitializerNode(Node initializerNode)
@@ -30,12 +35,17 @@ public class BcVariableDeclaration extends BcDeclaration
 	
 	public BcTypeNode getType()
 	{
-		return type;
+		return typeInstance.getType();
 	}
 	
-	public void setType(BcTypeNode type)
+	public BcTypeNodeInstance getTypeInstance()
 	{
-		this.type = type;
+		return typeInstance;
+	}
+	
+	public void setTypeInstance(BcTypeNodeInstance typeInstance) 
+	{
+		this.typeInstance = typeInstance;
 	}
 	
 	public String getIdentifier()
@@ -66,5 +76,22 @@ public class BcVariableDeclaration extends BcDeclaration
 	public ListWriteDestination getInitializer()
 	{
 		return initializer;
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder result = new StringBuilder();
+		result.append(typeInstance.getQualifiedName());
+		result.append(" ");
+		result.append(getIdentifier());
+		
+		if (hasInitializer())
+		{
+			result.append(" = ");
+			result.append(getInitializer());
+		}
+		
+		return result.toString();
 	}
 }

@@ -1,16 +1,16 @@
 package bc.flash.display
 {
-	import bc.flash.utils.MathHelper;
-
-	import flash.utils.getQualifiedClassName;
-
-	import bc.flash.geom.Matrix;
-	import bc.flash.utils.transformCoords;
 	import bc.flash.core.RenderSupport;
-	import bc.flash.error.AbstractClassError;
+	import bc.flash.errors.AbstractClassError;
 	import bc.flash.events.Event;
+	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Point;
 	import bc.flash.geom.Rectangle;
+	import bc.flash.utils.MathHelper;
+	import bc.flash.utils.transformCoords;
+	import flash.utils.getQualifiedClassName;
+
+
 
 	public class DisplayObjectContainer extends InteractiveObject
 	{

@@ -1,6 +1,6 @@
 package bc.flash.media
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.events.EventDispatcher;
 	import bc.flash.net.URLRequest;
 

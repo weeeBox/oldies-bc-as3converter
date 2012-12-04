@@ -1,6 +1,6 @@
 package bc.flash 
 {
-	import bc.flash.error.NotImplementedError;
+	import bc.flash.errors.NotImplementedError;
 	
 	[ConvertOnce]
 	public class Vector extends Object 
@@ -30,9 +30,9 @@ package bc.flash
 
 		/* public function map(callback : Function, thisObject : Object = null) : Vector { throw new NotImplementedError(); } */
 
-		public function pop() : Object { throw new NotImplementedError(); }
+		public function pop() : _$_generic_$_ { throw new NotImplementedError(); }
 
-		public function push(arg : Object) : uint { throw new NotImplementedError(); }
+		public function push(... arg) : uint { throw new NotImplementedError(); }
 
 		public function reverse() : Vector { throw new NotImplementedError(); }
 
@@ -42,6 +42,7 @@ package bc.flash
 
 		/* public function some(callback : Function, thisObject : Object = null) : Boolean; */
 
+		[FunctionType(callback="ComparatorFunction", params="o1:Object,o2:Object")]
 		public function sort(compareFunction : Function) : Vector { throw new NotImplementedError(); }
 
 		public function splice(startIndex : int, deleteCount : uint, item : Object = null) : Vector { throw new NotImplementedError(); }
@@ -50,6 +51,6 @@ package bc.flash
 
 		public function toString() : String { throw new NotImplementedError(); }
 
-		public function unshift(arg : Object) : uint { throw new NotImplementedError(); }
+		public function unshift(... arg) : uint { throw new NotImplementedError(); }
 	}
 }

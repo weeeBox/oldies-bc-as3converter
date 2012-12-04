@@ -19,18 +19,64 @@ import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.MetaDataNode;
 import macromedia.asc.parser.Node;
+import macromedia.asc.parser.PackageDefinitionNode;
+import macromedia.asc.parser.PackageNameNode;
+import macromedia.asc.parser.ParameterNode;
+import macromedia.asc.parser.QualifiedIdentifierNode;
+import macromedia.asc.parser.RestParameterNode;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
 import macromedia.asc.parser.TypeExpressionNode;
+import macromedia.asc.parser.TypedIdentifierNode;
 import macromedia.asc.util.ObjectList;
 import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
-import bc.lang.BcWildcardTypeNode;
+import bc.lang.BcUntypedTypeNode;
 
 public class BcNodeHelper
 {
+	public static String tryExtractPackageName(ClassDefinitionNode classDefinitionNode)
+	{
+		PackageDefinitionNode pkgdef = classDefinitionNode.pkgdef;
+		if (pkgdef != null)
+		{
+			return tryExtractPackageName(pkgdef.name);
+		}		
+		
+		return null;
+	}
+
+	public static String tryExtractPackageName(PackageNameNode packageNameNode)
+	{
+		if (packageNameNode != null)
+		{
+			return safeQualifier(packageNameNode.id.pkg_part);
+		}
+		return null;
+	}
+	
+	public static String safeQualifier(String qualifier)
+	{
+		if (qualifier != null)
+		{
+			if (qualifier.startsWith("flash."))
+			{
+				// replace Flash api class usage with bc platform class usage
+				// in order to avoid issues with unique reference types
+				return "bc." + qualifier;
+			}
+			
+			if (qualifier.startsWith("__AS3__."))
+			{
+				return "bc.flash";
+			}
+		}
+		
+		return qualifier;
+	}
+	
 	public static List<String> extractModifiers(AttributeListNode attrs)
 	{
 		List<String> modifiers = new ArrayList<String>();
@@ -135,6 +181,10 @@ public class BcNodeHelper
 				assert false;
 			}
 		}
+		else if (node instanceof LiteralStringNode)
+		{
+			// ignore
+		}
 		else
 		{
 			assert false;
@@ -144,9 +194,8 @@ public class BcNodeHelper
 	public static BcTypeNode extractBcType(Node type)
 	{
 		if (type == null)
-		{
-			assert false : "Found * type";
-			return new BcWildcardTypeNode();
+		{			
+			return new BcUntypedTypeNode();
 		}
 		
 		if (type instanceof IdentifierNode)
@@ -170,9 +219,21 @@ public class BcNodeHelper
 		if (type instanceof GetExpressionNode)
 		{
 			GetExpressionNode selector = (GetExpressionNode) type;
-			String name = ((IdentifierNode)selector.expr).name;
+			if (selector.expr instanceof QualifiedIdentifierNode)
+			{
+				QualifiedIdentifierNode identifier = (QualifiedIdentifierNode)selector.expr;
+				String name = identifier.name;
+				String qualifier = identifier.qualifier != null ? ((LiteralStringNode)identifier.qualifier).value : null;			 
+				
+				return BcTypeNode.create(name, safeQualifier(qualifier));
+			}
+			if (selector.expr instanceof IdentifierNode)
+			{
+				return extractBcType(selector.expr);
+			}
 			
-			return BcTypeNode.create(name);
+			assert false;
+			return null;
 		}
 		
 		if (type instanceof ApplyTypeExprNode)
@@ -180,15 +241,100 @@ public class BcNodeHelper
 			ApplyTypeExprNode selector = (ApplyTypeExprNode) type;
 			String typeName = ((IdentifierNode)selector.expr).name;
 			
+			BcTypeNode baseType = BcTypeNode.create(typeName);
+			assert baseType != null;
+			
 			ListNode typeArgs = selector.typeArgs;
 			assert typeArgs.size() == 1;
 			
-			BcTypeNode genericType = extractBcType(typeArgs.items.get(0));
-			return new BcVectorTypeNode(typeName, genericType);
+			Node genericNode = typeArgs.items.get(0);
+			BcTypeNode genericType = extractBcType(genericNode);
+			assert genericType != null;
+			
+			boolean qualified = isTypeQualified(genericNode);
+			return baseType.createGeneric(genericType.createTypeInstance(qualified));
+		}
+		
+		if (type instanceof TypedIdentifierNode)
+		{			
+			return extractBcType(((TypedIdentifierNode) type).type);
+		}
+		
+		if (type instanceof RestParameterNode)
+		{
+			RestParameterNode restTypeNode = (RestParameterNode) type;
+			BcTypeNode argType = extractBcType(restTypeNode.type);
+			assert argType != null;
+			
+			return BcTypeNode.createRestType(argType);
+		}
+		
+		if (type instanceof ParameterNode)
+		{
+			return extractBcType(((ParameterNode) type).type);
 		}
 		
 		assert false : type.getClass();
 		return null;
+	}
+	
+	public static boolean isTypeQualified(Node type)
+	{
+		if (type == null)
+		{			
+			return false;
+		}
+		
+		if (type instanceof QualifiedIdentifierNode)
+		{
+			return true;
+		}
+		
+		if (type instanceof IdentifierNode)
+		{
+			return false;
+		}
+		
+		if (type instanceof TypeExpressionNode)
+		{
+			TypeExpressionNode typeNode = (TypeExpressionNode) type;
+			return isTypeQualified(typeNode.expr);
+		}
+		
+		if (type instanceof MemberExpressionNode)
+		{
+			MemberExpressionNode expr = (MemberExpressionNode) type;
+			return isTypeQualified(expr.selector);
+		}
+		
+		if (type instanceof GetExpressionNode)
+		{
+			GetExpressionNode selector = (GetExpressionNode) type;
+			return selector.expr instanceof QualifiedIdentifierNode;
+		}
+		
+		if (type instanceof ApplyTypeExprNode)
+		{
+			return false;
+		}
+		
+		if (type instanceof TypedIdentifierNode)
+		{			
+			return isTypeQualified(((TypedIdentifierNode) type).type);
+		}
+		
+		if (type instanceof RestParameterNode)
+		{
+			return false;
+		}
+		
+		if (type instanceof ParameterNode)
+		{
+			return isTypeQualified(((ParameterNode) type).type);
+		}
+		
+		assert false : type.getClass();
+		return false;
 	}
 		
 	public static IdentifierNode tryExtractIdentifier(SelectorNode selector)
@@ -211,6 +357,7 @@ public class BcNodeHelper
 		{
 			return null;
 		}
+		
 		GetExpressionNode selector = (GetExpressionNode) memberNode.selector;
 		if (!(selector.expr instanceof IdentifierNode))
 		{
@@ -218,7 +365,7 @@ public class BcNodeHelper
 		}
 		return (IdentifierNode) selector.expr;
 	}
-	
+		
 	public static IdentifierNode tryExtractIdentifier(Node node)
 	{
 		if (node instanceof MemberExpressionNode)
@@ -322,6 +469,28 @@ public class BcNodeHelper
 				return true;
 			}
 		}
+		return false;
+	}
+	
+	public static boolean isPreprocessorConditionNode(Node node)
+	{
+		if (node instanceof ListNode)
+		{
+			ObjectList<Node> items = ((ListNode) node).items;
+			if (items.size() == 1 && items.get(0) instanceof MemberExpressionNode)
+			{
+				MemberExpressionNode memberNode = (MemberExpressionNode) items.get(0);
+				if (memberNode.selector instanceof CallExpressionNode)
+				{
+					CallExpressionNode callExp = (CallExpressionNode) memberNode.selector;
+					if (callExp.expr instanceof IdentifierNode)
+					{
+						return ((IdentifierNode) callExp.expr).name.equals("BC_AS3");
+					}
+				}
+			}
+		}
+		
 		return false;
 	}
 }

@@ -4,7 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import macromedia.asc.parser.IdentifierNode;
+import macromedia.asc.parser.LiteralStringNode;
+import macromedia.asc.parser.Node;
+import macromedia.asc.parser.QualifiedIdentifierNode;
+import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
+import bc.lang.BcTypeNodeInstance;
 
 public abstract class BcCodeHelper
 {
@@ -33,6 +38,7 @@ public abstract class BcCodeHelper
 		basicTypes.put("Boolean", "bool");
 		
 		integralTypes = new HashMap<String, String>();
+		integralTypes.put("void", "void");
 		integralTypes.put("uint", "uint");
 		integralTypes.put("int", "int");
 		integralTypes.put("long", "long");
@@ -47,6 +53,7 @@ public abstract class BcCodeHelper
 	}
 	
 	public abstract String literalNull();
+	public abstract String literalBool();
 	
 	public String getter(String name)
 	{
@@ -63,9 +70,19 @@ public abstract class BcCodeHelper
 		return value ? "true" : "false";
 	}
 	
+	public String literalString(Object value)
+	{
+		if (value == null)
+		{
+			throw new IllegalArgumentException("Value is null");
+		}
+		
+		return literalString(value.toString());
+	}
+	
 	public String literalString(String value)
 	{
-		return String.format("\"%s\"", BcStringUtils.replaceEscapes(value));
+		return BcStringUtils.parentesis(value);
 	}
 	
 	public String isNull(Object value)
@@ -102,6 +119,16 @@ public abstract class BcCodeHelper
 		return name;
 	}
 	
+	public static boolean isBasicType(BcTypeName typeName)
+	{
+		return isBasicType(typeName.getName());
+	}
+	
+	public static boolean isBasicType(BcTypeNodeInstance typeInstance)
+	{
+		return isBasicType(typeInstance.getType());
+	}
+	
 	public static boolean isBasicType(BcTypeNode type)
 	{
 		return isBasicType(type.getName());
@@ -122,7 +149,12 @@ public abstract class BcCodeHelper
 		return integralTypes.containsKey(name);
 	}
 	
-	public String identifier(IdentifierNode identifier)
+	public String extractIdentifier(IdentifierNode identifier)
+	{
+		return extractTypeName(identifier).getName();
+	}
+	
+	public BcTypeName extractTypeName(IdentifierNode identifier)
 	{
 		String name = identifier.name;
 		if (identifier.isAttr() && name.startsWith("@"))
@@ -130,7 +162,22 @@ public abstract class BcCodeHelper
 			name = name.substring(1);
 		}
 		
-		return identifier(name);
+		name = identifier(name);
+		
+		if (identifier instanceof QualifiedIdentifierNode)
+		{
+			QualifiedIdentifierNode qualifiedIdentifier = (QualifiedIdentifierNode) identifier;
+			Node qualifier = qualifiedIdentifier.qualifier;
+			if (qualifier instanceof LiteralStringNode)
+			{
+				String qualifierName = ((LiteralStringNode)qualifier).value;
+				return new BcTypeName(BcNodeHelper.safeQualifier(qualifierName), name);
+			}
+			
+			return new BcTypeName(name);
+		}
+		
+		return new BcTypeName(name);
 	}
 	
 	public String identifier(String name)

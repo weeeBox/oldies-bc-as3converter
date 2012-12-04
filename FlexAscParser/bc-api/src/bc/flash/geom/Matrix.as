@@ -1,8 +1,8 @@
 package bc.flash.geom
 {
-	import bc.flash.error.IllegalOperationError;
+	import bc.flash.errors.IllegalOperationError;
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.utils.MathHelper;
-	import bc.flash.error.NotImplementedError;
 
 	[ConvertOnce]
 	public final class Matrix extends Object
