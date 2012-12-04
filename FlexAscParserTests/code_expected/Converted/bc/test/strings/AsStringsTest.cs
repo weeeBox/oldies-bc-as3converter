@@ -6,13 +6,21 @@ namespace bc.test.strings
 {
 	public class AsStringsTest : AsObject
 	{
-		public AsStringsTest()
+		public virtual void testLiterals()
 		{
 			String str = "This is a string";
 			str = "This is a string";
 			str = "This is a string with \"escapes\"";
 			str = "This is a string with \"escapes\"";
+		}
+		public virtual void testLength()
+		{
+			String str = "This is a string";
 			int length = str.Length;
+		}
+		public virtual void testMethods()
+		{
+			String str = "This is a string";
 			String chrString = AsString.charAt(str, 0);
 			float chrCode = AsString.charCodeAt(str, 0);
 			String fromCharCode = AsString.fromCharCode(0);
@@ -32,12 +40,18 @@ namespace bc.test.strings
 			String toUpperCase = AsString.toUpperCase(str);
 			String toString = str.ToString();
 			String valueOf = AsString.valueOf(str);
+		}
+		public virtual void testTypesParsing()
+		{
 			float num = (AsString.parseFloat("10"));
 			int i = (AsString.parseInt("10"));
 			uint ui = (AsString.parseUint("10"));
 			bool b = (AsString.parseBool("true"));
-			length = "This is a string".Length;
-			replace = AsString.replace("This is a string", "string", "foo");
+		}
+		public virtual void testLiteralsCalls()
+		{
+			int length = "This is a string".Length;
+			String replace = AsString.replace("This is a string", "string", "foo");
 		}
 	}
 }

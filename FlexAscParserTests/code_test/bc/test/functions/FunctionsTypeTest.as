@@ -5,13 +5,23 @@ package bc.test.functions
     {
         private var mFunc:Function;
         
-        public function FunctionsTypeTest()
+        public function testFunctionAssignment() : void
         {
             mFunc = functionDefaultCallback;
+        }
+        
+        public function testFunctionUsage() : void
+        {
             mFunc("This is string", "This is another string");
-            
+        }
+        
+        public function testFunctionArgument() : void
+        {
             accept(functionDefaultCallback);
-            
+        }
+        
+        public function testFunctionApply() : void
+        {
             var args : Array = ["This is string", "This is another string"];
             functionDefaultCallback.apply(null, args);
         }

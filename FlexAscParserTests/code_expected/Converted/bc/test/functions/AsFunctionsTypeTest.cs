@@ -7,11 +7,20 @@ namespace bc.test.functions
 	public class AsFunctionsTypeTest : AsObject
 	{
 		private AsFunctionDefaultCallback mFunc;
-		public AsFunctionsTypeTest()
+		public virtual void testFunctionAssignment()
 		{
 			mFunc = functionDefaultCallback;
+		}
+		public virtual void testFunctionUsage()
+		{
 			mFunc("This is string", "This is another string");
+		}
+		public virtual void testFunctionArgument()
+		{
 			accept(functionDefaultCallback);
+		}
+		public virtual void testFunctionApply()
+		{
 			AsArray args = new AsArray("This is string", "This is another string");
 			functionDefaultCallback((String)(args[0]), (String)(args[1]));
 		}
