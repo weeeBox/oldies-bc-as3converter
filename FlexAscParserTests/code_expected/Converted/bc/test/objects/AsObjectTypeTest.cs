@@ -16,10 +16,27 @@ namespace bc.test.objects
 			Object obj = AsObject.createLiteralObject("a", "This is string", "b", 10);
 			String a = (String)(((AsObject)(obj)).getOwnProperty("a"));
 			int b = (int)(((AsObject)(obj)).getOwnProperty("b"));
-			((AsObject)(obj)).a = a;
-			((AsObject)(obj)).b = b;
+			((AsObject)(obj)).setOwnProperty("a", a);
+			((AsObject)(obj)).setOwnProperty("b", b);
 		}
 		public virtual void testLiteralObject2()
+		{
+			Object obj = AsObject.createLiteralObject("a", "This is string", "b", 10);
+			String a = (String)(((AsObject)(obj)).getOwnProperty("a"));
+			int b = (int)(((AsObject)(obj)).getOwnProperty("b"));
+			((AsObject)(obj)).setOwnProperty("a", a);
+			((AsObject)(obj)).setOwnProperty("b", b);
+		}
+		public virtual void testLiteralObject3()
+		{
+			Object obj = null;
+			obj = AsObject.createLiteralObject("a", "This is string", "b", 10);
+			String a = (String)(((AsObject)(obj)).getOwnProperty("a"));
+			int b = (int)(((AsObject)(obj)).getOwnProperty("b"));
+			((AsObject)(obj)).setOwnProperty("a", a);
+			((AsObject)(obj)).setOwnProperty("b", b);
+		}
+		public virtual void testLiteralObject4()
 		{
 			Object obj = null;
 			obj = AsObject.createLiteralObject("a", "This is string", "b", 10);

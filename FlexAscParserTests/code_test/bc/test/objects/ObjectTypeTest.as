@@ -19,11 +19,33 @@ package bc.test.objects
         
         public function testLiteralObject2() : void
         {
+            var obj : Object = {a:"This is string", b:10};
+            var a : String = obj.a;
+            var b : int = obj.b;
+            
+            obj["a"] = a;
+            obj["b"] = b;
+        }
+        
+        public function testLiteralObject3() : void
+        {
             var obj : Object = null;
             
             obj = {a:"This is string", b:10};
             var a : String = obj["a"];
             var b : int = obj["b"];
+            
+            obj["a"] = a;
+            obj["b"] = b;
+        }
+        
+        public function testLiteralObject4() : void
+        {
+            var obj : Object = null;
+            
+            obj = {a:"This is string", b:10};
+            var a : String = obj.a;
+            var b : int = obj.b;
             
             obj["a"] = a;
             obj["b"] = b;

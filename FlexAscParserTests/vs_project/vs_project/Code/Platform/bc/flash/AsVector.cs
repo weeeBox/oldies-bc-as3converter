@@ -140,6 +140,30 @@ namespace bc.flash
             internalList.RemoveAt(lastIndex);
             return lastElement;
         }
+
+        public virtual int push(AsArray array)
+        {
+            List<Object> args = array.internalList;
+            if (args.Count == 1)
+            {
+                internalList.Add((T)args[0]);
+            }
+            else if (args.Count > 1)
+            {
+                for (int i = 0; i < args.Count; ++i)
+                {
+                    internalList.Add((T)args[i]);
+                }
+            }
+            return internalList.Count;
+        }
+
+        public virtual int push(AsVector<T> other)
+        {
+            internalList.AddRange(other.internalList);
+            return internalList.Count;
+        }
+
         public virtual int push(params T[] args)
         {
             if (args.Length == 1)
