@@ -141,6 +141,8 @@
   <ItemGroup> 
     <!--Target group-->  
     <Compile Include="..\..\code_expected\Converted\bc\test\arrays\AsArraysTest.cs"/>
+    <Compile Include="..\..\code_expected\Converted\bc\test\basic\calls\AsCallsTests.cs"/>
+    <Compile Include="..\..\code_expected\Converted\bc\test\basic\calls\AsPropertiesTests.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\fields\AsClassA.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\fields\AsClassB.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\inheritance\AsBaseClass.cs"/>

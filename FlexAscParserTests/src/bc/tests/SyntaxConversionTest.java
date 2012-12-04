@@ -66,6 +66,20 @@ public class SyntaxConversionTest {
 	}
 	
 	@Test
+	public void testCalls() throws IOException
+	{
+		converter.convert(actualdDir, DIR_TEST + "/bc/test/basic/calls");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/basic/calls/AsPropertiesTests.cs",
+			"Converted/bc/test/basic/calls/AsCallsTests.cs"
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
 	public void testFields() throws IOException
 	{
 		converter.convert(actualdDir, DIR_TEST + "/bc/test/basic/fields");
