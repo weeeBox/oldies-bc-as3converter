@@ -145,6 +145,7 @@
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\calls\AsPropertiesTests.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\fields\AsClassA.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\fields\AsClassB.cs"/>
+    <Compile Include="..\..\code_expected\Converted\bc\test\basic\flow\AsFlowControlTests.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\inheritance\AsBaseClass.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\inheritance\AsChildClass.cs"/>
     <Compile Include="..\..\code_expected\Converted\bc\test\basic\types\AsTypesTests.cs"/>

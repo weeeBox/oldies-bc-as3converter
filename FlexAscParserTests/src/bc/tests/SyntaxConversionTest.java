@@ -133,6 +133,19 @@ public class SyntaxConversionTest {
 	}
 	
 	@Test
+	public void testFlowControl() throws IOException
+	{
+		converter.convert(actualdDir, DIR_TEST + "/bc/test/basic/flow");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/basic/flow/AsFlowControlTests.cs",
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
 	public void testFunctionTypes() throws IOException 
 	{
 		converter.convert(actualdDir, DIR_TEST + "/bc/test/functions");
