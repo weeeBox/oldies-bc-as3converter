@@ -1833,6 +1833,7 @@ public abstract class As2WhateverConverter
 
 		String identifier = exprDest.toString();
 		boolean addToDictionary = false;
+		boolean setDynamicProperty = false;
 
 		boolean setterCalled = false;
 		if (node.expr instanceof IdentifierNode)
@@ -1900,6 +1901,7 @@ public abstract class As2WhateverConverter
 					else
 					{
 						System.err.println("Warning! Dymaic set property: " + identifier);
+						setDynamicProperty = true;
 					}
 				}
 			}
@@ -2012,7 +2014,11 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{
-					if (needCast)
+					if (setDynamicProperty)
+					{
+						dest.write(call("setOwnProperty", codeHelper.literalString(identifier), argsDest));
+					}
+					else if (needCast)
 					{
 						dest.writef("%s = %s", identifier, cast(argsDest, argType, selectorType));
 					}
