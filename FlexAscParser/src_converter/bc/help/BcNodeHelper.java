@@ -33,7 +33,7 @@ import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcVectorTypeNode;
-import bc.lang.BcWildcardTypeNode;
+import bc.lang.BcUntypedTypeNode;
 
 public class BcNodeHelper
 {
@@ -195,7 +195,7 @@ public class BcNodeHelper
 	{
 		if (type == null)
 		{			
-			return new BcWildcardTypeNode();
+			return new BcUntypedTypeNode();
 		}
 		
 		if (type instanceof IdentifierNode)

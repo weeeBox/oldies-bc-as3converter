@@ -119,7 +119,7 @@ import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcUndefinedType;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
-import bc.lang.BcWildcardTypeNode;
+import bc.lang.BcUntypedTypeNode;
 import bc.preprocessor.Preprocessor;
 import bc.preprocessor.PreprocessorException;
 import bc.utils.filesystem.FileUtils;
@@ -2874,7 +2874,7 @@ public abstract class As2WhateverConverter
 			return null;
 		}
 
-		if (type instanceof BcWildcardTypeNode)
+		if (type instanceof BcUntypedTypeNode)
 		{
 			return findClass(BcTypeNode.typeObject);
 		}
@@ -4301,7 +4301,7 @@ public abstract class As2WhateverConverter
 
 	protected abstract String vectorType(BcVectorTypeNode vectorType);
 	protected abstract String restType(BcRestTypeNode type);
-	protected abstract String wildCardType(BcWildcardTypeNode type);
+	protected abstract String wildCardType(BcUntypedTypeNode type);
 	
 	public abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);
 	public abstract String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args);
@@ -4330,9 +4330,9 @@ public abstract class As2WhateverConverter
 			return restType((BcRestTypeNode) bcType);
 		}
 		
-		if (bcType instanceof BcWildcardTypeNode)
+		if (bcType instanceof BcUntypedTypeNode)
 		{
-			return wildCardType((BcWildcardTypeNode) bcType);
+			return wildCardType((BcUntypedTypeNode) bcType);
 		}
 		
 		String typeName = bcType.getName();

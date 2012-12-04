@@ -30,7 +30,7 @@ import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
-import bc.lang.BcWildcardTypeNode;
+import bc.lang.BcUntypedTypeNode;
 
 public class As2CsConverter extends As2WhateverConverter
 {
@@ -600,7 +600,7 @@ public class As2CsConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	protected String wildCardType(BcWildcardTypeNode type)
+	protected String wildCardType(BcUntypedTypeNode type)
 	{
 		return "Object";
 	}
