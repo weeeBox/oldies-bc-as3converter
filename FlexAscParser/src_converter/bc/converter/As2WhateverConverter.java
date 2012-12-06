@@ -2272,18 +2272,15 @@ public abstract class As2WhateverConverter
 		BcTypeNode conditionType = evaluateType(condition);
 		failConversionUnless(conditionType != null, "Unable to evaluate condition expression's type: '%s'", condString);
 
-		if (!typeEquals(conditionType, BcTypeNode.typeBoolean))
+		if (!conditionType.isIntegral())
 		{
-			if (typeEquals(conditionType, "int") || typeEquals(conditionType, "uint"))
-			{
-				return getCodeHelper().notZero(condString);
-			}
 			return getCodeHelper().notNull(condString);
 		}
-		else
+		else if (!(condition instanceof UnaryExpressionNode) && !typeEquals(conditionType, BcTypeNode.typeBoolean))
 		{
-			return String.format("%s", condString);
+			return getCodeHelper().notZero(condString);
 		}
+		return condString;
 	}
 
 	private void process(ConditionalExpressionNode node)
@@ -2612,7 +2609,6 @@ public abstract class As2WhateverConverter
 
 		if (node.op == Tokens.LOGICALAND_TOKEN || node.op == Tokens.LOGICALOR_TOKEN)
 		{
-
 			BcTypeNode lshType = evaluateType(node.lhs);
 			BcTypeNode rshType = evaluateType(node.rhs);
 
@@ -2620,7 +2616,7 @@ public abstract class As2WhateverConverter
 			{
 				if (canBeClass(lshType))
 				{
-					lshString = String.format("(%s)", getCodeHelper().notNull(lshString));
+					lshString = String.format("%s", getCodeHelper().notNull(lshString));
 				}
 				else
 				{
@@ -2632,7 +2628,7 @@ public abstract class As2WhateverConverter
 			{
 				if (canBeClass(rshType))
 				{
-					rshString = String.format("(%s)", getCodeHelper().notNull(rshString));
+					rshString = String.format("%s", getCodeHelper().notNull(rshString));
 				}
 				else
 				{
@@ -2672,15 +2668,15 @@ public abstract class As2WhateverConverter
 		}
 		else
 		{
-			if (BcNodeHelper.isBinaryOperandSetExpression(node.lhs))
+			if (BcNodeHelper.isBinaryOperandSetExpression(node.lhs) || BcNodeHelper.needsParentesisForBinaryOperation(node.lhs, node.op))
 			{
 				lshString = String.format("(%s)", lshString);
 			}
-			if (BcNodeHelper.isBinaryOperandSetExpression(node.rhs))
+			if (BcNodeHelper.isBinaryOperandSetExpression(node.rhs) || BcNodeHelper.needsParentesisForBinaryOperation(node.rhs, node.op))
 			{
 				rshString = String.format("(%s)", rshString);
 			}
-			dest.writef("(%s %s %s)", lshString, Tokens.tokenToString[-node.op], rshString);
+			dest.writef("%s %s %s", lshString, Tokens.tokenToString[-node.op], rshString);
 		}
 	}
 
@@ -2695,21 +2691,23 @@ public abstract class As2WhateverConverter
 		{
 		case Tokens.NOT_TOKEN:
 		{
-			if (node.expr instanceof MemberExpressionNode)
+			if (node.expr instanceof MemberExpressionNode || node.expr instanceof ListNode)
 			{
+				boolean needsParentesis = BcNodeHelper.needsParentesisForUnaryOperation(node.expr, node.op);
+				
 				BcTypeNode memberType = evaluateType(node.expr);
 				if (!typeEquals(memberType, BcTypeNode.typeBoolean))
 				{
-					dest.writef("(%s)", getCodeHelper().isNull(expr));
+					String exprFix = memberType.isIntegral() ? 
+							getCodeHelper().isZero(expr) : 
+							getCodeHelper().isNull(expr);
+							
+					dest.writef("%s", needsParentesis ? expr(exprFix) : exprFix);
 				}
 				else
 				{
-					dest.writef("!(%s)", expr);
+					dest.writef("!%s", needsParentesis ? expr(expr) : expr);
 				}
-			}
-			else if (node.expr instanceof ListNode)
-			{
-				process((ListNode)node.expr);
 			}
 			else
 			{

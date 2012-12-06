@@ -6,6 +6,7 @@ import java.util.List;
 import macromedia.asc.parser.ApplyTypeExprNode;
 import macromedia.asc.parser.ArgumentListNode;
 import macromedia.asc.parser.AttributeListNode;
+import macromedia.asc.parser.BinaryExpressionNode;
 import macromedia.asc.parser.CallExpressionNode;
 import macromedia.asc.parser.ClassDefinitionNode;
 import macromedia.asc.parser.FunctionDefinitionNode;
@@ -26,17 +27,31 @@ import macromedia.asc.parser.QualifiedIdentifierNode;
 import macromedia.asc.parser.RestParameterNode;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
+import macromedia.asc.parser.Tokens;
 import macromedia.asc.parser.TypeExpressionNode;
 import macromedia.asc.parser.TypedIdentifierNode;
 import macromedia.asc.util.ObjectList;
 import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
 import bc.lang.BcTypeNode;
-import bc.lang.BcVectorTypeNode;
 import bc.lang.BcUntypedTypeNode;
 
 public class BcNodeHelper
 {
+	private static final int[][] OPERATORS_PRECENDENCE = 
+	{
+		{ Tokens.MULT_TOKEN, Tokens.DIV_TOKEN, Tokens.MODULUS_TOKEN },
+		{ Tokens.PLUS_TOKEN, Tokens.MINUS_TOKEN },
+		{ Tokens.RIGHTSHIFT_TOKEN, Tokens.LEFTSHIFT_TOKEN, Tokens.UNSIGNEDRIGHTSHIFT_TOKEN },
+		{ Tokens.LESSTHAN_TOKEN, Tokens.GREATERTHAN_TOKEN, Tokens.LESSTHANOREQUALS_TOKEN, Tokens.GREATERTHANOREQUALS_TOKEN, Tokens.AS_TOKEN, Tokens.INSTANCEOF_TOKEN, Tokens.IS_TOKEN },
+		{ Tokens.EQUALS_TOKEN, Tokens.NOTEQUALS_TOKEN, Tokens.STRICTEQUALS_TOKEN, Tokens.STRICTNOTEQUALS_TOKEN },
+		{ Tokens.BITWISEAND_TOKEN},
+		{ Tokens.BITWISEXOR_TOKEN },
+		{ Tokens.BITWISEOR_TOKEN },
+		{ Tokens.LOGICALAND_TOKEN },
+		{ Tokens.LOGICALOR_TOKEN },
+	};
+	
 	public static String tryExtractPackageName(ClassDefinitionNode classDefinitionNode)
 	{
 		PackageDefinitionNode pkgdef = classDefinitionNode.pkgdef;
@@ -492,5 +507,81 @@ public class BcNodeHelper
 		}
 		
 		return false;
+	}
+
+	public static boolean needsParentesisForUnaryOperation(Node node, int op)
+	{
+		if (node instanceof MemberExpressionNode)
+		{
+			return needsParentesisForUnaryOperation((MemberExpressionNode)node, op);
+		}
+		
+		if (node instanceof ListNode)
+		{
+			return needsParentesisForUnaryOperation((ListNode)node, op);
+		}
+		
+		return true;
+	}
+	
+	public static boolean needsParentesisForUnaryOperation(MemberExpressionNode node, int op)
+	{
+		return false;
+	}
+	
+	public static boolean needsParentesisForUnaryOperation(ListNode node, int op)
+	{
+		if (node.items != null && node.items.size() == 1)
+		{
+			Node item = node.items.get(0);
+			if (item instanceof BinaryExpressionNode)
+			{
+				return needsParentesisForUnaryOperation((BinaryExpressionNode)item, op);
+			}
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public static boolean needsParentesisForUnaryOperation(BinaryExpressionNode node, int op)
+	{
+		return true;
+	}
+	
+	public static boolean needsParentesisForBinaryOperation(Node node, int op)
+	{
+		if (node instanceof BinaryExpressionNode)
+		{
+			return needsParentesisForBinaryOperation((BinaryExpressionNode) node, op);
+		}
+		return false;
+	}
+	
+	public static boolean needsParentesisForBinaryOperation(BinaryExpressionNode node, int op)
+	{
+		return hasMorePrecendence(op, node.op);
+	}
+	
+	private static boolean hasMorePrecendence(int op1, int op2) 
+	{
+		return findPrecendenceIndex(op1) < findPrecendenceIndex(op2);
+	}
+	
+	private static int findPrecendenceIndex(int op) 
+	{
+		for (int precendenceIndex = 0; precendenceIndex < OPERATORS_PRECENDENCE.length; ++precendenceIndex) 
+		{
+			int[] precendenceGroup = OPERATORS_PRECENDENCE[precendenceIndex];
+			for (int o : precendenceGroup) 
+			{
+				if (op == o)
+				{
+					return precendenceIndex;
+				}
+			}
+		}
+		
+		return Integer.MAX_VALUE;
 	}
 }

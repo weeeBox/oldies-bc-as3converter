@@ -9,14 +9,14 @@ namespace bc.test.basic.flow
 		public virtual void testIfNotNull()
 		{
 			Object obj = null;
-			if((obj != null))
+			if(obj != null)
 			{
 			}
 		}
 		public virtual void testIfNull()
 		{
 			Object obj = null;
-			if((obj == null))
+			if(obj == null)
 			{
 			}
 		}
@@ -30,7 +30,7 @@ namespace bc.test.basic.flow
 		public virtual void testIfNotReference()
 		{
 			Object obj = null;
-			if((obj == null))
+			if(obj == null)
 			{
 			}
 		}
@@ -38,7 +38,7 @@ namespace bc.test.basic.flow
 		{
 			int _value = 10;
 			int mask = 1;
-			if(((_value & mask)) != 0)
+			if((_value & mask) != 0)
 			{
 			}
 		}
@@ -46,7 +46,7 @@ namespace bc.test.basic.flow
 		{
 			int _value = 10;
 			int mask = 1;
-			if(((_value & mask)) == 0)
+			if((_value & mask) == 0)
 			{
 			}
 		}

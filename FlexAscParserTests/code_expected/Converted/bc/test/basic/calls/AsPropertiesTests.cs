@@ -27,8 +27,8 @@ namespace bc.test.basic.calls
 		}
 		public virtual void testRigthFunctionCall()
 		{
-			setField((getField() + " more string"));
-			Object _value = (getField() + " more string");
+			setField(getField() + " more string");
+			Object _value = getField() + " more string";
 		}
 		public virtual String getField()
 		{
