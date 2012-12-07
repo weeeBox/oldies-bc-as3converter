@@ -536,16 +536,11 @@ public class BcNodeHelper
 			Node item = node.items.get(0);
 			if (item instanceof BinaryExpressionNode)
 			{
-				return needsParentesisForUnaryOperation((BinaryExpressionNode)item, op);
+				return needsParentesisForBinaryOperation((BinaryExpressionNode)item, op);
 			}
 			return false;
 		}
 		
-		return true;
-	}
-	
-	public static boolean needsParentesisForUnaryOperation(BinaryExpressionNode node, int op)
-	{
 		return true;
 	}
 	

@@ -79,6 +79,7 @@ import macromedia.asc.parser.SuperStatementNode;
 import macromedia.asc.parser.SwitchStatementNode;
 import macromedia.asc.parser.ThisExpressionNode;
 import macromedia.asc.parser.ThrowStatementNode;
+import macromedia.asc.parser.Token;
 import macromedia.asc.parser.Tokens;
 import macromedia.asc.parser.TryStatementNode;
 import macromedia.asc.parser.UnaryExpressionNode;
@@ -2267,18 +2268,41 @@ public abstract class As2WhateverConverter
 		return createSafeConditionString(condString, condition);
 	}
 
-	private String createSafeConditionString(String condString, Node condition)
+	private String createSafeConditionString(String condString, Node conditionNode)
 	{
-		BcTypeNode conditionType = evaluateType(condition);
+		BcTypeNode conditionType = evaluateType(conditionNode);
 		failConversionUnless(conditionType != null, "Unable to evaluate condition expression's type: '%s'", condString);
 
 		if (!conditionType.isIntegral())
 		{
 			return getCodeHelper().notNull(condString);
 		}
-		else if (!(condition instanceof UnaryExpressionNode) && !typeEquals(conditionType, BcTypeNode.typeBoolean))
+		if (!typeEquals(conditionType, BcTypeNode.typeBoolean))
 		{
-			return getCodeHelper().notZero(condString);
+			if (conditionNode instanceof UnaryExpressionNode)
+			{
+				UnaryExpressionNode unaryExpression = (UnaryExpressionNode) conditionNode;
+				if (unaryExpression.op == Tokens.NOTEQUALS_TOKEN)
+				{
+					boolean needsParentesis = BcNodeHelper.needsParentesisForBinaryOperation(conditionNode, Tokens.EQUALS_TOKEN); // FIXME: other language may use another operator for comparation
+					if (needsParentesis)
+					{
+						condString = expr(condString);
+					}
+					
+					return getCodeHelper().isZero(condString);
+				}
+			}
+			else
+			{
+				boolean needsParentesis = BcNodeHelper.needsParentesisForBinaryOperation(conditionNode, Tokens.NOTEQUALS_TOKEN); // FIXME: other language may use another operator for comparation
+				if (needsParentesis)
+				{
+					condString = expr(condString);
+				}
+					
+				return getCodeHelper().notZero(condString);
+			}
 		}
 		return condString;
 	}
@@ -2693,19 +2717,21 @@ public abstract class As2WhateverConverter
 		{
 			if (node.expr instanceof MemberExpressionNode || node.expr instanceof ListNode)
 			{
-				boolean needsParentesis = BcNodeHelper.needsParentesisForUnaryOperation(node.expr, node.op);
 				
 				BcTypeNode memberType = evaluateType(node.expr);
 				if (!typeEquals(memberType, BcTypeNode.typeBoolean))
 				{
-					String exprFix = memberType.isIntegral() ? 
-							getCodeHelper().isZero(expr) : 
-							getCodeHelper().isNull(expr);
+					boolean needsParentesis = BcNodeHelper.needsParentesisForUnaryOperation(node.expr, Tokens.EQUALS_TOKEN);
+					String exprString = needsParentesis ? expr(expr) : expr.toString();
+					String safeExprString = memberType.isIntegral() ? 
+							getCodeHelper().isZero(exprString) : 
+							getCodeHelper().isNull(exprString);
 							
-					dest.writef("%s", needsParentesis ? expr(exprFix) : exprFix);
+					dest.writef(safeExprString);
 				}
 				else
 				{
+					boolean needsParentesis = BcNodeHelper.needsParentesisForUnaryOperation(node.expr, node.op);
 					dest.writef("!%s", needsParentesis ? expr(expr) : expr);
 				}
 			}
