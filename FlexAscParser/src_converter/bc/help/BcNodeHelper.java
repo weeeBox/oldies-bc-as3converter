@@ -509,34 +509,39 @@ public class BcNodeHelper
 		return false;
 	}
 
-	public static boolean needsParentesisForUnaryOperation(Node node, int op)
+	public static boolean needsParentesisForNode(Node node, int op)
 	{
 		if (node instanceof MemberExpressionNode)
 		{
-			return needsParentesisForUnaryOperation((MemberExpressionNode)node, op);
+			return needsParentesisForNode((MemberExpressionNode)node, op);
 		}
 		
 		if (node instanceof ListNode)
 		{
-			return needsParentesisForUnaryOperation((ListNode)node, op);
+			return needsParentesisForNode((ListNode)node, op);
+		}
+		
+		if (node instanceof BinaryExpressionNode)
+		{
+			return needsParentesisForNode((BinaryExpressionNode)node, op);
 		}
 		
 		return true;
 	}
 	
-	public static boolean needsParentesisForUnaryOperation(MemberExpressionNode node, int op)
+	public static boolean needsParentesisForNode(MemberExpressionNode node, int op)
 	{
 		return false;
 	}
 	
-	public static boolean needsParentesisForUnaryOperation(ListNode node, int op)
+	public static boolean needsParentesisForNode(ListNode node, int op)
 	{
 		if (node.items != null && node.items.size() == 1)
 		{
 			Node item = node.items.get(0);
 			if (item instanceof BinaryExpressionNode)
 			{
-				return needsParentesisForBinaryOperation((BinaryExpressionNode)item, op);
+				return needsParentesisForNode((BinaryExpressionNode)item, op);
 			}
 			return false;
 		}
@@ -544,23 +549,14 @@ public class BcNodeHelper
 		return true;
 	}
 	
-	public static boolean needsParentesisForBinaryOperation(Node node, int op)
+	public static boolean needsParentesisForNode(BinaryExpressionNode node, int op)
 	{
-		if (node instanceof BinaryExpressionNode)
-		{
-			return needsParentesisForBinaryOperation((BinaryExpressionNode) node, op);
-		}
-		return false;
+		return hasLessPrecendence(node.op, op);
 	}
 	
-	public static boolean needsParentesisForBinaryOperation(BinaryExpressionNode node, int op)
+	private static boolean hasLessPrecendence(int op1, int op2) 
 	{
-		return hasMorePrecendence(op, node.op);
-	}
-	
-	private static boolean hasMorePrecendence(int op1, int op2) 
-	{
-		return findPrecendenceIndex(op1) < findPrecendenceIndex(op2);
+		return findPrecendenceIndex(op1) > findPrecendenceIndex(op2);
 	}
 	
 	private static int findPrecendenceIndex(int op) 
