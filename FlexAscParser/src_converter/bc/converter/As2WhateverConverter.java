@@ -2692,11 +2692,11 @@ public abstract class As2WhateverConverter
 		}
 		else
 		{
-			if (BcNodeHelper.isBinaryOperandSetExpression(node.lhs) || BcNodeHelper.needsParentesisForNode(node.lhs, node.op))
+			if (node.lhs instanceof ListNode || BcNodeHelper.isBinaryOperandSetExpression(node.lhs) || BcNodeHelper.needsParentesisForNode(node.lhs, node.op))
 			{
 				lshString = String.format("(%s)", lshString);
 			}
-			if (BcNodeHelper.isBinaryOperandSetExpression(node.rhs) || BcNodeHelper.needsParentesisForNode(node.rhs, node.op))
+			if (node.rhs instanceof ListNode || BcNodeHelper.isBinaryOperandSetExpression(node.rhs) || BcNodeHelper.needsParentesisForNode(node.rhs, node.op))
 			{
 				rshString = String.format("(%s)", rshString);
 			}
@@ -2711,6 +2711,8 @@ public abstract class As2WhateverConverter
 		process(node.expr);
 		popDest();
 
+		boolean needsParentesis = node.expr instanceof ListNode;
+		
 		switch (node.op)
 		{
 		case Tokens.NOT_TOKEN:
@@ -2721,7 +2723,7 @@ public abstract class As2WhateverConverter
 				BcTypeNode memberType = evaluateType(node.expr);
 				if (!typeEquals(memberType, BcTypeNode.typeBoolean))
 				{
-					boolean needsParentesis = BcNodeHelper.needsParentesisForNode(node.expr, Tokens.EQUALS_TOKEN);
+					needsParentesis |= BcNodeHelper.needsParentesisForNode(node.expr, Tokens.EQUALS_TOKEN);
 					String exprString = needsParentesis ? expr(expr) : expr.toString();
 					String safeExprString = memberType.isIntegral() ? 
 							getCodeHelper().isZero(exprString) : 
@@ -2731,7 +2733,7 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{
-					boolean needsParentesis = BcNodeHelper.needsParentesisForNode(node.expr, node.op);
+					needsParentesis |= BcNodeHelper.needsParentesisForNode(node.expr, node.op);
 					dest.writef("!%s", needsParentesis ? expr(expr) : expr);
 				}
 			}
@@ -2742,7 +2744,7 @@ public abstract class As2WhateverConverter
 			break;
 		}
 		case Tokens.MINUS_TOKEN:
-			dest.writef("-%s", expr);
+			dest.writef("-%s", needsParentesis? expr(expr) : expr);
 			break;
 
 		default:

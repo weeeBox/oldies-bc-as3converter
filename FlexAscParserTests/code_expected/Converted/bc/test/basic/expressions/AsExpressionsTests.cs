@@ -24,14 +24,14 @@ namespace bc.test.basic.expressions
 			int a = 10;
 			int b = 20;
 			int c = 30;
-			Object d = a + b + c;
+			Object d = (a + b) + c;
 		}
 		public virtual void testAssignment4()
 		{
 			int a = 10;
 			int b = 20;
 			int c = 30;
-			Object d = a + b + c;
+			Object d = a + (b + c);
 		}
 		public virtual void testPriority()
 		{
