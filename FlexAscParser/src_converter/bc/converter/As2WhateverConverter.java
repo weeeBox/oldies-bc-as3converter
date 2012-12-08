@@ -2284,7 +2284,7 @@ public abstract class As2WhateverConverter
 				UnaryExpressionNode unaryExpression = (UnaryExpressionNode) conditionNode;
 				if (unaryExpression.op == Tokens.NOTEQUALS_TOKEN)
 				{
-					boolean needsParentesis = BcNodeHelper.needsParentesisForNode(conditionNode, Tokens.EQUALS_TOKEN); // FIXME: other language may use another operator for comparation
+					boolean needsParentesis = unaryExpression.expr instanceof BinaryExpressionNode;
 					if (needsParentesis)
 					{
 						condString = expr(condString);
@@ -2295,7 +2295,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				boolean needsParentesis = BcNodeHelper.needsParentesisForNode(conditionNode, Tokens.NOTEQUALS_TOKEN); // FIXME: other language may use another operator for comparation
+				boolean needsParentesis = conditionNode instanceof BinaryExpressionNode;
 				if (needsParentesis)
 				{
 					condString = expr(condString);
@@ -2692,11 +2692,11 @@ public abstract class As2WhateverConverter
 		}
 		else
 		{
-			if (node.lhs instanceof ListNode || BcNodeHelper.isBinaryOperandSetExpression(node.lhs) || BcNodeHelper.needsParentesisForNode(node.lhs, node.op))
+			if (BcNodeHelper.isBinaryOperandSetExpression(node.lhs) || BcNodeHelper.needsParentesisForNode(node.lhs, node.op))
 			{
 				lshString = String.format("(%s)", lshString);
 			}
-			if (node.rhs instanceof ListNode || BcNodeHelper.isBinaryOperandSetExpression(node.rhs) || BcNodeHelper.needsParentesisForNode(node.rhs, node.op))
+			if (BcNodeHelper.isBinaryOperandSetExpression(node.rhs) || BcNodeHelper.needsParentesisForNode(node.rhs, node.op))
 			{
 				rshString = String.format("(%s)", rshString);
 			}
@@ -2711,19 +2711,16 @@ public abstract class As2WhateverConverter
 		process(node.expr);
 		popDest();
 
-		boolean needsParentesis = node.expr instanceof ListNode;
-		
 		switch (node.op)
 		{
 		case Tokens.NOT_TOKEN:
 		{
 			if (node.expr instanceof MemberExpressionNode || node.expr instanceof ListNode)
 			{
-				
 				BcTypeNode memberType = evaluateType(node.expr);
 				if (!typeEquals(memberType, BcTypeNode.typeBoolean))
 				{
-					needsParentesis |= BcNodeHelper.needsParentesisForNode(node.expr, Tokens.EQUALS_TOKEN);
+					boolean needsParentesis = BcNodeHelper.needsParentesisForNode(node.expr, Tokens.EQUALS_TOKEN);
 					String exprString = needsParentesis ? expr(expr) : expr.toString();
 					String safeExprString = memberType.isIntegral() ? 
 							getCodeHelper().isZero(exprString) : 
@@ -2733,7 +2730,7 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{
-					needsParentesis |= BcNodeHelper.needsParentesisForNode(node.expr, node.op);
+					boolean needsParentesis = BcNodeHelper.needsParentesisForNode(node.expr, node.op);
 					dest.writef("!%s", needsParentesis ? expr(expr) : expr);
 				}
 			}
@@ -2744,8 +2741,11 @@ public abstract class As2WhateverConverter
 			break;
 		}
 		case Tokens.MINUS_TOKEN:
+		{
+			boolean needsParentesis = BcNodeHelper.needsParentesisForNode(node.expr, node.op);
 			dest.writef("-%s", needsParentesis? expr(expr) : expr);
 			break;
+		}
 
 		default:
 			failConversion("Unsupported unary operation: token=%d expr=%s", node.op, expr);

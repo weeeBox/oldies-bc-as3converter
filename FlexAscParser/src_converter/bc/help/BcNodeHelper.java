@@ -526,7 +526,7 @@ public class BcNodeHelper
 			return needsParentesisForNode((BinaryExpressionNode)node, op);
 		}
 		
-		return true;
+		return false;
 	}
 	
 	public static boolean needsParentesisForNode(MemberExpressionNode node, int op)
@@ -539,11 +539,7 @@ public class BcNodeHelper
 		if (node.items != null && node.items.size() == 1)
 		{
 			Node item = node.items.get(0);
-			if (item instanceof BinaryExpressionNode)
-			{
-				return needsParentesisForNode((BinaryExpressionNode)item, op);
-			}
-			return false;
+			return item instanceof BinaryExpressionNode;
 		}
 		
 		return true;

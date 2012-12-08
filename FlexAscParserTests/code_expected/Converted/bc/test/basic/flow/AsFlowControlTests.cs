@@ -100,7 +100,7 @@ namespace bc.test.basic.flow
 		{
 			int _value = 10;
 			int mask = 1;
-			if(_value + mask != 0)
+			if((_value + mask) != 0)
 			{
 			}
 		}
@@ -108,7 +108,7 @@ namespace bc.test.basic.flow
 		{
 			int _value = 10;
 			int mask = 1;
-			if(_value + mask == 0)
+			if((_value + mask) == 0)
 			{
 			}
 		}
