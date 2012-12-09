@@ -107,14 +107,10 @@ public class ConverterTestSuite
 
 	private void assertEquals(List<String> expectedLines, List<String> actualLines) 
 	{
-		if (expectedLines.size() != actualLines.size())
-		{
-			Assert.fail("Expected and actual lines lists have different sizes: " + expectedLines.size() + "!=" + actualLines.size());
-		}
-		
 		List<CodePair> difference = new ArrayList<CodePair>();
 		
-		for (int lineIndex = 0; lineIndex < expectedLines.size(); lineIndex++) 
+		int linesCount = Math.min(expectedLines.size(), actualLines.size());
+		for (int lineIndex = 0; lineIndex < linesCount; lineIndex++) 
 		{
 			String expectedLine = expectedLines.get(lineIndex);
 			String actualLine = actualLines.get(lineIndex);
@@ -124,7 +120,13 @@ public class ConverterTestSuite
 				difference.add(new CodePair(actualLine, expectedLine));
 			}
 		}
+		
 		Assert.assertTrue(toString(difference), difference.isEmpty());
+		
+		if (linesCount != actualLines.size())
+		{
+			Assert.fail("Expected and actual lines lists have different sizes: " + linesCount + "!=" + actualLines.size());
+		}
 	}
 
 	private String toString(List<CodePair> pairs)
