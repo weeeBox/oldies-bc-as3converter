@@ -16,11 +16,7 @@
 		</fileset>
 	</path>
 
-	<target name="clean">
-		<delete dir="${dir.classes}" />
-	</target>
-
-	<target name="build" depends="clean">
+	<target name="build">
 		<mkdir dir="${dir.classes}" />
 		<javac destdir="${dir.classes}" debug="true" encoding="UTF-8">
 			<src path="${dir.source}" />

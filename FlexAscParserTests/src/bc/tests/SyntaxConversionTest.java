@@ -21,6 +21,21 @@ public class SyntaxConversionTest extends ConverterTestSuite
 	}
 	
 	@Test
+	public void testPackages() throws IOException
+	{
+		convert("/bc/test/basic/packages");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/basic/packages/AsPackagesTests.cs",
+			"Converted/bc/test/basic/packages/foo/AsPackageClass.cs",
+			"Converted/bc/test/basic/packages/bar/AsPackageClass.cs",
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
 	public void testExpressions() throws IOException
 	{
 		convert("/bc/test/basic/expressions");

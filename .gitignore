@@ -8,7 +8,7 @@
 /FlexAscParserTests/output
 /FlexAscParserTests/code_actual
 
-/FlexAscParserTests/vs_project/*.suo
-/FlexAscParserTests/vs_project/vs_project/bin
-/FlexAscParserTests/vs_project/vs_project/obj
+/FlexAscParserTests/code_expected/*.suo
+/FlexAscParserTests/code_expected/bin
+/FlexAscParserTests/code_expected/obj
 
