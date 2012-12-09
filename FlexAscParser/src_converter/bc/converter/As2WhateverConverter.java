@@ -1250,7 +1250,7 @@ public abstract class As2WhateverConverter
 	{
 		if (typeEquals(baseType, BcTypeNode.typeObject))
 		{
-			String castString = createCast(base, BcTypeNode.create(BcTypeNode.typeObject));
+			String castString = createCast(base, BcTypeNode.create(BcTypeNode.typeObject).createTypeInstance());
 			dest.write(memberSelector(expr(castString), selector));
 		}
 		else
@@ -4294,18 +4294,14 @@ public abstract class As2WhateverConverter
 		return false;
 	}
 
-	private String cast(Object expression, BcTypeNode fromType, BcTypeNodeInstance toType)
-	{
-		return cast(expression, fromType, toType.getType(), toType.isQualified());
-	}
-	
 	private String cast(Object expression, BcTypeNode fromType, BcTypeNode toType)
 	{
-		return cast(expression, fromType, toType, false);
+		return cast(expression, fromType, toType.createTypeInstance());
 	}
 	
-	private String cast(Object expression, BcTypeNode fromType, BcTypeNode toType, boolean qualified)
+	private String cast(Object expression, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance)
 	{
+		BcTypeNode toType = toTypeInstance.getType();
 		if (toType.isIntegral() && typeEquals(fromType, BcTypeNode.typeString))
 		{
 			return parseString(expression, toType);
@@ -4325,11 +4321,11 @@ public abstract class As2WhateverConverter
 					return castString(expression, fromType);
 				}
 				
-				return castClass(expression, fromType, toType);
+				return castClass(expression, fromType, toTypeInstance);
 			}
 			else if (fromType.isInterface())
 			{
-				return castInterface(expression, fromType, toType);
+				return castInterface(expression, fromType, toTypeInstance);
 			}
 			else
 			{
@@ -4337,7 +4333,7 @@ public abstract class As2WhateverConverter
 			}
 		}
 
-		return createCast(expression, toType);
+		return createCast(expression, toTypeInstance);
 	}
 
 	/* code helper */
@@ -4415,6 +4411,17 @@ public abstract class As2WhateverConverter
 		return classType(name);
 	}
 
+	protected String classType(BcTypeNodeInstance typeInstance)
+	{
+		BcTypeNode type = typeInstance.getType();
+		if (typeInstance.isQualified())
+		{
+			return typeInstance.getQualified() + "." + classType(type);
+		}
+		
+		return classType(type);
+	}
+	
 	protected String classType(BcTypeNode type)
 	{
 		if (type.isIntegral())
@@ -4571,22 +4578,22 @@ public abstract class As2WhateverConverter
 		return String.format("(%s)", expr);
 	}
 	
-	public String createCast(Object expr, BcTypeNode type)
+	public String createCast(Object expr, BcTypeNodeInstance toTypeInstance)
 	{
-		return String.format("(%s)(%s)", classType(type), expr);
+		return String.format("(%s)(%s)", classType(toTypeInstance), expr);
 	}
 
 	public String castString(Object expr, BcTypeNode fromType)
 	{
-		return castClass(expr, fromType, BcTypeNode.create(BcTypeNode.typeString));
+		return castClass(expr, fromType, BcTypeNode.create(BcTypeNode.typeString).createTypeInstance());
 	}
 	
-	public String castClass(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	public String castClass(Object expr, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance)
 	{
-		return createCast(expr, toType);
+		return createCast(expr, toTypeInstance);
 	}
 
-	public String castInterface(Object expr, BcTypeNode fromType, BcTypeNode toType)
+	public String castInterface(Object expr, BcTypeNode fromType, BcTypeNodeInstance toType)
 	{
 		return createCast(expr, toType);
 	}
