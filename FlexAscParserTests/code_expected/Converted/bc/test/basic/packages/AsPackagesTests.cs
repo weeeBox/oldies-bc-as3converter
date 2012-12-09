@@ -3,6 +3,8 @@ using System;
 using bc.flash;
 using bc.test.basic.packages.bar;
 using bc.test.basic.packages.foo;
+// using AsPackageClass = bc.test.basic.packages.bar.AsPackageClass;
+// using AsPackageClass = bc.test.basic.packages.foo.AsPackageClass;
  
 namespace bc.test.basic.packages
 {
@@ -31,7 +33,7 @@ namespace bc.test.basic.packages
 		}
 		public virtual void testCast()
 		{
-			Object obj1 = new bc.test.basic.packages.bar.AsPackageClass();
+			Object obj1 = new bc.test.basic.packages.foo.AsPackageClass();
 			Object obj2 = new bc.test.basic.packages.bar.AsPackageClass();
 			foo1 = ((bc.test.basic.packages.foo.AsPackageClass)(obj1));
 			foo2 = ((bc.test.basic.packages.bar.AsPackageClass)(obj2));
