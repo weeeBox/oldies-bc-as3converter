@@ -5,10 +5,10 @@
 	<property name="dir.classes" value="bin" />
 	<property name="dir.lib" value="lib" />
 
-	<property name="project.dir" value="vs_project/vs_project" />
+	<property name="project.dir" value="code_expected" />
 	<property name="project.file" value="vs_project" />
 
-	<property name="dir.input" value="code_expected" />
+	<property name="dir.input" value="${project.dir}/Converted" />
 
 	<path id="libs">
 		<fileset dir="${dir.lib}">
