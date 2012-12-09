@@ -593,7 +593,7 @@ public class As2CsConverter extends As2WhateverConverter
 	@Override
 	protected String vectorType(BcVectorTypeNode vectorType)
 	{
-		String genericName = type(vectorType.getGeneric());
+		String genericName = type(vectorType.getGenericTypeInstance());
 		return type(VECTOR_BC_TYPE) + "<" + genericName + ">";
 	}
 	
@@ -613,13 +613,13 @@ public class As2CsConverter extends As2WhateverConverter
 	@Override
 	public String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
 	{
-		return NEW + " " + type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGeneric()) + ">" + "(" + args + ")";
+		return NEW + " " + type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGenericTypeInstance()) + ">" + "(" + args + ")";
 	}
 	
 	@Override
 	public String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args)
 	{
-		return staticCall(type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGeneric()) + ">", "create", args);
+		return staticCall(type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGenericTypeInstance()) + ">", "create", args);
 	}
 	
 	@Override
