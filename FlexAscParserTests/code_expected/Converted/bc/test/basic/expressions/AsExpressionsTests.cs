@@ -16,17 +16,23 @@ namespace bc.test.basic.expressions
 		{
 			int a = 10;
 			int b = 20;
-			int c = 30;
-			Object d = a + b + c;
+			Object c = a + b;
 		}
 		public virtual void testAssignment3()
 		{
 			int a = 10;
 			int b = 20;
 			int c = 30;
-			Object d = (a + b) + c;
+			Object d = a + b + c;
 		}
 		public virtual void testAssignment4()
+		{
+			int a = 10;
+			int b = 20;
+			int c = 30;
+			Object d = (a + b) + c;
+		}
+		public virtual void testAssignment5()
 		{
 			int a = 10;
 			int b = 20;
@@ -46,6 +52,33 @@ namespace bc.test.basic.expressions
 			int b = 20;
 			int c = 30;
 			Object d = a * (b + c);
+		}
+		public virtual void testBooleans()
+		{
+			int a = 10;
+			int b = 20;
+			bool c = false;
+			Object d = c && (a + b) != 0;
+		}
+		public virtual void testBooleans2()
+		{
+			int a = 10;
+			int b = 20;
+			bool c = false;
+			Object d = (a + b) != 0 && c;
+		}
+		public virtual void testBooleans3()
+		{
+			int a = 10;
+			int b = 20;
+			Object d = (a + b) == 0 && (a + b) != 0;
+		}
+		public virtual void testBooleans4()
+		{
+			int a = 10;
+			int b = 20;
+			bool c = false;
+			Object d = (a + b) != 0 && (a + b) == 0;
 		}
 	}
 }

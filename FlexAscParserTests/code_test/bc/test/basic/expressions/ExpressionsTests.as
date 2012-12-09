@@ -14,8 +14,7 @@ package bc.test.basic.expressions
         {
             var a : int = 10;
             var b : int = 20;
-            var c : int = 30;
-            var d = a + b + c;
+            var c = (a + b);
         }
         
         public function testAssignment3() : void
@@ -23,10 +22,18 @@ package bc.test.basic.expressions
             var a : int = 10;
             var b : int = 20;
             var c : int = 30;
-            var d = (a + b) + c;
+            var d = a + b + c;
         }
         
         public function testAssignment4() : void
+        {
+            var a : int = 10;
+            var b : int = 20;
+            var c : int = 30;
+            var d = (a + b) + c;
+        }
+        
+        public function testAssignment5() : void
         {
             var a : int = 10;
             var b : int = 20;
@@ -50,5 +57,35 @@ package bc.test.basic.expressions
             var d = a * (b + c);
         }
         
+        public function testBooleans() : void
+        {
+            var a : int = 10;
+            var b : int = 20;
+            var c : Boolean = false;
+            var d = c && (a + b);
+        }
+        
+        public function testBooleans2() : void
+        {
+            var a : int = 10;
+            var b : int = 20;
+            var c : Boolean = false;
+            var d = (a + b) && c;
+        }
+        
+        public function testBooleans3() : void
+        {
+            var a : int = 10;
+            var b : int = 20;
+            var d = !(a + b) && (a + b);
+        }
+        
+        public function testBooleans4() : void
+        {
+            var a : int = 10;
+            var b : int = 20;
+            var c : Boolean = false;
+            var d = (a + b) && !(a + b);
+        }
     }
 }

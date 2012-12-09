@@ -95,6 +95,7 @@ import bc.error.ConverterException;
 import bc.error.NotImplementedException;
 import bc.help.BcCodeHelper;
 import bc.help.BcGlobal;
+import bc.help.BcNodeFactory;
 import bc.help.BcNodeHelper;
 import bc.help.BcStringUtils;
 import bc.lang.BcArgumentsList;
@@ -2617,9 +2618,25 @@ public abstract class As2WhateverConverter
 
 	private void process(BinaryExpressionNode node)
 	{
+		if (node.op == Tokens.LOGICALAND_TOKEN || node.op == Tokens.LOGICALOR_TOKEN || node.op == Tokens.LOGICALXOR_TOKEN)
+		{	
+			BcTypeNode lshType = evaluateType(node.lhs);
+			BcTypeNode rshType = evaluateType(node.rhs);
+
+			if (!typeEquals(lshType, BcTypeNode.typeBoolean))
+			{
+				node.lhs = BcNodeFactory.notNull(lshType, node.lhs);
+			}
+
+			if (!typeEquals(rshType, BcTypeNode.typeBoolean))
+			{
+				node.rhs = BcNodeFactory.notNull(rshType, node.rhs);
+			}
+		}
+		
 		ListWriteDestination ldest = new ListWriteDestination();
 		ListWriteDestination rdest = new ListWriteDestination();
-
+		
 		pushDest(ldest);
 		process(node.lhs);
 		popDest();
@@ -2630,39 +2647,8 @@ public abstract class As2WhateverConverter
 
 		String lshString = ldest.toString();
 		String rshString = rdest.toString();
-
-		if (node.op == Tokens.LOGICALAND_TOKEN || node.op == Tokens.LOGICALOR_TOKEN)
-		{
-			BcTypeNode lshType = evaluateType(node.lhs);
-			BcTypeNode rshType = evaluateType(node.rhs);
-
-			if (!typeEquals(lshType, BcTypeNode.typeBoolean))
-			{
-				if (canBeClass(lshType))
-				{
-					lshString = String.format("%s", getCodeHelper().notNull(lshString));
-				}
-				else
-				{
-					lshString = String.format("(%s)", getCodeHelper().notZero(lshString));
-				}
-			}
-
-			if (!typeEquals(rshType, BcTypeNode.typeBoolean))
-			{
-				if (canBeClass(rshType))
-				{
-					rshString = String.format("%s", getCodeHelper().notNull(rshString));
-				}
-				else
-				{
-					rshString = String.format("(%s)", getCodeHelper().notZero(rshString));
-				}
-			}
-
-			dest.writef("(%s %s %s)", lshString, Tokens.tokenToString[-node.op], rshString);
-		}
-		else if (node.op == Tokens.IS_TOKEN)
+		
+		if (node.op == Tokens.IS_TOKEN)
 		{
 			dest.write(operatorIs(ldest, rdest));
 		}
@@ -2706,6 +2692,17 @@ public abstract class As2WhateverConverter
 
 	private void process(UnaryExpressionNode node)
 	{
+		if (node.op == Tokens.NOT_TOKEN || node.op == Tokens.BITWISEXOR_TOKEN)
+		{
+			BcTypeNode exprType = evaluateType(node.expr);
+			if (!typeEquals(exprType, BcTypeNode.typeBoolean))
+			{
+				node.expr = BcNodeFactory.isNull(exprType, node.expr);
+				process(node.expr);
+				return;
+			}
+		}
+		
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
 		process(node.expr);
@@ -2717,22 +2714,8 @@ public abstract class As2WhateverConverter
 		{
 			if (node.expr instanceof MemberExpressionNode || node.expr instanceof ListNode)
 			{
-				BcTypeNode memberType = evaluateType(node.expr);
-				if (!typeEquals(memberType, BcTypeNode.typeBoolean))
-				{
-					boolean needsParentesis = BcNodeHelper.needsParentesisForNode(node.expr, Tokens.EQUALS_TOKEN);
-					String exprString = needsParentesis ? expr(expr) : expr.toString();
-					String safeExprString = memberType.isIntegral() ? 
-							getCodeHelper().isZero(exprString) : 
-							getCodeHelper().isNull(exprString);
-							
-					dest.writef(safeExprString);
-				}
-				else
-				{
-					boolean needsParentesis = BcNodeHelper.needsParentesisForNode(node.expr, node.op);
-					dest.writef("!%s", needsParentesis ? expr(expr) : expr);
-				}
+				boolean needsParentesis = BcNodeHelper.needsParentesisForNode(node.expr, node.op);
+				dest.writef("!%s", needsParentesis ? expr(expr) : expr);
 			}
 			else
 			{
@@ -3557,12 +3540,13 @@ public abstract class As2WhateverConverter
 		if (node instanceof UnaryExpressionNode)
 		{
 			UnaryExpressionNode unary = (UnaryExpressionNode) node;
+			if (unary.op == Tokens.NOT_TOKEN || unary.op == Tokens.BITWISEXOR_TOKEN)
+			{
+				return createBcType(BcTypeNode.typeBoolean);
+			}
+			
 			if (unary.expr instanceof MemberExpressionNode)
 			{
-				if (unary.op == Tokens.NOT_TOKEN)
-				{
-					return createBcType(BcTypeNode.typeBoolean);
-				}
 				return evaluateMemberExpression((MemberExpressionNode) unary.expr);
 			}
 			else if (unary.expr instanceof ListNode)
