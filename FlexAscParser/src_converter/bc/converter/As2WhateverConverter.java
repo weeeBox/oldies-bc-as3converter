@@ -1099,8 +1099,9 @@ public abstract class As2WhateverConverter
 			lastBcMemberType = baseType;
 			failConversionUnless(lastBcMemberType != null, "Unable to evaluate expression: %s", baseExpr);
 
+			// TODO: fix that
 			IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier(base);
-			if (identifierNode != null && canBeClass(identifierNode.name)) // is call?
+			if (identifierNode != null && canBeClass(codeHelper.extractIdentifier(identifierNode))) // is call?
 			{
 				staticCall = true;
 				dest.write(classType(baseExpr.toString()));
@@ -2885,11 +2886,19 @@ public abstract class As2WhateverConverter
 			return findClass(BcTypeNode.typeObject);
 		}
 
-		return findClass(type.getTypeName());
+		return findClass(type.getQualifiedName());
 	}
 
 	private BcClassDefinitionNode findClass(String name)
 	{
+		int dotIndex = name.lastIndexOf(".");
+		if (dotIndex != -1)
+		{
+			String packageName = name.substring(0, dotIndex);
+			String typeName = name.substring(dotIndex + 1);
+			return findClass(typeName, packageName);
+		}
+		
 		return findClass(name, null);
 	}
 

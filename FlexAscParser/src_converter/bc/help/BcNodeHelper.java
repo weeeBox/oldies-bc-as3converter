@@ -33,6 +33,7 @@ import macromedia.asc.parser.TypedIdentifierNode;
 import macromedia.asc.util.ObjectList;
 import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
+import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcUntypedTypeNode;
 
@@ -216,7 +217,7 @@ public class BcNodeHelper
 		if (type instanceof IdentifierNode)
 		{
 			IdentifierNode identifier = (IdentifierNode) type;
-			return BcTypeNode.create(identifier.name);
+			return BcTypeNode.create(extractIdentifier(identifier));
 		}
 		
 		if (type instanceof TypeExpressionNode)
@@ -233,6 +234,7 @@ public class BcNodeHelper
 		
 		if (type instanceof GetExpressionNode)
 		{
+			// FIXME: remove that!
 			GetExpressionNode selector = (GetExpressionNode) type;
 			if (selector.expr instanceof QualifiedIdentifierNode)
 			{
@@ -254,7 +256,7 @@ public class BcNodeHelper
 		if (type instanceof ApplyTypeExprNode)
 		{
 			ApplyTypeExprNode selector = (ApplyTypeExprNode) type;
-			String typeName = ((IdentifierNode)selector.expr).name;
+			String typeName = BcNodeHelper.extractIdentifier((IdentifierNode)selector.expr);
 			
 			BcTypeNode baseType = BcTypeNode.create(typeName);
 			assert baseType != null;
@@ -408,6 +410,28 @@ public class BcNodeHelper
 		}
 		
 		return null;
+	}
+	
+	public static String extractIdentifier(IdentifierNode identifier)
+	{
+		String name = identifier.name;
+		if (identifier.isAttr() && name.startsWith("@"))
+		{
+			name = name.substring(1);
+		}
+		
+		if (identifier instanceof QualifiedIdentifierNode)
+		{
+			QualifiedIdentifierNode qualifiedIdentifier = (QualifiedIdentifierNode) identifier;
+			Node qualifier = qualifiedIdentifier.qualifier;
+			if (qualifier instanceof LiteralStringNode)
+			{
+				String qualifierName = ((LiteralStringNode)qualifier).value;
+				return qualifierName + "." + name;
+			}
+		}
+		
+		return name;
 	}
 	
 	public static String tryExtractFunctionType(FunctionDefinitionNode node) 

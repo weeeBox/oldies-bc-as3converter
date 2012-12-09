@@ -34,9 +34,18 @@ public class BcTypeNode extends BcNode
 	
 	public static Map<BcTypeName, BcTypeNode> uniqueTypes = new HashMap<BcTypeName, BcTypeNode>();
 
-	public static BcTypeNode create(String name)
+	public static BcTypeNode create(String identifier)
 	{
-		return create(name, true);
+		int dotIndex = identifier.lastIndexOf('.');
+		if (dotIndex != -1)
+		{
+			String qualifier = identifier.substring(0, dotIndex);
+			String name = identifier.substring(dotIndex + 1);
+			
+			return create(name, qualifier, true);
+		}
+		
+		return create(identifier, true);
 	}
 	
 	public static BcTypeNode create(String name, boolean registerType)
