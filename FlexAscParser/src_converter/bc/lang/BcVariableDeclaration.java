@@ -12,10 +12,10 @@ public class BcVariableDeclaration extends BcDeclaration
 	
 	private Node initializerNode;
 	
-	public BcVariableDeclaration(BcTypeNode type, String identifier, boolean qualified)
+	public BcVariableDeclaration(BcTypeNodeInstance typeInstance, String identifier)
 	{
 		this.identifier = identifier;
-		typeInstance = new BcTypeNodeInstance(type, qualified);
+		this.typeInstance = typeInstance;
 	}
 	
 	public boolean isQualified()

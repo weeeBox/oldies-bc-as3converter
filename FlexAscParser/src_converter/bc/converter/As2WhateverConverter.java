@@ -485,9 +485,8 @@ public abstract class As2WhateverConverter
 		}
 		else
 		{
-			BcTypeNode bcSuperType = extractBcType(baseclass);
-			boolean qualified = isTypeQualified(baseclass);
-			bcClass.setExtendsType(bcSuperType.createTypeInstance(qualified));
+			BcTypeNodeInstance bcSuperType = extractBcTypeInstance(baseclass);
+			bcClass.setExtendsType(bcSuperType);
 		}
 
 		// interfaces
@@ -495,9 +494,8 @@ public abstract class As2WhateverConverter
 		{
 			for (Node interfaceNode : classDefinitionNode.interfaces.items)
 			{
-				BcTypeNode interfaceType = extractBcType(interfaceNode);
-				boolean qualified = isTypeQualified(interfaceNode);
-				bcClass.addInterface(interfaceType.createTypeInstance(qualified));
+				BcTypeNodeInstance interfaceType = extractBcTypeInstance(interfaceNode);
+				bcClass.addInterface(interfaceType);
 			}
 		}
 
@@ -585,7 +583,7 @@ public abstract class As2WhateverConverter
 					failConversionUnless(funcType.isComplete(), "Function param '%s' is incomplete. Please provide function metadata or global function metadata", paramName);
 				}
 
-				BcFuncParam bcParam = new BcFuncParam(paramType, getCodeHelper().identifier(paramName), qualified);
+				BcFuncParam bcParam = new BcFuncParam(paramType.createTypeInstance(qualified), getCodeHelper().identifier(paramName));
 				if (param.init != null)
 				{
 					bcParam.setDefaultInitializer(param.init);
@@ -600,10 +598,8 @@ public abstract class As2WhateverConverter
 		Node returnTypeNode = functionDefinitionNode.fexpr.signature.result;
 		if (returnTypeNode != null)
 		{
-			BcTypeNode bcReturnType = extractBcType(returnTypeNode);
-			boolean qualified = isTypeQualified(returnTypeNode);
-
-			bcFunc.setReturnType(bcReturnType.createTypeInstance(qualified));
+			BcTypeNodeInstance bcReturnType = extractBcTypeInstance(returnTypeNode);
+			bcFunc.setReturnType(bcReturnType);
 		}
 
 		bcFunc.setStatements(functionDefinitionNode.fexpr.body);
@@ -626,10 +622,9 @@ public abstract class As2WhateverConverter
 		failConversionUnless(node.list.items.size() == 1, "Node list items size should be 1: %d", node.list.items.size());
 		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
 
-		BcTypeNode bcType = extractBcType(varBindNode.variable);
-		boolean qualified = isTypeQualified(varBindNode.variable);
+		BcTypeNodeInstance bcTypeInstance = extractBcTypeInstance(varBindNode.variable);
 		String bcIdentifier = getCodeHelper().extractIdentifier(varBindNode.variable.identifier);
-		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcType, bcIdentifier, qualified);
+		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcTypeInstance, bcIdentifier);
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));
 
@@ -716,7 +711,7 @@ public abstract class As2WhateverConverter
 					failConversionUnless(funcType.isComplete(), "Function param '%s' is incomplete. Please provide function metadata or global function metadata", paramName);
 				}
 
-				BcFuncParam bcParam = new BcFuncParam(paramType, getCodeHelper().identifier(paramName), qualified);
+				BcFuncParam bcParam = new BcFuncParam(paramType.createTypeInstance(qualified), getCodeHelper().identifier(paramName));
 				if (param.init != null)
 				{
 					bcParam.setDefaultInitializer(param.init);
@@ -731,10 +726,8 @@ public abstract class As2WhateverConverter
 		Node returnTypeNode = functionDefinitionNode.fexpr.signature.result;
 		if (returnTypeNode != null)
 		{
-			BcTypeNode bcReturnType = extractBcType(returnTypeNode);
-			boolean qualified = isTypeQualified(returnTypeNode);
-
-			bcFunc.setReturnType(bcReturnType.createTypeInstance(qualified));
+			BcTypeNodeInstance bcReturnType = extractBcTypeInstance(returnTypeNode);
+			bcFunc.setReturnType(bcReturnType);
 		}
 
 		bcFunc.setStatements(functionDefinitionNode.fexpr.body);
@@ -850,7 +843,6 @@ public abstract class As2WhateverConverter
 	private void process(BcVariableDeclaration bcVar)
 	{
 		BcTypeNodeInstance varTypeInstance = bcVar.getTypeInstance();
-		BcTypeNode varType = varTypeInstance.getType();
 
 		String varId = bcVar.getIdentifier();
 
@@ -870,9 +862,9 @@ public abstract class As2WhateverConverter
 			BcTypeNode initializerType = evaluateType(initializer);
 			failConversionUnless(initializerType != null, "Unable to evaluate initializer type: %s = %s", varDecl(varTypeInstance, varId), initializerDest);
 
-			if (needExplicitCast(initializerType, varType))
+			if (needExplicitCast(initializerType, varTypeInstance))
 			{
-				dest.write(" = " + cast(initializerDest, initializerType, varType));
+				dest.write(" = " + cast(initializerDest, initializerType, varTypeInstance));
 			}
 			else
 			{
@@ -1313,7 +1305,7 @@ public abstract class As2WhateverConverter
 					BcFuncParam arg = enclosingParams.get(argIndex);
 					String identifier = codeHelper.identifier(arg.getIdentifier());
 					
-					BcTypeNode paramType = params.get(argIndex).getType();
+					BcTypeNodeInstance paramType = params.get(argIndex).getTypeInstance();
 					BcTypeNode argType = arg.getType();
 					if (needExplicitCast(argType, paramType))
 					{
@@ -1343,11 +1335,11 @@ public abstract class As2WhateverConverter
 				BcTypeNode objectType = BcTypeNode.create(BcTypeNode.typeObject);
 				for (int argIndex = 0; argIndex < paramsCount; ++argIndex)
 				{
-					BcTypeNode paramType = params.get(argIndex).getType();
+					BcTypeNodeInstance paramTypeInstance = params.get(argIndex).getTypeInstance();
 					String arg = argDest + indexerGetter(argIndex); // FIXME: won't work for language without indexer operator
-					if (needExplicitCast(objectType, paramType))
+					if (needExplicitCast(objectType, paramTypeInstance))
 					{
-						argsList.add(cast(arg, objectType, paramType));
+						argsList.add(cast(arg, objectType, paramTypeInstance));
 					}
 					else
 					{
@@ -1754,18 +1746,17 @@ public abstract class As2WhateverConverter
 
 		if (node.is_new)
 		{
-			BcTypeNode type = extractBcType(node.expr);
-			boolean qualified = isTypeQualified(node.expr);
-			BcTypeNodeInstance typeInstance = type.createTypeInstance(qualified);
-
-			failConversionUnless(type != null, "Can't detect new's type: ", exprDest);
+			BcTypeNodeInstance typeInstance = extractBcTypeInstance(node.expr);
+			failConversionUnless(typeInstance != null, "Can't detect new's type: ", exprDest);
 
 			dest.write(construct(typeInstance, argsList));
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
 		{
-			BcTypeNode type = extractBcType(node.expr);
-			failConversionUnless(type != null, "Can't detect vector's type: ", exprDest);
+			BcTypeNodeInstance typeInstance = extractBcTypeInstance(node.expr);
+			failConversionUnless(typeInstance != null, "Can't detect vector's type: ", exprDest);
+			
+			BcTypeNode type = typeInstance.getType();
 
 			failConversionUnless(type instanceof BcVectorTypeNode, "Vector type expected: %s", exprDest);
 			Node argNode = node.args.items.get(0);
@@ -1787,7 +1778,7 @@ public abstract class As2WhateverConverter
 				BcTypeNode argType = evaluateType(argNode);
 				failConversionUnless(argType != null, "Unable to evaluate arg's type: %s", argDest);
 
-				dest.write(cast(argDest, argType, type));
+				dest.write(cast(argDest, argType, typeInstance));
 			}
 		}
 		else
@@ -1803,7 +1794,7 @@ public abstract class As2WhateverConverter
 				BcTypeNode argType = evaluateType(argNode);
 				failConversionUnless(argType != null, "Can't evaluate arg's type: %s", argStr);
 
-				BcTypeNode type = extractBcType(node.expr);
+				BcTypeNodeInstance type = extractBcTypeInstance(node.expr);
 				failConversionUnless(type != null, "Can't detect cast's type: ", exprDest);
 
 				if (typeEquals(type, BcTypeNode.typeString))
@@ -2099,14 +2090,11 @@ public abstract class As2WhateverConverter
 
 	private BcVariableDeclaration process(VariableBindingNode node)
 	{
-		BcTypeNode varType = extractBcType(node.variable);
-		boolean qualified = isTypeQualified(node.variable);
-
-		addToImport(varType);
+		BcTypeNodeInstance varTypeInstance = extractBcTypeInstance(node.variable);
+		addToImport(varTypeInstance);
 
 		String bcIdentifier = getCodeHelper().extractIdentifier(node.variable.identifier);	
-		BcVariableDeclaration bcVar = new BcVariableDeclaration(varType, bcIdentifier, qualified);
-		BcTypeNodeInstance varTypeInstance = bcVar.getTypeInstance();
+		BcVariableDeclaration bcVar = new BcVariableDeclaration(varTypeInstance, bcIdentifier);
 
 		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
 		bcVar.setModifiers(BcNodeHelper.extractModifiers(node.attrs));
@@ -2126,9 +2114,9 @@ public abstract class As2WhateverConverter
 			BcTypeNode initializerType = evaluateType(node.initializer);
 			failConversionUnless(initializerType != null, "Unable to evaluate initializer's type: %s = %s", varDecl(varTypeInstance, bcIdentifier), initializer);
 
-			if (needExplicitCast(initializerType, varType))
+			if (needExplicitCast(initializerType, varTypeInstance))
 			{
-				dest.writef(" = %s", cast(initializer, initializerType, varType));
+				dest.writef(" = %s", cast(initializer, initializerType, varTypeInstance));
 			}
 			else
 			{
@@ -2137,7 +2125,7 @@ public abstract class As2WhateverConverter
 		}
 		else if (BcGlobal.lastBcFunction != null)
 		{
-			dest.write(" = " + typeDefault(varType));
+			dest.write(" = " + typeDefault(varTypeInstance));
 		}
 		dest.writeln(";");
 
@@ -2584,14 +2572,12 @@ public abstract class As2WhateverConverter
 
 	private void process(ParameterNode node)
 	{
-		BcTypeNode type = extractBcType(node.type);
-		boolean qualified = isTypeQualified(node.type);
-
+		BcTypeNodeInstance type = extractBcTypeInstance(node.type);
 		addToImport(type);
 
 		String identifier = getCodeHelper().extractIdentifier(node.identifier);
 
-		BcVariableDeclaration parameterVar = new BcVariableDeclaration(type, identifier, qualified);
+		BcVariableDeclaration parameterVar = new BcVariableDeclaration(type, identifier);
 
 		BcGlobal.declaredVars.add(parameterVar);
 		dest.write(paramDecl(parameterVar.getTypeInstance(), identifier));
@@ -2654,13 +2640,13 @@ public abstract class As2WhateverConverter
 		}
 		else if (node.op == Tokens.AS_TOKEN)
 		{
-			BcTypeNode toType = evaluateType(node.rhs);
-			failConversionUnless(toType != null, "Can't detect to-cast type: '%s'", rshString);
+			BcTypeNodeInstance toTypeInstance = evaluateTypeInstance(node.rhs);
+			failConversionUnless(toTypeInstance != null, "Can't detect to-cast type: '%s'", rshString);
 			
 			BcTypeNode fromType = evaluateType(node.lhs);
 			failConversionUnless(fromType != null, "Can't detect from-cast type: '%s'", lshString);
 			
-			dest.writef("((%s) ? (%s) : %s)", operatorIs(ldest, rdest), cast(lshString, fromType, toType), getCodeHelper().literalNull());
+			dest.writef("((%s) ? (%s) : %s)", operatorIs(ldest, rdest), cast(lshString, fromType, toTypeInstance), getCodeHelper().literalNull());
 		}
 		else if (node.op == Tokens.IN_TOKEN)
 		{
@@ -2755,10 +2741,10 @@ public abstract class As2WhateverConverter
 			BcTypeNode returnValueType = evaluateType(node.expr);
 			failConversionUnless(returnValueType != null, "Unable to evaluate return type from expression: %s", exprDest);
 
-			BcTypeNode returnType = BcGlobal.lastBcFunction.getReturnType();
-			if (needExplicitCast(returnValueType, returnType))
+			BcTypeNodeInstance returnTypeInstance = BcGlobal.lastBcFunction.getReturnTypeInstance();
+			if (needExplicitCast(returnValueType, returnTypeInstance))
 			{
-				dest.write(cast(exprDest, returnValueType, returnType));
+				dest.write(cast(exprDest, returnValueType, returnTypeInstance));
 			}
 			else
 			{
@@ -3208,6 +3194,11 @@ public abstract class As2WhateverConverter
 		return null;
 	}
 
+	private void addToImport(BcTypeNodeInstance bcTypeInstance)
+	{
+		addToImport(bcTypeInstance.getType());
+	}
+	
 	private void addToImport(BcTypeNode bcType)
 	{
 		if (canBeClass(bcType))
@@ -3347,7 +3338,7 @@ public abstract class As2WhateverConverter
 					String type = token.substring(index + 1);
 					failConversionUnless(type.length() > 0, "Can't parse param for 'FunctionType' metadata: %s", paramsString);
 
-					func.addParam(new BcFuncParam(createBcType(type), getCodeHelper().identifier(name), false));
+					func.addParam(new BcFuncParam(createBcType(type).createTypeInstance(), getCodeHelper().identifier(name)));
 				}
 			}
 
@@ -3378,6 +3369,18 @@ public abstract class As2WhateverConverter
 		return BcGlobal.lastBcClass != null && BcGlobal.lastBcClass.hasDefaultFunctionType() ? BcGlobal.lastBcClass.getDefaultFunctionType() : new BcFunctionTypeNode();
 	}
 
+	public BcTypeNodeInstance evaluateTypeInstance(Node node)
+	{
+		BcTypeNode type = evaluateType(node);
+		if (type != null)
+		{
+			boolean qualified = isTypeQualified(node);
+			return type.createTypeInstance(qualified);
+		}
+		
+		return null;
+	}
+	
 	public BcTypeNode evaluateType(Node node)
 	{
 		return evaluateType(node, false);
@@ -3805,6 +3808,17 @@ public abstract class As2WhateverConverter
 		return null;
 	}
 
+	private BcTypeNodeInstance extractBcTypeInstance(Node node)
+	{
+		BcTypeNode type = extractBcType(node);
+		if (type != null)
+		{
+			boolean qualified = isTypeQualified(node);
+			return type.createTypeInstance(qualified);
+		}
+		return null;
+	}
+	
 	private BcTypeNode extractBcType(Node node)
 	{
 		BcTypeNode bcType = BcNodeHelper.extractBcType(node);
@@ -3892,7 +3906,7 @@ public abstract class As2WhateverConverter
 			if (args.size() == 1 && args.size() == 1 && args.get(0) instanceof LiteralArrayNode)
 			{
 				LiteralArrayNode arrayNode = (LiteralArrayNode) args.get(0);
-				BcTypeNode genericType = vectorType.getGeneric();
+				BcTypeNodeInstance genericTypeInstance = vectorType.getGenericTypeInstance();
 
 				ArgumentListNode elementlist = arrayNode.elementlist;
 				BcArgumentsList argsList = new BcArgumentsList(elementlist.size());
@@ -3905,9 +3919,9 @@ public abstract class As2WhateverConverter
 					popDest();
 
 					BcTypeNode argType = evaluateType(elementNode);
-					if (argType != genericType)
+					if (argType != genericTypeInstance.getType())
 					{
-						argsList.add(cast(argDest, argType, genericType));
+						argsList.add(cast(argDest, argType, genericTypeInstance));
 					}
 					else
 					{
@@ -3987,6 +4001,11 @@ public abstract class As2WhateverConverter
 		return false;
 	}
 
+	protected boolean typeEquals(BcTypeNodeInstance typeInstance, String name)
+	{
+		return typeInstance != null && typeEquals(typeInstance.getType(), name);
+	}
+	
 	protected boolean typeEquals(BcTypeNode type, String name)
 	{
 		if (name.equals(BcTypeNode.typeVector) && type instanceof BcVectorTypeNode)
@@ -4055,9 +4074,9 @@ public abstract class As2WhateverConverter
 				return createArgsList(function, BcGlobal.lastBcFunction);
 			}
 			
-			BcTypeNode paramType = argIndex >= params.size() && hasRestParams ? 
-					BcTypeNode.create(BcTypeNode.typeObject) : 
-					params.get(argIndex).getType();
+			BcTypeNodeInstance paramType = argIndex >= params.size() && hasRestParams ? 
+					BcTypeNode.create(BcTypeNode.typeObject).createTypeInstance() : 
+					params.get(argIndex).getTypeInstance();
 
 			if (needExplicitCast(argType, paramType))
 			{
@@ -4177,6 +4196,11 @@ public abstract class As2WhateverConverter
 		return canBeClass(type.getName(), type.getQualifier());
 	}
 
+	protected String typeDefault(BcTypeNodeInstance typeInstance)
+	{
+		return typeDefault(typeInstance.getType());
+	}
+	
 	protected String typeDefault(BcTypeNode type)
 	{
 		if (type.isIntegral())
@@ -4192,6 +4216,11 @@ public abstract class As2WhateverConverter
 		return getCodeHelper().literalNull();
 	}
 
+	private boolean needExplicitCast(BcTypeNode fromType, BcTypeNodeInstance toTypeInstance)
+	{
+		return toTypeInstance != null && needExplicitCast(fromType, toTypeInstance.getType());
+	}
+	
 	private boolean needExplicitCast(BcTypeNode fromType, BcTypeNode toType)
 	{
 		if (fromType.isIntegral() && toType.isIntegral())
@@ -4265,7 +4294,17 @@ public abstract class As2WhateverConverter
 		return false;
 	}
 
+	private String cast(Object expression, BcTypeNode fromType, BcTypeNodeInstance toType)
+	{
+		return cast(expression, fromType, toType.getType(), toType.isQualified());
+	}
+	
 	private String cast(Object expression, BcTypeNode fromType, BcTypeNode toType)
+	{
+		return cast(expression, fromType, toType, false);
+	}
+	
+	private String cast(Object expression, BcTypeNode fromType, BcTypeNode toType, boolean qualified)
 	{
 		if (toType.isIntegral() && typeEquals(fromType, BcTypeNode.typeString))
 		{
