@@ -2852,6 +2852,11 @@ public abstract class As2WhateverConverter
 		if (!typeNode.isIntegral() && !typeNode.hasClassNode())
 		{
 			BcClassDefinitionNode classNode = findClass(typeNode);
+			if (classNode == null)
+			{
+				findClass(typeNode);
+			}
+			
 			failConversionUnless(classNode != null, "Can't find class: %s", typeNode.getNameEx());
 			typeNode.setClassNode(classNode);
 		}
@@ -2912,17 +2917,19 @@ public abstract class As2WhateverConverter
 		BcClassDefinitionNode bcClass;
 		List<BcClassDefinitionNode> foundClasses = new ArrayList<BcClassDefinitionNode>();
 
-		if ((bcClass = findClass(BcGlobal.bcPlatformClasses, name, packageName)) != null)
+		String fixedPackageName = getFixedPackageName(packageName);
+		
+		if ((bcClass = findClass(BcGlobal.bcPlatformClasses, name, fixedPackageName)) != null)
 		{
 			foundClasses.add(bcClass);
 		}
 
-		if ((bcClass = findClass(BcGlobal.bcApiClasses, name, packageName)) != null)
+		if ((bcClass = findClass(BcGlobal.bcApiClasses, name, fixedPackageName)) != null)
 		{
 			foundClasses.add(bcClass);
 		}
 
-		if ((bcClass = findClass(BcGlobal.bcClasses, name, packageName)) != null)
+		if ((bcClass = findClass(BcGlobal.bcClasses, name, fixedPackageName)) != null)
 		{
 			foundClasses.add(bcClass);
 		}
@@ -2937,16 +2944,16 @@ public abstract class As2WhateverConverter
 			return foundClasses.get(0);
 		}
 
-		if (packageName == null)
+		if (fixedPackageName == null)
 		{
 			packageName = tryFindPackage(name);
 		}
 
-		if (packageName != null)
+		if (fixedPackageName != null)
 		{
 			for (BcClassDefinitionNode foundClass : foundClasses)
 			{
-				if (packageName.equals(foundClass.getPackageName()))
+				if (fixedPackageName.equals(foundClass.getPackageName()))
 				{
 					return foundClass;
 				}
@@ -2995,6 +3002,16 @@ public abstract class As2WhateverConverter
 
 		failConversion("Can't detect type's class: '%s'", name);
 		return null;
+	}
+
+	private String getFixedPackageName(String packageName) 
+	{
+		if (packageName != null && packageName.startsWith("flash."))
+		{
+			return "bc." + packageName;
+		}
+		
+		return packageName;
 	}
 
 	private BcClassDefinitionNode findClass(BcClassList classList, String name, String packageName)
