@@ -1,6 +1,7 @@
 using System;
  
 using bc.flash;
+using bc.test.vectors;
  
 namespace bc.test.vectors
 {
@@ -31,6 +32,16 @@ namespace bc.test.vectors
 		{
 			AsVector<String> v = new AsVector<String>();
 			String element = v.pop();
+		}
+		public virtual void testVectorCast()
+		{
+			Object obj = new AsVector<String>();
+			AsVector<String> vector = (AsVector<String>)(obj);
+		}
+		public virtual void testVectorQualifiedCast()
+		{
+			Object obj = new AsVector<bc.test.vectors.AsVectorsTest>();
+			AsVector<bc.test.vectors.AsVectorsTest> vector = (AsVector<bc.test.vectors.AsVectorsTest>)(obj);
 		}
 	}
 }

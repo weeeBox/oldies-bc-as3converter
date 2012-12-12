@@ -31,5 +31,17 @@ package bc.test.vectors
             var v:Vector.<String> = new<String>["a"];
             var element:String = v.pop();
         }
+        
+        public function testVectorCast() : void
+        {
+            var obj : Object = new Vector.<String>();
+            var vector : Vector.<String> = Vector.<String>(obj);
+        }
+        
+        public function testVectorQualifiedCast() : void
+        {
+            var obj : Object = new Vector.<bc.test.vectors.VectorsTest>();
+            var vector : Vector.<bc.test.vectors.VectorsTest> = Vector.<bc.test.vectors.VectorsTest>(obj);
+        }
     }
 }

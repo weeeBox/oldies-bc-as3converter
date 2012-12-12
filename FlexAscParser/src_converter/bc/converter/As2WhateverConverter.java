@@ -4445,6 +4445,12 @@ public abstract class As2WhateverConverter
 			return typeInstance.getQualified() + "." + classType(type);
 		}
 		
+		if (type instanceof BcVectorTypeNode)
+		{
+			BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
+			return vectorType(vectorType);
+		}
+		
 		return classType(type);
 	}
 	
