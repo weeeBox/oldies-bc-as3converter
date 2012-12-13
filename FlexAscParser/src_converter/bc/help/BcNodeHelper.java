@@ -106,7 +106,7 @@ public class BcNodeHelper
 		{
 			if (node instanceof MemberExpressionNode)
 			{
-				modifiers.add(tryExtractIdentifier((MemberExpressionNode) node).name);
+				modifiers.add(tryExtractIdentifierNode((MemberExpressionNode) node).name);
 			}
 			else if (node instanceof ListNode)
 			{
@@ -115,7 +115,7 @@ public class BcNodeHelper
 				{
 					if (innerNode instanceof MemberExpressionNode)
 					{
-						modifiers.add(tryExtractIdentifier((MemberExpressionNode) innerNode).name);
+						modifiers.add(tryExtractIdentifierNode((MemberExpressionNode) innerNode).name);
 					}
 					else
 					{
@@ -152,14 +152,14 @@ public class BcNodeHelper
 			MemberExpressionNode memberNode = (MemberExpressionNode) node;
 			if (memberNode.selector instanceof GetExpressionNode)
 			{
-				IdentifierNode identifier = tryExtractIdentifier(memberNode.selector);
+				IdentifierNode identifier = tryExtractIdentifierNode(memberNode.selector);
 				assert identifier != null;
 				
 				parentNode.add(new BcMetadataNode(identifier.name));
 			}
 			else if (memberNode.selector instanceof SetExpressionNode)
 			{
-				IdentifierNode identifier = tryExtractIdentifier(memberNode.selector);
+				IdentifierNode identifier = tryExtractIdentifierNode(memberNode.selector);
 				assert identifier != null;
 				
 				SetExpressionNode setNode = (SetExpressionNode) memberNode.selector;
@@ -175,7 +175,7 @@ public class BcNodeHelper
 			}
 			else if (memberNode.selector instanceof CallExpressionNode)
 			{
-				IdentifierNode identifier = tryExtractIdentifier(memberNode.selector);
+				IdentifierNode identifier = tryExtractIdentifierNode(memberNode.selector);
 				assert identifier != null;
 				
 				BcMetadataNode metadata = new BcMetadataNode(identifier.name);
@@ -354,7 +354,7 @@ public class BcNodeHelper
 		return false;
 	}
 		
-	public static IdentifierNode tryExtractIdentifier(SelectorNode selector)
+	public static IdentifierNode tryExtractIdentifierNode(SelectorNode selector)
 	{
 		if ((selector.expr instanceof IdentifierNode))
 		{
@@ -363,7 +363,7 @@ public class BcNodeHelper
 		return null;
 	}
 	
-	public static IdentifierNode tryExtractIdentifier(MemberExpressionNode memberNode)
+	public static IdentifierNode tryExtractIdentifierNode(MemberExpressionNode memberNode)
 	{
 		if (memberNode.base != null)
 		{
@@ -383,16 +383,16 @@ public class BcNodeHelper
 		return (IdentifierNode) selector.expr;
 	}
 		
-	public static IdentifierNode tryExtractIdentifier(Node node)
+	public static IdentifierNode tryExtractIdentifierNode(Node node)
 	{
 		if (node instanceof MemberExpressionNode)
 		{
-			return tryExtractIdentifier((MemberExpressionNode)node);
+			return tryExtractIdentifierNode((MemberExpressionNode)node);
 		}
 		
 		if (node instanceof SelectorNode)
 		{
-			return tryExtractIdentifier((SelectorNode)node);
+			return tryExtractIdentifierNode((SelectorNode)node);
 		}
 		
 		if (node instanceof IdentifierNode)
@@ -405,11 +405,17 @@ public class BcNodeHelper
 			ListNode listNode = (ListNode) node;
 			if (listNode.items != null && listNode.items.size() == 1)
 			{
-				return tryExtractIdentifier(listNode.items.get(0));
+				return tryExtractIdentifierNode(listNode.items.get(0));
 			}
 		}
 		
 		return null;
+	}
+	
+	public static String tryExtractIdentifier(Node node)
+	{
+		IdentifierNode identifierNode = tryExtractIdentifierNode(node);
+		return identifierNode != null ? extractIdentifier(identifierNode) : null;
 	}
 	
 	public static String extractIdentifier(IdentifierNode identifier)
@@ -444,7 +450,7 @@ public class BcNodeHelper
 			{
 				for (Node item : items) 
 				{
-					IdentifierNode identifier = tryExtractIdentifier(item);
+					IdentifierNode identifier = tryExtractIdentifierNode(item);
 					if (identifier != null)
 					{
 						String name = identifier.name;
@@ -497,7 +503,7 @@ public class BcNodeHelper
 		
 		for (Node attr : attrs.items)
 		{
-			IdentifierNode identifier = tryExtractIdentifier(attr);
+			IdentifierNode identifier = tryExtractIdentifierNode(attr);
 			if (identifier == null)
 			{
 				continue;

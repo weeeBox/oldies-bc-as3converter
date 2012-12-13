@@ -49,5 +49,10 @@ namespace bc.test.vectors
 			AsVector<bc.test.vectors.AsVectorsTest> vector = obj != null ? (AsVector<bc.test.vectors.AsVectorsTest>)obj : null;
 			vector = obj == null ? null : (AsVector<bc.test.vectors.AsVectorsTest>)obj;
 		}
+		public virtual void testVectorQualifiedAsOperator()
+		{
+			Object obj = new AsVector<bc.test.vectors.AsVectorsTest>();
+			AsVector<bc.test.vectors.AsVectorsTest> vector = obj is AsVector<bc.test.vectors.AsVectorsTest> ? (AsVector<bc.test.vectors.AsVectorsTest>)obj : null;
+		}
 	}
 }

@@ -50,5 +50,11 @@ package bc.test.vectors
             var vector : Vector.<bc.test.vectors.VectorsTest> = obj != null ? Vector.<bc.test.vectors.VectorsTest>(obj) : null;
             vector = obj == null ? null : Vector.<bc.test.vectors.VectorsTest>(obj);
         }
+        
+        public function testVectorQualifiedAsOperator() : void
+        {
+            var obj : Object = new Vector.<bc.test.vectors.VectorsTest>();
+            var vector : Vector.<bc.test.vectors.VectorsTest> = obj as Vector.<bc.test.vectors.VectorsTest>;
+        }
     }
 }

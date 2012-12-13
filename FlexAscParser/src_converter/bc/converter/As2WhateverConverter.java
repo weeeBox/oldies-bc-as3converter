@@ -1071,12 +1071,11 @@ public abstract class As2WhateverConverter
 				else if (selector instanceof CallExpressionNode)
 				{
 					CallExpressionNode call = (CallExpressionNode) selector;
-					IdentifierNode identifier = BcNodeHelper.tryExtractIdentifier(call);
-					failConversionUnless(identifier != null, "Cannot extract function type call identifier: %s", funcType);
+					String funcName = BcNodeHelper.tryExtractIdentifier(call);
+					failConversionUnless(funcName != null, "Cannot extract function type call identifier: %s", funcType);
 					
 					funcMemberCall = true;
 					
-					String funcName = identifier.name;
 					if (funcName.equals("apply"))
 					{
 						Node target = call.args.items.get(0);
@@ -1100,8 +1099,8 @@ public abstract class As2WhateverConverter
 			failConversionUnless(lastBcMemberType != null, "Unable to evaluate expression: %s", baseExpr);
 
 			// TODO: fix that
-			IdentifierNode identifierNode = BcNodeHelper.tryExtractIdentifier(base);
-			if (identifierNode != null && canBeClass(codeHelper.extractIdentifier(identifierNode))) // is call?
+			String identifier = BcNodeHelper.tryExtractIdentifier(base);
+			if (identifier != null && canBeClass(identifier)) // is call?
 			{
 				staticCall = true;
 				dest.write(classType(baseExpr.toString()));
@@ -1190,10 +1189,9 @@ public abstract class As2WhateverConverter
 				popDest();
 			}
 
-			IdentifierNode funcIndentifierNode = BcNodeHelper.tryExtractIdentifier(selector);
-			failConversionUnless(funcIndentifierNode != null, "Unable to extract identifier from: %s", selectorDest);
+			String funcName = BcNodeHelper.tryExtractIdentifier(selector);
+			failConversionUnless(funcName != null, "Unable to extract identifier from: %s", selectorDest);
 
-			String funcName = getCodeHelper().extractIdentifier(funcIndentifierNode);
 			if (callExpr.args != null)
 			{
 				dest.write(staticCall(classType(baseType), funcName, baseDest, argsDest));
@@ -2043,7 +2041,7 @@ public abstract class As2WhateverConverter
 			int genericIndex = 0;
 			for (Node genericTypeNode : typeArgs.items)
 			{
-				BcTypeNode genericType = extractBcType(genericTypeNode);
+				BcTypeNodeInstance genericType = extractBcTypeInstance(genericTypeNode);
 				typeBuffer.append(type(genericType));
 				if (++genericIndex < genericCount)
 				{
@@ -3275,10 +3273,10 @@ public abstract class As2WhateverConverter
 				{
 					if (argItem instanceof MemberExpressionNode)
 					{
-						IdentifierNode argIdentifier = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode) argItem);
-						if (argIdentifier != null)
+						String argName = BcNodeHelper.tryExtractIdentifier((MemberExpressionNode) argItem);
+						if (argName != null)
 						{
-							BcVariableDeclaration bcUsedField = bcClass.findField(getCodeHelper().extractIdentifier(argIdentifier));
+							BcVariableDeclaration bcUsedField = bcClass.findField(argName);
 							if (bcUsedField != null && !bcUsedField.isStatic())
 							{
 								return false;
@@ -3713,64 +3711,62 @@ public abstract class As2WhateverConverter
 			}
 		}
 
-		if (node.selector instanceof SelectorNode)
+		SelectorNode selector = (SelectorNode) node.selector;
+		if (selector instanceof ApplyTypeExprNode)
 		{
-			SelectorNode selector = (SelectorNode) node.selector;
-			if (selector.expr instanceof IdentifierNode)
+			return extractBcType(selector);
+		}
+		
+		if (selector.expr instanceof IdentifierNode)
+		{
+			IdentifierNode identifier = (IdentifierNode) selector.expr;
+			int argsCount = argsCount(selector);
+			BcTypeNode identifierType = findIdentifierType(baseClass, identifier, hasCallTarget, argsCount);
+			if (identifierType != null)
 			{
-				IdentifierNode identifier = (IdentifierNode) selector.expr;
-				int argsCount = argsCount(selector);
-				BcTypeNode identifierType = findIdentifierType(baseClass, identifier, hasCallTarget, argsCount);
-				if (identifierType != null)
-				{
-					return identifierType;
-				}
-				else
-				{
-					if (classEquals(baseClass, BcTypeNode.typeXML) || classEquals(baseClass, BcTypeNode.typeXMLList))
-					{
-						if (identifier.isAttr())
-						{
-							return createBcType(BcTypeNode.typeString);
-						}
-
-						return createBcType(BcTypeNode.typeXMLList); // dirty hack
-					}
-					else if (getCodeHelper().extractIdentifier(identifier).equals(BcCodeHelper.thisCallMarker))
-					{
-						return BcGlobal.lastBcClass.getClassType(); // this referes to the current class
-					}
-					else if (classEquals(baseClass, BcTypeNode.typeObject))
-					{
-						return createBcType(BcTypeNode.typeObject);
-					}
-				}
-			}
-			else if (selector.expr instanceof ArgumentListNode)
-			{
-				BcTypeNode baseClassType = baseClass.getClassType();
-				if (baseClassType instanceof BcVectorTypeNode)
-				{
-					BcVectorTypeNode bcVector = (BcVectorTypeNode) baseClassType;
-					return bcVector.getGeneric();
-				}
-				else if (typeEquals(baseClassType, BcTypeNode.typeXMLList))
-				{
-					return createBcType(BcTypeNode.typeXMLList);
-				}
-				else
-				{
-					return createBcType(BcTypeNode.typeObject); // no generics
-				}
+				return identifierType;
 			}
 			else
 			{
-				failConversion("Can't evaluate MemberExpressionNode. Selector's expression is unsupported: %s", selector.expr.getClass());
+				if (classEquals(baseClass, BcTypeNode.typeXML) || classEquals(baseClass, BcTypeNode.typeXMLList))
+				{
+					if (identifier.isAttr())
+					{
+						return createBcType(BcTypeNode.typeString);
+					}
+
+					return createBcType(BcTypeNode.typeXMLList); // dirty hack
+				}
+				else if (getCodeHelper().extractIdentifier(identifier).equals(BcCodeHelper.thisCallMarker))
+				{
+					return BcGlobal.lastBcClass.getClassType(); // this referes to the current class
+				}
+				else if (classEquals(baseClass, BcTypeNode.typeObject))
+				{
+					return createBcType(BcTypeNode.typeObject);
+				}
+			}
+		}
+		else if (selector.expr instanceof ArgumentListNode)
+		{
+			BcTypeNode baseClassType = baseClass.getClassType();
+			if (baseClassType instanceof BcVectorTypeNode)
+			{
+				BcVectorTypeNode bcVector = (BcVectorTypeNode) baseClassType;
+				return bcVector.getGeneric();
+			}
+			else if (typeEquals(baseClassType, BcTypeNode.typeXMLList))
+			{
+				return createBcType(BcTypeNode.typeXMLList);
+			}
+			else
+			{
+				return createBcType(BcTypeNode.typeObject); // no generics
 			}
 		}
 		else
 		{
-			failConversion("Can't evaluate MemeberExpressionNode. Selector's node is unsupported: %s", node.selector.getClass());
+			failConversion("Can't evaluate MemberExpressionNode. Selector's expression is unsupported: %s", selector.expr.getClass());
 		}
 
 		return null;
