@@ -43,5 +43,11 @@ namespace bc.test.vectors
 			Object obj = new AsVector<bc.test.vectors.AsVectorsTest>();
 			AsVector<bc.test.vectors.AsVectorsTest> vector = (AsVector<bc.test.vectors.AsVectorsTest>)(obj);
 		}
+		public virtual void testVectorQaulifiedTernaryCast()
+		{
+			Object obj = new AsVector<bc.test.vectors.AsVectorsTest>();
+			AsVector<bc.test.vectors.AsVectorsTest> vector = obj != null ? (AsVector<bc.test.vectors.AsVectorsTest>)obj : null;
+			vector = obj == null ? null : (AsVector<bc.test.vectors.AsVectorsTest>)obj;
+		}
 	}
 }

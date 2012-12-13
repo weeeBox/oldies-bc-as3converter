@@ -43,5 +43,12 @@ package bc.test.vectors
             var obj : Object = new Vector.<bc.test.vectors.VectorsTest>();
             var vector : Vector.<bc.test.vectors.VectorsTest> = Vector.<bc.test.vectors.VectorsTest>(obj);
         }
+        
+        public function testVectorQaulifiedTernaryCast() : void
+        {
+            var obj : Object = new Vector.<bc.test.vectors.VectorsTest>();
+            var vector : Vector.<bc.test.vectors.VectorsTest> = obj != null ? Vector.<bc.test.vectors.VectorsTest>(obj) : null;
+            vector = obj == null ? null : Vector.<bc.test.vectors.VectorsTest>(obj);
+        }
     }
 }

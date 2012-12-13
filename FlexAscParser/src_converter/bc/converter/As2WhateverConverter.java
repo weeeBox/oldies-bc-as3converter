@@ -2317,7 +2317,7 @@ public abstract class As2WhateverConverter
 		process(node.elseexpr);
 		popDest();
 
-		dest.writef("((%s) ? (%s) : (%s))", condString, thenDest, elseDest);
+		dest.writef("%s ? %s : %s", condString, thenDest, elseDest);
 	}
 
 	private void process(WhileStatementNode node)
@@ -2647,7 +2647,7 @@ public abstract class As2WhateverConverter
 			BcTypeNode fromType = evaluateType(node.lhs);
 			failConversionUnless(fromType != null, "Can't detect from-cast type: '%s'", lshString);
 			
-			dest.writef("((%s) ? (%s) : %s)", operatorIs(ldest, rdest), cast(lshString, fromType, toTypeInstance), getCodeHelper().literalNull());
+			dest.writef("%s ? %s : %s", operatorIs(ldest, rdest), cast(lshString, fromType, toTypeInstance), getCodeHelper().literalNull());
 		}
 		else if (node.op == Tokens.IN_TOKEN)
 		{
