@@ -58,5 +58,11 @@ package bc.test.basic.packages
         {
             var textField : flash.text.TextField = new flash.text.TextField();
         }
+        
+        public function testNewApiAsOperator() : void
+        {
+            var obj : Object = new flash.text.TextField();
+            var textField : TextField = obj as flash.text.TextField;
+        }
     }
 }

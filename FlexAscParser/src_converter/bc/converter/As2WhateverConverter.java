@@ -337,7 +337,7 @@ public abstract class As2WhateverConverter
 				failConversionUnless(packageIdentifierNode != null, "Error while parsing import directive: packageIdentifierNode is null");
 
 				String typeName = packageIdentifierNode.def_part;
-				String packageName = BcNodeHelper.safeQualifier(packageIdentifierNode.pkg_part);
+				String packageName = safeQualifier(packageIdentifierNode.pkg_part);
 
 				importList.add(typeName, packageName);
 			}
@@ -2927,7 +2927,7 @@ public abstract class As2WhateverConverter
 		BcClassDefinitionNode bcClass;
 		List<BcClassDefinitionNode> foundClasses = new ArrayList<BcClassDefinitionNode>();
 
-		String fixedPackageName = getFixedPackageName(packageName);
+		String fixedPackageName = safeQualifier(packageName);
 		
 		if ((bcClass = findClass(BcGlobal.bcPlatformClasses, name, fixedPackageName)) != null)
 		{
@@ -3014,14 +3014,9 @@ public abstract class As2WhateverConverter
 		return null;
 	}
 
-	private String getFixedPackageName(String packageName) 
+	private String safeQualifier(String packageName) 
 	{
-		if (packageName != null && packageName.startsWith("flash."))
-		{
-			return "bc." + packageName;
-		}
-		
-		return packageName;
+		return BcNodeHelper.safeQualifier(packageName);
 	}
 
 	private BcClassDefinitionNode findClass(BcClassList classList, String name, String packageName)
@@ -4398,7 +4393,7 @@ public abstract class As2WhateverConverter
 		if (bcTypeInstance.isQualified())
 		{
 			String packageName = bcTypeInstance.getQualifier();
-			return getFixedPackageName(packageName) + "." + typeName;
+			return safeQualifier(packageName) + "." + typeName;
 		}
 
 		return typeName;
@@ -4453,7 +4448,7 @@ public abstract class As2WhateverConverter
 		if (typeInstance.isQualified())
 		{
 			String packageName = typeInstance.getQualifier();
-			return getFixedPackageName(packageName) + "." + classType(type);
+			return safeQualifier(packageName) + "." + classType(type);
 		}
 		
 		if (type instanceof BcVectorTypeNode)

@@ -52,5 +52,10 @@ namespace bc.test.basic.packages
 		{
 			bc.flash.text.AsTextField textField = new bc.flash.text.AsTextField();
 		}
+		public virtual void testNewApiAsOperator()
+		{
+			Object obj = new bc.flash.text.AsTextField();
+			AsTextField textField = obj as bc.flash.text.AsTextField;
+		}
 	}
 }
