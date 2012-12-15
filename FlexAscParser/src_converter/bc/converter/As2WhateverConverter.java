@@ -2633,19 +2633,22 @@ public abstract class As2WhateverConverter
 		String lshString = ldest.toString();
 		String rshString = rdest.toString();
 		
-		if (node.op == Tokens.IS_TOKEN)
-		{
-			dest.write(operatorIs(ldest, rdest));
-		}
-		else if (node.op == Tokens.AS_TOKEN)
+		if (node.op == Tokens.IS_TOKEN || node.op == Tokens.AS_TOKEN)
 		{
 			BcTypeNodeInstance toTypeInstance = evaluateTypeInstance(node.rhs);
 			failConversionUnless(toTypeInstance != null, "Can't detect to-cast type: '%s'", rshString);
 			
 			BcTypeNode fromType = evaluateType(node.lhs);
 			failConversionUnless(fromType != null, "Can't detect from-cast type: '%s'", lshString);
-			
-			dest.writef("%s ? %s : %s", operatorIs(ldest, rdest), cast(lshString, fromType, toTypeInstance), getCodeHelper().literalNull());
+
+			if (node.op == Tokens.IS_TOKEN) 
+			{
+				dest.write(operatorIs(ldest, rdest, fromType, toTypeInstance));
+			} 
+			else 
+			{
+				dest.write(operatorAs(ldest, rdest, fromType, toTypeInstance));
+			}
 		}
 		else if (node.op == Tokens.IN_TOKEN)
 		{
@@ -4365,7 +4368,8 @@ public abstract class As2WhateverConverter
 	private static final BcArgumentsList emptyInitializer = new BcArgumentsList();
 
 	public abstract String construct(String type, Object initializer);
-	public abstract String operatorIs(Object lhs, Object rhs);
+	public abstract String operatorIs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance);
+	public abstract String operatorAs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance);
 
 	public abstract String thisSelector(BcClassDefinitionNode bcClass, Object selector);
 	public abstract String superSelector(BcClassDefinitionNode bcClass, Object selector);

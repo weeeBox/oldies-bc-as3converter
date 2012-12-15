@@ -552,6 +552,7 @@ public class As2CsConverter extends As2WhateverConverter
 	
 	private static final String NEW = "new";
 	private static final String IS = "is";
+	private static final String AS = "as";
 	
 	protected static final String VECTOR_BC_TYPE = "Vector";
 		
@@ -623,9 +624,15 @@ public class As2CsConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	public String operatorIs(Object lhs, Object rhs)
+	public String operatorIs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance) 
 	{
 		return String.format("%s %s %s", lhs, IS, type(rhs.toString()));
+	}
+
+	@Override
+	public String operatorAs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance)
+	{
+		return String.format("%s %s %s", lhs, AS, type(rhs.toString()));
 	}
 	
 	@Override

@@ -1074,6 +1074,7 @@ public class As2CppConverter extends As2WhateverConverter
 	private static final String SELECTOR = "AS_SELECTOR";
 	
 	private static final String IS_OPERATOR = "AS_IS";
+	private static final String AS_OPERATOR = "AS_AS";
 	
 	@Override
 	public String thisSelector(BcClassDefinitionNode bcClass, Object selector)
@@ -1095,9 +1096,15 @@ public class As2CppConverter extends As2WhateverConverter
 	}
 
 	@Override
-	public String operatorIs(Object lhs, Object rhs)
+	public String operatorIs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance) 
 	{
 		return String.format("%s(%s, %s)", IS_OPERATOR, lhs, rhs);
+	}
+	
+	@Override
+	public String operatorAs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance) 
+	{
+		return String.format("%s(%s, %s)", AS_OPERATOR, lhs, rhs);
 	}
 
 	@Override
