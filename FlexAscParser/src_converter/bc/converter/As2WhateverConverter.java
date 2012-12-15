@@ -746,6 +746,11 @@ public abstract class As2WhateverConverter
 		for (Entry<BcTypeName, BcTypeNode> entry : entries) 
 		{
 			BcTypeNode type = entry.getValue();
+			if (type.isIntegral())
+			{
+				continue;
+			}
+			
 			if (type.hasClassNode())
 			{
 				BcClassDefinitionNode classNode = type.getClassNode();
@@ -755,6 +760,10 @@ public abstract class As2WhateverConverter
 					uniqueTypes.remove(typeName);
 					System.out.println("Removed: " + typeName);
 				}
+			}
+			else
+			{
+				uniqueTypes.remove(type.getTypeName());
 			}
 		}
 	}

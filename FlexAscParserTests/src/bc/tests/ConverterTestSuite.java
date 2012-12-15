@@ -51,9 +51,22 @@ public class ConverterTestSuite
 		converter.convert(actualdDir);
 	}
 
-	protected void convert(String subpath) throws IOException 
+	protected void convert(String... subpathes) throws IOException 
 	{
-		converter.convert(actualdDir, DIR_TEST + subpath);
+		if (subpathes.length == 1)
+		{
+			converter.convert(actualdDir, DIR_TEST + subpathes[0]);
+		}
+		else if (subpathes.length > 1)	
+		{
+			String[] filenames = new String[subpathes.length];
+			for (int i = 0; i < subpathes.length; ++i)
+			{
+				filenames[i] = DIR_TEST + subpathes[i];
+			}
+			
+			converter.convert(actualdDir, filenames);
+		}
 	}
 	
 	protected void assertExpectedAndActualEquals(String[] filenames) throws IOException 

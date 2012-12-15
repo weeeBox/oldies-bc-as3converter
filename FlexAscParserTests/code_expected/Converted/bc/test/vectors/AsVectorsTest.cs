@@ -52,7 +52,7 @@ namespace bc.test.vectors
 		public virtual void testVectorQualifiedAsOperator()
 		{
 			Object obj = new AsVector<bc.test.vectors.AsVectorsTest>();
-			AsVector<bc.test.vectors.AsVectorsTest> vector = obj is AsVector<bc.test.vectors.AsVectorsTest> ? (AsVector<bc.test.vectors.AsVectorsTest>)obj : null;
+			AsVector<bc.test.vectors.AsVectorsTest> vector = obj as AsVector<bc.test.vectors.AsVectorsTest>;
 		}
 	}
 }

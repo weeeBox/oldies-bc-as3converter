@@ -2,6 +2,8 @@ package bc.test.basic.packages
 {
     import bc.test.basic.packages.bar.PackageClass;
     import bc.test.basic.packages.foo.PackageClass;
+    
+    import flash.text.TextField;
 
     public class PackagesTests
     {
@@ -50,6 +52,11 @@ package bc.test.basic.packages
             
             foo1 = v1[0];
             foo2 = v2[0];
+        }
+        
+        public function testNewApi() : void
+        {
+            var textField : flash.text.TextField = new flash.text.TextField();
         }
     }
 }

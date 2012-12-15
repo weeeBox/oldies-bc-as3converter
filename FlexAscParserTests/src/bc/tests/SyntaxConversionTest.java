@@ -23,7 +23,7 @@ public class SyntaxConversionTest extends ConverterTestSuite
 	@Test
 	public void testPackages() throws IOException
 	{
-		convert("/bc/test/basic/packages");
+		convert("/bc/flash/text", "/bc/test/basic/packages");
 		
 		String[] filenames = 
 		{

@@ -1,6 +1,7 @@
 using System;
  
 using bc.flash;
+using bc.flash.text;
 using bc.test.basic.packages.bar;
 using bc.test.basic.packages.foo;
 // using AsPackageClass = bc.test.basic.packages.bar.AsPackageClass;
@@ -46,6 +47,10 @@ namespace bc.test.basic.packages
 			v2.push(foo2);
 			foo1 = v1[0];
 			foo2 = v2[0];
+		}
+		public virtual void testNewApi()
+		{
+			bc.flash.text.AsTextField textField = new bc.flash.text.AsTextField();
 		}
 	}
 }

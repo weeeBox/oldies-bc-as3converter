@@ -140,6 +140,7 @@
     -->  
   <ItemGroup> 
     <!--Target group-->  
+    <Compile Include="Converted\bc\flash\text\AsTextField.cs"/>
     <Compile Include="Converted\bc\test\arrays\AsArraysTest.cs"/>
     <Compile Include="Converted\bc\test\basic\calls\AsCallsTests.cs"/>
     <Compile Include="Converted\bc\test\basic\calls\AsPropertiesTests.cs"/>
