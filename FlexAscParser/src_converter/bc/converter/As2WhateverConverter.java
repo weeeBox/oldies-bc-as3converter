@@ -4397,7 +4397,8 @@ public abstract class As2WhateverConverter
 		String typeName = type(bcTypeInstance.getType());
 		if (bcTypeInstance.isQualified())
 		{
-			return bcTypeInstance.getQualified() + "." + typeName;
+			String packageName = bcTypeInstance.getQualifier();
+			return getFixedPackageName(packageName) + "." + typeName;
 		}
 
 		return typeName;
@@ -4451,7 +4452,8 @@ public abstract class As2WhateverConverter
 		BcTypeNode type = typeInstance.getType();
 		if (typeInstance.isQualified())
 		{
-			return typeInstance.getQualified() + "." + classType(type);
+			String packageName = typeInstance.getQualifier();
+			return getFixedPackageName(packageName) + "." + classType(type);
 		}
 		
 		if (type instanceof BcVectorTypeNode)
