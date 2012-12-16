@@ -33,6 +33,7 @@ import macromedia.asc.parser.ContinueStatementNode;
 import macromedia.asc.parser.DefinitionNode;
 import macromedia.asc.parser.DeleteExpressionNode;
 import macromedia.asc.parser.DoStatementNode;
+import macromedia.asc.parser.EmptyStatementNode;
 import macromedia.asc.parser.ExpressionStatementNode;
 import macromedia.asc.parser.FinallyClauseNode;
 import macromedia.asc.parser.ForStatementNode;
@@ -956,6 +957,8 @@ public abstract class As2WhateverConverter
 			process((StoreRegisterNode) node);
 		else if (node instanceof LoadRegisterNode)
 			process((LoadRegisterNode) node);
+		else if (node instanceof EmptyStatementNode)
+			process((EmptyStatementNode) node);
 		else
 			failConversion("Unsupported node class: %s", node.getClass());
 	}
@@ -1010,6 +1013,11 @@ public abstract class As2WhateverConverter
 		// do nothing
 	}
 
+	private void process(EmptyStatementNode node)
+	{
+		dest.writeln(";");
+	}
+	
 	private void process(FunctionCommonNode node)
 	{
 		failConversion("Unexpected function common node");
@@ -4406,6 +4414,11 @@ public abstract class As2WhateverConverter
 
 	protected String type(BcTypeNode bcType)
 	{
+		if (bcType.isIntegral())
+		{
+			return createIntegralType(bcType.getName());
+		}
+		
 		String typeString = createTypeString(bcType);
 		return typeString != null ? typeString : createTypeName(bcType.getName());
 	}
@@ -4430,11 +4443,6 @@ public abstract class As2WhateverConverter
 	
 	private String createTypeString(BcTypeNode bcType)
 	{
-		if (bcType.isIntegral())
-		{
-			return createIntegralType(bcType.getName());
-		}
-		
 		if (bcType instanceof BcFunctionTypeNode)
 		{
 			BcFunctionTypeNode funcType = (BcFunctionTypeNode) bcType;

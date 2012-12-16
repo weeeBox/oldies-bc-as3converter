@@ -48,5 +48,26 @@ package bc.test.basic.types
             value2 = integer + uinteger + number;
             value3 = integer + uinteger + number;
         }
+        
+        public function testNumberCalls() : void
+        {
+            var num : Number = 10;
+            var str : String;
+            str = num.toExponential();
+            str = num.toExponential(10);
+            str = num.toFixed();
+            str = num.toFixed(10);
+            str = num.toPrecision();
+            str = num.toPrecision(10);
+            str = num.toString();
+            str = num.toString(10);
+            
+            num = num.valueOf();
+            num = Number.MAX_VALUE;
+            num = Number.MIN_VALUE;
+            num = Number.NaN;
+            num = Number.NEGATIVE_INFINITY;
+            num = Number.POSITIVE_INFINITY;
+        }
     }
 }

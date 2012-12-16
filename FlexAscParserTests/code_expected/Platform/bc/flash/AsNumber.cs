@@ -13,39 +13,8 @@ namespace bc.flash
         public static float MIN_VALUE = 1.401298464324817E-45f;
         public static float MAX_VALUE = 3.4028234663852886E38f;
 
-        public AsNumber(AsObject _value)
+        private AsNumber()
         {
-            throw new AsNotImplementedError();
-        }
-
-        public String toExponential(uint fractionDigits)
-        {
-            throw new AsNotImplementedError();
-        }
-
-        public String toFixed(uint fractionDigits)
-        {
-            throw new AsNotImplementedError();
-        }
-
-        public String toPrecision(uint precision)
-        {
-            throw new AsNotImplementedError();
-        }
-
-        public String toString(float radix)
-        {
-            throw new AsNotImplementedError();
-        }
-
-        public String toString()
-        {
-            return toString(10);
-        }
-
-        public float valueOf()
-        {
-            throw new AsNotImplementedError();
         }
 
         public static bool isUint(object obj)
@@ -84,6 +53,51 @@ namespace bc.flash
         }
 
         public static float asFloat(object obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string toExponential(float num)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string toExponential(float num, int p)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string toFixed(float num)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string toFixed(float num, int p)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string toPrecision(float num)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string toPrecision(float num, int p)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string toString(float num)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string toString(float num, int p)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static float valueOf(float num)
         {
             throw new NotImplementedException();
         }

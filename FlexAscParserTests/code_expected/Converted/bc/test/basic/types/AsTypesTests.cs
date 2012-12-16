@@ -45,5 +45,24 @@ namespace bc.test.basic.types
 			value2 = (int)(integer + uinteger + number);
 			value3 = (uint)(integer + uinteger + number);
 		}
+		public virtual void testNumberCalls()
+		{
+			float num = 10;
+			String str = null;
+			str = AsNumber.toExponential(num);
+			str = AsNumber.toExponential(num, 10);
+			str = AsNumber.toFixed(num);
+			str = AsNumber.toFixed(num, 10);
+			str = AsNumber.toPrecision(num);
+			str = AsNumber.toPrecision(num, 10);
+			str = AsNumber.toString(num);
+			str = AsNumber.toString(num, 10);
+			num = AsNumber.valueOf(num);
+			num = AsNumber.MAX_VALUE;
+			num = AsNumber.MIN_VALUE;
+			num = AsNumber.NaN;
+			num = AsNumber.NEGATIVE_INFINITY;
+			num = AsNumber.POSITIVE_INFINITY;
+		}
 	}
 }

@@ -19,17 +19,17 @@ package bc.flash
 			throw new NotImplementedError();
 		}
 
-		public function toExponential(fractionDigits : uint) : String
+		public function toExponential(fractionDigits : uint = 0) : String
 		{
 			throw new NotImplementedError();
 		}
 
-		public function toFixed(fractionDigits : uint) : String
+		public function toFixed(fractionDigits : uint = 0) : String
 		{
 			throw new NotImplementedError();
 		}
 
-		public function toPrecision(precision : uint) : String
+		public function toPrecision(precision : uint = 0) : String
 		{
 			throw new NotImplementedError();
 		}

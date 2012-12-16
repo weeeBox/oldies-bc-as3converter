@@ -105,7 +105,6 @@
     <Compile Include="Platform\bc\flash\AsRangeError.cs" />
     <Compile Include="Platform\bc\flash\AsString.cs" />
     <Compile Include="Platform\bc\flash\AsVector.cs" />
-    <Compile Include="Platform\bc\flash\BcNumber.cs" />
     <Compile Include="Platform\bc\flash\errors\AsAbstractClassError.cs" />
     <Compile Include="Platform\bc\flash\errors\AsAbstractMethodError.cs" />
     <Compile Include="Platform\bc\flash\errors\AsIllegalOperationError.cs" />
