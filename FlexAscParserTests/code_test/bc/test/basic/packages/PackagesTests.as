@@ -1,5 +1,6 @@
 package bc.test.basic.packages
 {
+    import bc.flash.text.TextField;
     import bc.test.basic.packages.bar.PackageClass;
     import bc.test.basic.packages.foo.PackageClass;
     
@@ -54,15 +55,31 @@ package bc.test.basic.packages
             foo2 = v2[0];
         }
         
-        public function testNewApi() : void
+        public function testStaticCall() : void
+        {
+            bc.flash.text.TextField.isFontCompatible(null, null);
+        }
+        
+        public function testApiAssignment() : void
         {
             var textField : flash.text.TextField = new flash.text.TextField();
         }
         
-        public function testNewApiAsOperator() : void
+        public function testApiStaticCall() : void
+        {
+            flash.text.TextField.isFontCompatible(null, null);
+        }
+        
+        public function testApiAsOperator() : void
         {
             var obj : Object = new flash.text.TextField();
-            var textField : TextField = obj as flash.text.TextField;
+            var textField : flash.text.TextField = obj as flash.text.TextField;
+        }
+        
+        public function testApiIsOperator() : void
+        {
+            var obj : Object = new flash.text.TextField();
+            var flag : Boolean = obj is flash.text.TextField;
         }
     }
 }

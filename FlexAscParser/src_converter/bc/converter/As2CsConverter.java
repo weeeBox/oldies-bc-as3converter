@@ -28,9 +28,9 @@ import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
+import bc.lang.BcUntypedTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
-import bc.lang.BcUntypedTypeNode;
 
 public class As2CsConverter extends As2WhateverConverter
 {
@@ -245,7 +245,7 @@ public class As2CsConverter extends As2WhateverConverter
 		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
 		String name = getCodeHelper().identifier(funcType.getName());			
 		
-		src.writelnf("public delegate %s %s(%s);", type, type(name), paramsDef(funcType.getParams()));
+		src.writelnf("public delegate %s %s(%s);", type, createClassName(name), paramsDef(funcType.getParams()));
 	}
 
 	private void writeFields(BcClassDefinitionNode bcClass)
@@ -569,20 +569,27 @@ public class As2CsConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	public String type(String name) 
+	public String createTypeName(String name)
 	{
+		// XXX we use Object and String classes as-is
 		if (name.equals("Object") || name.equals("String"))
 		{
 			return name;
 		}
 		
-		return super.type(name);
+		return super.createTypeName(name);
+	}
+	
+	@Override
+	public String objectSelector(Object target, Object selector)
+	{
+		return String.format("((%s)%s).%s", createClassName(BcTypeNode.typeObject), target, selector);
 	}
 	
 	@Override
 	public String castString(Object expr, BcTypeNode fromType) 
 	{
-		return String.format("(%s)(%s)", type(BcTypeNode.typeString), expr);
+		return String.format("(%s)(%s)", createTypeName(BcTypeNode.typeString), expr);
 	}
 	
 	@Override
@@ -595,13 +602,13 @@ public class As2CsConverter extends As2WhateverConverter
 	protected String vectorType(BcVectorTypeNode vectorType)
 	{
 		String genericName = type(vectorType.getGenericTypeInstance());
-		return type(VECTOR_BC_TYPE) + "<" + genericName + ">";
+		return createClassName(VECTOR_BC_TYPE) + "<" + genericName + ">";
 	}
 	
 	@Override
 	protected String restType(BcRestTypeNode type)
 	{
-		BcTypeNode restType = type.getRestType();
+		BcTypeNodeInstance restType = type.getRestTypeInstance();
 		return String.format("params %s[]", type(restType));
 	}
 	
@@ -614,25 +621,25 @@ public class As2CsConverter extends As2WhateverConverter
 	@Override
 	public String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args)
 	{
-		return NEW + " " + type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGenericTypeInstance()) + ">" + "(" + args + ")";
+		return NEW + " " + createClassName(VECTOR_BC_TYPE) + "<" + type(vectorType.getGenericTypeInstance()) + ">" + "(" + args + ")";
 	}
 	
 	@Override
 	public String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args)
 	{
-		return staticCall(type(VECTOR_BC_TYPE) + "<" + type(vectorType.getGenericTypeInstance()) + ">", "create", args);
+		return staticCall(createClassName(VECTOR_BC_TYPE) + "<" + type(vectorType.getGenericTypeInstance()) + ">", "create", args);
 	}
 	
 	@Override
-	public String operatorIs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance) 
+	public String operatorIs(Object lhs, Object rhs, BcTypeNodeInstance fromTypeInstance, BcTypeNodeInstance toTypeInstance) 
 	{
-		return String.format("%s %s %s", lhs, IS, type(rhs.toString()));
+		return String.format("%s %s %s", lhs, IS, type(toTypeInstance));
 	}
 
 	@Override
-	public String operatorAs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance)
+	public String operatorAs(Object lhs, Object rhs, BcTypeNodeInstance fromTypeInstance, BcTypeNodeInstance toTypeInstance)
 	{
-		return String.format("%s %s %s", lhs, AS, type(rhs.toString()));
+		return String.format("%s %s %s", lhs, AS, type(toTypeInstance));
 	}
 	
 	@Override

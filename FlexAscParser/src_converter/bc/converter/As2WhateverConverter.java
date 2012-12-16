@@ -79,7 +79,6 @@ import macromedia.asc.parser.SuperStatementNode;
 import macromedia.asc.parser.SwitchStatementNode;
 import macromedia.asc.parser.ThisExpressionNode;
 import macromedia.asc.parser.ThrowStatementNode;
-import macromedia.asc.parser.Token;
 import macromedia.asc.parser.Tokens;
 import macromedia.asc.parser.TryStatementNode;
 import macromedia.asc.parser.UnaryExpressionNode;
@@ -119,9 +118,9 @@ import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcUndefinedType;
+import bc.lang.BcUntypedTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
-import bc.lang.BcUntypedTypeNode;
 import bc.preprocessor.Preprocessor;
 import bc.preprocessor.PreprocessorException;
 import bc.utils.filesystem.FileUtils;
@@ -1109,12 +1108,20 @@ public abstract class As2WhateverConverter
 
 			// TODO: fix that
 			String identifier = BcNodeHelper.tryExtractIdentifier(base);
-			if (identifier != null && canBeClass(identifier)) // is call?
+			if (identifier != null)
 			{
-				staticCall = true;
-				dest.write(classType(baseExpr.toString()));
+				BcTypeName typeName = codeHelper.extractTypeName(identifier);
+				BcClassDefinitionNode classNode = findClass(typeName);
+				staticCall = classNode != null;
+				if (staticCall)
+				{
+					BcTypeNode classType = classNode.getClassType();
+					BcTypeNodeInstance classTypeInstance = classType.createTypeInstance(typeName.hasQualifier());
+					dest.write(classType(classTypeInstance));
+				}
 			}
-			else
+			
+			if (!staticCall)
 			{
 				numberMemberCall = typeEquals(baseType, BcTypeNode.typeNumber);
 				process(base);
@@ -1258,8 +1265,7 @@ public abstract class As2WhateverConverter
 	{
 		if (typeEquals(baseType, BcTypeNode.typeObject))
 		{
-			String castString = createCast(base, BcTypeNode.create(BcTypeNode.typeObject).createTypeInstance());
-			dest.write(memberSelector(expr(castString), selector));
+			dest.write(objectSelector(base, selector));
 		}
 		else
 		{
@@ -1538,15 +1544,15 @@ public abstract class As2WhateverConverter
 		}
 		else if (accessingDynamicProperty)
 		{
-			dest.writef("getOwnProperty(\"%s\")", identifier);
+			dest.writef("getOwnProperty(\"%s\")", identifier); // FIXME: make member call
 		}
 		else if (accessingDynamicXMLList)
 		{
-			dest.writef("elements(\"%s\")", identifier);
+			dest.writef("elements(\"%s\")", identifier); // FIXME: make member call
 		}
 		else if (getterCalled)
 		{
-			dest.writef("%s()", identifier);
+			dest.writef("%s()", identifier); // FIXME: make member call
 		}
 		else
 		{
@@ -1816,7 +1822,7 @@ public abstract class As2WhateverConverter
 			}
 			else if (isGlobalCalled)
 			{
-				dest.writef(staticSelector(type(BcTypeNode.typeGlobal), call(identifier, argsList)));
+				dest.writef(staticSelector(createClassName(BcTypeNode.typeGlobal), call(identifier, argsList)));
 			}
 			else
 			{
@@ -2180,7 +2186,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				dest.writef(construct(type(BcTypeNode.typeArray), ""));
+				dest.writef(construct(createClassName(BcTypeNode.typeArray), ""));
 			}
 		}
 		else if (node instanceof LiteralVectorNode)
@@ -2647,16 +2653,16 @@ public abstract class As2WhateverConverter
 			BcTypeNodeInstance toTypeInstance = evaluateTypeInstance(node.rhs);
 			failConversionUnless(toTypeInstance != null, "Can't detect to-cast type: '%s'", rshString);
 			
-			BcTypeNode fromType = evaluateType(node.lhs);
-			failConversionUnless(fromType != null, "Can't detect from-cast type: '%s'", lshString);
+			BcTypeNodeInstance fromTypeInstance = evaluateTypeInstance(node.lhs);
+			failConversionUnless(fromTypeInstance != null, "Can't detect from-cast type: '%s'", lshString);
 
 			if (node.op == Tokens.IS_TOKEN) 
 			{
-				dest.write(operatorIs(ldest, rdest, fromType, toTypeInstance));
+				dest.write(operatorIs(ldest, rdest, fromTypeInstance, toTypeInstance));
 			} 
 			else 
 			{
-				dest.write(operatorAs(ldest, rdest, fromType, toTypeInstance));
+				dest.write(operatorAs(ldest, rdest, fromTypeInstance, toTypeInstance));
 			}
 		}
 		else if (node.op == Tokens.IN_TOKEN)
@@ -2901,20 +2907,13 @@ public abstract class As2WhateverConverter
 			return findClass(BcTypeNode.typeObject);
 		}
 
-		return findClass(type.getQualifiedName());
+		return findClass(type.getTypeName());
 	}
 
-	private BcClassDefinitionNode findClass(String name)
+	private BcClassDefinitionNode findClass(String identifier)
 	{
-		int dotIndex = name.lastIndexOf(".");
-		if (dotIndex != -1)
-		{
-			String packageName = name.substring(0, dotIndex);
-			String typeName = name.substring(dotIndex + 1);
-			return findClass(typeName, packageName);
-		}
-		
-		return findClass(name, null);
+		BcTypeName typeName = codeHelper.extractTypeName(identifier);
+		return findClass(typeName);
 	}
 
 	private BcClassDefinitionNode findClass(BcTypeName typeName)
@@ -3322,7 +3321,7 @@ public abstract class As2WhateverConverter
 			return classType(bcClass.getExtendsType());
 		}
 
-		return classType(BcTypeNode.typeObject);
+		return createClassName(BcTypeNode.typeObject);
 	}
 
 	protected BcTypeNode getBaseClassType(BcClassDefinitionNode bcClass)
@@ -3920,7 +3919,7 @@ public abstract class As2WhateverConverter
 		}
 		popDest();
 
-		dest.writef(construct(type(BcTypeNode.typeArray), elementDest));
+		dest.writef(construct(createClassName(BcTypeNode.typeArray), elementDest));
 	}
 
 	private void writeNewLiteralVector(BcVectorTypeNode vectorType, ObjectList<Node> args)
@@ -4004,13 +4003,13 @@ public abstract class As2WhateverConverter
 			}
 		}
 		
-		dest.write(staticCall(classType(BcTypeNode.typeObject), "createLiteralObject", args)); // FIXME: make a separate call for it		
+		dest.write(staticCall(createClassName(BcTypeNode.typeObject), "createLiteralObject", args)); // FIXME: make a separate call for it		
 	}
 	
 	private void writeLiteralXML(LiteralXMLNode node) 
 	{
 		String text = codeHelper.literalString(((LiteralStringNode)node.list.items.get(0)).value);
-		dest.write(construct(type(BcTypeNode.typeXML), text));
+		dest.write(construct(createClassName(BcTypeNode.typeXML), text));
 	}
 
 	protected boolean classEquals(BcClassDefinitionNode classNode, String name)
@@ -4210,17 +4209,17 @@ public abstract class As2WhateverConverter
 		return -1;
 	}
 
-	private boolean canBeClass(String name)
-	{
-		return canBeClass(name, null);
-	}
-
 	private boolean canBeClass(String name, String packageName)
 	{
 		return findClass(name, packageName) != null;
 	}
 
 	protected boolean canBeClass(BcTypeNode type)
+	{
+		return canBeClass(type.getTypeName());
+	}
+	
+	protected boolean canBeClass(BcTypeName type)
 	{
 		return canBeClass(type.getName(), type.getQualifier());
 	}
@@ -4372,8 +4371,8 @@ public abstract class As2WhateverConverter
 	private static final BcArgumentsList emptyInitializer = new BcArgumentsList();
 
 	public abstract String construct(String type, Object initializer);
-	public abstract String operatorIs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance);
-	public abstract String operatorAs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance);
+	public abstract String operatorIs(Object lhs, Object rhs, BcTypeNodeInstance fromTypeInstance, BcTypeNodeInstance toTypeInstance);
+	public abstract String operatorAs(Object lhs, Object rhs, BcTypeNodeInstance fromTypeInstance, BcTypeNodeInstance toTypeInstance);
 
 	public abstract String thisSelector(BcClassDefinitionNode bcClass, Object selector);
 	public abstract String superSelector(BcClassDefinitionNode bcClass, Object selector);
@@ -4387,20 +4386,49 @@ public abstract class As2WhateverConverter
 	public abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);
 	public abstract String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args);
 
-	public String type(BcTypeNodeInstance bcTypeInstance)
+	protected String type(BcTypeNodeInstance typeInstance)
 	{
-		String typeName = type(bcTypeInstance.getType());
-		if (bcTypeInstance.isQualified())
+		String typeName = type(typeInstance.getType());
+		if (typeInstance.isQualified())
 		{
-			String packageName = bcTypeInstance.getQualifier();
+			String packageName = typeInstance.getQualifier();
 			return safeQualifier(packageName) + "." + typeName;
 		}
 
 		return typeName;
 	}
 
-	public String type(BcTypeNode bcType)
+	protected String type(BcTypeNode bcType)
 	{
+		String typeString = createTypeString(bcType);
+		return typeString != null ? typeString : createTypeName(bcType.getName());
+	}
+
+	protected String classType(BcTypeNodeInstance typeInstance)
+	{
+		String typeName = classType(typeInstance.getType());
+		if (typeInstance.isQualified())
+		{
+			String packageName = typeInstance.getQualifier();
+			return safeQualifier(packageName) + "." + typeName;
+		}
+
+		return typeName;
+	}
+	
+	protected String classType(BcTypeNode type)
+	{
+		String typeString = createTypeString(type);
+		return typeString != null ? typeString : createClassName(type.getName());
+	}
+	
+	private String createTypeString(BcTypeNode bcType)
+	{
+		if (bcType.isIntegral())
+		{
+			return createIntegralType(bcType.getName());
+		}
+		
 		if (bcType instanceof BcFunctionTypeNode)
 		{
 			BcFunctionTypeNode funcType = (BcFunctionTypeNode) bcType;
@@ -4417,68 +4445,59 @@ public abstract class As2WhateverConverter
 			return wildCardType((BcUntypedTypeNode) bcType);
 		}
 		
-		String typeName = bcType.getName();
 		if (bcType instanceof BcVectorTypeNode)
 		{
 			return vectorType((BcVectorTypeNode) bcType);
 		}
 		
-		return type(typeName);
+		return null;
 	}
 
-	public String type(String name)
+	/**
+	 * Creates type string from the type name. Resulting type string should be
+	 * used for:
+	 * <ul>
+	 * <li>Classes declarations</li>
+	 * <li>Static calls</li>
+	 * </ul>
+	 */
+	protected String createClassName(String name)
 	{
-		if (name.equals(BcTypeNode.typeFunction))
-		{
-			name = getDefaultFunctionType().getName();
-		}
-
-		String basic = BcCodeHelper.findBasicType(name);
-		if (basic != null)
-		{
-			return basic;
-		}
-
-		return classType(name);
-	}
-
-	protected String classType(BcTypeNodeInstance typeInstance)
-	{
-		BcTypeNode type = typeInstance.getType();
-		if (typeInstance.isQualified())
-		{
-			String packageName = typeInstance.getQualifier();
-			return safeQualifier(packageName) + "." + classType(type);
-		}
-		
-		if (type instanceof BcVectorTypeNode)
-		{
-			BcVectorTypeNode vectorType = (BcVectorTypeNode) type;
-			return vectorType(vectorType);
-		}
-		
-		return classType(type);
-	}
-	
-	protected String classType(BcTypeNode type)
-	{
-		if (type.isIntegral())
-		{
-			return type(type);
-		}
-		
-		return classType(type.getName());
-	}
-	
-	protected String classType(String name)
-	{
+		assert name.indexOf('.') == -1 : name;
 		if (name.startsWith(TYPE_PREFIX))
 		{
 			return name;
 		}
 		return TYPE_PREFIX + name;
 	}
+	
+	/**
+	 * Creates type string from the type name. Resulting type string should be
+	 * used for:
+	 * <ul>
+	 * <li>Variable declarations</li>
+	 * <li>Cast types</li>
+	 * <li><code>Vector</code>'s generic types</li>
+	 * <li><code>as</code>/<code>is</code> operators</li>
+	 * </ul>
+	 */
+	protected String createTypeName(String name)
+	{
+		return createClassName(name);
+	}
 
+	protected String createIntegralType(String name)
+	{
+		assert name.indexOf('.') == -1 : name;
+		String basicType = BcCodeHelper.findBasicType(name);
+		if (basicType != null)
+		{
+			return basicType;
+		}
+		
+		return name;
+	}
+	
 	public String construct(BcTypeNodeInstance typeInstance)
 	{
 		return construct(typeInstance, emptyInitializer);
@@ -4498,7 +4517,7 @@ public abstract class As2WhateverConverter
 	{
 		String typeString = type(exprType);
 		typeString = Character.toUpperCase(typeString.charAt(0)) + typeString.substring(1);
-		return staticCall(classType(BcTypeNode.typeString), "parse" + typeString, expr);
+		return staticCall(createClassName(BcTypeNode.typeString), "parse" + typeString, expr);
 	}
 
 	public String varDecl(BcTypeNodeInstance typeInstance, String identifier)
@@ -4578,6 +4597,11 @@ public abstract class As2WhateverConverter
 	{
 		return memberSelector(target, selector);
 	}
+	
+	public String objectSelector(Object target, Object selector)
+	{
+		return memberSelector(target, selector);
+	}
 
 	public String staticCall(Object target, Object selector, Object... args)
 	{
@@ -4618,7 +4642,7 @@ public abstract class As2WhateverConverter
 	
 	public String createCast(Object expr, BcTypeNodeInstance toTypeInstance)
 	{
-		return String.format("(%s)(%s)", classType(toTypeInstance), expr);
+		return String.format("(%s)(%s)", type(toTypeInstance), expr);
 	}
 
 	public String castString(Object expr, BcTypeNode fromType)

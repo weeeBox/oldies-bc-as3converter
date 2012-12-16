@@ -165,9 +165,9 @@ public class BcTypeNode extends BcNode
 		return null;
 	}
 	
-	public static BcTypeNode createRestType(BcTypeNode type)
+	public static BcTypeNode createRestType(BcTypeNodeInstance typeInstance)
 	{
-		return new BcRestTypeNode(type);
+		return new BcRestTypeNode(typeInstance);
 	}
 	
 	public static List<BcTypeNode> typesForPackage(String packageName)

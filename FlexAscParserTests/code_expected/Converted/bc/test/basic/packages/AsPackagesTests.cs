@@ -48,14 +48,27 @@ namespace bc.test.basic.packages
 			foo1 = v1[0];
 			foo2 = v2[0];
 		}
-		public virtual void testNewApi()
+		public virtual void testStaticCall()
+		{
+			bc.flash.text.AsTextField.isFontCompatible(null, null);
+		}
+		public virtual void testApiAssignment()
 		{
 			bc.flash.text.AsTextField textField = new bc.flash.text.AsTextField();
 		}
-		public virtual void testNewApiAsOperator()
+		public virtual void testApiStaticCall()
+		{
+			bc.flash.text.AsTextField.isFontCompatible(null, null);
+		}
+		public virtual void testApiAsOperator()
 		{
 			Object obj = new bc.flash.text.AsTextField();
-			AsTextField textField = obj as bc.flash.text.AsTextField;
+			bc.flash.text.AsTextField textField = obj as bc.flash.text.AsTextField;
+		}
+		public virtual void testApiIsOperator()
+		{
+			Object obj = new bc.flash.text.AsTextField();
+			bool flag = obj is bc.flash.text.AsTextField;
 		}
 	}
 }

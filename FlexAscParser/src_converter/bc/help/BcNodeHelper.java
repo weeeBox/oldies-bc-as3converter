@@ -35,6 +35,7 @@ import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
 import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
+import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcUntypedTypeNode;
 
 public class BcNodeHelper
@@ -207,6 +208,18 @@ public class BcNodeHelper
 		}
 	}
 
+	public static BcTypeNodeInstance extractBcTypeInstance(Node node)
+	{
+		BcTypeNode type = extractBcType(node);
+		if (type != null)
+		{
+			boolean qualified = isTypeQualified(node);
+			return type.createTypeInstance(qualified);
+		}
+		
+		return null;
+	}
+	
 	public static BcTypeNode extractBcType(Node type)
 	{
 		if (type == null)
@@ -280,10 +293,10 @@ public class BcNodeHelper
 		if (type instanceof RestParameterNode)
 		{
 			RestParameterNode restTypeNode = (RestParameterNode) type;
-			BcTypeNode argType = extractBcType(restTypeNode.type);
-			assert argType != null;
+			BcTypeNodeInstance argTypeInstance = extractBcTypeInstance(restTypeNode.type);
+			assert argTypeInstance != null;
 			
-			return BcTypeNode.createRestType(argType);
+			return BcTypeNode.createRestType(argTypeInstance);
 		}
 		
 		if (type instanceof ParameterNode)

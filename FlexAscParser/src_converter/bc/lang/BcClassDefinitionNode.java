@@ -22,7 +22,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private List<BcVariableDeclaration> declaredVars;
 	private List<BcTypeNode> additionalImports;
 	
-	private BcTypeNodeInstance extendsType;
+	private BcTypeNodeInstance extendsTypeInstance;
 	private List<BcTypeNodeInstance> interfaces;
 
 	private List<Node> statements;
@@ -97,22 +97,27 @@ public class BcClassDefinitionNode extends BcDeclaration
 	
 	public BcTypeNode getExtendsType()
 	{
-		return extendsType.getType();
+		return extendsTypeInstance.getType();
+	}
+	
+	public BcTypeNodeInstance getExtendsTypeInstance()
+	{
+		return extendsTypeInstance;
 	}
 	
 	public void setExtendsType(BcTypeNodeInstance extendsType)
 	{
-		this.extendsType = extendsType;
+		this.extendsTypeInstance = extendsType;
 	}
 	
 	public boolean hasExtendsType()
 	{
-		return extendsType != null;
+		return extendsTypeInstance != null;
 	}
 	
 	public BcClassDefinitionNode getExtendsClass()
 	{
-		return hasExtendsType() ? extendsType.getType().getClassNode() : null;
+		return hasExtendsType() ? extendsTypeInstance.getType().getClassNode() : null;
 	}
 	
 	public void addFunctionType(BcFunctionTypeNode node)
@@ -146,7 +151,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 				return funcType;
 			}
 		}
-		return extendsType != null ? extendsType.getType().getClassNode().findFunctionType(name) : null;
+		return extendsTypeInstance != null ? extendsTypeInstance.getType().getClassNode().findFunctionType(name) : null;
 	}
 	
 	public boolean hasFunctionTypes()
@@ -409,7 +414,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 	public BcClassDefinitionNode clone(BcTypeNode classType)
 	{
 		BcClassDefinitionNode bcClass = new BcClassDefinitionNode(classType);
-		bcClass.extendsType = extendsType;
+		bcClass.extendsTypeInstance = extendsTypeInstance;
 		bcClass.importList = importList;
 		
 		bcClass.fields = fields;

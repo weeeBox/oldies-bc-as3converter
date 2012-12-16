@@ -156,17 +156,21 @@ public abstract class BcCodeHelper
 	
 	public BcTypeName extractTypeName(IdentifierNode identifier)
 	{
-		String identifierString = BcNodeHelper.extractIdentifier(identifier);
-		int dotIndex = identifierString.lastIndexOf('.');
+		return extractTypeName(BcNodeHelper.extractIdentifier(identifier));
+	}
+
+	public BcTypeName extractTypeName(String identifier)
+	{
+		int dotIndex = identifier.lastIndexOf('.');
 		if (dotIndex != -1)
 		{
-			String packageName = identifierString.substring(0, dotIndex);
-			String name = identifierString.substring(dotIndex + 1);
+			String packageName = identifier.substring(0, dotIndex);
+			String name = identifier.substring(dotIndex + 1);
 			
 			return new BcTypeName(BcNodeHelper.safeQualifier(packageName), identifier(name));
 		}
 			
-		return new BcTypeName(identifier(identifierString));
+		return new BcTypeName(identifier(identifier));
 	}
 	
 	public String identifier(String name)

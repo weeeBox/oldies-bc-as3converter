@@ -2,16 +2,21 @@ package bc.lang;
 
 public class BcRestTypeNode extends BcTypeNode
 {
-	private BcTypeNode restType;
+	private BcTypeNodeInstance restTypeInstance;
 
-	protected BcRestTypeNode(BcTypeNode resType)
+	protected BcRestTypeNode(BcTypeNodeInstance resType)
 	{
 		super("_AS_REST");
-		this.restType = resType;
+		this.restTypeInstance = resType;
+	}
+	
+	public BcTypeNodeInstance getRestTypeInstance()
+	{
+		return restTypeInstance;
 	}
 	
 	public BcTypeNode getRestType()
 	{
-		return restType;
+		return restTypeInstance.getType();
 	}
 }

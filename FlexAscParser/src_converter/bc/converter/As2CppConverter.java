@@ -1096,13 +1096,13 @@ public class As2CppConverter extends As2WhateverConverter
 	}
 
 	@Override
-	public String operatorIs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance) 
+	public String operatorIs(Object lhs, Object rhs, BcTypeNodeInstance fromTypeInstance, BcTypeNodeInstance toTypeInstance) 
 	{
 		return String.format("%s(%s, %s)", IS_OPERATOR, lhs, rhs);
 	}
 	
 	@Override
-	public String operatorAs(Object lhs, Object rhs, BcTypeNode fromType, BcTypeNodeInstance toTypeInstance) 
+	public String operatorAs(Object lhs, Object rhs, BcTypeNodeInstance fromTypeInstance, BcTypeNodeInstance toTypeInstance) 
 	{
 		return String.format("%s(%s, %s)", AS_OPERATOR, lhs, rhs);
 	}
@@ -1186,6 +1186,11 @@ public class As2CppConverter extends As2WhateverConverter
 	public String typePtr(BcTypeNode bcType)
 	{
 		 return typePtr(bcType.getName());
+	}
+	
+	public String type(String type)
+	{
+		return createTypeName(type);
 	}
 	
 	public String typePtr(String type)
