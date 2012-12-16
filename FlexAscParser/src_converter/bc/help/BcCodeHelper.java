@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import macromedia.asc.parser.IdentifierNode;
-import macromedia.asc.parser.LiteralStringNode;
-import macromedia.asc.parser.Node;
-import macromedia.asc.parser.QualifiedIdentifierNode;
 import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;

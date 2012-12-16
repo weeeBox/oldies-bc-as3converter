@@ -9,5 +9,9 @@ namespace bc.flash.text
 		public AsTextField()
 		{
 		}
+		public static bool isFontCompatible(String fontName, String fontStyle)
+		{
+			return false;
+		}
 	}
 }

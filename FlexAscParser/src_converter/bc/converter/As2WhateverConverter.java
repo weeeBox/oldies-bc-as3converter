@@ -1411,6 +1411,8 @@ public abstract class As2WhateverConverter
 
 		if (node.expr instanceof IdentifierNode)
 		{
+			// TODO: refactor it!!!
+			
 			BcClassDefinitionNode bcClass;
 			if (lastBcMemberType != null)
 			{
@@ -1431,6 +1433,10 @@ public abstract class As2WhateverConverter
 				failConversionUnless(lastBcMemberType != null, "Static class type undefined: %s", expr);
 
 				addToImport(lastBcMemberType);
+			}
+			else if (BcCodeHelper.isIntegralType(identifier))
+			{
+				lastBcMemberType = BcTypeNode.create(identifier);
 			}
 			else
 			{
