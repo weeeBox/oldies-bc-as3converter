@@ -162,6 +162,56 @@ namespace bc.test.basic.flow
 			{
 			}
 		}
+		public virtual void testIsOperator()
+		{
+			Object obj = "This is string";
+			bool flag = obj is String;
+		}
+		public virtual void testAsOperator()
+		{
+			Object obj = "This is string";
+			String str = obj as String;
+		}
+		public virtual void testIsNumberOperator()
+		{
+			Object obj = 3.14f;
+			bool flag = AsNumber.isFloat(obj);
+		}
+		public virtual void testAsNumberOperator()
+		{
+			Object obj = 3.14f;
+			float str = AsNumber.asFloat(obj);
+		}
+		public virtual void testIsBooleanOperator()
+		{
+			Object obj = true;
+			bool flag = AsNumber.isBool(obj);
+		}
+		public virtual void testAsBooleanOperator()
+		{
+			Object obj = true;
+			bool str = AsNumber.asBool(obj);
+		}
+		public virtual void testIsIntOperator()
+		{
+			Object obj = 10;
+			bool flag = AsNumber.isInt(obj);
+		}
+		public virtual void testAsIntOperator()
+		{
+			Object obj = 10;
+			int str = AsNumber.asInt(obj);
+		}
+		public virtual void testIsUintOperator()
+		{
+			Object obj = 10;
+			bool flag = AsNumber.isUint(obj);
+		}
+		public virtual void testAsUintOperator()
+		{
+			Object obj = 10;
+			uint str = AsNumber.asUint(obj);
+		}
 		public virtual int returnsInteger()
 		{
 			return 0;

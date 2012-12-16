@@ -35,4 +35,9 @@ public class BcTypeNodeInstance
 	{
 		return qualified;
 	}
+	
+	public boolean isIntegral()
+	{
+		return type.isIntegral();
+	}
 }

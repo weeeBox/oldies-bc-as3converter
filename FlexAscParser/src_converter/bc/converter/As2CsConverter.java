@@ -633,19 +633,30 @@ public class As2CsConverter extends As2WhateverConverter
 	@Override
 	public String operatorIs(Object lhs, Object rhs, BcTypeNodeInstance fromTypeInstance, BcTypeNodeInstance toTypeInstance) 
 	{
-		return String.format("%s %s %s", lhs, IS, type(toTypeInstance));
+		return operatorHelper(IS, lhs, toTypeInstance);
 	}
 
 	@Override
 	public String operatorAs(Object lhs, Object rhs, BcTypeNodeInstance fromTypeInstance, BcTypeNodeInstance toTypeInstance)
 	{
-		return String.format("%s %s %s", lhs, AS, type(toTypeInstance));
+		return operatorHelper(AS, lhs, toTypeInstance);
 	}
 	
 	@Override
 	public String toString(Object expr)
 	{
 		return memberCall(expr, "ToString");
+	}
+	
+	private String operatorHelper(String operator, Object expr, BcTypeNodeInstance toTypeInstance)
+	{
+		if (toTypeInstance.isIntegral())
+		{
+			String name = type(toTypeInstance);
+			String methodName = operator + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+			return String.format("%s.%s(%s)", createClassName(BcTypeNode.typeNumber), methodName, expr);
+		}
+		return String.format("%s %s %s", expr, operator, type(toTypeInstance));
 	}
 	
 	private class CsImportsData

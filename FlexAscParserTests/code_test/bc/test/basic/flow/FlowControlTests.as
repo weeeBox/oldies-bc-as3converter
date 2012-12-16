@@ -202,6 +202,66 @@ package bc.test.basic.flow
             }
         }
         
+        public function testIsOperator() : void
+        {
+            var obj : Object = "This is string";
+            var flag : Boolean = obj is String;
+        }
+        
+        public function testAsOperator() : void
+        {
+            var obj : Object = "This is string";
+            var str : String = obj as String;
+        }
+        
+        public function testIsNumberOperator() : void
+        {
+            var obj : Object = 3.14;
+            var flag : Boolean = obj is Number;
+        }
+        
+        public function testAsNumberOperator() : void
+        {
+            var obj : Object = 3.14;
+            var str : Number = obj as Number;
+        }
+        
+        public function testIsBooleanOperator() : void
+        {
+            var obj : Object = true;
+            var flag : Boolean = obj is Boolean;
+        }
+        
+        public function testAsBooleanOperator() : void
+        {
+            var obj : Object = true;
+            var str : Boolean = obj as Boolean;
+        }
+        
+        public function testIsIntOperator() : void
+        {
+            var obj : Object = 10;
+            var flag : Boolean = obj is int;
+        }
+        
+        public function testAsIntOperator() : void
+        {
+            var obj : Object = 10;
+            var str : int = obj as int;
+        }
+        
+        public function testIsUintOperator() : void
+        {
+            var obj : Object = 10;
+            var flag : Boolean = obj is uint;
+        }
+        
+        public function testAsUintOperator() : void
+        {
+            var obj : Object = 10;
+            var str : uint = obj as uint;
+        }
+        
         public function returnsInteger() : int
         {
             return 0;
