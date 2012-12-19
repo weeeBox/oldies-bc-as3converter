@@ -69,6 +69,11 @@ public class BcClassDefinitionNode extends BcDeclaration
 	{
 		return classType.getName();
 	}
+	
+	public String getQualifiedName()
+	{
+		return classType.getQualifiedName();
+	}
 
 	public void setClassType(BcTypeNode classType)
 	{
@@ -78,6 +83,11 @@ public class BcClassDefinitionNode extends BcDeclaration
 	public BcTypeNode getClassType()
 	{
 		return classType;
+	}
+	
+	public BcTypeName getClassTypeName()
+	{
+		return classType.getTypeName();
 	}
 	
 	public String getPackageName() 

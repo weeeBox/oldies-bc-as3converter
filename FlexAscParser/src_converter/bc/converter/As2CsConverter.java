@@ -31,6 +31,7 @@ import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcUntypedTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
+import bc.utils.string.StringUtils;
 
 public class As2CsConverter extends As2WhateverConverter
 {
@@ -653,7 +654,7 @@ public class As2CsConverter extends As2WhateverConverter
 		if (toTypeInstance.isIntegral())
 		{
 			String name = type(toTypeInstance);
-			String methodName = operator + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+			String methodName = operator + StringUtils.capitalize(name);
 			return String.format("%s.%s(%s)", createClassName(BcTypeNode.typeNumber), methodName, expr);
 		}
 		return String.format("%s %s %s", expr, operator, type(toTypeInstance));

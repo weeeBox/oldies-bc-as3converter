@@ -68,6 +68,14 @@ package bc.test.basic.types
             num = Number.NaN;
             num = Number.NEGATIVE_INFINITY;
             num = Number.POSITIVE_INFINITY;
+            
+            var i : int;
+            i = int.MAX_VALUE;
+            i = int.MIN_VALUE;
+            
+            var ui : uint;
+            ui = uint.MAX_VALUE;
+            ui = uint.MIN_VALUE;
         }
     }
 }

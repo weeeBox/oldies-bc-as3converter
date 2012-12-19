@@ -63,6 +63,12 @@ namespace bc.test.basic.types
 			num = AsNumber.NaN;
 			num = AsNumber.NEGATIVE_INFINITY;
 			num = AsNumber.POSITIVE_INFINITY;
+			int i = 0;
+			i = AsInt.MAX_VALUE;
+			i = AsInt.MIN_VALUE;
+			uint ui = 0;
+			ui = AsUint.MAX_VALUE;
+			ui = AsUint.MIN_VALUE;
 		}
 	}
 }

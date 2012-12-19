@@ -14,32 +14,31 @@ package bc.flash
 		public static const MIN_VALUE : Number = 1.401298464324817E-45;
 		public static const MAX_VALUE : Number = 3.4028234663852886E38;
 
-		public function Number(value : Object)
+		private function Number()
+		{
+		}
+
+		public static function toExponential(number : Number, fractionDigits : Number = 0) : String
 		{
 			throw new NotImplementedError();
 		}
 
-		public function toExponential(fractionDigits : uint = 0) : String
+		public static function toFixed(number : Number, fractionDigits : Number = 0) : String
 		{
 			throw new NotImplementedError();
 		}
 
-		public function toFixed(fractionDigits : uint = 0) : String
+		public static function toPrecision(number : Number, precision : Number = 0) : String
 		{
 			throw new NotImplementedError();
 		}
 
-		public function toPrecision(precision : uint = 0) : String
+		public static function toString(number : Number, radix:Number = 10) : String
 		{
 			throw new NotImplementedError();
 		}
 
-		public function toString(radix:Number = 10) : String
-		{
-			throw new NotImplementedError();
-		}
-
-		public function valueOf() : Number
+		public static function valueOf(number : Number) : Number
 		{
 			throw new NotImplementedError();
 		}

@@ -7,6 +7,7 @@ import macromedia.asc.parser.IdentifierNode;
 import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
+import bc.utils.string.StringUtils;
 
 public abstract class BcCodeHelper
 {
@@ -54,12 +55,12 @@ public abstract class BcCodeHelper
 	
 	public String getter(String name)
 	{
-		return "get" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+		return "get" + StringUtils.capitalize(name);
 	}
 	
 	public String setter(String name)
 	{
-		return "set" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+		return "set" + StringUtils.capitalize(name);
 	}
 	
 	public String literalBool(boolean value)
