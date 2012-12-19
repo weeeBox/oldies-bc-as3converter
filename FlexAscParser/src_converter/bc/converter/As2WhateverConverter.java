@@ -1147,7 +1147,7 @@ public abstract class As2WhateverConverter
 			{
 				BcTypeName typeName = codeHelper.extractTypeName(identifier);
 				BcClassDefinitionNode classNode = findClass(typeName);
-				staticCall = classNode != null;
+				staticCall = classNode != null || (classNode = findBindedClass(identifier)) != null;
 				if (staticCall)
 				{
 					BcTypeNode classType = classNode.getClassType();
@@ -2885,9 +2885,12 @@ public abstract class As2WhateverConverter
 
 	private BcClassDefinitionNode findBindedClass(BcTypeNode type)
 	{
-		String typeName = type.getName();
-		String className = bindedClasses.get(typeName);
+		return findBindedClass(type.getName());
+	}
 
+	private BcClassDefinitionNode findBindedClass(String identifier)
+	{
+		String className = bindedClasses.get(identifier);
 		return className != null ? findClass(className) : null;
 	}
 	
