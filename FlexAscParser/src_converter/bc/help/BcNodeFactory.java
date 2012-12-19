@@ -18,7 +18,6 @@ import macromedia.asc.parser.QualifiedIdentifierNode;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.Tokens;
 import macromedia.asc.parser.UnaryExpressionNode;
-import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
 
@@ -125,7 +124,7 @@ public class BcNodeFactory {
 			}
 			else
 			{
-				turnToStaticStringDelegateCall(node, stringTypeInstance	);
+				turnToStaticTypeDelegateCall(node, stringTypeInstance);
 			}
 		}
 	}

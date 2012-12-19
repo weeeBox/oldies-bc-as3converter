@@ -15,7 +15,7 @@ package bc.flash
 
 		/* public function concat(...args : *) : String; */
 
-		public static function fromCharCode(str : String, ...args : Number) : String
+		public static function fromCharCode(...args : Number) : String
 		{
 			throw new NotImplementedError();
 		}
@@ -40,16 +40,16 @@ package bc.flash
 
 		public static function substring(str : String, start : Number, end : Number = 2147483647) : String { throw new NotImplementedError(); }
 
-		public static function toLocaleLowerCase(str : String, ) : String { throw new NotImplementedError(); }
+		public static function toLocaleLowerCase(str : String) : String { throw new NotImplementedError(); }
 
-		public static function toLocaleUpperCase(str : String, ) : String { throw new NotImplementedError(); }
+		public static function toLocaleUpperCase(str : String) : String { throw new NotImplementedError(); }
 
-		public function toLower() : String { throw new NotImplementedError(); }
+		public static function valueOf(str : String) : String { throw new NotImplementedError(); }
+
+		public function ToLower() : String { throw new NotImplementedError(); }
 
 		public function ToString() : String { throw new NotImplementedError(); }
 
-		public function toUpper() : String { throw new NotImplementedError(); }
-
-		public static function valueOf(str : String) : String { throw new NotImplementedError(); }
+		public function ToUpper() : String { throw new NotImplementedError(); }
 	}
 }
