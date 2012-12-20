@@ -779,7 +779,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 	
-	private void process()
+	protected void process()
 	{
 		processUniqueTypes();
 
@@ -794,7 +794,7 @@ public abstract class As2WhateverConverter
 		processUniqueTypes(); // more unique types may appear
 	}
 
-	private void processUniqueTypes() 
+	protected void processUniqueTypes() 
 	{
 		Collection<BcTypeNode> values = BcTypeNode.uniqueTypes.values();
 		for (BcTypeNode type : values)
@@ -803,7 +803,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(BcClassList classList)
+	protected void process(BcClassList classList)
 	{
 		if (!classList.isProcessed())
 		{
@@ -826,12 +826,12 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(BcInterfaceDefinitionNode bcInterface)
+	protected void process(BcInterfaceDefinitionNode bcInterface)
 	{
 		BcGlobal.declaredVars = bcInterface.getDeclaredVars();
 	}
 
-	private void process(BcClassDefinitionNode bcClass)
+	protected void process(BcClassDefinitionNode bcClass)
 	{
 		System.out.println("Process: " + bcClass.getName());
 
@@ -860,7 +860,7 @@ public abstract class As2WhateverConverter
 		BcGlobal.declaredVars = null;
 	}
 
-	private void process(BcVariableDeclaration bcVar)
+	protected void process(BcVariableDeclaration bcVar)
 	{
 		BcTypeNodeInstance varTypeInstance = bcVar.getTypeInstance();
 
@@ -894,7 +894,7 @@ public abstract class As2WhateverConverter
 		dest.writeln(";");
 	}
 
-	private void process(Node node)
+	protected void process(Node node)
 	{
 		failConversionUnless(node != null, "Tried to process 'null' node");
 
@@ -974,7 +974,7 @@ public abstract class As2WhateverConverter
 			failConversion("Unsupported node class: %s", node.getClass());
 	}
 
-	private void process(StatementListNode statementsNode)
+	protected void process(StatementListNode statementsNode)
 	{
 		writeBlockOpen(dest);
 
@@ -1000,7 +1000,7 @@ public abstract class As2WhateverConverter
 		writeBlockClose(dest);
 	}
 
-	private void process(ArgumentListNode node)
+	protected void process(ArgumentListNode node)
 	{
 		int itemIndex = 0;
 		for (Node arg : node.items)
@@ -1014,22 +1014,22 @@ public abstract class As2WhateverConverter
 		}
 	}
 	
-	private void process(StoreRegisterNode node)
+	protected void process(StoreRegisterNode node)
 	{
 		process(node.expr);
 	}
 	
-	private void process(LoadRegisterNode node)
+	protected void process(LoadRegisterNode node)
 	{
 		// do nothing
 	}
 
-	private void process(EmptyStatementNode node)
+	protected void process(EmptyStatementNode node)
 	{
 		dest.writeln(";");
 	}
 	
-	private void process(FunctionCommonNode node)
+	protected void process(FunctionCommonNode node)
 	{
 		failConversion("Unexpected function common node");
 	}
@@ -1060,26 +1060,10 @@ public abstract class As2WhateverConverter
 	private BcTypeNode lastBcMemberType;
 	private Stack<BcTypeNode> bcMembersTypesStack;
 
-	private void process(MemberExpressionNode node)
+	protected void process(MemberExpressionNode node)
 	{
 		bcMembersTypesStack.push(lastBcMemberType);
 		lastBcMemberType = null;
-		
-
-		if (node.base != null)
-		{
-			BcTypeNodeInstance baseTypeInstance = evaluateTypeInstance(node.base, true);
-			failConversionUnless(baseTypeInstance != null, "Unable to evaluate base type");
-			
-			if (baseTypeInstance.isIntegral())
-			{
-				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance);
-			}
-			else if (typeEquals(baseTypeInstance, BcTypeNode.typeString) && getCodeHelper().boolSetting(BcCodeHelper.SETTING_DELEGATE_STRINGS_CALLS))
-			{
-				BcNodeFactory.turnToStaticStringDelegateCall(node, baseTypeInstance);
-			}
-		}
 		
 		boolean staticCall = false;
 		boolean funcMemberCall = false; // Function.apply or Function.call
@@ -1275,7 +1259,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void processFuncMemberCall(BcTypeNode baseType, SelectorNode selector) 
+	protected void processFuncMemberCall(BcTypeNode baseType, SelectorNode selector) 
 	{
 		failConversionUnless(baseType instanceof BcFunctionTypeNode, "Unexcepted base type: %s", baseType);
 		
@@ -1368,7 +1352,7 @@ public abstract class As2WhateverConverter
 		dest.write(argsDef(argsList));
 	}
 
-	private void process(SelectorNode node)
+	protected void process(SelectorNode node)
 	{
 		if (node instanceof DeleteExpressionNode)
 			process((DeleteExpressionNode) node);
@@ -1386,7 +1370,7 @@ public abstract class As2WhateverConverter
 			failConversion("Unexpected selector class: %s", node.getClass());
 	}
 
-	private void process(DeleteExpressionNode node)
+	protected void process(DeleteExpressionNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -1397,7 +1381,7 @@ public abstract class As2WhateverConverter
 		dest.writef(".remove(%s)", expr); // fix me for member call
 	}
 
-	private void process(GetExpressionNode node)
+	protected void process(GetExpressionNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -1608,7 +1592,7 @@ public abstract class As2WhateverConverter
 		return BcGlobal.lastBcFunction.findVariable(name);
 	}
 
-	private void process(CallExpressionNode node)
+	protected void process(CallExpressionNode node)
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
 		pushDest(exprDest);
@@ -1821,7 +1805,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(SetExpressionNode node)
+	protected void process(SetExpressionNode node)
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
 		pushDest(exprDest);
@@ -2028,7 +2012,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(ApplyTypeExprNode node)
+	protected void process(ApplyTypeExprNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -2060,7 +2044,7 @@ public abstract class As2WhateverConverter
 		dest.write(type);
 	}
 
-	private void process(IncrementNode node)
+	protected void process(IncrementNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -2078,7 +2062,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(IdentifierNode node)
+	protected void process(IdentifierNode node)
 	{
 		if (node.isAttr())
 		{
@@ -2138,7 +2122,7 @@ public abstract class As2WhateverConverter
 		return bcVar;
 	}
 
-	private void processLiteral(Node node)
+	protected void processLiteral(Node node)
 	{
 		if (node instanceof LiteralNumberNode)
 		{
@@ -2201,7 +2185,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(IfStatementNode node)
+	protected void process(IfStatementNode node)
 	{
 		// TODO: make it right
 		boolean cutWithPreprocessor = BcNodeHelper.isPreprocessorConditionNode(node.condition);
@@ -2300,7 +2284,7 @@ public abstract class As2WhateverConverter
 		return condString;
 	}
 
-	private void process(ConditionalExpressionNode node)
+	protected void process(ConditionalExpressionNode node)
 	{
 		ListWriteDestination condDest = new ListWriteDestination();
 		pushDest(condDest);
@@ -2323,7 +2307,7 @@ public abstract class As2WhateverConverter
 		dest.writef("%s ? %s : %s", condString, thenDest, elseDest);
 	}
 
-	private void process(WhileStatementNode node)
+	protected void process(WhileStatementNode node)
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
 		pushDest(exprDest);
@@ -2352,7 +2336,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(ForStatementNode node)
+	protected void process(ForStatementNode node)
 	{
 		boolean isForEach = node.test instanceof HasNextNode;
 		if (isForEach)
@@ -2484,12 +2468,12 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(DoStatementNode node)
+	protected void process(DoStatementNode node)
 	{
 		failConversion("'do' statement is not supported yet. Sorry");
 	}
 
-	private void process(SwitchStatementNode node)
+	protected void process(SwitchStatementNode node)
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
@@ -2532,7 +2516,7 @@ public abstract class As2WhateverConverter
 		writeBlockClose(dest);
 	}
 
-	private void process(TryStatementNode node)
+	protected void process(TryStatementNode node)
 	{
 		dest.writeln("try");
 
@@ -2560,7 +2544,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(CatchClauseNode node)
+	protected void process(CatchClauseNode node)
 	{
 		ListWriteDestination paramDest = new ListWriteDestination();
 		if (node.parameter != null)
@@ -2574,7 +2558,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(ParameterNode node)
+	protected void process(ParameterNode node)
 	{
 		BcTypeNodeInstance type = extractBcTypeInstance(node.type);
 		addToImport(type);
@@ -2587,13 +2571,13 @@ public abstract class As2WhateverConverter
 		dest.write(paramDecl(parameterVar.getTypeInstance(), identifier));
 	}
 
-	private void process(FinallyClauseNode node)
+	protected void process(FinallyClauseNode node)
 	{
 		dest.writeln(finallyClause());
 		process(node.statements);
 	}
 
-	private void process(ThrowStatementNode node)
+	protected void process(ThrowStatementNode node)
 	{
 		if (node.expr != null)
 		{
@@ -2606,7 +2590,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(BinaryExpressionNode node)
+	protected void process(BinaryExpressionNode node)
 	{
 		if (node.op == Tokens.LOGICALAND_TOKEN || node.op == Tokens.LOGICALOR_TOKEN || node.op == Tokens.LOGICALXOR_TOKEN)
 		{	
@@ -2683,7 +2667,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(UnaryExpressionNode node)
+	protected void process(UnaryExpressionNode node)
 	{
 		if (node.op == Tokens.NOT_TOKEN || node.op == Tokens.BITWISEXOR_TOKEN)
 		{
@@ -2728,7 +2712,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(ReturnStatementNode node)
+	protected void process(ReturnStatementNode node)
 	{
 		failConversionUnless(!node.finallyInserted, "Return statement with finally inserted is not supported yet");
 
@@ -2762,7 +2746,7 @@ public abstract class As2WhateverConverter
 		dest.writeln(";");
 	}
 
-	private void process(BreakStatementNode node)
+	protected void process(BreakStatementNode node)
 	{
 		dest.write("break");
 		if (node.id != null)
@@ -2773,7 +2757,7 @@ public abstract class As2WhateverConverter
 		dest.writeln(";");
 	}
 	
-	private void process(ContinueStatementNode node)
+	protected void process(ContinueStatementNode node)
 	{
 		failConversionUnless(node.block == null, "ContinueStatementNode has not null block");
 		dest.write("continue");
@@ -2790,7 +2774,7 @@ public abstract class As2WhateverConverter
 		dest.write("base");
 	}
 
-	private void process(SuperStatementNode node)
+	protected void process(SuperStatementNode node)
 	{
 		ArgumentListNode args = node.call.args;
 
@@ -2814,7 +2798,7 @@ public abstract class As2WhateverConverter
 		dest.writelnf(call(BcCodeHelper.superCallMarker, argsDest));
 	}
 
-	private void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
+	protected void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> oldDeclaredVars = BcGlobal.declaredVars;
 		BcGlobal.lastBcFunction = bcFunc;
@@ -2838,13 +2822,13 @@ public abstract class As2WhateverConverter
 		BcGlobal.lastBcFunction = null;
 	}
 
-	private void process(ExpressionStatementNode node)
+	protected void process(ExpressionStatementNode node)
 	{
 		process(node.expr);
 		dest.writeln(";");
 	}
 
-	private void process(ListNode node)
+	protected void process(ListNode node)
 	{
 		ObjectList<Node> items = node.items;
 		for (Node item : items)
@@ -2853,7 +2837,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void process(BcTypeNode typeNode)
+	protected void process(BcTypeNode typeNode)
 	{
 		if (!typeNode.hasClassNode())
 		{

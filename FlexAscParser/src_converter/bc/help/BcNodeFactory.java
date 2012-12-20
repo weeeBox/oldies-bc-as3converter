@@ -24,19 +24,6 @@ import bc.lang.BcTypeNodeInstance;
 
 public class BcNodeFactory {
 	
-	private static Map<String, SelectorNode> STRING_SELECTOR_LOOKUP;
-	
-	// TODO: move that to code helper
-	static
-	{
-		STRING_SELECTOR_LOOKUP = new HashMap<String, SelectorNode>();
-		STRING_SELECTOR_LOOKUP.put("length", getExpression("Length"));
-		STRING_SELECTOR_LOOKUP.put("toString", callExpression("ToString"));
-		STRING_SELECTOR_LOOKUP.put("toLowerCase", callExpression("ToLower"));
-		STRING_SELECTOR_LOOKUP.put("toUpperCase", callExpression("ToUpper"));
-		STRING_SELECTOR_LOOKUP.put("replace", callExpression("Replace"));
-	}
-	
 	public static Node notNull(BcTypeNode type, Node expr)
 	{
 		return type.isIntegral() ? notZero(expr) : notNull(expr);
@@ -112,7 +99,8 @@ public class BcNodeFactory {
 		return new BinaryExpressionNode(op, lhs, rhs);
 	}
 	
-	public static void turnToStaticStringDelegateCall(Node node, BcTypeNodeInstance stringTypeInstance)
+	// TODO: collapse it into the turnToStaticTypeDelegateCall
+	public static void turnToStaticStringDelegateCall(Node node, BcTypeNodeInstance stringTypeInstance, Map<String, SelectorNode> selectorsLookup)
 	{
 		if (node.isMemberExpression())
 		{
@@ -128,7 +116,7 @@ public class BcNodeFactory {
 			
 			String identifier = BcNodeHelper.tryExtractIdentifier(memberExpression.selector);
 			
-			SelectorNode replacementSelector = identifier != null ? STRING_SELECTOR_LOOKUP.get(identifier) : null;
+			SelectorNode replacementSelector = identifier != null ? selectorsLookup.get(identifier) : null;
 			if (replacementSelector != null)
 			{
 				if (replacementSelector.isCallExpression())
@@ -183,32 +171,32 @@ public class BcNodeFactory {
 		}
 	}
 	
-	private static MemberExpressionNode memberExpression(BcTypeNodeInstance typeInstance)
+	public static MemberExpressionNode memberExpression(BcTypeNodeInstance typeInstance)
 	{
 		return new MemberExpressionNode(null, getExpression(typeInstance), -1);
 	}
 	
-	private static CallExpressionNode callExpression(String identifier)
+	public static CallExpressionNode callExpression(String identifier)
 	{
 		return new CallExpressionNode(identifier(identifier), null);
 	}
 	
-	private static GetExpressionNode getExpression(BcTypeNodeInstance typeInstance)
+	public static GetExpressionNode getExpression(BcTypeNodeInstance typeInstance)
 	{
 		return new GetExpressionNode(identifier(typeInstance));
 	}
 	
-	private static GetExpressionNode getExpression(String identifier)
+	public static GetExpressionNode getExpression(String identifier)
 	{
 		return new GetExpressionNode(identifier(identifier));
 	}
 
-	private static IdentifierNode identifier(BcTypeNodeInstance typeInstance)
+	public static IdentifierNode identifier(BcTypeNodeInstance typeInstance)
 	{
 		return identifier(typeInstance.isQualified() ? typeInstance.getQualifier() : null, typeInstance.getName());
 	}
 	
-	private static IdentifierNode identifier(String identifier)
+	public static IdentifierNode identifier(String identifier)
 	{
 		int dotIndex = identifier.lastIndexOf('.');
 		if (dotIndex != -1)
@@ -222,7 +210,7 @@ public class BcNodeFactory {
 		return identifier(null, identifier);
 	}
 	
-	private static IdentifierNode identifier(String qualifier, String name)
+	public static IdentifierNode identifier(String qualifier, String name)
 	{
 		if (qualifier != null)
 		{
@@ -233,7 +221,7 @@ public class BcNodeFactory {
 		return new IdentifierNode(name, -1);
 	}
 	
-	private static ArgumentListNode concat(Node item, ArgumentListNode list)
+	public static ArgumentListNode concat(Node item, ArgumentListNode list)
 	{
 		ArgumentListNode newList = new ArgumentListNode(item, -1);
 		if (list != null)

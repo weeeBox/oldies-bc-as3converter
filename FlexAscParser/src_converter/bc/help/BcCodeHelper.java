@@ -23,8 +23,6 @@ public abstract class BcCodeHelper
 	
 	private Map<String, Object> settingsMap;
 	
-	public static String SETTING_DELEGATE_STRINGS_CALLS = "SETTING_DELEGATE_STRINGS_CALLS";
-	
 	static
 	{
 		basicTypes = new HashMap<String, String>();

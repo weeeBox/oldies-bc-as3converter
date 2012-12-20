@@ -1,19 +1,26 @@
 package bc.converter;
 
+import static bc.help.BcNodeFactory.callExpression;
+import static bc.help.BcNodeFactory.getExpression;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import macromedia.asc.parser.MemberExpressionNode;
+import macromedia.asc.parser.SelectorNode;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.error.ConverterException;
 import bc.help.BcCodeHelper;
 import bc.help.BcGlobal;
+import bc.help.BcNodeFactory;
 import bc.help.CsCodeHelper;
 import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
@@ -35,6 +42,19 @@ import bc.utils.string.StringUtils;
 
 public class As2CsConverter extends As2WhateverConverter
 {
+	private static Map<String, SelectorNode> STRING_SELECTOR_LOOKUP;
+	
+	static
+	{
+		STRING_SELECTOR_LOOKUP = new HashMap<String, SelectorNode>();
+		STRING_SELECTOR_LOOKUP.put("length", getExpression("Length"));
+		STRING_SELECTOR_LOOKUP.put("toString", callExpression("ToString"));
+		STRING_SELECTOR_LOOKUP.put("toLowerCase", callExpression("ToLower"));
+		STRING_SELECTOR_LOOKUP.put("toUpperCase", callExpression("ToUpper"));
+		STRING_SELECTOR_LOOKUP.put("replace", callExpression("Replace"));
+	}
+
+	
 	private ListWriteDestination src;
 	private BcFuncRegister funcRegister;
 	
@@ -49,6 +69,27 @@ public class As2CsConverter extends As2WhateverConverter
 		super.clean();
 		funcRegister = new BcFuncRegister();
 	}
+	
+	@Override
+	protected void process(MemberExpressionNode node) 
+	{
+		if (node.base != null)
+		{
+			BcTypeNodeInstance baseTypeInstance = evaluateTypeInstance(node.base, true);
+			failConversionUnless(baseTypeInstance != null, "Unable to evaluate base type");
+			
+			if (baseTypeInstance.isIntegral())
+			{
+				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance);
+			}
+			else if (typeEquals(baseTypeInstance, BcTypeNode.typeString))
+			{
+				BcNodeFactory.turnToStaticStringDelegateCall(node, baseTypeInstance, STRING_SELECTOR_LOOKUP);
+			}
+		}
+		
+		super.process(node);
+	};
 	
 	@Override
 	protected void postProcess(BcClassDefinitionNode bcClass)

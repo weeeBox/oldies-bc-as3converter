@@ -26,11 +26,6 @@ public class CsCodeHelper extends BcCodeHelper
 		"while", "yield"
 	};
 	
-	public CsCodeHelper()
-	{
-		setSetting(SETTING_DELEGATE_STRINGS_CALLS, true);
-	}
-	
 	@Override
 	protected String[] getKeywords()
 	{
