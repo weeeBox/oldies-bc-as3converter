@@ -757,7 +757,7 @@ public abstract class As2WhateverConverter
 		for (Entry<BcTypeName, BcTypeNode> entry : entries) 
 		{
 			BcTypeNode type = entry.getValue();
-			if (type.isIntegral())
+			if (type.isBasic())
 			{
 				continue;
 			}
@@ -2842,7 +2842,7 @@ public abstract class As2WhateverConverter
 		if (!typeNode.hasClassNode())
 		{
 			BcClassDefinitionNode classNode;
-			if (typeNode.isIntegral())
+			if (typeNode.isBasic())
 			{
 				classNode = findBindedClass(typeNode);
 			}
@@ -2880,7 +2880,7 @@ public abstract class As2WhateverConverter
 	
 	private BcClassDefinitionNode findClass(BcTypeNode type)
 	{
-		if (type.isIntegral())
+		if (type.isBasic())
 		{
 			return null;
 		}
@@ -3442,7 +3442,7 @@ public abstract class As2WhateverConverter
 		if (node instanceof LiteralNumberNode)
 		{
 			LiteralNumberNode numberNode = (LiteralNumberNode) node;
-			return numberNode.value.indexOf('.') != -1 ? createBcType("float") : createBcType("int");
+			return numberNode.value.indexOf('.') != -1 ? createBcType(BcTypeNode.typeNumber) : createBcType("int");
 		}
 
 		if (node instanceof LiteralStringNode)
@@ -3532,11 +3532,6 @@ public abstract class As2WhateverConverter
 			if (typeEquals(lhsType, "Number") || typeEquals(rhsType, "Number"))
 			{
 				return createBcType("Number");
-			}
-
-			if (typeEquals(lhsType, "float") || typeEquals(rhsType, "float"))
-			{
-				return createBcType("float");
 			}
 
 			if (typeEquals(lhsType, "long") || typeEquals(rhsType, "long"))
@@ -3792,7 +3787,7 @@ public abstract class As2WhateverConverter
 			return bcClass.getClassType();
 		}
 
-		if (BcCodeHelper.isBasicType(typeName))
+		if (BcCodeHelper.isIntegralType(typeName))
 		{
 			return createBcType(typeName);
 		}
@@ -4246,7 +4241,7 @@ public abstract class As2WhateverConverter
 	{
 		if (fromType.isIntegral() && toType.isIntegral())
 		{
-			if ((typeEquals(fromType, "float") || typeEquals(fromType, "Number") || typeEquals(fromType, "long")) && (typeEquals(toType, "int") || typeEquals(toType, "uint")))
+			if ((typeEquals(fromType, "Number") || typeEquals(fromType, "long")) && (typeEquals(toType, "int") || typeEquals(toType, "uint")))
 			{
 				return true;
 			}
@@ -4398,6 +4393,11 @@ public abstract class As2WhateverConverter
 			return createIntegralType(bcType.getName());
 		}
 		
+		if (bcType.isVoid())
+		{
+			return bcType.getName();
+		}
+		
 		String typeString = createTypeString(bcType);
 		return typeString != null ? typeString : createTypeName(bcType.getName());
 	}
@@ -4416,7 +4416,7 @@ public abstract class As2WhateverConverter
 	
 	protected String classType(BcTypeNode type)
 	{
-		if (type.isIntegral())
+		if (type.isBasic())
 		{
 			return createIntegralClass(type.getName());
 		}
@@ -4487,7 +4487,7 @@ public abstract class As2WhateverConverter
 	protected String createIntegralType(String name)
 	{
 		assert name.indexOf('.') == -1 : name;
-		String basicType = BcCodeHelper.findBasicType(name);
+		String basicType = BcCodeHelper.findIntegralType(name);
 		if (basicType != null)
 		{
 			return basicType;
@@ -4504,7 +4504,7 @@ public abstract class As2WhateverConverter
 			return createClassName(BcTypeNode.typeNumber);
 		}
 		
-		String basicType = BcCodeHelper.findBasicType(name);
+		String basicType = BcCodeHelper.findIntegralType(name);
 		return createClassName(basicType != null ? StringUtils.capitalize(basicType) : StringUtils.capitalize(name));
 	}
 	

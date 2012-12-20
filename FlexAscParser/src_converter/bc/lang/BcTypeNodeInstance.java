@@ -50,4 +50,15 @@ public class BcTypeNodeInstance
 	{
 		return type.isIntegral();
 	}
+
+	public boolean isFunction()
+	{
+		return type.isFunction();
+	}
+	
+	@Override
+	public String toString()
+	{
+		return getFullname();
+	}
 }

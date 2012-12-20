@@ -33,7 +33,6 @@ public class BcCodeCpp
 		basicTypes.put("uint", "int");
 		basicTypes.put("int", "int");
 		basicTypes.put("Number", "float");
-		basicTypes.put("float", "float");
 		basicTypes.put("long", "long");
 		basicTypes.put("Boolean", "BOOL");
 	};

@@ -1060,7 +1060,7 @@ public class As2CppConverter extends As2WhateverConverter
 	
 	private boolean isFloatType(BcTypeNode type)
 	{
-		return type.isIntegral() && typeOneOf(type, "float", "Number");
+		return type.isIntegral() && typeEquals(type, BcTypeNode.typeNumber); 
 	}
 	
 	/* code helper */
@@ -1215,7 +1215,7 @@ public class As2CppConverter extends As2WhateverConverter
 
 	public String typeRef(String type)
 	{
-		if (BcCodeHelper.isBasicType(type))
+		if (BcCodeHelper.isIntegralType(type))
 		{
 			return type(type);
 		}
@@ -1225,7 +1225,7 @@ public class As2CppConverter extends As2WhateverConverter
 	@Override
 	public String paramDecl(BcTypeNodeInstance type, String identifier)
 	{
-		if (BcCodeHelper.isBasicType(type))
+		if (BcCodeHelper.isIntegralType(type))
 		{
 			return String.format("%s %s", type(type), getCodeHelper().identifier(identifier));
 		}

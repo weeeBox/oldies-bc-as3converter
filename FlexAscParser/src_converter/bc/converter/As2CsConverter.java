@@ -21,6 +21,7 @@ import bc.error.ConverterException;
 import bc.help.BcCodeHelper;
 import bc.help.BcGlobal;
 import bc.help.BcNodeFactory;
+import bc.help.Cast;
 import bc.help.CsCodeHelper;
 import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
@@ -78,11 +79,18 @@ public class As2CsConverter extends As2WhateverConverter
 			BcTypeNodeInstance baseTypeInstance = evaluateTypeInstance(node.base, true);
 			failConversionUnless(baseTypeInstance != null, "Unable to evaluate base type");
 			
-			if (baseTypeInstance.isIntegral())
+			BcTypeNode type = baseTypeInstance.getType();
+			BcFunctionTypeNode funcType = Cast.tryCast(type, BcFunctionTypeNode.class);
+			if (funcType != null && funcType.hasReturnType())
+			{
+				type = funcType.getReturnType();
+			}
+			
+			if (type.isIntegral())
 			{
 				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance);
 			}
-			else if (typeEquals(baseTypeInstance, BcTypeNode.typeString))
+			else if (typeEquals(type, BcTypeNode.typeString))
 			{
 				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance, STRING_SELECTOR_LOOKUP);
 			}

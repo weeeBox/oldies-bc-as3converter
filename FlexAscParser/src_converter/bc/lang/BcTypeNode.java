@@ -85,12 +85,19 @@ public class BcTypeNode extends BcNode
 
 	private static BcTypeNode createTypeNode(BcTypeName typeName, String name) 
 	{
-		if (name.equals(TYPE_FUNCTION)) {
+		if (name.equals(TYPE_FUNCTION))
+		{
 			return new BcFunctionTypeNode();
 		}
-		
-		if (name.equals(TYPE_GENERIC)) {
+
+		if (name.equals(TYPE_GENERIC))
+		{
 			return new BcGenericTypeNode(typeName);
+		}
+
+		if (name.equals("void"))
+		{
+			return BcVoidType.getInstance();
 		}
 		
 		return new BcTypeNode(typeName);
@@ -273,9 +280,19 @@ public class BcTypeNode extends BcNode
 		return classNode;
 	}
 	
+	public boolean isVoid()
+	{
+		return false;
+	}
+	
 	public boolean isIntegral()
 	{
 		return integral;
+	}
+	
+	public boolean isBasic()
+	{
+		return isIntegral() || isVoid();
 	}
 	
 	public boolean isInterface()
@@ -291,6 +308,16 @@ public class BcTypeNode extends BcNode
 	public boolean isNull()
 	{
 		return getName().equals("null");
+	}
+	
+	public boolean isFunction()
+	{
+		return false;
+	}
+	
+	public boolean isRest()
+	{
+		return false;
 	}
 
 	@Override

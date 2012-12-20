@@ -5,7 +5,6 @@ import java.util.Map;
 
 import macromedia.asc.parser.IdentifierNode;
 import bc.lang.BcTypeName;
-import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
 import bc.utils.string.StringUtils;
 
@@ -18,28 +17,16 @@ public abstract class BcCodeHelper
 	
 	protected abstract String[] getKeywords();
 	
-	private static Map<String, String> basicTypes;
 	private static Map<String, String> integralTypes;	
-	
 	private Map<String, Object> settingsMap;
 	
 	static
 	{
-		basicTypes = new HashMap<String, String>();
-		basicTypes.put("void", "void");
-		basicTypes.put("uint", "uint");
-		basicTypes.put("int", "int");
-		basicTypes.put("Number", "float");
-		basicTypes.put("float", "float");
-		basicTypes.put("Boolean", "bool");
-		
 		integralTypes = new HashMap<String, String>();
-		integralTypes.put("void", "void");
 		integralTypes.put("uint", "uint");
 		integralTypes.put("int", "int");
-		integralTypes.put("long", "long");
+		integralTypes.put("long", "long"); // there's no "long" type in actionscript, but we keep it to store int+uint operations
 		integralTypes.put("Number", "float");
-		integralTypes.put("float", "float");
 		integralTypes.put("Boolean", "bool");
 	};
 	
@@ -115,34 +102,24 @@ public abstract class BcCodeHelper
 		return name;
 	}
 	
-	public static boolean isBasicType(BcTypeName typeName)
+	public static String findIntegralType(String name)
 	{
-		return isBasicType(typeName.getName());
-	}
-	
-	public static boolean isBasicType(BcTypeNodeInstance typeInstance)
-	{
-		return isBasicType(typeInstance.getType());
-	}
-	
-	public static boolean isBasicType(BcTypeNode type)
-	{
-		return isBasicType(type.getName());
-	}
-	
-	public static String findBasicType(String name)
-	{
-		return basicTypes.get(name);
-	}
-	
-	public static boolean isBasicType(String name)
-	{
-		return basicTypes.containsKey(name);
+		return integralTypes.get(name);
 	}
 	
 	public static boolean isIntegralType(String name)
 	{
-		return integralTypes.containsKey(name);
+		return findIntegralType(name) != null;
+	}
+	
+	public static boolean isIntegralType(BcTypeNodeInstance type)
+	{
+		return findIntegralType(type.getName()) != null;
+	}
+	
+	public static boolean isIntegralType(BcTypeName typeName)
+	{
+		return findIntegralType(typeName.getName()) != null;
 	}
 	
 	public String extractIdentifier(IdentifierNode identifier)
