@@ -117,6 +117,11 @@ public class BcNodeFactory {
 			MemberExpressionNode memberExpression = (MemberExpressionNode) node;
 			
 			String identifier = BcNodeHelper.tryExtractIdentifier(memberExpression.selector);
+			if (BcTypeNode.typeString.equals(identifier))
+			{
+				return; // do not modify static calls
+			}
+			
 			SelectorNode replacementSelector = identifier != null ? STRING_SELECTOR_LOOKUP.get(identifier) : null;
 			if (replacementSelector != null)
 			{
