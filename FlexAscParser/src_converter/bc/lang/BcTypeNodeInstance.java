@@ -36,6 +36,11 @@ public class BcTypeNodeInstance
 		return type.getName();
 	}
 	
+	public String getFullname()
+	{
+		return isQualified() ? getQualifiedName() : getName();
+	}
+	
 	public boolean isQualified()
 	{
 		return qualified;

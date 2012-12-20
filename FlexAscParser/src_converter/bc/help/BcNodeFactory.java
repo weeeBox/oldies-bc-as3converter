@@ -98,9 +98,39 @@ public class BcNodeFactory {
 		Node rhs = literal;
 		return new BinaryExpressionNode(op, lhs, rhs);
 	}
+
+	/**
+	 * Changes the node to delegate member call:
+	 * 
+	 * <pre>
+	 * obj.func(arg1, arg2, ...) => ObjClass.func(obj, arg1, arg2, ...)
+	 * </pre>
+	 * 
+	 * @param node
+	 *            target member expression node
+	 * @param typeInstance
+	 *            type instance for the static call
+	 * */
+	public static void turnToStaticTypeDelegateCall(Node node, BcTypeNodeInstance typeInstance)
+	{
+		turnToStaticTypeDelegateCall(node, typeInstance, null);
+	}
 	
-	// TODO: collapse it into the turnToStaticTypeDelegateCall
-	public static void turnToStaticStringDelegateCall(Node node, BcTypeNodeInstance stringTypeInstance, Map<String, SelectorNode> selectorsLookup)
+	/**
+	 * Changes the node to delegate member call:
+	 * 
+	 * <pre>
+	 * obj.func(arg1, arg2, ...) => ObjClass.func(obj, arg1, arg2, ...)
+	 * </pre>
+	 * 
+	 * @param node
+	 *            target member expression node
+	 * @param typeInstance
+	 *            type instance for the static call
+	 * @param selectorsLookup
+	 *            lookup map for selectors replacements
+	 * */
+	public static void turnToStaticTypeDelegateCall(Node node, BcTypeNodeInstance typeInstance, Map<String, SelectorNode> selectorsLookup)
 	{
 		if (node.isMemberExpression())
 		{
@@ -108,66 +138,59 @@ public class BcNodeFactory {
 			if (memberExpression.base != null)
 			{
 				String callTarget = BcNodeHelper.tryExtractIdentifier(memberExpression.base);
-				if (BcTypeNode.typeString.equals(callTarget))
+				if (callTarget != null && (typeInstance.getName().equals(callTarget) || typeInstance.getQualifiedName().equals(callTarget)))
 				{
 					return; // do not modify static calls
 				}
 			}
 			
-			String identifier = BcNodeHelper.tryExtractIdentifier(memberExpression.selector);
-			
-			SelectorNode replacementSelector = identifier != null ? selectorsLookup.get(identifier) : null;
-			if (replacementSelector != null)
+			if (selectorsLookup != null)
 			{
-				if (replacementSelector.isCallExpression())
+				String identifier = BcNodeHelper.tryExtractIdentifier(memberExpression.selector);
+				SelectorNode replacementSelector = identifier != null ? selectorsLookup.get(identifier) : null;
+				if (replacementSelector != null)
 				{
-					CallExpressionNode oldCall = (CallExpressionNode) memberExpression.selector;
-					CallExpressionNode newCall = new CallExpressionNode(replacementSelector.expr, oldCall.args);
-					
-					memberExpression.selector = newCall;
-				}
-				else if (replacementSelector.isSetExpression())
-				{
-					SetExpressionNode oldSet = (SetExpressionNode) memberExpression.selector;
-					SetExpressionNode newSet = new SetExpressionNode(replacementSelector.expr, oldSet.args);
-					
-					memberExpression.selector = newSet;
-				}
-				else
-				{
-					memberExpression.selector = replacementSelector;
+					replaceSelector(memberExpression, replacementSelector);
+					return;
 				}
 			}
-			else
+			
+			SelectorNode selector = null;
+		
+			MemberExpressionNode memberExpression1 = (MemberExpressionNode) node;
+			if (memberExpression1.selector.isCallExpression())
 			{
-				turnToStaticTypeDelegateCall(node, stringTypeInstance);
+				CallExpressionNode call = (CallExpressionNode) memberExpression1.selector;
+				selector = new CallExpressionNode(call.expr, concat(memberExpression1.base, call.args));
+			}
+		
+			if (selector != null) 
+			{
+				memberExpression1.base = memberExpression(typeInstance);
+				memberExpression1.selector = selector;
 			}
 		}
 	}
-	
-	/** Changes the node to delegate member call:
-	 * <pre>
-	 * obj.func(arg1, arg2, ...) => ObjClass.func(obj, arg1, arg2, ...)
-	 * </pre>
-	 *  */
-	public static void turnToStaticTypeDelegateCall(Node node, BcTypeNodeInstance targetTypeInstance)
-	{
-		if (node.isMemberExpression())
-		{
-			SelectorNode selector = null;
-	
-			MemberExpressionNode memberExpression = (MemberExpressionNode) node;
-			if (memberExpression.selector.isCallExpression())
-			{
-				CallExpressionNode call = (CallExpressionNode) memberExpression.selector;
-				selector = new CallExpressionNode(call.expr, concat(memberExpression.base, call.args));
-			}
 
-			if (selector != null) 
-			{
-				memberExpression.base = memberExpression(targetTypeInstance);
-				memberExpression.selector = selector;
-			}
+	private static void replaceSelector(MemberExpressionNode node, SelectorNode selector)
+	{
+		if (selector.isCallExpression())
+		{
+			CallExpressionNode oldCall = (CallExpressionNode) node.selector;
+			CallExpressionNode newCall = new CallExpressionNode(selector.expr, oldCall.args);
+			
+			node.selector = newCall;
+		}
+		else if (selector.isSetExpression())
+		{
+			SetExpressionNode oldSet = (SetExpressionNode) node.selector;
+			SetExpressionNode newSet = new SetExpressionNode(selector.expr, oldSet.args);
+			
+			node.selector = newSet;
+		}
+		else
+		{
+			node.selector = selector;
 		}
 	}
 	

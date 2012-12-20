@@ -84,7 +84,7 @@ public class As2CsConverter extends As2WhateverConverter
 			}
 			else if (typeEquals(baseTypeInstance, BcTypeNode.typeString))
 			{
-				BcNodeFactory.turnToStaticStringDelegateCall(node, baseTypeInstance, STRING_SELECTOR_LOOKUP);
+				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance, STRING_SELECTOR_LOOKUP);
 			}
 		}
 		
