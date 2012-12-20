@@ -1700,7 +1700,7 @@ public abstract class As2WhateverConverter
 					}
 					else
 					{
-						failConversion("'Function' type not found: class='%s' identifier='%s'", bcClass.getName(), identifier);
+						failConversion("'Function' type not found: class='%s' identifier='%s' argsCount=%d", bcClass.getName(), identifier, argsCount);
 					}
 				}
 			}

@@ -27,9 +27,12 @@ import macromedia.asc.parser.QualifiedIdentifierNode;
 import macromedia.asc.parser.RestParameterNode;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
+import macromedia.asc.parser.SuperExpressionNode;
+import macromedia.asc.parser.ThisExpressionNode;
 import macromedia.asc.parser.Tokens;
 import macromedia.asc.parser.TypeExpressionNode;
 import macromedia.asc.parser.TypedIdentifierNode;
+import macromedia.asc.parser.UnaryExpressionNode;
 import macromedia.asc.util.ObjectList;
 import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
@@ -308,62 +311,79 @@ public class BcNodeHelper
 		return null;
 	}
 	
-	public static boolean isTypeQualified(Node type)
+	public static boolean isTypeQualified(Node node)
 	{
-		if (type == null)
+
+		if (node == null)
 		{			
 			return false;
 		}
 		
-		if (type instanceof QualifiedIdentifierNode)
+		if (node instanceof QualifiedIdentifierNode)
 		{
 			return true;
 		}
 		
-		if (type instanceof IdentifierNode)
+		if (node instanceof IdentifierNode)
 		{
 			return false;
 		}
 		
-		if (type instanceof TypeExpressionNode)
+		if (node instanceof TypeExpressionNode)
 		{
-			TypeExpressionNode typeNode = (TypeExpressionNode) type;
+			TypeExpressionNode typeNode = (TypeExpressionNode) node;
 			return isTypeQualified(typeNode.expr);
 		}
 		
-		if (type instanceof MemberExpressionNode)
+		if (node instanceof MemberExpressionNode)
 		{
-			MemberExpressionNode expr = (MemberExpressionNode) type;
+			MemberExpressionNode expr = (MemberExpressionNode) node;
 			return isTypeQualified(expr.selector);
 		}
 		
-		if (type instanceof GetExpressionNode)
+		if (node instanceof SelectorNode)
 		{
-			GetExpressionNode selector = (GetExpressionNode) type;
+			SelectorNode selector = (SelectorNode) node;
 			return selector.expr instanceof QualifiedIdentifierNode;
 		}
 		
-		if (type instanceof ApplyTypeExprNode)
+		if (node instanceof ApplyTypeExprNode)
 		{
 			return false;
 		}
 		
-		if (type instanceof TypedIdentifierNode)
+		if (node instanceof TypedIdentifierNode)
 		{			
-			return isTypeQualified(((TypedIdentifierNode) type).type);
+			return isTypeQualified(((TypedIdentifierNode) node).type);
 		}
 		
-		if (type instanceof RestParameterNode)
+		if (node instanceof RestParameterNode)
 		{
 			return false;
 		}
 		
-		if (type instanceof ParameterNode)
+		if (node instanceof ParameterNode)
 		{
-			return isTypeQualified(((ParameterNode) type).type);
+			return isTypeQualified(((ParameterNode) node).type);
 		}
 		
-		assert false : type.getClass();
+		if (node instanceof ThisExpressionNode || node instanceof SuperExpressionNode)
+		{
+			return false;
+		}
+		
+		if (node.isList())
+		{
+			ListNode list = (ListNode) node;
+			return isTypeQualified(list.items.first());
+		}
+		
+		if (node instanceof BinaryExpressionNode || node instanceof UnaryExpressionNode)
+		{
+			return false;
+		}
+		
+		assert false : node.getClass();
 		return false;
 	}
 		
@@ -383,17 +403,7 @@ public class BcNodeHelper
 			return null;
 		}
 		
-		if (!(memberNode.selector instanceof GetExpressionNode))
-		{
-			return null;
-		}
-		
-		GetExpressionNode selector = (GetExpressionNode) memberNode.selector;
-		if (!(selector.expr instanceof IdentifierNode))
-		{
-			return null;
-		}
-		return (IdentifierNode) selector.expr;
+		return Cast.tryCast(memberNode.selector.expr, IdentifierNode.class);
 	}
 		
 	public static IdentifierNode tryExtractIdentifierNode(Node node)
