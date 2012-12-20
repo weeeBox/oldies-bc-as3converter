@@ -51,5 +51,7 @@ package bc.flash
 		public function ToString() : String { throw new NotImplementedError(); }
 
 		public function ToUpper() : String { throw new NotImplementedError(); }
+        
+		public function Replace(p : String, repl : String) : String { throw new NotImplementedError(); }
 	}
 }

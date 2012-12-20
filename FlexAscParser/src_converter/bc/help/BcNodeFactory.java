@@ -16,6 +16,7 @@ import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.Node;
 import macromedia.asc.parser.QualifiedIdentifierNode;
 import macromedia.asc.parser.SelectorNode;
+import macromedia.asc.parser.SetExpressionNode;
 import macromedia.asc.parser.Tokens;
 import macromedia.asc.parser.UnaryExpressionNode;
 import bc.lang.BcTypeNode;
@@ -33,6 +34,7 @@ public class BcNodeFactory {
 		STRING_SELECTOR_LOOKUP.put("toString", callExpression("ToString"));
 		STRING_SELECTOR_LOOKUP.put("toLowerCase", callExpression("ToLower"));
 		STRING_SELECTOR_LOOKUP.put("toUpperCase", callExpression("ToUpper"));
+		STRING_SELECTOR_LOOKUP.put("replace", callExpression("Replace"));
 	}
 	
 	public static Node notNull(BcTypeNode type, Node expr)
@@ -129,7 +131,24 @@ public class BcNodeFactory {
 			SelectorNode replacementSelector = identifier != null ? STRING_SELECTOR_LOOKUP.get(identifier) : null;
 			if (replacementSelector != null)
 			{
-				memberExpression.selector = replacementSelector;
+				if (replacementSelector.isCallExpression())
+				{
+					CallExpressionNode oldCall = (CallExpressionNode) memberExpression.selector;
+					CallExpressionNode newCall = new CallExpressionNode(replacementSelector.expr, oldCall.args);
+					
+					memberExpression.selector = newCall;
+				}
+				else if (replacementSelector.isSetExpression())
+				{
+					SetExpressionNode oldSet = (SetExpressionNode) memberExpression.selector;
+					SetExpressionNode newSet = new SetExpressionNode(replacementSelector.expr, oldSet.args);
+					
+					memberExpression.selector = newSet;
+				}
+				else
+				{
+					memberExpression.selector = replacementSelector;
+				}
 			}
 			else
 			{

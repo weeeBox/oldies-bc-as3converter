@@ -26,7 +26,7 @@ namespace bc.test.strings
 			String fromCharCode = AsString.fromCharCode(0);
 			int indexOf = AsString.indexOf(str, "string");
 			indexOf = AsString.indexOf(str, "string", 0);
-			String replace = AsString.replace(str, "string", "foo");
+			String replace = str.Replace("string", "foo");
 			String slice = AsString.slice(str, 0);
 			slice = AsString.slice(str, 0, 10);
 			AsArray split = AsString.split(str, " ");
@@ -51,7 +51,7 @@ namespace bc.test.strings
 		public virtual void testLiteralsCalls()
 		{
 			int length = "This is a string".Length;
-			String replace = AsString.replace("This is a string", "string", "foo");
+			String replace = "This is a string".Replace("string", "foo");
 		}
 	}
 }
