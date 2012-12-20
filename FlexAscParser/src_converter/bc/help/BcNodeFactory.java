@@ -115,12 +115,16 @@ public class BcNodeFactory {
 		if (node.isMemberExpression())
 		{
 			MemberExpressionNode memberExpression = (MemberExpressionNode) node;
+			if (memberExpression.base != null)
+			{
+				String callTarget = BcNodeHelper.tryExtractIdentifier(memberExpression.base);
+				if (BcTypeNode.typeString.equals(callTarget))
+				{
+					return; // do not modify static calls
+				}
+			}
 			
 			String identifier = BcNodeHelper.tryExtractIdentifier(memberExpression.selector);
-			if (BcTypeNode.typeString.equals(identifier))
-			{
-				return; // do not modify static calls
-			}
 			
 			SelectorNode replacementSelector = identifier != null ? STRING_SELECTOR_LOOKUP.get(identifier) : null;
 			if (replacementSelector != null)

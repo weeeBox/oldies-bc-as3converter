@@ -36,8 +36,8 @@ namespace bc.test.strings
 			substring = AsString.substring(str, 0, 10);
 			String toLocalLowerCase = AsString.toLocaleLowerCase(str);
 			String toLocalUpperCase = AsString.toLocaleUpperCase(str);
-			String toLowerCase = AsString.toLowerCase(str);
-			String toUpperCase = AsString.toUpperCase(str);
+			String toLowerCase = str.ToLower();
+			String toUpperCase = str.ToUpper();
 			String toString = str.ToString();
 			String valueOf = AsString.valueOf(str);
 		}
