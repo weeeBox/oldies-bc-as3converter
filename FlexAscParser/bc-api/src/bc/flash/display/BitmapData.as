@@ -6,6 +6,7 @@ package bc.flash.display
 	import bc.flash.geom.ColorTransform;
 	import bc.flash.geom.Matrix;
 	import bc.flash.geom.Rectangle;
+	import bc.flash.utils.ByteArray;
 	
 	[ConvertOnce]
 	public class BitmapData extends Object implements IBitmapDrawable
