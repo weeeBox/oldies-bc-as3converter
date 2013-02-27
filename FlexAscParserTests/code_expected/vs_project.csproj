@@ -99,11 +99,13 @@
     <Compile Include="Platform\bc\flash\AsDictionary.cs" />
     <Compile Include="Platform\bc\flash\AsError.cs" />
     <Compile Include="Platform\bc\flash\AsGlobal.cs" />
+    <Compile Include="Platform\bc\flash\AsInt.cs" />
     <Compile Include="Platform\bc\flash\AsMath.cs" />
     <Compile Include="Platform\bc\flash\AsNumber.cs" />
     <Compile Include="Platform\bc\flash\AsObject.cs" />
     <Compile Include="Platform\bc\flash\AsRangeError.cs" />
     <Compile Include="Platform\bc\flash\AsString.cs" />
+    <Compile Include="Platform\bc\flash\AsUint.cs" />
     <Compile Include="Platform\bc\flash\AsVector.cs" />
     <Compile Include="Platform\bc\flash\errors\AsAbstractClassError.cs" />
     <Compile Include="Platform\bc\flash\errors\AsAbstractMethodError.cs" />
