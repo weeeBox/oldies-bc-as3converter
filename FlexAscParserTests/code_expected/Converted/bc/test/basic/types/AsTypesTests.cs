@@ -19,21 +19,21 @@ namespace bc.test.basic.types
 		public virtual void testAssignments()
 		{
 			int integer = -10;
-			uint uinteger = (uint)10;
+			uint uinteger = (uint)(10);
 			float number = 3.14f;
 			bool boolean = true;
-			integer = (int)uinteger;
-			uinteger = (uint)integer;
+			integer = (int)(uinteger);
+			uinteger = (uint)(integer);
 			number = integer;
 			number = uinteger;
-			integer = (int)number;
-			uinteger = (uint)number;
+			integer = (int)(number);
+			uinteger = (uint)(number);
 			boolean = false;
 		}
 		public virtual void testExpressions()
 		{
 			int integer = -10;
-			uint uinteger = (uint)10;
+			uint uinteger = (uint)(10);
 			float number = 3.14f;
 			float value1 = uinteger + number;
 			int value2 = (int)(uinteger + number);
