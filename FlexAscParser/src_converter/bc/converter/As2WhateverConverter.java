@@ -537,6 +537,9 @@ public abstract class As2WhateverConverter
 			{
 				failConversion("Unsupported top level expression found");
 			}
+			else if (node instanceof EmptyStatementNode)
+			{
+			}
 			else
 			{
 				failConversion("Unexpected top level class element found: " + node.getClass());
