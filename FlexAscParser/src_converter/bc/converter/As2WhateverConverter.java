@@ -600,7 +600,7 @@ public abstract class As2WhateverConverter
 				BcFuncParam bcParam = new BcFuncParam(paramType.createTypeInstance(qualified), getCodeHelper().identifier(paramName));
 				if (param.init != null)
 				{
-					bcParam.setDefaultInitializer(param.init);
+					bcParam.setInitializerNode(param.init);
 				}
 
 				bcFunc.addParam(bcParam);
@@ -728,7 +728,7 @@ public abstract class As2WhateverConverter
 				BcFuncParam bcParam = new BcFuncParam(paramType.createTypeInstance(qualified), getCodeHelper().identifier(paramName));
 				if (param.init != null)
 				{
-					bcParam.setDefaultInitializer(param.init);
+					bcParam.setInitializerNode(param.init);
 				}
 
 				bcFunc.addParam(bcParam);
@@ -4538,9 +4538,10 @@ public abstract class As2WhateverConverter
 		StringBuilder buffer = new StringBuilder();
 
 		int paramIndex = 0;
-		for (BcVariableDeclaration bcParam : params)
+		for (BcFuncParam bcParam : params)
 		{
 			buffer.append(paramDecl(bcParam.getTypeInstance(), bcParam.getIdentifier()));
+			
 			if (++paramIndex < params.size())
 			{
 				buffer.append(", ");

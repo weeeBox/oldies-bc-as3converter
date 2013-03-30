@@ -85,7 +85,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 	public void addParam(BcFuncParam param)
 	{
 		params.add(param);
-		if (param.hasDefaultInitializer())
+		if (param.hasInitializer())
 		{
 			defaultParamsCount++;
 		}
@@ -282,71 +282,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 		
 		return func;
 	}
-	
-	public BcFunctionDeclaration createOverridenWithNumDefParams(int numParams)
-	{
-		BcFunctionDeclaration bcFunc = new BcFunctionDeclaration(name);
 		
-		bcFunc.isConstructor = isConstructor;
-		bcFunc.isOverridenConstructor = isConstructor;
-		bcFunc.returnTypeInstance = returnTypeInstance;
-		bcFunc.kind = kind;
-		bcFunc.declaredVars = new ArrayList<BcVariableDeclaration>(declaredVars);
-		bcFunc.modifiers = modifiers;
-		
-		ArrayList<BcFuncParam> newParams = new ArrayList<BcFuncParam>();
-		int lastParamIndex = params.size() - (defaultParamsCount - numParams);
-		int counter = 0;
-		for (BcFuncParam param : params)
-		{
-			if (counter == lastParamIndex)
-			{
-				break;
-			}
-			newParams.add(param);
-			counter++;			
-		}
-		bcFunc.params = newParams;
-		
-		// this is a big mess. Just take it as is
-		IdentifierNode identifier = new IdentifierNode(bcFunc.isConstructor ? BcCodeHelper.thisCallMarker : name, 0);
-		ArgumentListNode args = new ArgumentListNode(null, 0);
-		args.items.clear(); // this is more like a hack. The first element is added from the constructor and we don't need it
-		counter = 0;
-		
-		for (BcFuncParam param : params)
-		{
-			if (counter < lastParamIndex)
-			{
-				args.items.add(new MemberExpressionNode(null, new GetExpressionNode(new IdentifierNode(param.getIdentifier(), 0)), 0));
-			}
-			else
-			{
-				assert param.hasDefaultInitializer();
-				args.items.add(param.getDefaultInitializer());
-			}
-			counter++;			
-		}		
-		
-		CallExpressionNode selector = new CallExpressionNode(identifier, args);
-		MemberExpressionNode member = new MemberExpressionNode(null, selector, 0);
-		StatementListNode newStatements;
-		if (hasReturnType())
-		{
-			newStatements = new StatementListNode(new ReturnStatementNode(member));
-		}
-		else
-		{
-			ListNode list = new ListNode(null, member, 0);
-			ExpressionStatementNode exprNode = new ExpressionStatementNode(list);
-			newStatements = new StatementListNode(exprNode);
-		}
-		
-		bcFunc.statements = newStatements;
-		
-		return bcFunc;
-	}
-	
 	@Override
 	public String toString()
 	{
