@@ -209,14 +209,14 @@ public class BcClassDefinitionNode extends BcDeclaration
 			constructors.add(func);
 		}
 		
-		if (func.hasDefaultParams())
-		{
-			for (int paramsCount = func.getDefaultParamsCount() - 1; paramsCount >= 0; --paramsCount)
-			{
-				BcFunctionDeclaration overridenFunc = func.createOverridenWithNumDefParams(paramsCount);
-				add(overridenFunc);
-			}
-		}		
+//		if (func.hasDefaultParams())
+//		{
+//			for (int paramsCount = func.getDefaultParamsCount() - 1; paramsCount >= 0; --paramsCount)
+//			{
+//				BcFunctionDeclaration overridenFunc = func.createOverridenWithNumDefParams(paramsCount);
+//				add(overridenFunc);
+//			}
+//		}		
 	}
 
 	public void addToImport(BcTypeNode bcType)
@@ -330,27 +330,27 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private static final int FIND_GETTER = 1;
 	private static final int FIND_SETTER = 2;
 	
-	public BcFunctionDeclaration findFunction(String name, int paramsCount)
+	public BcFunctionDeclaration findFunction(String name)
 	{
-		return findFunction(this, name, paramsCount, FIND_NORMAL);
+		return findFunction(this, name, FIND_NORMAL);
 	}
 	
 	public BcFunctionDeclaration findGetterFunction(String name)
 	{
-		return findFunction(this, name, 0, FIND_GETTER);
+		return findFunction(this, name, FIND_GETTER);
 	}
 	
 	public BcFunctionDeclaration findSetterFunction(String name)
 	{
-		return findFunction(this, name, 1, FIND_SETTER);
+		return findFunction(this, name, FIND_SETTER);
 	}
 	
-	private static BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int paramsCount, int mode)
+	private static BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int mode)
 	{
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
 		{
-			if (bcFunc.getName().equals(name) && (paramsCount == -1 || bcFunc.paramsCount() == paramsCount || bcFunc.hasRestParams()))
+			if (bcFunc.getName().equals(name))
 			{
 				if (bcFunc.isConstructor())
 				{
@@ -381,7 +381,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 			BcClassDefinitionNode bcSuperClass = bcClass.getExtendsType().getClassNode();
 			assert bcSuperClass != null : bcClass.getExtendsType().getName();
 			
-			return findFunction(bcSuperClass, name, paramsCount, mode);
+			return findFunction(bcSuperClass, name, mode);
 		}
 		
 		return null;
