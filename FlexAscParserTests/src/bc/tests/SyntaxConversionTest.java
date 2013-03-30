@@ -138,6 +138,7 @@ public class SyntaxConversionTest extends ConverterTestSuite
 		{
 			"Converted/bc/test/functions/AsFunctions.cs",
 			"Converted/bc/test/functions/AsFunctionsTypeTest.cs",
+			"Converted/bc/test/functions/AsFunctionsSyntaxTest.cs",
 		};
 		
 		assertExpectedAndActualEquals(filenames);
