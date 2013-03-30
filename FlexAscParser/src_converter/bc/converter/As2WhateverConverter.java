@@ -2804,6 +2804,39 @@ public abstract class As2WhateverConverter
 		BcGlobal.lastBcFunction = bcFunc;
 		BcGlobal.declaredVars = bcFunc.getDeclaredVars();
 
+		// handling default params. TODO: remove code duplication
+		List<BcFuncParam> params = bcFunc.getParams();
+		for (BcFuncParam param : params)
+		{
+			BcTypeNodeInstance varTypeInstance = param.getTypeInstance();
+			addToImport(varTypeInstance);
+			
+			Node initializerNode = param.getInitializerNode();
+			if (initializerNode != null)
+			{
+				ListWriteDestination initializer = new ListWriteDestination();
+				pushDest(initializer);
+				process(initializerNode);
+				popDest();
+
+				BcTypeNode initializerType = evaluateType(initializerNode);
+				failConversionUnless(initializerType != null, "Unable to evaluate initializer's type: %s = %s", varDecl(varTypeInstance, param.getIdentifier()), initializer);
+
+				if (needExplicitCast(initializerType, varTypeInstance))
+				{
+					ListWriteDestination castDest = new ListWriteDestination();
+					pushDest(castDest);
+					dest.write(cast(initializer, initializerType, varTypeInstance));
+					popDest();
+					
+					initializer = castDest;
+				}
+				
+				param.setInitializer(initializer);
+				param.setIntegralInitializerFlag(BcNodeHelper.isIntegralLiteralNode(initializerNode));
+			}
+		}
+		
 		// get function statements
 		ListWriteDestination body = new ListWriteDestination();
 		pushDest(body);
@@ -4541,6 +4574,11 @@ public abstract class As2WhateverConverter
 		for (BcFuncParam bcParam : params)
 		{
 			buffer.append(paramDecl(bcParam.getTypeInstance(), bcParam.getIdentifier()));
+			
+			if (bcParam.hasInitializer())
+			{
+				buffer.append(" = " + bcParam.getInitializer());
+			}
 			
 			if (++paramIndex < params.size())
 			{
