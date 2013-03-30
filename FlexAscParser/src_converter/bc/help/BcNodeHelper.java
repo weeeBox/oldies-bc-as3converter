@@ -313,7 +313,6 @@ public class BcNodeHelper
 	
 	public static boolean isTypeQualified(Node node)
 	{
-
 		if (node == null)
 		{			
 			return false;
@@ -379,6 +378,11 @@ public class BcNodeHelper
 		}
 		
 		if (node instanceof BinaryExpressionNode || node instanceof UnaryExpressionNode)
+		{
+			return false;
+		}
+		
+		if (node instanceof LiteralStringNode)
 		{
 			return false;
 		}
