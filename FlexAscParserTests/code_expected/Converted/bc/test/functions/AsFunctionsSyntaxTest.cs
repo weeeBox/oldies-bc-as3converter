@@ -6,10 +6,10 @@ namespace bc.test.functions
 {
 	public class AsFunctionsSyntaxTest : AsObject
 	{
-		public virtual void call(Object oCaller = null, params Object[] uArgs)
+		public virtual void func1(Object arg = null, params Object[] rest)
 		{
 		}
-		public virtual void setParams(Object oCaller = null)
+		public virtual void func2(Object arg = null)
 		{
 		}
 	}
