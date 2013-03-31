@@ -22,6 +22,7 @@ namespace vs_project_test
             func = new AsFunction(this, "Func", typeof(int));
             func = new AsFunction(this, "Func", typeof(int), typeof(int));
             func = new AsFunction(this, "Func", typeof(Foo));
+            func = new AsFunction(this, "Func", typeof(Bar)); // covariant param
         }
 
         [TestMethod]
@@ -48,7 +49,10 @@ namespace vs_project_test
             func = new AsFunction(this, "Func", typeof(Foo));
             func.Invoke(new Foo());
 
-            AssertResult("PrivateFunc()", "ProtectedFunc()", "PublicFunc()", "Func(10)", "Func(20,30)", "Func(foo)");
+            func = new AsFunction(this, "Func", typeof(Bar));
+            func.Invoke(new Bar());
+
+            AssertResult("PrivateFunc()", "ProtectedFunc()", "PublicFunc()", "Func(10)", "Func(20,30)", "Func(Foo)", "Func(Bar)");
         }
 
         private void PrivateFunc()
@@ -78,7 +82,7 @@ namespace vs_project_test
 
         private void Func(Foo foo)
         {
-            result.Add("Func(foo)");
+            result.Add("Func(" + foo.GetType().Name + ")");
         }
 
         private void AssertResult(params String[] data)
@@ -92,7 +96,6 @@ namespace vs_project_test
         }
     }
 
-    class Foo
-    {
-    }
+    class Foo { }
+    class Bar : Foo { }
 }
