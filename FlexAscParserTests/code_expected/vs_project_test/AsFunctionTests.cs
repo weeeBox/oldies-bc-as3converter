@@ -10,6 +10,8 @@ namespace vs_project_test
     [TestClass]
     public class AsFunctionTests
     {
+        private List<String> result = new List<String>();
+
         [TestMethod]
         public void TestAssignmet()
         {
@@ -22,28 +24,71 @@ namespace vs_project_test
             func = new AsFunction(this, "Func", typeof(Foo));
         }
 
+        [TestMethod]
+        public void TestCalls()
+        {
+            result.Clear();
+
+            AsFunction func;
+            func = new AsFunction(this, "PrivateFunc");
+            func.Invoke();
+
+            func = new AsFunction(this, "ProtectedFunc");
+            func.Invoke();
+
+            func = new AsFunction(this, "PublicFunc");
+            func.Invoke();
+
+            func = new AsFunction(this, "Func", typeof(int));
+            func.Invoke(10);
+
+            func = new AsFunction(this, "Func", typeof(int), typeof(int));
+            func.Invoke(20, 30);
+
+            func = new AsFunction(this, "Func", typeof(Foo));
+            func.Invoke(new Foo());
+
+            AssertResult("PrivateFunc()", "ProtectedFunc()", "PublicFunc()", "Func(10)", "Func(20,30)", "Func(foo)");
+        }
+
         private void PrivateFunc()
         {
+            result.Add("PrivateFunc()");
         }
 
         protected void ProtectedFunc()
         {
+            result.Add("ProtectedFunc()");
         }
 
         public void PublicFunc()
         {
+            result.Add("PublicFunc()");
         }
 
         private void Func(int arg)
         {
+            result.Add("Func(" + arg + ")");
         }
 
         private void Func(int arg1, int arg2)
         {
+            result.Add("Func(" + arg1 + "," + arg2 + ")");
         }
 
         private void Func(Foo foo)
         {
+            result.Add("Func(foo)");
+        }
+
+        private void AssertResult(params String[] data)
+        {
+            Assert.AreEqual(data.Length, result.Count);
+
+            for (int i = 0; i < data.Length; ++i)
+            {
+                Assert.AreEqual(data[i], result[i]);
+            }
         }
     }
 
