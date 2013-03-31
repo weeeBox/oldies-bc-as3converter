@@ -1,5 +1,7 @@
 package bc.help;
 
+import bc.lang.BcFunctionTypeNode;
+
 public class CsCodeHelper extends BcCodeHelper
 {
 	private static String[] keyWords = 
@@ -53,5 +55,11 @@ public class CsCodeHelper extends BcCodeHelper
 	public String literalBool()
 	{
 		return "Boolean";
+	}
+	
+	@Override
+	public boolean shouldCastFunction(BcFunctionTypeNode bcFunc)
+	{
+		return !bcFunc.isComplete();
 	}
 }

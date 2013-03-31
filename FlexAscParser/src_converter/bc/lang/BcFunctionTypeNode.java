@@ -34,6 +34,12 @@ public class BcFunctionTypeNode extends BcTypeNode
 		return true;
 	}
 	
+	@Override
+	public BcFunctionTypeNode asFunction()
+	{
+		return this;
+	}
+	
 	public void setUseByDefault(boolean useByDefault)
 	{
 		this.useByDefault = useByDefault;

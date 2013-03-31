@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import macromedia.asc.parser.IdentifierNode;
+import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcTypeName;
 import bc.lang.BcTypeNodeInstance;
 import bc.utils.string.StringUtils;
@@ -196,5 +197,10 @@ public abstract class BcCodeHelper
 	public Object literalRegexp(String value)
 	{
 		return literalString(value);
+	}
+
+	public boolean shouldCastFunction(BcFunctionTypeNode bcFunc)
+	{
+		return false;
 	}
 }

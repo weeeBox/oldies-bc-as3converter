@@ -315,6 +315,11 @@ public class BcTypeNode extends BcNode
 		return false;
 	}
 	
+	public BcFunctionTypeNode asFunction()
+	{
+		return null;
+	}
+	
 	public boolean isRest()
 	{
 		return false;

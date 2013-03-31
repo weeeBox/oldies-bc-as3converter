@@ -9,7 +9,7 @@ namespace bc.test.functions
         public AsFunction func;
         public virtual void testAssignment()
         {
-            
+            func = new AsFunction(this, "someFunction");
         }
         public virtual void someFunction()
         {
