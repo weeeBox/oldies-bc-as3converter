@@ -9,56 +9,66 @@ namespace vs_project_test
 {
     [TestClass]
     public class AsFunctionTests
-    {
-        private List<String> result = new List<String>();
-
+    {   
+        private Bar target = new Bar();
+        
         [TestMethod]
         public void TestAssignmet()
         {
             AsFunction func;
-            func = new AsFunction(this, "PrivateFunc");
-            func = new AsFunction(this, "ProtectedFunc");
-            func = new AsFunction(this, "PublicFunc");
-            func = new AsFunction(this, "Func", typeof(int));
-            func = new AsFunction(this, "Func", typeof(int), typeof(int));
-            func = new AsFunction(this, "Func", typeof(Foo));
-            func = new AsFunction(this, "Func", typeof(Bar)); // covariant param
+            func = new AsFunction(target, "PrivateFunc");
+            func = new AsFunction(target, "ProtectedFunc");
+            func = new AsFunction(target, "PublicFunc");
+            func = new AsFunction(target, "Func", typeof(int));
+            func = new AsFunction(target, "Func", typeof(int), typeof(int));
+            func = new AsFunction(target, "Func", typeof(Foo));
+            func = new AsFunction(target, "Func", typeof(Bar)); // covariant param
         }
 
         [TestMethod]
         public void TestCalls()
         {
-            result.Clear();
+            target.Clear();
 
             AsFunction func;
-            func = new AsFunction(this, "PrivateFunc");
+            func = new AsFunction(target, "PrivateFunc");
             func.Invoke();
 
-            func = new AsFunction(this, "ProtectedFunc");
+            func = new AsFunction(target, "ProtectedFunc");
             func.Invoke();
 
-            func = new AsFunction(this, "PublicFunc");
+            func = new AsFunction(target, "PublicFunc");
             func.Invoke();
 
-            func = new AsFunction(this, "Func", typeof(int));
+            func = new AsFunction(target, "Func", typeof(int));
             func.Invoke(10);
 
-            func = new AsFunction(this, "Func", typeof(int), typeof(int));
+            func = new AsFunction(target, "Func", typeof(int), typeof(int));
             func.Invoke(20, 30);
 
-            func = new AsFunction(this, "Func", typeof(Foo));
+            func = new AsFunction(target, "Func", typeof(Foo));
             func.Invoke(new Foo());
 
-            func = new AsFunction(this, "Func", typeof(Bar));
+            func = new AsFunction(target, "Func", typeof(Bar));
             func.Invoke(new Bar());
 
             AssertResult("PrivateFunc()", "ProtectedFunc()", "PublicFunc()", "Func(10)", "Func(20,30)", "Func(Foo)", "Func(Bar)");
         }
 
-        private void PrivateFunc()
+        private void AssertResult(params String[] data)
         {
-            result.Add("PrivateFunc()");
+            Assert.AreEqual(data.Length, target.result.Count);
+
+            for (int i = 0; i < data.Length; ++i)
+            {
+                Assert.AreEqual(data[i], target.result[i]);
+            }
         }
+    }
+
+    class Foo 
+    {
+        public List<String> result = new List<String>();
 
         protected void ProtectedFunc()
         {
@@ -68,6 +78,19 @@ namespace vs_project_test
         public void PublicFunc()
         {
             result.Add("PublicFunc()");
+        }
+
+        public void Clear()
+        {
+            result.Clear();
+        }
+    }
+
+    class Bar : Foo 
+    {
+        private void PrivateFunc()
+        {
+            result.Add("PrivateFunc()");
         }
 
         private void Func(int arg)
@@ -84,18 +107,5 @@ namespace vs_project_test
         {
             result.Add("Func(" + foo.GetType().Name + ")");
         }
-
-        private void AssertResult(params String[] data)
-        {
-            Assert.AreEqual(data.Length, result.Count);
-
-            for (int i = 0; i < data.Length; ++i)
-            {
-                Assert.AreEqual(data[i], result[i]);
-            }
-        }
     }
-
-    class Foo { }
-    class Bar : Foo { }
 }
