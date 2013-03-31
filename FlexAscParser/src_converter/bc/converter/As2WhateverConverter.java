@@ -339,18 +339,7 @@ public abstract class As2WhateverConverter
 			}
 			else if (node instanceof ImportDirectiveNode)
 			{
-				ImportDirectiveNode importNode = (ImportDirectiveNode) node;
-
-				PackageNameNode packageNameNode = importNode.name;
-				failConversionUnless(packageNameNode != null, "Error while parsing import directive: packageNameNode is null");
-
-				PackageIdentifiersNode packageIdentifierNode = packageNameNode.id;
-				failConversionUnless(packageIdentifierNode != null, "Error while parsing import directive: packageIdentifierNode is null");
-
-				String typeName = packageIdentifierNode.def_part;
-				String packageName = safeQualifier(packageIdentifierNode.pkg_part);
-
-				importList.add(typeName, packageName);
+				collect(importList, (ImportDirectiveNode) node);
 			}
 			else if (node instanceof PackageDefinitionNode)
 			{
@@ -405,7 +394,7 @@ public abstract class As2WhateverConverter
 
 		return new BcModuleEntry(file, entries);
 	}
-
+	
 	private void collect(BcModuleEntry module) throws IOException
 	{
 		File file = module.getFile();
@@ -537,6 +526,10 @@ public abstract class As2WhateverConverter
 			{
 				failConversion("Unsupported top level expression found");
 			}
+			else if (node instanceof ImportDirectiveNode)
+			{
+				collect(bcClass.getImportList(), (ImportDirectiveNode)node);
+			}
 			else if (node instanceof EmptyStatementNode)
 			{
 			}
@@ -551,6 +544,20 @@ public abstract class As2WhateverConverter
 		BcGlobal.declaredVars = null;
 
 		return bcClass;
+	}
+	
+	private void collect(BcImportList importList, ImportDirectiveNode importNode)
+	{
+		PackageNameNode packageNameNode = importNode.name;
+		failConversionUnless(packageNameNode != null, "Error while parsing import directive: packageNameNode is null");
+
+		PackageIdentifiersNode packageIdentifierNode = packageNameNode.id;
+		failConversionUnless(packageIdentifierNode != null, "Error while parsing import directive: packageIdentifierNode is null");
+
+		String typeName = packageIdentifierNode.def_part;
+		String packageName = safeQualifier(packageIdentifierNode.pkg_part);
+
+		importList.add(typeName, packageName);
 	}
 	
 	private BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode, BcFunctionDeclaration bcFunc)
@@ -631,22 +638,29 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private BcVariableDeclaration collect(VariableDefinitionNode node)
+	private BcVariableDeclaration[] collect(VariableDefinitionNode node)
 	{
-		failConversionUnless(node.list.items.size() == 1, "Node list items size should be 1: %d", node.list.items.size());
-		VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(0);
+		int count = node.list.items.size();
+		BcVariableDeclaration[] variables = new BcVariableDeclaration[count];
 
-		BcTypeNodeInstance bcTypeInstance = extractBcTypeInstance(varBindNode.variable);
-		String bcIdentifier = getCodeHelper().extractIdentifier(varBindNode.variable.identifier);
-		BcVariableDeclaration bcVar = new BcVariableDeclaration(bcTypeInstance, bcIdentifier);
-		bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
-		bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));
+		for (int i = 0; i < count; ++i)
+		{
+			VariableBindingNode varBindNode = (VariableBindingNode) node.list.items.get(i);
+	
+			BcTypeNodeInstance bcTypeInstance = extractBcTypeInstance(varBindNode.variable);
+			String bcIdentifier = getCodeHelper().extractIdentifier(varBindNode.variable.identifier);
+			BcVariableDeclaration bcVar = new BcVariableDeclaration(bcTypeInstance, bcIdentifier);
+			bcVar.setConst(node.kind == Tokens.CONST_TOKEN);
+			bcVar.setModifiers(BcNodeHelper.extractModifiers(varBindNode.attrs));
+	
+			bcVar.setInitializerNode(varBindNode.initializer);
+	
+			BcGlobal.declaredVars.add(bcVar);
+			
+			variables[i] = bcVar;
+		}
 
-		bcVar.setInitializerNode(varBindNode.initializer);
-
-		BcGlobal.declaredVars.add(bcVar);
-
-		return bcVar;
+		return variables;
 	}
 
 	private BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode)

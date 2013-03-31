@@ -194,9 +194,12 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return declaredVars;
 	}
 	
-	public void add(BcVariableDeclaration var)
+	public void add(BcVariableDeclaration... vars)
 	{
-		fields.add(var);
+		for (BcVariableDeclaration var : vars)
+		{
+			fields.add(var);
+		}
 	}
 	
 	public void add(BcFunctionDeclaration func)

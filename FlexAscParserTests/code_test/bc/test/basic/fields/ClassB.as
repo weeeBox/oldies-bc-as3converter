@@ -16,6 +16,8 @@ package bc.test.basic.fields
         public var memberC2 : int = 10;
         public var memberC3 : int = memberB1.length;
         
+        public var a1:int, b1:int, c1:int, d1:int = 0;
+        
         public function ClassB()
         {
             super("Some arg");

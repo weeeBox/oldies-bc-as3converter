@@ -18,6 +18,10 @@ namespace bc.test.basic.fields
 		public int memberC1;
 		public int memberC2 = 10;
 		public int memberC3;
+		public int a1;
+		public int b1;
+		public int c1;
+		public int d1 = 0;
 		private void __internalInitializeFields()
 		{
 			memberA4 = memberA3;
