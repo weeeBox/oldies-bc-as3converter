@@ -582,6 +582,11 @@ public class As2CsConverter extends As2WhateverConverter
 			return;
 		}
 		
+		if (type.isFunction())
+		{
+			return;
+		}
+		
 		if (canBeClass(type))
 		{
 			importsData.addType(type);
