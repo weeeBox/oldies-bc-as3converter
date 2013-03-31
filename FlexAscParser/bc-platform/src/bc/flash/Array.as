@@ -46,7 +46,7 @@ package bc.flash
 
 		/* public function sort(...args : *) : *; */
 
-		/* public function sortOn(names : *, options : * = 0, ...args : *) : *; */
+		public function sortOn(names : *, options : * = 0, ...args : *) : * { throw new NotImplementedError(); }
 
 		public function splice(startIndex:int, deleteCount:uint, ... values) : Array { throw new NotImplementedError(); }
 

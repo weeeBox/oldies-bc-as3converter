@@ -192,4 +192,9 @@ public abstract class BcCodeHelper
 	{
 		return settingsMap.get(name);
 	}
+
+	public Object literalRegexp(String value)
+	{
+		return literalString(value);
+	}
 }

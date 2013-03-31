@@ -2163,7 +2163,8 @@ public abstract class As2WhateverConverter
 		}
 		else if (node instanceof LiteralRegExpNode)
 		{
-			failConversion("LiteralRegExpNode is not supported");
+			LiteralRegExpNode regexp = (LiteralRegExpNode) node;
+			dest.write(getCodeHelper().literalRegexp(regexp.value));
 		}
 		else if (node instanceof LiteralArrayNode)
 		{
@@ -2478,7 +2479,14 @@ public abstract class As2WhateverConverter
 
 			dest.writelnf("for (%s; %s; %s)", initialize, test, increment);
 
-			process(node.statement);
+			if (node.statement != null)
+			{
+				process(node.statement);
+			}
+			else
+			{
+				writeEmptyBlock();
+			}
 		}
 	}
 
@@ -4005,7 +4013,11 @@ public abstract class As2WhateverConverter
 		failConversionUnless(node.block == null, "Literal objects with blocks are not supported yet");
 		
 		ArgumentListNode fieldlist = node.fieldlist;
-		failConversionUnless(fieldlist != null, "Literal object is expected to have fields list");
+		if (fieldlist == null)
+		{
+			dest.write(staticCall(createClassName(BcTypeNode.typeObject), "createLiteralObject")); // FIXME: make a separate call for it
+			return;
+		}
 	
 		int itemsCount = fieldlist.items.size();
 		Object[] args = new Object[2 * itemsCount]; // name + value
