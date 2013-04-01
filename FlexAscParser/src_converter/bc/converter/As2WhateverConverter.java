@@ -3219,13 +3219,20 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	private void pushDest(WriteDestination newDest)
+	protected ListWriteDestination pushDest()
+	{
+		ListWriteDestination dest = new ListWriteDestination();
+		pushDest(dest);
+		return dest;
+	}
+	
+	protected void pushDest(WriteDestination newDest)
 	{
 		destStack.push(dest);
 		dest = newDest;
 	}
 
-	private void popDest()
+	protected void popDest()
 	{
 		dest = destStack.pop();
 	}
@@ -3520,7 +3527,7 @@ public abstract class As2WhateverConverter
 			ListNode listNode = (ListNode) node;
 			failConversionUnless(listNode.items.size() == 1, "Can't evaluate ListNode's type");
 
-			return evaluateType(listNode.items.get(0));
+			return evaluateTypeHelper(listNode.items.get(0));
 		}
 
 		if (node instanceof ThisExpressionNode)
@@ -3538,14 +3545,14 @@ public abstract class As2WhateverConverter
 		if (node instanceof GetExpressionNode)
 		{
 			GetExpressionNode get = (GetExpressionNode) node;
-			return evaluateType(get.expr);
+			return evaluateTypeHelper(get.expr);
 		}
 
 		if (node instanceof ArgumentListNode)
 		{
 			ArgumentListNode args = (ArgumentListNode) node;
 			failConversionUnless(args.size() == 1, "Can't evaluate argument list type");
-			return evaluateType(args.items.get(0));
+			return evaluateTypeHelper(args.items.get(0));
 		}
 
 		if (node instanceof BinaryExpressionNode)
@@ -3627,7 +3634,7 @@ public abstract class As2WhateverConverter
 			}
 			else if (unary.expr instanceof ListNode)
 			{
-				return evaluateType(unary.expr);
+				return evaluateTypeHelper(unary.expr);
 			}
 			else
 			{
@@ -3656,7 +3663,7 @@ public abstract class As2WhateverConverter
 		if (node instanceof ConditionalExpressionNode)
 		{
 			ConditionalExpressionNode conditional = (ConditionalExpressionNode) node;
-			BcTypeNode thenType = evaluateType(conditional.thenexpr);
+			BcTypeNode thenType = evaluateTypeHelper(conditional.thenexpr);
 			failConversionUnless(thenType != null, "Can't evaluate 'then' conditional type");
 
 			String classNull = getCodeHelper().literalNull();
@@ -3666,7 +3673,7 @@ public abstract class As2WhateverConverter
 				return thenType;
 			}
 
-			BcTypeNode elseType = evaluateType(conditional.elseexpr);
+			BcTypeNode elseType = evaluateTypeHelper(conditional.elseexpr);
 			failConversionUnless(elseType != null, "Conditional expression 'else' is 'null'");
 
 			if (!typeEquals(elseType, classNull))
@@ -3738,7 +3745,7 @@ public abstract class As2WhateverConverter
 				}
 				else if (firstItem instanceof BinaryExpressionNode)
 				{
-					BcTypeNode baseType = evaluateType(firstItem);
+					BcTypeNode baseType = evaluateTypeHelper(firstItem);
 
 					failConversionUnless(baseType != null, "Can't evaluate BinaryExpressionNode. Base type is 'null'");
 					baseClass = baseType.getClassNode();
