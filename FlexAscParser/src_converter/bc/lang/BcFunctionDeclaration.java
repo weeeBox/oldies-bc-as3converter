@@ -3,17 +3,8 @@ package bc.lang;
 import java.util.ArrayList;
 import java.util.List;
 
-import macromedia.asc.parser.ArgumentListNode;
-import macromedia.asc.parser.CallExpressionNode;
-import macromedia.asc.parser.ExpressionStatementNode;
-import macromedia.asc.parser.GetExpressionNode;
-import macromedia.asc.parser.IdentifierNode;
-import macromedia.asc.parser.ListNode;
-import macromedia.asc.parser.MemberExpressionNode;
-import macromedia.asc.parser.ReturnStatementNode;
 import macromedia.asc.parser.StatementListNode;
 import bc.code.ListWriteDestination;
-import bc.help.BcCodeHelper;
 
 public class BcFunctionDeclaration extends BcDeclaration
 {

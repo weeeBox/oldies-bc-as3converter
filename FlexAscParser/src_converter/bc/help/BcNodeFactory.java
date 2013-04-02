@@ -1,6 +1,5 @@
 package bc.help;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import macromedia.asc.parser.ArgumentListNode;
@@ -171,6 +170,17 @@ public class BcNodeFactory {
 			}
 		}
 	}
+	
+	public static void turnSetterToFunctionCall(MemberExpressionNode node, String funcName)
+	{
+		if (!node.selector.isSetExpression())
+		{
+			throw new IllegalArgumentException("Member selector should be set");
+		}
+		
+		SetExpressionNode set = (SetExpressionNode) node.selector;
+		node.selector = callExpression(funcName, set.args);
+	}
 
 	private static void replaceSelector(MemberExpressionNode node, SelectorNode selector)
 	{
@@ -201,7 +211,12 @@ public class BcNodeFactory {
 	
 	public static CallExpressionNode callExpression(String identifier)
 	{
-		return new CallExpressionNode(identifier(identifier), null);
+		return callExpression(identifier, null);
+	}
+	
+	public static CallExpressionNode callExpression(String identifier, ArgumentListNode args)
+	{
+		return new CallExpressionNode(identifier(identifier), args);
 	}
 	
 	public static GetExpressionNode getExpression(BcTypeNodeInstance typeInstance)

@@ -13,14 +13,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import macromedia.asc.parser.ArgumentListNode;
+import macromedia.asc.parser.IdentifierNode;
+import macromedia.asc.parser.ListNode;
 import macromedia.asc.parser.MemberExpressionNode;
+import macromedia.asc.parser.Node;
 import macromedia.asc.parser.SelectorNode;
+import macromedia.asc.parser.StoreRegisterNode;
+import macromedia.asc.parser.Tokens;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.error.ConverterException;
 import bc.help.BcCodeHelper;
 import bc.help.BcGlobal;
 import bc.help.BcNodeFactory;
+import bc.help.BcNodeHelper;
 import bc.help.Cast;
 import bc.help.CsCodeHelper;
 import bc.lang.BcArgumentsList;
@@ -97,7 +104,7 @@ public class As2CsConverter extends As2WhateverConverter
 		}
 		
 		super.process(node);
-	};
+	}
 	
 	@Override
 	protected void postProcess(BcClassDefinitionNode bcClass)

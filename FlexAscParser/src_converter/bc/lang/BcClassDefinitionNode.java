@@ -329,17 +329,22 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return null;
 	}
 
-	private static final int FIND_NORMAL = 0;
-	private static final int FIND_GETTER = 1;
-	private static final int FIND_SETTER = 2;
+	public static final int FIND_NORMAL = 0;
+	public static final int FIND_GETTER = 1;
+	public static final int FIND_SETTER = 2;
 	
 	public BcFunctionDeclaration findFunction(String name)
 	{
 		return findFunction(this, name, FIND_NORMAL);
 	}
 	
-	public BcFunctionDeclaration findGetterFunction(String name)
+	public BcFunctionDeclaration findFunction(String name, int mode)
 	{
+		return findFunction(this, name, mode);
+	}
+	
+	public BcFunctionDeclaration findGetterFunction(String name)
+	{ 
 		return findFunction(this, name, FIND_GETTER);
 	}
 	
