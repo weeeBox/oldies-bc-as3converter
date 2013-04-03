@@ -144,6 +144,8 @@ public abstract class As2WhateverConverter
 
 	private File userDir;
 	private List<File> ignoreDirs;
+	
+	private Stack<Node> nodeStack;
 
 	// TODO: add metadata support for binded class
 	private static Map<String, String> bindedClasses;
@@ -161,6 +163,7 @@ public abstract class As2WhateverConverter
 	{
 		userDir = new File(System.getProperty("user.dir"));
 		ignoreDirs = new ArrayList<File>();
+		nodeStack = new Stack<Node>();
 
 		this.codeHelper = codeHelper;
 	}
@@ -890,7 +893,7 @@ public abstract class As2WhateverConverter
 		{
 			ListWriteDestination initializerDest = new ListWriteDestination();
 			pushDest(initializerDest);
-			process(initializer);
+			processNode(initializer);
 			popDest();
 
 			bcVar.setInitializer(initializerDest);
@@ -911,9 +914,10 @@ public abstract class As2WhateverConverter
 		dest.writeln(";");
 	}
 
-	protected void process(Node node)
+	protected void processNode(Node node)
 	{
 		failConversionUnless(node != null, "Tried to process 'null' node");
+		nodeStack.push(node);
 
 		if (node instanceof MemberExpressionNode)
 			process((MemberExpressionNode) node);
@@ -989,6 +993,8 @@ public abstract class As2WhateverConverter
 			process((EmptyStatementNode) node);
 		else
 			failConversion("Unsupported node class: %s", node.getClass());
+		
+		nodeStack.pop();
 	}
 
 	protected void process(StatementListNode statementsNode)
@@ -1006,11 +1012,11 @@ public abstract class As2WhateverConverter
 				BcNodeHelper.extractBcMetadata((MetaDataNode) node);
 
 				failConversionUnless(iter.hasNext(), "Error processing metadata");
-				process(iter.next());
+				processNode(iter.next());
 			}
 			else
 			{
-				process(node);
+				processNode(node);
 			}
 		}
 
@@ -1022,7 +1028,7 @@ public abstract class As2WhateverConverter
 		int itemIndex = 0;
 		for (Node arg : node.items)
 		{
-			process(arg);
+			processNode(arg);
 
 			if (++itemIndex < node.items.size())
 			{
@@ -1033,7 +1039,7 @@ public abstract class As2WhateverConverter
 	
 	protected void process(StoreRegisterNode node)
 	{
-		process(node.expr);
+		processNode(node.expr);
 	}
 	
 	protected void process(LoadRegisterNode node)
@@ -1096,7 +1102,7 @@ public abstract class As2WhateverConverter
 
 			ListWriteDestination baseExpr = new ListWriteDestination();
 			pushDest(baseExpr);
-			process(base);
+			processNode(base);
 			popDest();
 			
 			// handle function type variables
@@ -1178,7 +1184,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				process(selector);
+				processNode(selector);
 			}
 			popDest();
 		}
@@ -1197,7 +1203,7 @@ public abstract class As2WhateverConverter
 		{
 			ListWriteDestination exprDest = new ListWriteDestination();
 			pushDest(exprDest);
-			process(selector.expr);
+			processNode(selector.expr);
 			popDest();
 
 			if (selector instanceof SetExpressionNode)
@@ -1208,7 +1214,7 @@ public abstract class As2WhateverConverter
 
 				ListWriteDestination argsDest = new ListWriteDestination();
 				pushDest(argsDest);
-				process(setExpr.args);
+				processNode(setExpr.args);
 				popDest();
 
 				writeMemberSelector(baseType, baseDest, call("setOwnProperty", exprDest, argsDest));
@@ -1398,7 +1404,7 @@ public abstract class As2WhateverConverter
 		{
 			WriteDestination argDest = new ListWriteDestination();
 			pushDest(argDest);
-			process(args.get(1));
+			processNode(args.get(1));
 			popDest();
 			
 			if (calledFunction.hasRestParams())
@@ -1450,7 +1456,7 @@ public abstract class As2WhateverConverter
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
-		process(node.expr);
+		processNode(node.expr);
 		popDest();
 
 		failConversionUnless(node.getMode() == Tokens.LEFTBRACKET_TOKEN, "LEFTBRACKET_TOKEN expected for 'delete' expression node");
@@ -1461,7 +1467,7 @@ public abstract class As2WhateverConverter
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
-		process(node.expr);
+		processNode(node.expr);
 		popDest();
 
 		boolean accessingDynamicProperty = false;
@@ -1672,7 +1678,7 @@ public abstract class As2WhateverConverter
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
 		pushDest(exprDest);
-		process(node.expr);
+		processNode(node.expr);
 		popDest();
 
 		String identifier = exprDest.toString();
@@ -1834,7 +1840,7 @@ public abstract class As2WhateverConverter
 			{
 				ListWriteDestination argDest = new ListWriteDestination();
 				pushDest(argDest);
-				process(argNode);
+				processNode(argNode);
 				popDest();
 
 				BcTypeNode argType = evaluateType(argNode);
@@ -1885,7 +1891,7 @@ public abstract class As2WhateverConverter
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
 		pushDest(exprDest);
-		process(node.expr);
+		processNode(node.expr);
 		popDest();
 
 		String identifier = exprDest.toString();
@@ -1991,7 +1997,7 @@ public abstract class As2WhateverConverter
 
 		ListWriteDestination argsDest = new ListWriteDestination();
 		pushDest(argsDest);
-		process(node.args);
+		processNode(node.args);
 		popDest();
 
 		failConversionUnless(node.args.size() == 1, "'set' expression should have a single argument: %d", node.args.size());
@@ -2063,7 +2069,7 @@ public abstract class As2WhateverConverter
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
-		process(node.expr);
+		processNode(node.expr);
 		popDest();
 
 		String typeName = getCodeHelper().extractIdentifier((IdentifierNode)node.expr); // TODO: handle qualifier here
@@ -2095,7 +2101,7 @@ public abstract class As2WhateverConverter
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
-		process(node.expr);
+		processNode(node.expr);
 		popDest();
 
 		String op = Tokens.tokenToString[-node.op];
@@ -2140,7 +2146,7 @@ public abstract class As2WhateverConverter
 		{
 			ListWriteDestination initializer = new ListWriteDestination();
 			pushDest(initializer);
-			process(node.initializer);
+			processNode(node.initializer);
 			popDest();
 
 			bcVar.setInitializer(initializer);
@@ -2246,7 +2252,7 @@ public abstract class As2WhateverConverter
 		{
 			ListWriteDestination condDest = new ListWriteDestination();
 			pushDest(condDest);
-			process(node.condition);
+			processNode(node.condition);
 			popDest();
 	
 			String condString = condDest.toString();
@@ -2261,7 +2267,7 @@ public abstract class As2WhateverConverter
 			{
 				ListWriteDestination thenDest = new ListWriteDestination();
 				pushDest(thenDest);
-				process(node.thenactions);
+				processNode(node.thenactions);
 				popDest();
 				dest.writeln(thenDest);
 			}
@@ -2275,7 +2281,7 @@ public abstract class As2WhateverConverter
 		{
 			ListWriteDestination elseDest = new ListWriteDestination();
 			pushDest(elseDest);
-			process(node.elseactions);
+			processNode(node.elseactions);
 			popDest();
 			if (!cutWithPreprocessor)
 			{
@@ -2336,7 +2342,7 @@ public abstract class As2WhateverConverter
 	{
 		ListWriteDestination condDest = new ListWriteDestination();
 		pushDest(condDest);
-		process(node.condition);
+		processNode(node.condition);
 		popDest();
 
 		String condString = condDest.toString();
@@ -2344,12 +2350,12 @@ public abstract class As2WhateverConverter
 
 		ListWriteDestination thenDest = new ListWriteDestination();
 		pushDest(thenDest);
-		process(node.thenexpr);
+		processNode(node.thenexpr);
 		popDest();
 
 		ListWriteDestination elseDest = new ListWriteDestination();
 		pushDest(elseDest);
-		process(node.elseexpr);
+		processNode(node.elseexpr);
 		popDest();
 
 		dest.writef("%s ? %s : %s", condString, thenDest, elseDest);
@@ -2359,7 +2365,7 @@ public abstract class As2WhateverConverter
 	{
 		ListWriteDestination exprDest = new ListWriteDestination();
 		pushDest(exprDest);
-		process(node.expr);
+		processNode(node.expr);
 		popDest();
 
 		String condString = exprDest.toString();
@@ -2374,7 +2380,7 @@ public abstract class As2WhateverConverter
 		{
 			ListWriteDestination statementDest = new ListWriteDestination();
 			pushDest(statementDest);
-			process(node.statement);
+			processNode(node.statement);
 			popDest();
 			dest.writeln(statementDest);
 		}
@@ -2403,7 +2409,7 @@ public abstract class As2WhateverConverter
 
 			ListWriteDestination collection = new ListWriteDestination();
 			pushDest(collection);
-			process(coerce.expr);
+			processNode(coerce.expr);
 			popDest();
 
 			BcTypeNode collectionType = evaluateType(coerce.expr);
@@ -2469,7 +2475,7 @@ public abstract class As2WhateverConverter
 				ObjectList<Node> items = statementsNode.items;
 				for (Node itemNode : items)
 				{
-					process(itemNode);
+					processNode(itemNode);
 				}
 
 				writeBlockClose(dest);
@@ -2491,14 +2497,14 @@ public abstract class As2WhateverConverter
 			if (node.initialize != null)
 			{
 				pushDest(initialize);
-				process(node.initialize);
+				processNode(node.initialize);
 				popDest();
 			}
 
 			if (node.test != null)
 			{
 				pushDest(test);
-				process(node.test);
+				processNode(node.test);
 				popDest();
 			}
 
@@ -2506,7 +2512,7 @@ public abstract class As2WhateverConverter
 			{
 				increment = new ListWriteDestination();
 				pushDest(increment);
-				process(node.increment);
+				processNode(node.increment);
 				popDest();
 			}
 
@@ -2514,7 +2520,7 @@ public abstract class As2WhateverConverter
 
 			if (node.statement != null)
 			{
-				process(node.statement);
+				processNode(node.statement);
 			}
 			else
 			{
@@ -2532,7 +2538,7 @@ public abstract class As2WhateverConverter
 	{
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
-		process(node.expr);
+		processNode(node.expr);
 		popDest();
 
 		dest.writelnf("switch(%s)", expr);
@@ -2556,14 +2562,14 @@ public abstract class As2WhateverConverter
 					{
 						ListWriteDestination caseDest = new ListWriteDestination();
 						pushDest(caseDest);
-						process(label);
+						processNode(label);
 						popDest();
 						dest.writelnf("case %s:", caseDest);
 					}
 				}
 				else
 				{
-					process(statement);
+					processNode(statement);
 				}
 			}
 		}
@@ -2577,7 +2583,7 @@ public abstract class As2WhateverConverter
 
 		if (node.tryblock != null)
 		{
-			process(node.tryblock);
+			processNode(node.tryblock);
 		}
 		else
 		{
@@ -2589,13 +2595,13 @@ public abstract class As2WhateverConverter
 			ObjectList<Node> items = node.catchlist.items;
 			for (Node item : items)
 			{
-				process(item);
+				processNode(item);
 			}
 		}
 
 		if (node.finallyblock != null)
 		{
-			process(node.finallyblock);
+			processNode(node.finallyblock);
 		}
 	}
 
@@ -2605,11 +2611,11 @@ public abstract class As2WhateverConverter
 		if (node.parameter != null)
 		{
 			pushDest(paramDest);
-			process(node.parameter);
+			processNode(node.parameter);
 			popDest();
 			
 			dest.writeln(catchClause(paramDest));
-			process(node.statements);
+			processNode(node.statements);
 		}
 	}
 
@@ -2629,7 +2635,7 @@ public abstract class As2WhateverConverter
 	protected void process(FinallyClauseNode node)
 	{
 		dest.writeln(finallyClause());
-		process(node.statements);
+		processNode(node.statements);
 	}
 
 	protected void process(ThrowStatementNode node)
@@ -2638,7 +2644,7 @@ public abstract class As2WhateverConverter
 		{
 			ListWriteDestination throwDest = new ListWriteDestination();
 			pushDest(throwDest);
-			process(node.expr);
+			processNode(node.expr);
 			popDest();
 	
 			dest.writelnf("%s;", throwStatment(throwDest));
@@ -2667,11 +2673,11 @@ public abstract class As2WhateverConverter
 		ListWriteDestination rdest = new ListWriteDestination();
 		
 		pushDest(ldest);
-		process(node.lhs);
+		processNode(node.lhs);
 		popDest();
 
 		pushDest(rdest);
-		process(node.rhs);
+		processNode(node.rhs);
 		popDest();
 
 		String lshString = ldest.toString();
@@ -2730,14 +2736,14 @@ public abstract class As2WhateverConverter
 			if (!typeEquals(exprType, BcTypeNode.typeBoolean))
 			{
 				node.expr = BcNodeFactory.isNull(exprType, node.expr);
-				process(node.expr);
+				processNode(node.expr);
 				return;
 			}
 		}
 		
 		ListWriteDestination expr = new ListWriteDestination();
 		pushDest(expr);
-		process(node.expr);
+		processNode(node.expr);
 		popDest();
 
 		switch (node.op)
@@ -2778,7 +2784,7 @@ public abstract class As2WhateverConverter
 
 			ListWriteDestination exprDest = new ListWriteDestination();
 			pushDest(exprDest);
-			process(node.expr);
+			processNode(node.expr);
 			popDest();
 
 			failConversionUnless(BcGlobal.lastBcFunction != null, "'return' statemnt outside of a function: return %s", exprDest);
@@ -2840,7 +2846,7 @@ public abstract class As2WhateverConverter
 			int itemIndex = 0;
 			for (Node arg : args.items)
 			{
-				process(arg);
+				processNode(arg);
 
 				if (++itemIndex < args.items.size())
 				{
@@ -2871,7 +2877,7 @@ public abstract class As2WhateverConverter
 			{
 				ListWriteDestination initializer = new ListWriteDestination();
 				pushDest(initializer);
-				process(initializerNode);
+				processNode(initializerNode);
 				popDest();
 
 				BcTypeNode initializerType = evaluateType(initializerNode);
@@ -2895,7 +2901,7 @@ public abstract class As2WhateverConverter
 		// get function statements
 		ListWriteDestination body = new ListWriteDestination();
 		pushDest(body);
-		process(bcFunc.getStatements());
+		processNode(bcFunc.getStatements());
 		popDest();
 
 		List<String> lines = body.getLines();
@@ -2912,7 +2918,7 @@ public abstract class As2WhateverConverter
 
 	protected void process(ExpressionStatementNode node)
 	{
-		process(node.expr);
+		processNode(node.expr);
 		dest.writeln(";");
 	}
 
@@ -2921,7 +2927,7 @@ public abstract class As2WhateverConverter
 		ObjectList<Node> items = node.items;
 		for (Node item : items)
 		{
-			process(item);
+			processNode(item);
 		}
 	}
 
@@ -3982,7 +3988,7 @@ public abstract class As2WhateverConverter
 			ListWriteDestination argDest = new ListWriteDestination();
 			pushDest(argDest);
 
-			process(arg);
+			processNode(arg);
 
 			popDest();
 			argsList.add(argDest);
@@ -3998,7 +4004,7 @@ public abstract class As2WhateverConverter
 		int elementIndex = 0;
 		for (Node elementNode : args)
 		{
-			process(elementNode);
+			processNode(elementNode);
 			if (++elementIndex < args.size())
 			{
 				dest.write(", ");
@@ -4030,7 +4036,7 @@ public abstract class As2WhateverConverter
 				{
 					ListWriteDestination argDest = new ListWriteDestination();
 					pushDest(argDest);
-					process(elementNode);
+					processNode(elementNode);
 					popDest();
 
 					BcTypeNode argType = evaluateType(elementNode);
@@ -4080,14 +4086,14 @@ public abstract class As2WhateverConverter
 				
 				ListWriteDestination nameDest = new ListWriteDestination();
 				pushDest(nameDest);
-				process(field.name);
+				processNode(field.name);
 				popDest();
 				
 				args[itemIndex++] = codeHelper.literalString(nameDest);
 				
 				ListWriteDestination valueDest = new ListWriteDestination();
 				pushDest(valueDest);
-				process(field.value);
+				processNode(field.value);
 				popDest();
 				
 				args[itemIndex++] = valueDest;
@@ -4179,7 +4185,7 @@ public abstract class As2WhateverConverter
 		{
 			WriteDestination argDest = new ListWriteDestination();
 			pushDest(argDest);
-			process(arg);
+			processNode(arg);
 			popDest();
 
 			BcTypeNode argType = evaluateType(arg); // FIXME: should return function type
