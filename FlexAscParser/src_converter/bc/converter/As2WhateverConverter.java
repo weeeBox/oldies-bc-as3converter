@@ -114,6 +114,7 @@ import bc.lang.BcMetadata;
 import bc.lang.BcMetadataNode;
 import bc.lang.BcModuleDeclarationEntry;
 import bc.lang.BcModuleEntry;
+import bc.lang.BcNode;
 import bc.lang.BcNullType;
 import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeName;
@@ -1412,7 +1413,6 @@ public abstract class As2WhateverConverter
 		processNode(node.expr);
 		popDest();
 
-		boolean accessingDynamicProperty = false;
 		boolean accessingDynamicXMLList = false;
 		String identifier = expr.toString();
 		boolean getterCalled = false;
@@ -1513,7 +1513,10 @@ public abstract class As2WhateverConverter
 									failConversionUnless(lastBcMemberType != null, "Identifier not recognized: '%s'", identifier);
 									
 									System.err.println("Warning! Dymaic property: " + identifier);
-									accessingDynamicProperty = true;
+									if (processPropertyGet(node, identifier))
+									{
+										return;
+									}
 								}
 							}
 						}
@@ -1547,10 +1550,6 @@ public abstract class As2WhateverConverter
 		if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 		{
 			dest.write(indexerGetter(identifier));
-		}
-		else if (accessingDynamicProperty)
-		{
-			dest.writef("getOwnProperty(\"%s\")", identifier); // FIXME: make member call
 		}
 		else if (accessingDynamicXMLList)
 		{
@@ -1902,7 +1901,7 @@ public abstract class As2WhateverConverter
 					else
 					{
 						System.err.println("Warning! Dymaic set property: " + identifier);
-						if (processPropertySetter(node, identifier))
+						if (processPropertySet(node, identifier))
 						{
 							return;
 						}
@@ -2925,17 +2924,26 @@ public abstract class As2WhateverConverter
 		return true;
 	}
 	
-	protected boolean processPropertySetter(SetExpressionNode node, String propName)
+	protected boolean processPropertySet(SetExpressionNode node, String propName)
+	{
+		failConversionUnless(node.args != null && node.args.size() == 1);
+		return propertyAccessHelper(node, "setOwnProperty", BcNodeFactory.concat(new LiteralStringNode(propName), node.args));
+	}
+	
+	protected boolean processPropertyGet(GetExpressionNode node, String propName)
+	{
+		return propertyAccessHelper(node, "getOwnProperty", BcNodeFactory.args(new LiteralStringNode(propName)));
+	}
+
+	private boolean propertyAccessHelper(SelectorNode node, String funcName, ArgumentListNode args)
 	{
 		checkCurrentNode(node);
 		
 		Node prevNode = getPrevNode();
 		if (prevNode.isMemberExpression())
 		{
-			failConversionUnless(node.args != null && node.args.size() > 0);
-			
 			MemberExpressionNode memberExpr = (MemberExpressionNode) prevNode;
-			BcNodeFactory.turnSetToCall(memberExpr, "setOwnProperty", BcNodeFactory.concat(new LiteralStringNode(propName), node.args));
+			BcNodeFactory.turnSelectorToCall(memberExpr, funcName, args);
 			
 			replaceNode(memberExpr.selector);
 			process(memberExpr.selector);

@@ -182,13 +182,8 @@ public class BcNodeFactory {
 		node.selector = callExpression(funcName, set.args);
 	}
 	
-	public static void turnSetToCall(MemberExpressionNode node, String funcName, ArgumentListNode args)
+	public static void turnSelectorToCall(MemberExpressionNode node, String funcName, ArgumentListNode args)
 	{
-		if (!node.selector.isSetExpression())
-		{
-			throw new IllegalArgumentException("Member selector should be set");
-		}
-		
 		node.selector = callExpression(funcName, args);
 	}
 
