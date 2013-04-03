@@ -1835,7 +1835,6 @@ public abstract class As2WhateverConverter
 
 		String identifier = exprDest.toString();
 		boolean addToDictionary = false;
-		boolean setDynamicProperty = false;
 
 		if (node.expr instanceof IdentifierNode)
 		{
@@ -1871,7 +1870,7 @@ public abstract class As2WhateverConverter
 				BcFunctionDeclaration bcFunc = bcClass.findSetterFunction(identifier);
 				if (bcFunc != null)
 				{
-					if (processSetter(node, bcFunc))
+					if (processSetterFunction(node, bcFunc))
 					{
 						return;
 					}
@@ -1903,7 +1902,10 @@ public abstract class As2WhateverConverter
 					else
 					{
 						System.err.println("Warning! Dymaic set property: " + identifier);
-						setDynamicProperty = true;
+						if (processPropertySetter(node, identifier))
+						{
+							return;
+						}
 					}
 				}
 			}
@@ -2003,11 +2005,7 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				if (setDynamicProperty)
-				{
-					dest.write(call("setOwnProperty", codeHelper.literalString(identifier), argsDest));
-				}
-				else if (needCast)
+				if (needCast)
 				{
 					dest.writef("%s = %s", identifier, cast(argsDest, argType, selectorType));
 				}
@@ -2903,7 +2901,7 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	protected boolean processSetter(SetExpressionNode node, BcFunctionDeclaration bcFunc)
+	protected boolean processSetterFunction(SetExpressionNode node, BcFunctionDeclaration bcFunc)
 	{
 		checkCurrentNode(node);
 		
@@ -2911,12 +2909,35 @@ public abstract class As2WhateverConverter
 		if (prevNode.isMemberExpression())
 		{
 			MemberExpressionNode memberExpr = (MemberExpressionNode) prevNode;
-			BcNodeFactory.turnSetterToFunctionCall(memberExpr, bcFunc.getName());
+			BcNodeFactory.turnSetToCall(memberExpr, bcFunc.getName());
 			
 			CallExpressionNode call = (CallExpressionNode) memberExpr.selector;
 			call.kind = bcFunc.getKind();
 
 			replaceNode(call);
+			process(memberExpr.selector);
+		}
+		else
+		{
+			failConversion("Unexpected node: %s", prevNode);
+		}
+		
+		return true;
+	}
+	
+	protected boolean processPropertySetter(SetExpressionNode node, String propName)
+	{
+		checkCurrentNode(node);
+		
+		Node prevNode = getPrevNode();
+		if (prevNode.isMemberExpression())
+		{
+			failConversionUnless(node.args != null && node.args.size() > 0);
+			
+			MemberExpressionNode memberExpr = (MemberExpressionNode) prevNode;
+			BcNodeFactory.turnSetToCall(memberExpr, "setOwnProperty", BcNodeFactory.concat(new LiteralStringNode(propName), node.args));
+			
+			replaceNode(memberExpr.selector);
 			process(memberExpr.selector);
 		}
 		else

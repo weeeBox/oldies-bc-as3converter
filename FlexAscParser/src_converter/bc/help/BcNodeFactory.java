@@ -171,7 +171,7 @@ public class BcNodeFactory {
 		}
 	}
 	
-	public static void turnSetterToFunctionCall(MemberExpressionNode node, String funcName)
+	public static void turnSetToCall(MemberExpressionNode node, String funcName)
 	{
 		if (!node.selector.isSetExpression())
 		{
@@ -180,6 +180,16 @@ public class BcNodeFactory {
 		
 		SetExpressionNode set = (SetExpressionNode) node.selector;
 		node.selector = callExpression(funcName, set.args);
+	}
+	
+	public static void turnSetToCall(MemberExpressionNode node, String funcName, ArgumentListNode args)
+	{
+		if (!node.selector.isSetExpression())
+		{
+			throw new IllegalArgumentException("Member selector should be set");
+		}
+		
+		node.selector = callExpression(funcName, args);
 	}
 
 	private static void replaceSelector(MemberExpressionNode node, SelectorNode selector)
@@ -271,5 +281,18 @@ public class BcNodeFactory {
 		}
 		
 		return newList;
+	}
+	
+	public static ArgumentListNode args(Node...items)
+	{
+		if (items.length == 0) return null;
+		
+		ArgumentListNode args = new ArgumentListNode(items[0], -1);
+		for (int i = 1; i < items.length; ++i)
+		{
+			args.items.add(items[i]);
+		}
+		
+		return args;
 	}
 }
