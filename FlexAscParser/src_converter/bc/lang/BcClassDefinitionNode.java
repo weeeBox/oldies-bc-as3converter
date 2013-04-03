@@ -329,31 +329,27 @@ public class BcClassDefinitionNode extends BcDeclaration
 		return null;
 	}
 
-	public static final int FIND_NORMAL = 0;
-	public static final int FIND_GETTER = 1;
-	public static final int FIND_SETTER = 2;
-	
 	public BcFunctionDeclaration findFunction(String name)
 	{
-		return findFunction(this, name, FIND_NORMAL);
+		return findFunction(this, name, 0);
 	}
 	
-	public BcFunctionDeclaration findFunction(String name, int mode)
+	public BcFunctionDeclaration findFunction(String name, int kind)
 	{
-		return findFunction(this, name, mode);
+		return findFunction(this, name, kind);
 	}
 	
 	public BcFunctionDeclaration findGetterFunction(String name)
 	{ 
-		return findFunction(this, name, FIND_GETTER);
+		return findFunction(this, name, BcFunctionDeclaration.KIND_GETTER);
 	}
 	
 	public BcFunctionDeclaration findSetterFunction(String name)
 	{
-		return findFunction(this, name, FIND_SETTER);
+		return findFunction(this, name, BcFunctionDeclaration.KIND_SETTER);
 	}
 	
-	private static BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int mode)
+	private static BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int kind)
 	{
 		List<BcFunctionDeclaration> functions = bcClass.getFunctions();
 		for (BcFunctionDeclaration bcFunc : functions)
@@ -365,19 +361,9 @@ public class BcClassDefinitionNode extends BcDeclaration
 					continue;
 				}
 				
-				if (mode == FIND_GETTER)
+				if (bcFunc.getKind() != kind && kind != 0)
 				{
-					if (!bcFunc.isGetter())
-					{
-						continue;
-					}
-				}
-				else if (mode == FIND_SETTER)
-				{
-					if (!bcFunc.isSetter())
-					{
-						continue;
-					}
+					continue;
 				}
 				
 				return bcFunc;
@@ -389,7 +375,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 			BcClassDefinitionNode bcSuperClass = bcClass.getExtendsType().getClassNode();
 			assert bcSuperClass != null : bcClass.getExtendsType().getName();
 			
-			return findFunction(bcSuperClass, name, mode);
+			return findFunction(bcSuperClass, name, kind);
 		}
 		
 		return null;

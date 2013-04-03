@@ -10,31 +10,31 @@ namespace bc.test.basic.calls
 		public virtual void testProperties()
 		{
 			String _value = "Some string";
-			setField(_value);
-			_value = getField();
+			field(_value);
+			_value = field();
 		}
 		public virtual void testThisProperties()
 		{
 			String _value = "Some string";
-			this.setField(_value);
-			_value = this.getField();
+			this.field(_value);
+			_value = this.field();
 		}
 		public virtual void testVisiblity()
 		{
 			String field = "Some string";
-			this.setField(field);
-			field = this.getField();
+			this.field(field);
+			field = this.field();
 		}
 		public virtual void testRigthFunctionCall()
 		{
-			setField(getField() + " more string");
-			Object _value = getField() + " more string";
+			field(field() + " more string");
+			Object _value = field() + " more string";
 		}
-		public virtual String getField()
+		public virtual String field()
 		{
 			return mField;
 		}
-		public virtual void setField(String _value)
+		public virtual void field(String _value)
 		{
 			mField = _value;
 		}

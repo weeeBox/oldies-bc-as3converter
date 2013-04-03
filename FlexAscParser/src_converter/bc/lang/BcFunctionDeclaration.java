@@ -26,10 +26,10 @@ public class BcFunctionDeclaration extends BcDeclaration
 	private static final int TYPE_OVERRIDE = 2;
 	private int type = TYPE_REGULAR;
 	
-	private static final int KIND_REGULAR = 0;
-	private static final int KIND_GETTER = 1;
-	private static final int KIND_SETTER = 2;
-	private static final int KIND_GLOBAL = 3;
+	public static final int KIND_REGULAR = 0;
+	public static final int KIND_GETTER = 1;
+	public static final int KIND_SETTER = 2;
+	public static final int KIND_GLOBAL = 3;
 	private int kind = KIND_REGULAR;
 	
 	private StatementListNode statements;
@@ -190,6 +190,11 @@ public class BcFunctionDeclaration extends BcDeclaration
 	public void setVirtual()
 	{
 		type = TYPE_VIRTUAL;
+	}
+
+	public int getKind()
+	{
+		return kind;
 	}
 	
 	public boolean isSetter()

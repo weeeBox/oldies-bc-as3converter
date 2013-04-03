@@ -383,14 +383,6 @@ public class As2CsConverter extends As2WhateverConverter
 				String type = bcFunc.hasReturnType() ? type(bcFunc.getReturnTypeInstance()) : "void";
 				String name = getCodeHelper().identifier(bcFunc.getName());			
 				
-				if (bcFunc.isGetter())
-				{
-					name = getCodeHelper().getter(name);
-				}
-				else if (bcFunc.isSetter())
-				{
-					name = getCodeHelper().setter(name);
-				}
 				src.writef("%s %s", type, name);
 			}
 			

@@ -29,7 +29,7 @@ public class CallExpressionNode extends SelectorNode
 {
     public ArgumentListNode args;
 	public boolean is_new;
-	public int type;
+	public int kind;
 
 	public CallExpressionNode(Node expr, ArgumentListNode args)
 	{

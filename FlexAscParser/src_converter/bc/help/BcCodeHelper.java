@@ -39,16 +39,6 @@ public abstract class BcCodeHelper
 	public abstract String literalNull();
 	public abstract String literalBool();
 	
-	public String getter(String name)
-	{
-		return "get" + StringUtils.capitalize(name);
-	}
-	
-	public String setter(String name)
-	{
-		return "set" + StringUtils.capitalize(name);
-	}
-	
 	public String literalBool(boolean value)
 	{
 		return value ? "true" : "false";
