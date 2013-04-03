@@ -1092,6 +1092,8 @@ public abstract class As2WhateverConverter
 		boolean funcMemberCall = false; // Function.apply or Function.call
 		
 		Node base = node.base;
+		SelectorNode selector = node.selector;
+		
 		BcTypeNode baseType = null;
 		
 		// base expression
@@ -1116,9 +1118,9 @@ public abstract class As2WhateverConverter
 				{
 					baseType = funcType.getReturnType();
 				}
-				else if (node.selector.isCallExpression())
+				else if (selector instanceof CallExpressionNode)
 				{
-					CallExpressionNode call = (CallExpressionNode) node.selector;
+					CallExpressionNode call = (CallExpressionNode) selector;
 					String funcName = BcNodeHelper.tryExtractIdentifier(call);
 					failConversionUnless(funcName != null, "Cannot extract function type call identifier: %s", funcType);
 
@@ -1169,10 +1171,6 @@ public abstract class As2WhateverConverter
 			popDest();
 		}
 
-		preprocessSelector(node, node.selector);
-		
-		SelectorNode selector = node.selector;
-		
 		// selector expression
 		ListWriteDestination selectorDest = new ListWriteDestination();
 		if (selector != null)
@@ -1270,63 +1268,6 @@ public abstract class As2WhateverConverter
 		}
 
 		lastBcMemberType = bcMembersTypesStack.pop();
-	}
-
-	protected void preprocessSelector(MemberExpressionNode mem, SelectorNode selector)
-	{
-		if (selector.isSetExpression())
-		if (selector.expr instanceof IdentifierNode)
-		{
-			String identifier = BcNodeHelper.tryExtractIdentifier(selector.expr);
-			
-			BcClassDefinitionNode bcClass;
-			if (lastBcMemberType != null)
-			{
-				bcClass = lastBcMemberType.getClassNode();
-				failConversionUnless(bcClass != null);
-			}
-			else
-			{
-				failConversionUnless(BcGlobal.lastBcClass != null);
-				bcClass = BcGlobal.lastBcClass;
-			}
-
-			BcVariableDeclaration bcVar = null;
-			if (lastBcMemberType == null)
-			{
-				bcVar = findVariable(bcClass, identifier);
-			}
-			else
-			{
-				bcVar = bcClass.findField(identifier);
-			}
-
-			if (bcVar == null) // first check variables
-			{
-				BcFunctionDeclaration bcFunc = bcClass.findSetterFunction(identifier);
-				if (bcFunc != null)
-				{
-					BcNodeFactory.turnSetterToFunctionCall(mem, identifier);
-					((CallExpressionNode)mem.selector).type = BcClassDefinitionNode.FIND_SETTER; // TODO: fix
-				}
-				else
-				{
-					BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
-					if (bcFunction != null)
-					{
-						// TODO: handle setting function
-					}
-					else if (classEquals(bcClass, BcTypeNode.typeXML))
-					{
-						// TODO: handle XML calls
-					}
-					else
-					{
-						// TODO: handle dynamic property set
-					}
-				}
-			}
-		}
 	}
 
 	private void writeMemberSelector(BcTypeNode baseType, Object base, Object selector) 
@@ -1693,7 +1634,7 @@ public abstract class As2WhateverConverter
 			{
 				if (!(identifier.equals(BcCodeHelper.thisCallMarker) && identifier.equals(BcCodeHelper.thisCallMarker)))
 				{
-					BcFunctionDeclaration bcFunc = findFunction(identifier, node.type);
+					BcFunctionDeclaration bcFunc = findFunction(identifier);
 					if (bcFunc != null)
 					{
 						calledFunction = bcFunc;
@@ -1756,7 +1697,7 @@ public abstract class As2WhateverConverter
 				BcClassDefinitionNode bcClass = lastBcMemberType.getClassNode();
 				failConversionUnless(bcClass != null, "Class type is undefined: " + exprDest);
 
-				BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier, node.type);
+				BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier);
 				if (bcFunc != null)
 				{
 					calledFunction = bcFunc;
@@ -1880,8 +1821,6 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				if (node.type == BcClassDefinitionNode.FIND_GETTER) identifier = getCodeHelper().getter(identifier);
-				else if (node.type == BcClassDefinitionNode.FIND_SETTER) identifier = getCodeHelper().setter(identifier);
 				dest.writef(call(identifier, argsList));
 			}
 		}
@@ -1898,6 +1837,7 @@ public abstract class As2WhateverConverter
 		boolean addToDictionary = false;
 		boolean setDynamicProperty = false;
 
+		boolean setterCalled = false;
 		if (node.expr instanceof IdentifierNode)
 		{
 			BcClassDefinitionNode bcClass;
@@ -1929,28 +1869,41 @@ public abstract class As2WhateverConverter
 			}
 			else
 			{
-				BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
-				if (bcFunction != null)
+				BcFunctionDeclaration bcFunc = bcClass.findSetterFunction(identifier);
+				if (bcFunc != null)
 				{
-					System.err.println("Warning! Function type: " + identifier);
-					lastBcMemberType = createBcType(BcTypeNode.typeFunction);
-				}
-				else if (classEquals(bcClass, BcTypeNode.typeXML))
-				{
-					IdentifierNode identifierNode = (IdentifierNode) node.expr;
-					if (identifierNode.isAttribute())
-					{
-						lastBcMemberType = createBcType(BcTypeNode.typeString);
-					}
-					else
-					{
-						failConversion("Identifier is supposed to be an attribute: %s", exprDest);
-					}
+					List<BcFuncParam> funcParams = bcFunc.getParams();
+					BcTypeNode setterType = funcParams.get(0).getType();
+					setterCalled = true;
+
+					identifier = getCodeHelper().setter(identifier);
+					lastBcMemberType = setterType;
 				}
 				else
 				{
-					System.err.println("Warning! Dymaic set property: " + identifier);
-					setDynamicProperty = true;
+					BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
+					if (bcFunction != null)
+					{
+						System.err.println("Warning! Function type: " + identifier);
+						lastBcMemberType = createBcType(BcTypeNode.typeFunction);
+					}
+					else if (classEquals(bcClass, BcTypeNode.typeXML))
+					{
+						IdentifierNode identifierNode = (IdentifierNode) node.expr;
+						if (identifierNode.isAttribute())
+						{
+							lastBcMemberType = createBcType(BcTypeNode.typeString);
+						}
+						else
+						{
+							failConversion("Identifier is supposed to be an attribute: %s", exprDest);
+						}
+					}
+					else
+					{
+						System.err.println("Warning! Dymaic set property: " + identifier);
+						setDynamicProperty = true;
+					}
 				}
 			}
 		}
@@ -2000,66 +1953,80 @@ public abstract class As2WhateverConverter
 		processNode(node.args);
 		popDest();
 
-		failConversionUnless(node.args.size() == 1, "'set' expression should have a single argument: %d", node.args.size());
-
-		Node argNode = node.args.items.get(0);
-
-		if (selectorType instanceof BcFunctionTypeNode)
+		if (setterCalled)
 		{
-			BcTypeNode argType = evaluateType(argNode, true);
-			if (argType instanceof BcFunctionTypeNode)
+			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 			{
-				BcFunctionTypeNode funcType = (BcFunctionTypeNode) argType;
-				failConversionUnless(funcType.isComplete(), "Selector should have a complete 'Function' type: %s", exprDest);
-
-				BcFunctionDeclaration func = funcType.getFunc();
-				failConversionUnless(func.hasOwner(), "Selector is a 'Function' type but should have an owner: %s", exprDest);
-
-				func.setSelector();
-
-				BcClassDefinitionNode ownerClass = func.getOwner();
-				dest.writef("%s = %s", identifier, selector(ownerClass, argsDest));
-			}
-			else if (argType.isNull())
-			{
-				dest.writef("%s = %s", identifier, argsDest);
+				dest.writef(call(indexerGetter(identifier), argsDest));
 			}
 			else
 			{
-				failConversion("Unexpected argType: '%s' expr: %s", argType.getClass(), argsDest);
+				dest.writef(call(identifier, argsDest));
 			}
 		}
 		else
 		{
-			BcTypeNode argType = evaluateType(argNode);
-			failConversionUnless(argType != null, "Can't evaluated arg's type: %s", argsDest);
+			failConversionUnless(node.args.size() == 1, "'set' expression should have a single argument: %d", node.args.size());
 
-			boolean needCast = !addToDictionary && needExplicitCast(argType, selectorType);
+			Node argNode = node.args.items.get(0);
 
-			if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
+			if (selectorType instanceof BcFunctionTypeNode)
 			{
-				if (needCast)
+				BcTypeNode argType = evaluateType(argNode, true);
+				if (argType instanceof BcFunctionTypeNode)
 				{
-					dest.write(indexerSetter(identifier, cast(argsDest, argType, selectorType)));
+					BcFunctionTypeNode funcType = (BcFunctionTypeNode) argType;
+					failConversionUnless(funcType.isComplete(), "Selector should have a complete 'Function' type: %s", exprDest);
+
+					BcFunctionDeclaration func = funcType.getFunc();
+					failConversionUnless(func.hasOwner(), "Selector is a 'Function' type but should have an owner: %s", exprDest);
+
+					func.setSelector();
+
+					BcClassDefinitionNode ownerClass = func.getOwner();
+					dest.writef("%s = %s", identifier, selector(ownerClass, argsDest));
+				}
+				else if (argType.isNull())
+				{
+					dest.writef("%s = %s", identifier, argsDest);
 				}
 				else
 				{
-					dest.write(indexerSetter(identifier, argsDest));
+					failConversion("Unexpected argType: '%s' expr: %s", argType.getClass(), argsDest);
 				}
 			}
 			else
 			{
-				if (setDynamicProperty)
+				BcTypeNode argType = evaluateType(argNode);
+				failConversionUnless(argType != null, "Can't evaluated arg's type: %s", argsDest);
+
+				boolean needCast = !addToDictionary && needExplicitCast(argType, selectorType);
+
+				if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
 				{
-					dest.write(call("setOwnProperty", codeHelper.literalString(identifier), argsDest));
-				}
-				else if (needCast)
-				{
-					dest.writef("%s = %s", identifier, cast(argsDest, argType, selectorType));
+					if (needCast)
+					{
+						dest.write(indexerSetter(identifier, cast(argsDest, argType, selectorType)));
+					}
+					else
+					{
+						dest.write(indexerSetter(identifier, argsDest));
+					}
 				}
 				else
 				{
-					dest.writef("%s = %s", identifier, argsDest);
+					if (setDynamicProperty)
+					{
+						dest.write(call("setOwnProperty", codeHelper.literalString(identifier), argsDest));
+					}
+					else if (needCast)
+					{
+						dest.writef("%s = %s", identifier, cast(argsDest, argType, selectorType));
+					}
+					else
+					{
+						dest.writef("%s = %s", identifier, argsDest);
+					}
 				}
 			}
 		}
@@ -3281,17 +3248,12 @@ public abstract class As2WhateverConverter
 
 	private BcFunctionDeclaration findFunction(String name)
 	{
-		return findFunction(name, 0);
-	}
-	
-	private BcFunctionDeclaration findFunction(String name, int mode)
-	{
-		return findFunction(BcGlobal.lastBcClass, name, mode);
+		return findFunction(BcGlobal.lastBcClass, name);
 	}
 
-	private BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int mode)
+	private BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name)
 	{
-		BcFunctionDeclaration classFunc = bcClass.findFunction(name, mode);
+		BcFunctionDeclaration classFunc = bcClass.findFunction(name);
 		if (classFunc != null)
 		{
 			return classFunc;
