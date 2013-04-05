@@ -1496,6 +1496,8 @@ public abstract class As2WhateverConverter
 		boolean isCast = false;
 		boolean isGlobalCalled = false;
 
+		// нахуя этот код???
+		
 		if (node.expr.isIdentifier())
 		{
 			if (lastBcMemberType == null)
@@ -1607,14 +1609,16 @@ public abstract class As2WhateverConverter
 		BcArgumentsList argsList;
 		if (node.args != null)
 		{
+			pushNode(node.args);
 			if (calledFunction != null && !isCast)
 			{
-				argsList = createArgsList(calledFunction, node.args.items);
+				argsList = createArgsList(calledFunction, node.args);
 			}
 			else
 			{
 				argsList = getArgs(node.args);
 			}
+			popNode();
 		}
 		else
 		{
@@ -4052,8 +4056,10 @@ public abstract class As2WhateverConverter
 		return type;
 	}
 	
-	private BcArgumentsList createArgsList(BcFunctionDeclaration function, ObjectList<Node> args) 
+	private BcArgumentsList createArgsList(BcFunctionDeclaration function, ArgumentListNode argListNode) 
 	{
+		ObjectList<Node> args = argListNode.items;
+		
 		BcArgumentsList argsList = new BcArgumentsList(args.size());
 		
 		boolean hasRestParams = function.hasRestParams();
