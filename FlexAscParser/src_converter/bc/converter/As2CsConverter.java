@@ -66,7 +66,40 @@ public class As2CsConverter extends As2WhateverConverter
 		super.process(node);
 	}
 
-	private void preprocess(MemberExpressionNode node)
+	private boolean preprocess(MemberExpressionNode node)
+	{
+		if (preprocessFuncType(node))
+			return true;
+		
+		if (node.base != null)
+		{
+			BcTypeNodeInstance baseTypeInstance = evaluateTypeInstance(node.base, true);
+			failConversionUnless(baseTypeInstance != null, "Unable to evaluate base type");
+			
+			BcTypeNode type = baseTypeInstance.getType();
+			BcFunctionTypeNode funcType = Cast.tryCast(type, BcFunctionTypeNode.class);
+			if (funcType != null && funcType.hasReturnType())
+			{
+				type = funcType.getReturnType();
+			}
+			
+			if (type.isIntegral())
+			{
+				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance);
+				return true;
+			}
+			
+			if (typeEquals(type, BcTypeNode.typeString))
+			{
+				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance, STRING_SELECTOR_LOOKUP);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private boolean preprocessFuncType(MemberExpressionNode node)
 	{
 		if (node.selector.isGetExpression())
 		{
@@ -84,7 +117,7 @@ public class As2CsConverter extends As2WhateverConverter
 				if (funcType.isGetter())
 				{
 					// TODO: handle assigning getter function to Function type
-					return;
+					return false;
 				}
 				
 				String funcName = BcNodeHelper.tryExtractIdentifier(node.selector);
@@ -92,31 +125,11 @@ public class As2CsConverter extends As2WhateverConverter
 				
 				ArgumentListNode args =	BcNodeFactory.args(new LiteralStringNode(funcName));
 				BcNodeFactory.turnSelectorToCall(node, "__function", args);
-				return;
+				return true;
 			}
 		}
 		
-		if (node.base != null)
-		{
-			BcTypeNodeInstance baseTypeInstance = evaluateTypeInstance(node.base, true);
-			failConversionUnless(baseTypeInstance != null, "Unable to evaluate base type");
-			
-			BcTypeNode type = baseTypeInstance.getType();
-			BcFunctionTypeNode funcType = Cast.tryCast(type, BcFunctionTypeNode.class);
-			if (funcType != null && funcType.hasReturnType())
-			{
-				type = funcType.getReturnType();
-			}
-			
-			if (type.isIntegral())
-			{
-				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance);
-			}
-			else if (typeEquals(type, BcTypeNode.typeString))
-			{
-				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance, STRING_SELECTOR_LOOKUP);
-			}
-		}
+		return false;
 	}
 	
 	@Override
