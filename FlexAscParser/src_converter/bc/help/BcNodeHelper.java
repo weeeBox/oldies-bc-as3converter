@@ -9,6 +9,7 @@ import macromedia.asc.parser.AttributeListNode;
 import macromedia.asc.parser.BinaryExpressionNode;
 import macromedia.asc.parser.CallExpressionNode;
 import macromedia.asc.parser.ClassDefinitionNode;
+import macromedia.asc.parser.ConditionalExpressionNode;
 import macromedia.asc.parser.FunctionDefinitionNode;
 import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.IdentifierNode;
@@ -430,11 +431,31 @@ public class BcNodeHelper
 		if (node instanceof ListNode)
 		{
 			ListNode listNode = (ListNode) node;
-			if (listNode.items != null && listNode.items.size() == 1)
+			ObjectList<Node> items = listNode.items;
+			if (items != null && items.size() == 1)
 			{
-				return tryExtractIdentifierNode(listNode.items.get(0));
+				return tryExtractIdentifierNode(listNode.items.first());
 			}
 		}
+		
+		if (node instanceof ArgumentListNode)
+		{
+			ArgumentListNode args = (ArgumentListNode) node;
+			ObjectList<Node> items = args.items;
+			if (items != null && items.size() == 1)
+			{
+				return tryExtractIdentifierNode(args.items.first());
+			}
+		}
+		
+//		if (node instanceof SuperExpressionNode ||
+//			node.isLiteral() ||
+//			node instanceof BinaryExpressionNode ||
+//			node instanceof UnaryExpressionNode ||
+//			node instanceof ConditionalExpressionNode)
+//		{
+//			return null;
+//		}
 		
 		return null;
 	}

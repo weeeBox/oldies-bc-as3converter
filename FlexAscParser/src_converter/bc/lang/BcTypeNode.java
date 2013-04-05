@@ -87,7 +87,7 @@ public class BcTypeNode extends BcNode
 	{
 		if (name.equals(TYPE_FUNCTION))
 		{
-			return new BcFunctionTypeNode();
+			return BcFunctionTypeNode.Function;
 		}
 
 		if (name.equals(TYPE_GENERIC))

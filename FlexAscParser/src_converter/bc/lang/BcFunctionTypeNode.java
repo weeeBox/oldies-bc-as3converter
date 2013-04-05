@@ -8,9 +8,11 @@ public class BcFunctionTypeNode extends BcTypeNode
 	private boolean useByDefault;
 	private String attachedParam;
 
-	public BcFunctionTypeNode()
+	public static final BcFunctionTypeNode Function = new BcFunctionTypeNode();
+	
+	private BcFunctionTypeNode()
 	{
-		super("Function");		
+		super("Function");
 	}
 	
 	public BcFunctionTypeNode(BcFunctionDeclaration func)
@@ -83,14 +85,12 @@ public class BcFunctionTypeNode extends BcTypeNode
 	
 	public BcTypeNode getReturnType()
 	{
-		assert isComplete();
-		return func.getReturnType();
+		return isComplete() ? func.getReturnType() : BcTypeNode.create(BcTypeNode.typeObject);
 	}
 	
 	public boolean hasReturnType()
 	{
-		assert isComplete();
-		return func.hasReturnType();
+		return isComplete() ? func.hasReturnType() : true;
 	}
 
 	public void setReturnType(BcTypeNodeInstance returnType)

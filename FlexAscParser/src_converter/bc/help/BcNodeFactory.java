@@ -182,9 +182,18 @@ public class BcNodeFactory {
 		node.selector = callExpression(funcName, set.args);
 	}
 	
-	public static void turnSelectorToCall(MemberExpressionNode node, String funcName, ArgumentListNode args)
+	public static CallExpressionNode turnSelectorToConstructor(MemberExpressionNode node, String funcName, ArgumentListNode args)
 	{
-		node.selector = callExpression(funcName, args);
+		CallExpressionNode callExpr = turnSelectorToCall(node, funcName, args);
+		callExpr.is_new = true;
+		return callExpr;
+	}
+	
+	public static CallExpressionNode turnSelectorToCall(MemberExpressionNode node, String funcName, ArgumentListNode args)
+	{
+		CallExpressionNode callExpression = callExpression(funcName, args);
+		node.selector = callExpression;
+		return callExpression;
 	}
 
 	private static void replaceSelector(MemberExpressionNode node, SelectorNode selector)

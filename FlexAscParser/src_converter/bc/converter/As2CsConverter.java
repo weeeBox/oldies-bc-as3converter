@@ -16,6 +16,7 @@ import java.util.Set;
 import macromedia.asc.parser.ArgumentListNode;
 import macromedia.asc.parser.IdentifierNode;
 import macromedia.asc.parser.ListNode;
+import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.Node;
 import macromedia.asc.parser.SelectorNode;
@@ -81,6 +82,39 @@ public class As2CsConverter extends As2WhateverConverter
 	@Override
 	protected void process(MemberExpressionNode node) 
 	{
+		preprocess(node);
+		super.process(node);
+	}
+
+	private void preprocess(MemberExpressionNode node)
+	{
+		Node prevNode = getPrevNode();
+		if (prevNode instanceof ArgumentListNode)
+		{
+			if (node.selector.isGetExpression())
+			{
+				BcTypeNode nodeType = evaluateType(node, true);
+				failConversionUnless(nodeType != null);
+				
+				if (nodeType.isFunction())
+				{
+					BcFunctionTypeNode funcType = (BcFunctionTypeNode) nodeType;
+					if (funcType.isGetter())
+					{
+						// TODO: handle assigning getter function to Function type
+						return;
+					}
+					
+					String funcName = BcNodeHelper.tryExtractIdentifier(node.selector);
+					failConversionUnless(funcName != null);
+					
+					ArgumentListNode args =	BcNodeFactory.args(new LiteralStringNode(funcName));
+					BcNodeFactory.turnSelectorToCall(node, "__function", args);
+					return;
+				}
+			}
+		}
+		
 		if (node.base != null)
 		{
 			BcTypeNodeInstance baseTypeInstance = evaluateTypeInstance(node.base, true);
@@ -102,8 +136,6 @@ public class As2CsConverter extends As2WhateverConverter
 				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance, STRING_SELECTOR_LOOKUP);
 			}
 		}
-		
-		super.process(node);
 	}
 	
 	@Override

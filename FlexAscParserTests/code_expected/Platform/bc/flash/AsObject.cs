@@ -40,6 +40,11 @@ namespace bc.flash
             }
         }
 
+        public AsFunction __function(String name)
+        {
+            return new AsFunction(this, name);
+        }
+
         public virtual String toString()
         {
             return "Object";

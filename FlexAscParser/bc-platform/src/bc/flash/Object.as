@@ -49,6 +49,11 @@ package bc.flash
 			}
         }
 
+		public function __function(name:String) : Function
+		{
+			return null;
+		}
+		
 		public virtual function toString() : String
 		{
 			return "Object";
