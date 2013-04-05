@@ -472,11 +472,6 @@ public abstract class As2WhateverConverter
 
 		BcTypeNode classType = bcClass.getClassType();
 		
-		if (bcClass.hasMetadata())
-		{
-			collectClassMetadata(bcClass);
-		}
-		
 		// super type
 		Node baseclass = classDefinitionNode.baseclass;
 		if (baseclass == null)
@@ -629,17 +624,6 @@ public abstract class As2WhateverConverter
 
 		bcFunc.setStatements(functionDefinitionNode.fexpr.body);
 		return bcFunc;
-	}
-
-	protected void collectClassMetadata(BcClassDefinitionNode bcClass)
-	{
-		BcMetadata bcMetadata = bcClass.getMetadata();
-		
-		List<BcFunctionTypeNode> functionTypes = extractFunctionTypes(bcMetadata);
-		for (BcFunctionTypeNode funcType : functionTypes)
-		{
-			bcClass.addFunctionType(funcType);
-		}
 	}
 
 	private BcVariableDeclaration[] collect(VariableDefinitionNode node)
@@ -807,10 +791,6 @@ public abstract class As2WhateverConverter
 		process(BcGlobal.bcPlatformClasses);
 		process(BcGlobal.bcApiClasses);
 		process(BcGlobal.bcClasses);
-		
-		postProcess(BcGlobal.bcPlatformClasses);
-		postProcess(BcGlobal.bcApiClasses);
-		postProcess(BcGlobal.bcClasses);
 		
 		processUniqueTypes(); // more unique types may appear
 	}
@@ -2800,18 +2780,6 @@ public abstract class As2WhateverConverter
 		return true;
 	}
 	
-	private void postProcess(BcClassList classList)
-	{
-		for (BcClassDefinitionNode bcClass : classList)
-		{
-			postProcess(bcClass);
-		}
-	}
-
-	protected void postProcess(BcClassDefinitionNode bcClass)
-	{
-	}
-
 	private BcClassDefinitionNode findBindedClass(BcTypeNode type)
 	{
 		return findBindedClass(type.getName());
@@ -4046,13 +4014,7 @@ public abstract class As2WhateverConverter
 			qualifier = tryFindPackage(name);
 		}
 
-		BcTypeNode type = BcTypeNode.create(name, qualifier);
-		if (type instanceof BcFunctionTypeNode)
-		{
-			return BcGlobal.lastBcClass != null && BcGlobal.lastBcClass.hasDefaultFunctionType() ? BcGlobal.lastBcClass.getDefaultFunctionType() : type;
-		}
-
-		return type;
+		return BcTypeNode.create(name, qualifier);
 	}
 	
 	private BcArgumentsList createArgsList(BcFunctionDeclaration function, ArgumentListNode argListNode) 

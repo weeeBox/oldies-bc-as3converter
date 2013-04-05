@@ -19,13 +19,12 @@ import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
 import bc.lang.BcFuncParam;
 import bc.lang.BcFunctionDeclaration;
-import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
+import bc.lang.BcUntypedTypeNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
-import bc.lang.BcUntypedTypeNode;
 
 public class As2CppConverter extends As2WhateverConverter
 {
@@ -81,25 +80,6 @@ public class As2CppConverter extends As2WhateverConverter
 		catch (IOException e)
 		{
 			System.err.println("Unable to read defines: " + e);
-		}
-	}
-	
-	@Override
-	protected void postProcess(BcClassDefinitionNode bcClass)
-	{
-		if (!bcClass.isInterface() && !bcClass.hasConstructors())
-		{
-			BcFunctionDeclaration defaultConstructor = new BcFunctionDeclaration(bcClass.getName());
-			defaultConstructor.setConstructorFlag(true);
-			defaultConstructor.setDeclaredVars(new ArrayList<BcVariableDeclaration>());
-			
-			ListWriteDestination body = new ListWriteDestination();
-			body.writeBlockOpen();
-			body.writeBlockClose();
-			
-			defaultConstructor.setBody(body);
-			
-			bcClass.add(defaultConstructor);
 		}
 	}
 	
@@ -170,14 +150,6 @@ public class As2CppConverter extends As2WhateverConverter
 		writeImplementationTypes(impl, implTypes);
 		
 		hdr.writeln();
-		
-		if (bcClass.hasFunctionTypes())
-		{
-			hdr.writeln(getCodeHelper().include("AsFunction.h"));
-			
-			writeFunctionTypes(bcClass);
-			hdr.writeln();
-		}
 		
 		hdr.writelnf("%s(%s);", isInterface ? defineRef : defineClass, className);
 		hdr.writeln();
@@ -755,36 +727,6 @@ public class As2CppConverter extends As2WhateverConverter
 			impl.writeBlockClose();
 			impl.writeBlockClose();
 		}
-	}
-	
-	private void writeFunctionTypes(BcClassDefinitionNode bcClass) 
-	{
-		List<BcFunctionTypeNode> functionTypes = bcClass.getFunctionTypes();
-		for (BcFunctionTypeNode funcType : functionTypes) 
-		{
-			writeFunctionType(bcClass, funcType);
-		}
-	}
-
-	private void writeFunctionType(BcClassDefinitionNode bcClass, BcFunctionTypeNode funcType) 
-	{
-		String type = funcType.hasReturnType() ? typeRef(funcType.getReturnType()) : "void";
-		String name = typeRef(getCodeHelper().identifier(funcType.getName()));			
-
-		hdr.writelnf("class %s : public AsObjectRef<%s>", name, type(BcTypeNode.typeFunction));
-		hdr.writeBlockOpen();
-		
-		writeVisiblity("public", true);
-		writeDefine(hdr, defineObjectRefCommon, name, type(BcTypeNode.typeFunction));
-		hdr.writeln();
-		
-		List<BcFuncParam> params = funcType.getParams();
-		hdr.writelnf("inline %s operator() (%s)", type, paramsDef(params));
-		hdr.writeBlockOpen();
-		hdr.writelnf("return object()->call<%s>(%s);", type, argsDef(params));
-		hdr.writeBlockClose();
-		
-		hdr.writeBlockClose(true);
 	}
 	
 	private void writeBoxingInterfaces(BcClassDefinitionNode bcClass)

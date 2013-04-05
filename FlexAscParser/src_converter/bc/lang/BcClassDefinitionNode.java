@@ -26,8 +26,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 	private List<BcTypeNodeInstance> interfaces;
 
 	private List<Node> statements;
-	private List<BcFunctionTypeNode> functionTypes;
-	private BcFunctionTypeNode defaultFunctionType;
 	
 	public BcClassDefinitionNode(BcTypeNode classType)
 	{
@@ -41,7 +39,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 		statements = new ArrayList<Node>();
 		interfaces = new ArrayList<BcTypeNodeInstance>();
 		additionalImports = new ArrayList<BcTypeNode>();
-		functionTypes = new ArrayList<BcFunctionTypeNode>();
 		declaredVars = new ArrayList<BcVariableDeclaration>();
 	}
 	
@@ -128,50 +125,6 @@ public class BcClassDefinitionNode extends BcDeclaration
 	public BcClassDefinitionNode getExtendsClass()
 	{
 		return hasExtendsType() ? extendsTypeInstance.getType().getClassNode() : null;
-	}
-	
-	public void addFunctionType(BcFunctionTypeNode node)
-	{
-		functionTypes.add(node);
-		node.getFunc().setOwner(this);
-		
-		if (node.isUseByDefault())
-		{
-			assert defaultFunctionType == null;
-			defaultFunctionType = node;
-		}
-	}
-	
-	public BcFunctionTypeNode getDefaultFunctionType()
-	{
-		return defaultFunctionType;
-	}
-	
-	public boolean hasDefaultFunctionType()
-	{
-		return defaultFunctionType != null;
-	}
-	
-	public BcFunctionTypeNode findFunctionType(String name)
-	{
-		for (BcFunctionTypeNode funcType : functionTypes) 
-		{
-			if (funcType.getName().equals(name))
-			{
-				return funcType;
-			}
-		}
-		return extendsTypeInstance != null ? extendsTypeInstance.getType().getClassNode().findFunctionType(name) : null;
-	}
-	
-	public boolean hasFunctionTypes()
-	{
-		return functionTypes.size() > 0;
-	}
-	
-	public List<BcFunctionTypeNode> getFunctionTypes() 
-	{
-		return functionTypes;
 	}
 	
 	public void addInterface(BcTypeNodeInstance interfaceType)
