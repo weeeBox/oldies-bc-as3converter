@@ -5,7 +5,8 @@ package bc.flash
 	[NoConversion]
 	public final class String extends Object 
 	{
-		public static const Length : int = 1;
+		public var length : int;
+		public var Length : int;
 
 		public function String(value : String = "") : void { throw new NotImplementedError(); }
         
@@ -20,11 +21,6 @@ package bc.flash
 			throw new NotImplementedError();
 		}
 		
-		public function get length() : int
-		{
-			throw new NotImplementedError();
-		}
-
 		public static function indexOf(str : String, s : String, i : Number = 0) : int { throw new NotImplementedError(); }
 
 		public static function lastIndexOf(str : String, s : String, i : Number = 2147483647) : int { throw new NotImplementedError(); }
