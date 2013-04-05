@@ -2,7 +2,7 @@ using System;
  
 using bc.flash;
  
-namespace bc.test.functions
+namespace bc.test.functions.syntax
 {
 	public class AsFunctionsSyntaxTest : AsObject
 	{
@@ -11,6 +11,10 @@ namespace bc.test.functions
 		}
 		public virtual void func2(Object arg = null)
 		{
+		}
+		public virtual void func3(Object arg)
+		{
+			return null;
 		}
 	}
 }

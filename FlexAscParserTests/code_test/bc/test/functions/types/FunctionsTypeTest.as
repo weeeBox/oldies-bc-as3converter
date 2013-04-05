@@ -1,4 +1,4 @@
-package bc.test.functions
+package bc.test.functions.types
 {
     public class FunctionsTypeTest
     {
@@ -35,12 +35,12 @@ package bc.test.functions
         
         public function argumentsFunction(a:String, b:String) : void
         {
-            mFunc.apply(null, arguments);
+            mFunc.apply();
         }
         
         public function argumentsCastFunction(a:Object, b:String) : void
         {
-            mFunc.apply(null, arguments);
+            mFunc.apply();
         }
 
         private function accept(func:Function) : void 

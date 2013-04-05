@@ -130,15 +130,26 @@ public class SyntaxConversionTest extends ConverterTestSuite
 	}
 	
 	@Test
-	public void testFunctionTypes() throws IOException 
+	public void testFunctionSyntax() throws IOException 
 	{
-		convert("/bc/test/functions");
+		convert("/bc/test/functions/syntax");
 		
 		String[] filenames = 
 		{
-			"Converted/bc/test/functions/AsFunctionsTypeTest.cs",
-			"Converted/bc/test/functions/AsFunctionsSyntaxTest.cs",
-			"Converted/bc/test/functions/AsFunctionsReflectionTest.cs",
+			"Converted/bc/test/functions/syntax/AsFunctionsSyntaxTest.cs",
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
+	public void testFunctionTypes() throws IOException 
+	{
+		convert("/bc/test/functions/types");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/functions/types/AsFunctionsTypeTest.cs",
 		};
 		
 		assertExpectedAndActualEquals(filenames);
