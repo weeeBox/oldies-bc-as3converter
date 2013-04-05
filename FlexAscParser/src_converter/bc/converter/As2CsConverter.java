@@ -88,30 +88,31 @@ public class As2CsConverter extends As2WhateverConverter
 
 	private void preprocess(MemberExpressionNode node)
 	{
-		Node prevNode = getPrevNode();
-		if (prevNode instanceof ArgumentListNode)
+		if (node.selector.isGetExpression())
 		{
-			if (node.selector.isGetExpression())
+			BcTypeNode nodeType = evaluateType(node, true);
+			if (nodeType == null)
 			{
-				BcTypeNode nodeType = evaluateType(node, true);
-				failConversionUnless(nodeType != null);
-				
-				if (nodeType.isFunction())
+				evaluateType(node, true);
+			}
+			
+			failConversionUnless(nodeType != null);
+			
+			if (nodeType.isFunction())
+			{
+				BcFunctionTypeNode funcType = (BcFunctionTypeNode) nodeType;
+				if (funcType.isGetter())
 				{
-					BcFunctionTypeNode funcType = (BcFunctionTypeNode) nodeType;
-					if (funcType.isGetter())
-					{
-						// TODO: handle assigning getter function to Function type
-						return;
-					}
-					
-					String funcName = BcNodeHelper.tryExtractIdentifier(node.selector);
-					failConversionUnless(funcName != null);
-					
-					ArgumentListNode args =	BcNodeFactory.args(new LiteralStringNode(funcName));
-					BcNodeFactory.turnSelectorToCall(node, "__function", args);
+					// TODO: handle assigning getter function to Function type
 					return;
 				}
+				
+				String funcName = BcNodeHelper.tryExtractIdentifier(node.selector);
+				failConversionUnless(funcName != null);
+				
+				ArgumentListNode args =	BcNodeFactory.args(new LiteralStringNode(funcName));
+				BcNodeFactory.turnSelectorToCall(node, "__function", args);
+				return;
 			}
 		}
 		

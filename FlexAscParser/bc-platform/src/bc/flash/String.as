@@ -19,6 +19,11 @@ package bc.flash
 		{
 			throw new NotImplementedError();
 		}
+		
+		public function get length() : int
+		{
+			throw new NotImplementedError();
+		}
 
 		public static function indexOf(str : String, s : String, i : Number = 0) : int { throw new NotImplementedError(); }
 

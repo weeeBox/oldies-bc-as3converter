@@ -5,7 +5,10 @@ package bc.flash
 	{
 		/* public static const length : int = 1; */
 
-		/* public function apply(thisArg : * = undefined, argArray : * = undefined) : *; */
+		public function apply(thisArg : * = null, argArray : * = null) : *
+		{
+			return null;
+		}
 
 		/* public function call(thisArg : * = undefined, ...args : *) : *; */
 

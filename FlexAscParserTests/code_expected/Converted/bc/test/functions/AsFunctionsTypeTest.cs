@@ -6,35 +6,35 @@ namespace bc.test.functions
 {
 	public class AsFunctionsTypeTest : AsObject
 	{
-		private AsFunctionDefaultCallback mFunc;
+		private AsFunction mFunc;
 		public virtual void testFunctionAssignment()
 		{
-			mFunc = functionDefaultCallback;
+			mFunc = __function("functionDefaultCallback");
 		}
 		public virtual void testFunctionUsage()
 		{
-			mFunc("This is string", "This is another string");
+			mFunc.Invoke("This is string", "This is another string");
 		}
 		public virtual void testFunctionArgument()
 		{
-			accept(functionDefaultCallback);
+			accept(__function("functionDefaultCallback"));
 		}
 		public virtual void testFunctionApply()
 		{
 			AsArray args = new AsArray("This is string", "This is another string");
-			functionDefaultCallback((String)(args[0]), (String)(args[1]));
+			__function("functionDefaultCallback").Apply(null, args);
 		}
 		public virtual void argumentsFunction(String a, String b)
 		{
-			mFunc(a, b);
+			mFunc.Apply(null, a, b);
 		}
 		public virtual void argumentsCastFunction(Object a, String b)
 		{
-			mFunc((String)(a), b);
+			mFunc.Apply(null, a, b);
 		}
-		private void accept(AsFunctionDefaultCallback func)
+		private void accept(AsFunction func)
 		{
-			func("This is string", "This is another string");
+			func.Invoke("This is string", "This is another string");
 		}
 		private void functionDefaultCallback(String a, String b)
 		{

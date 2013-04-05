@@ -38,6 +38,16 @@ namespace bc.flash
             this.target = target;
         }
 
+        public Object Apply(Object target, AsArray args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Object Apply(Object target, params Object[] args)
+        {
+            throw new NotImplementedException();
+        }
+
         public Object Invoke()
         {
             return Invoke(EMPTY_PARAMS);

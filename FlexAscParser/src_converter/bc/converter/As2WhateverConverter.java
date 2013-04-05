@@ -2584,7 +2584,6 @@ public abstract class As2WhateverConverter
 			popDest();
 
 			failConversionUnless(BcGlobal.lastBcFunction != null, "'return' statemnt outside of a function: return %s", exprDest);
-			failConversionUnless(BcGlobal.lastBcFunction.hasReturnType(), "'return' statement with expression inside 'void' function: return %s", exprDest);
 
 			BcTypeNode returnValueType = evaluateType(node.expr);
 			failConversionUnless(returnValueType != null, "Unable to evaluate return type from expression: %s", exprDest);

@@ -4,9 +4,19 @@ package bc.test.functions
 	{
 		public var func:Function;
         
+        public var obj:FunctionsReflectionTest;
+        
         public function testAssignment() : void
         {
             func = someFunction;
+            func = obj.someFunction;
+            func = this.someFunction;
+            acceptFunction(someFunction);
+        }
+        
+        public function acceptFunction(func:Function) : void
+        {
+            
         }
         
         public function someFunction() : void
