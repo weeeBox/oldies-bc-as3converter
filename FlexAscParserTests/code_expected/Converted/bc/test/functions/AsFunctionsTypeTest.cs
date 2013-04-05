@@ -13,6 +13,8 @@ namespace bc.test.functions
         {
             mFunc = __function("functionDefaultCallback");
             mObj.mFunc = __function("functionDefaultCallback");
+            mFunc = mObj.__function("functionDefaultCallback");
+            mObj.mFunc = mObj.__function("functionDefaultCallback");
         }
         public virtual void testFunctionUsage()
         {

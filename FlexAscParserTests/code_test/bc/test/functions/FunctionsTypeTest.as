@@ -10,6 +10,8 @@ package bc.test.functions
         {
             mFunc = functionDefaultCallback;
             mObj.mFunc = functionDefaultCallback;
+            mFunc = mObj.functionDefaultCallback;
+            mObj.mFunc = mObj.functionDefaultCallback;
         }
         
         public function testFunctionUsage() : void
