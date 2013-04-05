@@ -10,8 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import macromedia.asc.parser.ArgumentListNode;
 import macromedia.asc.parser.LiteralStringNode;
@@ -19,19 +17,14 @@ import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.SelectorNode;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
-import bc.error.ConverterException;
 import bc.help.BcCodeHelper;
-import bc.help.BcGlobal;
 import bc.help.BcNodeFactory;
 import bc.help.BcNodeHelper;
 import bc.help.Cast;
 import bc.help.CsCodeHelper;
 import bc.lang.BcArgumentsList;
 import bc.lang.BcClassDefinitionNode;
-import bc.lang.BcClassList;
 import bc.lang.BcFuncParam;
-import bc.lang.BcFuncRegister;
-import bc.lang.BcFuncRegister.FuncList;
 import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcFunctionTypeNode;
 import bc.lang.BcImportList;
@@ -60,18 +53,10 @@ public class As2CsConverter extends As2WhateverConverter
 
 	
 	private ListWriteDestination src;
-	private BcFuncRegister funcRegister;
 	
 	public As2CsConverter()
 	{
 		super(new CsCodeHelper());
-	}
-	
-	@Override
-	protected void clean() 
-	{
-		super.clean();
-		funcRegister = new BcFuncRegister();
 	}
 	
 	@Override
@@ -308,14 +293,6 @@ public class As2CsConverter extends As2WhateverConverter
 		writeDestToFile(src, outputFile);
 	}
 
-	private void writeFunctionType(BcFunctionTypeNode funcType) 
-	{
-		String type = funcType.hasReturnType() ? type(funcType.getReturnType()) : "void";
-		String name = getCodeHelper().identifier(funcType.getName());			
-		
-		src.writelnf("public delegate %s %s(%s);", type, createClassName(name), paramsDef(funcType.getParams()));
-	}
-
 	private void writeFields(BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> fields = bcClass.getFields();
@@ -497,31 +474,6 @@ public class As2CsConverter extends As2WhateverConverter
 		return importsData;
 	}
 		
-	private CsImportsData getImports(FuncList funcList)
-	{
-		CsImportsData importsData = new CsImportsData();
-		
-		List<BcFunctionTypeNode> types = funcList.getTypes();
-		for (BcFunctionTypeNode funcType : types)
-		{
-			BcFunctionDeclaration bcFunc = funcType.getFunc();
-			if (bcFunc.hasReturnType())
-			{
-				BcTypeNode returnType = bcFunc.getReturnType();
-				tryAddUniqueNamespace(importsData, returnType);
-			}
-			
-			List<BcFuncParam> params = bcFunc.getParams();
-			for (BcFuncParam param : params)
-			{
-				BcTypeNode type = param.getType();
-				tryAddUniqueNamespace(importsData, type);
-			}
-		}
-		
-		return importsData;
-	}
-	
 	private void tryAddUniqueNamespace(CsImportsData importsData, BcTypeNode type)
 	{
 		if (type instanceof BcUntypedTypeNode)
@@ -746,38 +698,5 @@ public class As2CsConverter extends As2WhateverConverter
 			}
 			return null;
 		}
-	}
-	
-	private String findSectionName(String packageName)
-	{
-		if (containsPackage(BcGlobal.bcClasses, packageName))
-		{
-			return SECTION_CONVERTED;
-		}
-
-		if (containsPackage(BcGlobal.bcApiClasses, packageName))
-		{
-			return SECTION_API;
-		}
-
-		if (containsPackage(BcGlobal.bcPlatformClasses, packageName))
-		{
-			return SECTION_PLATFORM;
-		}
-		
-		return null;
-	}
-	
-	private boolean containsPackage(BcClassList classesList, String packageName)
-	{
-		for (BcClassDefinitionNode bcClass : classesList) 
-		{
-			if (packageName.equals(bcClass.getPackageName()))
-			{
-				return true;
-			}
-		}
-		
-		return false;
 	}
 }
