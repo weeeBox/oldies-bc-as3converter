@@ -32,25 +32,25 @@ namespace vs_project_test
 
             AsFunction func;
             func = new AsFunction(target, "PrivateFunc");
-            func.Invoke();
+            func.invoke();
 
             func = new AsFunction(target, "ProtectedFunc");
-            func.Invoke();
+            func.invoke();
 
             func = new AsFunction(target, "PublicFunc");
-            func.Invoke();
+            func.invoke();
 
             func = new AsFunction(target, "Func", typeof(int));
-            func.Invoke(10);
+            func.invoke(10);
 
             func = new AsFunction(target, "Func", typeof(int), typeof(int));
-            func.Invoke(20, 30);
+            func.invoke(20, 30);
 
             func = new AsFunction(target, "Func", typeof(Foo));
-            func.Invoke(new Foo());
+            func.invoke(new Foo());
 
             func = new AsFunction(target, "Func", typeof(Bar));
-            func.Invoke(new Bar());
+            func.invoke(new Bar());
 
             AssertResult("PrivateFunc()", "ProtectedFunc()", "PublicFunc()", "Func(10)", "Func(20,30)", "Func(Foo)", "Func(Bar)");
         }

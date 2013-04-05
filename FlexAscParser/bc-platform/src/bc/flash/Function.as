@@ -9,6 +9,11 @@ package bc.flash
 		{
 			return null;
 		}
+		
+		public function invoke(...args) : *
+		{
+			return null;
+		}
 
 		/* public function call(thisArg : * = undefined, ...args : *) : *; */
 

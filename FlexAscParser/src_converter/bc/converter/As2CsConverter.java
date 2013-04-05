@@ -12,12 +12,15 @@ import java.util.List;
 import java.util.Map;
 
 import macromedia.asc.parser.ArgumentListNode;
+import macromedia.asc.parser.CallExpressionNode;
+import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.SelectorNode;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeHelper;
+import bc.help.BcGlobal;
 import bc.help.BcNodeFactory;
 import bc.help.BcNodeHelper;
 import bc.help.Cast;
@@ -101,31 +104,75 @@ public class As2CsConverter extends As2WhateverConverter
 
 	private boolean preprocessFuncType(MemberExpressionNode node)
 	{
-		if (node.selector.isGetExpression())
+		SelectorNode selector = node.selector;
+		
+		if (selector.isGetExpression())
 		{
 			BcTypeNode nodeType = evaluateType(node, true);
-			if (nodeType == null)
-			{
-				evaluateType(node, true);
-			}
-			
 			failConversionUnless(nodeType != null);
 			
 			if (nodeType.isFunction())
 			{
 				BcFunctionTypeNode funcType = (BcFunctionTypeNode) nodeType;
+				if (!funcType.isComplete())
+				{
+					return false;
+				}
+				
 				if (funcType.isGetter())
 				{
 					// TODO: handle assigning getter function to Function type
 					return false;
 				}
 				
-				String funcName = BcNodeHelper.tryExtractIdentifier(node.selector);
+				String funcName = BcNodeHelper.tryExtractIdentifier(selector);
 				failConversionUnless(funcName != null);
 				
 				ArgumentListNode args =	BcNodeFactory.args(new LiteralStringNode(funcName));
 				BcNodeFactory.turnSelectorToCall(node, "__function", args);
 				return true;
+			}
+		}
+		
+		if (selector.isCallExpression())
+		{
+			if (selector.expr.isIdentifier())
+			{
+				String identifier = BcNodeHelper.tryExtractIdentifier(selector.expr);
+				failConversionUnless(identifier != null);
+				
+				// TODO: code duplication
+				BcClassDefinitionNode classNode;
+				if (node.base != null)
+				{
+					BcTypeNode baseType = evaluateType(node.base);
+					failConversionUnless(baseType != null);
+					
+					if (baseType.isVoid())
+					{
+						return false;
+					}
+					
+					classNode = baseType.getClassNode();
+					failConversionUnless(classNode != null);
+				}
+				else
+				{
+					classNode = BcGlobal.lastBcClass;
+					failConversionUnless(classNode != null);
+				}
+				
+				BcVariableDeclaration var = findVariable(classNode, identifier);
+				if (var != null && var.getType().isFunction())
+				{
+					CallExpressionNode call = (CallExpressionNode) selector;
+					
+					GetExpressionNode delegateSelector = new GetExpressionNode(call.expr);
+					node.base = new MemberExpressionNode(node.base, delegateSelector, -1);
+					node.selector = BcNodeFactory.callExpression("invoke", call.args);
+					
+					return true;
+				}
 			}
 		}
 		

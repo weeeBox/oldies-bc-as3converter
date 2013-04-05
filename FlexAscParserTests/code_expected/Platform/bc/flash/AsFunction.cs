@@ -38,29 +38,29 @@ namespace bc.flash
             this.target = target;
         }
 
-        public Object Apply(Object target, AsArray args)
+        public Object apply(Object target, AsArray args)
         {
             throw new NotImplementedException();
         }
 
-        public Object Apply(Object target, params Object[] args)
+        public Object apply(Object target, params Object[] args)
         {
             throw new NotImplementedException();
         }
 
-        public Object Invoke()
+        public Object invoke()
         {
-            return Invoke(EMPTY_PARAMS);
+            return invoke(EMPTY_PARAMS);
         }
 
-        public Object Invoke(Object param)
+        public Object invoke(Object param)
         {
-            return Invoke(new Object[] { param });
+            return invoke(new Object[] { param });
         }
 
-        public Object Invoke(params Object[] parameters)
+        public Object invoke(params Object[] parameters)
         {
-            return parameters == null ? Invoke(new Object[] { null }) : 
+            return parameters == null ? invoke(new Object[] { null }) : 
                    methodInfo.Invoke(target, parameters);
         }
     }

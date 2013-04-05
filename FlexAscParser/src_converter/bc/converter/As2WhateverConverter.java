@@ -1437,12 +1437,12 @@ public abstract class As2WhateverConverter
 		return null;
 	}
 
-	private BcVariableDeclaration findVariable(String name)
+	protected BcVariableDeclaration findVariable(String name)
 	{
 		return findVariable(BcGlobal.lastBcClass, name);
 	}
 
-	private BcVariableDeclaration findVariable(BcClassDefinitionNode bcClass, String name)
+	protected BcVariableDeclaration findVariable(BcClassDefinitionNode bcClass, String name)
 	{
 		BcVariableDeclaration bcVar = findLocalVar(name);
 		if (bcVar != null)
