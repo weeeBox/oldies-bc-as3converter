@@ -4,7 +4,6 @@ package bc.flash.events
 
 	import flash.utils.Dictionary;
 
-	[FunctionType(callback="EventListenerCallback", params="event:Event", useByDefault="true")]
 	public class EventDispatcher extends Object
 	{
 		private var mEventListeners : Dictionary;

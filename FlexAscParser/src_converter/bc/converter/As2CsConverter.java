@@ -446,69 +446,6 @@ public class As2CsConverter extends As2WhateverConverter
 		src.writeln(new ListWriteDestination(lines));
 	}
 	
-	@Override
-	protected void postWrite(File outputDir) throws IOException
-	{
-		Map<String, FuncList> data = funcRegister.data;
-		Set<Entry<String, FuncList>> entries = data.entrySet();
-		for (Entry<String, FuncList> entry : entries)
-		{
-			String packageName = entry.getKey();
-			FuncList funcList = entry.getValue();
-			
-			// we need to write function to one of sections, not just in the source root
-			String sectionName = findSectionName(packageName);
-			if (sectionName == null)
-			{
-				throw new ConverterException("Unable to detect package section name: " + packageName);
-			}
-			
-			File outputFile = new File(outputDir, sectionName);
-			if (!shouldIgnoreFile(outputFile))
-			{
-				writeFunctionTypes(outputFile, packageName, funcList);
-			}
-		}
-	}
-	
-	private void writeFunctionTypes(File outputDir, String packageName, FuncList funcList) throws IOException
-	{
-		String subPath = packageName.replace(".", "/");
-		
-		File srcFileDir = new File(outputDir, subPath);
-		if (!srcFileDir.exists())
-		{
-			boolean successed = srcFileDir.mkdirs();
-			failConversionUnless(successed, "Can't make output dir: %s", srcFileDir.getAbsolutePath());
-		}
-		
-		File outputFile = new File(srcFileDir, "AsFunctions.cs");
-		
-		src = new ListWriteDestination();		
-		
-		src.writeln("using System;");
-		writeBlankLine(src);
-		
-		CsImportsData importsData = getImports(funcList);
-		
-		writeImports(src, importsData.getNamespaces());
-		// writeUsings(src, importsData.getUsingTypes()); TODO: handle conflicting names
-		writeBlankLine(src);
-		
-		src.writeln("namespace " + getCodeHelper().namespace(packageName));
-		writeBlockOpen(src);
-
-		List<BcFunctionTypeNode> funcTypes = funcList.getTypes();
-		for (BcFunctionTypeNode funcType : funcTypes)
-		{
-			writeFunctionType(funcType);
-		}
-		
-		writeBlockClose(src);
-		
-		writeDestToFile(src, outputFile);
-	}
-	
 	private CsImportsData getImports(BcClassDefinitionNode bcClass)
 	{
 		CsImportsData importsData = new CsImportsData();

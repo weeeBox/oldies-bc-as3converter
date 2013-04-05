@@ -136,7 +136,6 @@ public class SyntaxConversionTest extends ConverterTestSuite
 		
 		String[] filenames = 
 		{
-			"Converted/bc/test/functions/AsFunctions.cs",
 			"Converted/bc/test/functions/AsFunctionsTypeTest.cs",
 			"Converted/bc/test/functions/AsFunctionsSyntaxTest.cs",
 			"Converted/bc/test/functions/AsFunctionsReflectionTest.cs",

@@ -156,7 +156,6 @@
     <Compile Include="Converted\bc\test\basic\packages\bar\AsPackageClass.cs" />
     <Compile Include="Converted\bc\test\basic\packages\foo\AsPackageClass.cs" />
     <Compile Include="Converted\bc\test\basic\types\AsTypesTests.cs" />
-    <Compile Include="Converted\bc\test\functions\AsFunctions.cs" />
     <Compile Include="Converted\bc\test\functions\AsFunctionsReflectionTest.cs" />
     <Compile Include="Converted\bc\test\functions\AsFunctionsSyntaxTest.cs" />
     <Compile Include="Converted\bc\test\functions\AsFunctionsTypeTest.cs" />
