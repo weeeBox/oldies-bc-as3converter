@@ -66,6 +66,17 @@ package bc.test.basic.calls
             CallsTests.staticFunc();
         }
         
+        /*
+        public static function testArgumentsLength(arg1:String, arg2:String) : void
+        {
+            var length:int = arguments.length;
+        }
+
+        public static function testArgumentsCall(arg1:String, arg2:String) : void
+        {
+            funcWithArgsAndRestArgs("arg1", "arg2", arguments);
+        }
+        */        
         // void functions
         
         public function func() : void

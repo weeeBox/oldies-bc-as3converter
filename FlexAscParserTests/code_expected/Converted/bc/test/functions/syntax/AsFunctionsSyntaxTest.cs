@@ -13,8 +13,7 @@ namespace bc.test.functions.syntax
 		{
 		}
 		public virtual void func3(Object arg)
-		{
-			return null;
+		{	
 		}
 	}
 }

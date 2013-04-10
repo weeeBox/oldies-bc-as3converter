@@ -189,6 +189,12 @@ public class BcNodeFactory {
 		return callExpr;
 	}
 	
+	public static CallExpressionNode turnSelectorToCall(MemberExpressionNode node, String funcName, String arg)
+	{
+		ArgumentListNode args = new ArgumentListNode(new LiteralStringNode(arg), -1);
+		return turnSelectorToCall(node, funcName, args);
+	}
+	
 	public static CallExpressionNode turnSelectorToCall(MemberExpressionNode node, String funcName, ArgumentListNode args)
 	{
 		CallExpressionNode callExpression = callExpression(funcName, args);
@@ -271,6 +277,11 @@ public class BcNodeFactory {
 		}
 		
 		return new IdentifierNode(name, -1);
+	}
+	
+	public static ArgumentListNode concat(String identifier, ArgumentListNode list)
+	{
+		return concat(new LiteralStringNode(identifier), list);
 	}
 	
 	public static ArgumentListNode concat(Node item, ArgumentListNode list)

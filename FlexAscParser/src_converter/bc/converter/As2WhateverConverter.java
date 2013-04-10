@@ -146,8 +146,6 @@ public abstract class As2WhateverConverter
 	private File userDir;
 	private List<File> ignoreDirs;
 	
-	private LinkedList<Node> nodeStack;
-
 	// TODO: add metadata support for binded class
 	private static Map<String, String> bindedClasses;
 	static
@@ -164,7 +162,6 @@ public abstract class As2WhateverConverter
 	{
 		userDir = new File(System.getProperty("user.dir"));
 		ignoreDirs = new ArrayList<File>();
-		nodeStack = new LinkedList<Node>();
 
 		this.codeHelper = codeHelper;
 	}
@@ -898,7 +895,6 @@ public abstract class As2WhateverConverter
 	protected void processNode(Node node)
 	{
 		failConversionUnless(node != null, "Tried to process 'null' node");
-		pushNode(node);
 
 		if (node instanceof MemberExpressionNode)
 			process((MemberExpressionNode) node);
@@ -974,8 +970,6 @@ public abstract class As2WhateverConverter
 			process((EmptyStatementNode) node);
 		else
 			failConversion("Unsupported node class: %s", node.getClass());
-		
-		popNode();
 	}
 
 	protected void process(StatementListNode statementsNode)
@@ -1356,17 +1350,7 @@ public abstract class As2WhateverConverter
 							}
 							else
 							{
-								IdentifierNode identifierNode = (IdentifierNode) node.expr;
-								if (!identifierNode.isAttr())
-								{
-									failConversionUnless(lastBcMemberType != null, "Identifier not recognized: '%s'", identifier);
-									
-									System.err.println("Warning! Dymaic property: " + identifier);
-									if (processPropertyGet(node, identifier))
-									{
-										return;
-									}
-								}
+								failConversion("Unexpected something");
 							}
 						}
 					}
@@ -1589,7 +1573,6 @@ public abstract class As2WhateverConverter
 		BcArgumentsList argsList;
 		if (node.args != null)
 		{
-			pushNode(node.args);
 			if (calledFunction != null && !isCast)
 			{
 				argsList = createArgsList(calledFunction, node.args);
@@ -1598,7 +1581,6 @@ public abstract class As2WhateverConverter
 			{
 				argsList = getArgs(node.args);
 			}
-			popNode();
 		}
 		else
 		{
@@ -1722,11 +1704,6 @@ public abstract class As2WhateverConverter
 				BcFunctionDeclaration bcFunc = bcClass.findSetterFunction(identifier);
 				if (bcFunc != null)
 				{
-					if (processSetterFunction(node, bcFunc))
-					{
-						return;
-					}
-					
 					List<BcFuncParam> funcParams = bcFunc.getParams();
 					BcTypeNode setterType = funcParams.get(0).getType();
 					lastBcMemberType = setterType;
@@ -1753,11 +1730,7 @@ public abstract class As2WhateverConverter
 					}
 					else
 					{
-						System.err.println("Warning! Dymaic set property: " + identifier);
-						if (processPropertySet(node, identifier))
-						{
-							return;
-						}
+						failConversion("Unexpected something");
 					}
 				}
 			}
@@ -2724,62 +2697,6 @@ public abstract class As2WhateverConverter
 		}
 	}
 
-	protected boolean processSetterFunction(SetExpressionNode node, BcFunctionDeclaration bcFunc)
-	{
-		checkCurrentNode(node);
-		
-		Node prevNode = getPrevNode();
-		if (prevNode.isMemberExpression())
-		{
-			MemberExpressionNode memberExpr = (MemberExpressionNode) prevNode;
-			BcNodeFactory.turnSetToCall(memberExpr, bcFunc.getName());
-			
-			CallExpressionNode call = (CallExpressionNode) memberExpr.selector;
-			call.kind = bcFunc.getKind();
-
-			replaceNode(call);
-			process(memberExpr.selector);
-		}
-		else
-		{
-			failConversion("Unexpected node: %s", prevNode);
-		}
-		
-		return true;
-	}
-	
-	protected boolean processPropertySet(SetExpressionNode node, String propName)
-	{
-		failConversionUnless(node.args != null && node.args.size() == 1);
-		return propertyAccessHelper(node, "setOwnProperty", BcNodeFactory.concat(new LiteralStringNode(propName), node.args));
-	}
-	
-	protected boolean processPropertyGet(GetExpressionNode node, String propName)
-	{
-		return propertyAccessHelper(node, "getOwnProperty", BcNodeFactory.args(new LiteralStringNode(propName)));
-	}
-
-	private boolean propertyAccessHelper(SelectorNode node, String funcName, ArgumentListNode args)
-	{
-		checkCurrentNode(node);
-		
-		Node prevNode = getPrevNode();
-		if (prevNode.isMemberExpression())
-		{
-			MemberExpressionNode memberExpr = (MemberExpressionNode) prevNode;
-			BcNodeFactory.turnSelectorToCall(memberExpr, funcName, args);
-			
-			replaceNode(memberExpr.selector);
-			process(memberExpr.selector);
-		}
-		else
-		{
-			failConversion("Unexpected node: %s", prevNode);
-		}
-		
-		return true;
-	}
-	
 	private BcClassDefinitionNode findBindedClass(BcTypeNode type)
 	{
 		return findBindedClass(type.getName());
@@ -3095,51 +3012,30 @@ public abstract class As2WhateverConverter
 		dest = destStack.pop();
 	}
 	
-	protected void checkCurrentNode(Node node)
-	{
-		failConversionUnless(node == getCurrentNode());
-	}
-	
-	protected Node getCurrentNode()
-	{
-		return nodeStack.getFirst();
-	}
-	
-	protected Node getPrevNode()
-	{
-		return nodeStack.size() > 1 ? nodeStack.get(1) : null;
-	}
-	
-	protected void pushNode(Node node)
-	{
-		nodeStack.addFirst(node);
-	}
-	
-	protected void popNode()
-	{
-		nodeStack.removeFirst();
-	}	
-	
-	protected void replaceNode(Node node)
-	{
-		popNode();
-		pushNode(node);
-	}
-
 	// /////////////////////////////////////////////////////////////
 	// Helpers
 
-	private BcFunctionDeclaration findFunction(String name)
+	protected BcFunctionDeclaration findFunction(String name)
 	{
 		return findFunction(name, 0);
 	}
 	
-	private BcFunctionDeclaration findFunction(String name, int kind)
+	protected BcFunctionDeclaration findFunction(String name, int kind)
 	{
 		return findFunction(BcGlobal.lastBcClass, name, kind);
 	}
 
-	private BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int kind)
+	protected BcFunctionDeclaration findGetterFunction(BcClassDefinitionNode bcClass, String name)
+	{
+		return findFunction(bcClass, name, BcFunctionDeclaration.KIND_GETTER);
+	}
+	
+	protected BcFunctionDeclaration findSetterFunction(BcClassDefinitionNode bcClass, String name)
+	{
+		return findFunction(bcClass, name, BcFunctionDeclaration.KIND_SETTER);
+	}
+	
+	protected BcFunctionDeclaration findFunction(BcClassDefinitionNode bcClass, String name, int kind)
 	{
 		BcFunctionDeclaration classFunc = bcClass.findFunction(name, kind);
 		if (classFunc != null)

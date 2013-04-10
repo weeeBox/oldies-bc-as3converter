@@ -17,6 +17,7 @@ import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.SelectorNode;
+import macromedia.asc.parser.SetExpressionNode;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeHelper;
@@ -72,30 +73,74 @@ public class As2CsConverter extends As2WhateverConverter
 	private boolean preprocess(MemberExpressionNode node)
 	{
 		if (preprocessFuncType(node))
+		{
 			return true;
+		}
 		
 		if (node.base != null)
 		{
 			BcTypeNodeInstance baseTypeInstance = evaluateTypeInstance(node.base, true);
 			failConversionUnless(baseTypeInstance != null, "Unable to evaluate base type");
 			
-			BcTypeNode type = baseTypeInstance.getType();
-			BcFunctionTypeNode funcType = Cast.tryCast(type, BcFunctionTypeNode.class);
-			if (funcType != null && funcType.hasReturnType())
+			BcTypeNode baseType = baseTypeInstance.getType();
+			if (baseType.isFunction())
 			{
-				type = funcType.getReturnType();
+				BcFunctionTypeNode funcType = (BcFunctionTypeNode) baseType;
+				if (funcType != null && funcType.hasReturnType())
+				{
+					baseType = funcType.getReturnType();
+				}
 			}
 			
-			if (type.isIntegral())
+			if (baseType.isIntegral())
 			{
 				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance);
 				return true;
 			}
 			
-			if (typeEquals(type, BcTypeNode.typeString))
+			if (typeEquals(baseType, BcTypeNode.typeString))
 			{
 				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance, STRING_SELECTOR_LOOKUP);
 				return true;
+			}
+			
+			if (node.selector.isGetExpression() || node.selector.isSetExpression())
+			{
+				if (node.selector.expr.isIdentifier())
+				{
+					String identifier = BcNodeHelper.tryExtractIdentifier(node.selector);
+					failConversionUnless(identifier != null);
+					
+					BcClassDefinitionNode baseClass = baseType.getClassNode();
+					failConversionUnless(baseClass != null);
+					
+					BcVariableDeclaration bcVar = baseClass.findField(identifier);
+					if (bcVar == null)
+					{
+						if (node.selector.isGetExpression())
+						{
+							BcFunctionDeclaration getterFunc = findGetterFunction(baseClass, identifier);
+							if (getterFunc == null)
+							{
+								BcNodeFactory.turnSelectorToCall(node, "getOwnProperty", identifier);
+								return true;
+							}
+						}
+						
+						if (node.selector.isSetExpression())
+						{
+							BcFunctionDeclaration setterFunc = findSetterFunction(baseClass, identifier);
+							if (setterFunc == null)
+							{
+								SetExpressionNode set = (SetExpressionNode) node.selector;
+								
+								ArgumentListNode args = BcNodeFactory.concat(identifier, set.args);
+								BcNodeFactory.turnSelectorToCall(node, "setOwnProperty", args);
+								return true;
+							}
+						}
+					}
+				}
 			}
 		}
 		

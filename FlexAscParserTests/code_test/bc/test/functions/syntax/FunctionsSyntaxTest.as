@@ -12,7 +12,6 @@ package bc.test.functions.syntax
         
         public function func3(arg:*):void
         {
-            return null;
         }
     }
 }
