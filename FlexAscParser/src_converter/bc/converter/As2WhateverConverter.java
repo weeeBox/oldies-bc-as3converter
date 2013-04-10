@@ -1258,7 +1258,6 @@ public abstract class As2WhateverConverter
 
 		boolean accessingDynamicXMLList = false;
 		String identifier = expr.toString();
-		boolean getterCalled = false;
 
 		boolean needLocalVars = false;
 
@@ -1301,57 +1300,45 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{
-					BcFunctionDeclaration bcFunc = bcClass.findGetterFunction(identifier);
-					if (bcFunc != null)
+					BcVariableDeclaration bcVar = bcClass.findField(identifier);
+					if (bcVar != null)
 					{
-						BcTypeNode funcType = bcFunc.getReturnType();
-						failConversionUnless(funcType != null, "Function return type undefined: %s", expr);
-
-						lastBcMemberType = funcType;
-						getterCalled = true;
+						lastBcMemberType = bcVar.getType();
+						failConversionUnless(lastBcMemberType != null, "Field's type undefined: %s", expr);
 					}
 					else
 					{
-						BcVariableDeclaration bcVar = bcClass.findField(identifier);
-						if (bcVar != null)
+						BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
+						if (bcFunction != null)
 						{
-							lastBcMemberType = bcVar.getType();
-							failConversionUnless(lastBcMemberType != null, "Field's type undefined: %s", expr);
+							System.err.println("Warning! Function type: " + identifier);
+							lastBcMemberType = createBcType(BcTypeNode.typeFunction);
 						}
-						else
+						else if (classEquals(bcClass, BcTypeNode.typeXML) || classEquals(bcClass, BcTypeNode.typeXMLList))
 						{
-							BcFunctionDeclaration bcFunction = bcClass.findFunction(identifier); // check if it's a function type
-							if (bcFunction != null)
+							IdentifierNode identifierNode = (IdentifierNode) node.expr;
+							if (identifierNode.isAttr())
 							{
-								System.err.println("Warning! Function type: " + identifier);
-								lastBcMemberType = createBcType(BcTypeNode.typeFunction);
-							}
-							else if (classEquals(bcClass, BcTypeNode.typeXML) || classEquals(bcClass, BcTypeNode.typeXMLList))
-							{
-								IdentifierNode identifierNode = (IdentifierNode) node.expr;
-								if (identifierNode.isAttr())
-								{
-									lastBcMemberType = createBcType(BcTypeNode.typeString);
-								}
-								else
-								{
-									lastBcMemberType = createBcType(BcTypeNode.typeXMLList);
-									accessingDynamicXMLList = true;
-									System.err.println("Warning! Dynamic XMLList: " + identifier);
-								}
-							}
-							else if (identifier.equals("arguments"))
-							{
-								lastBcMemberType = BcArgumentsType.instance();
-							}
-							else if (identifier.equals("undefined"))
-							{
-								lastBcMemberType = BcUndefinedType.instance();
+								lastBcMemberType = createBcType(BcTypeNode.typeString);
 							}
 							else
 							{
-								failConversion("Unexpected something");
+								lastBcMemberType = createBcType(BcTypeNode.typeXMLList);
+								accessingDynamicXMLList = true;
+								System.err.println("Warning! Dynamic XMLList: " + identifier);
 							}
+						}
+						else if (identifier.equals("arguments"))
+						{
+							lastBcMemberType = BcArgumentsType.instance();
+						}
+						else if (identifier.equals("undefined"))
+						{
+							lastBcMemberType = BcUndefinedType.instance();
+						}
+						else
+						{
+							failConversion("Unexpected something");
 						}
 					}
 				}
@@ -1387,10 +1374,6 @@ public abstract class As2WhateverConverter
 		else if (accessingDynamicXMLList)
 		{
 			dest.writef("elements(\"%s\")", identifier); // FIXME: make member call
-		}
-		else if (getterCalled)
-		{
-			dest.writef("%s()", identifier); // FIXME: make member call
 		}
 		else
 		{
@@ -1428,10 +1411,18 @@ public abstract class As2WhateverConverter
 
 	protected BcVariableDeclaration findVariable(BcClassDefinitionNode bcClass, String name)
 	{
-		BcVariableDeclaration bcVar = findLocalVar(name);
-		if (bcVar != null)
+		return findVariable(bcClass, name, true);
+	}
+	
+	protected BcVariableDeclaration findVariable(BcClassDefinitionNode bcClass, String name, boolean checkLocals)
+	{
+		if (checkLocals)
 		{
-			return bcVar;
+			BcVariableDeclaration bcVar = findLocalVar(name);
+			if (bcVar != null)
+			{
+				return bcVar;
+			}
 		}
 
 		return bcClass.findField(name);

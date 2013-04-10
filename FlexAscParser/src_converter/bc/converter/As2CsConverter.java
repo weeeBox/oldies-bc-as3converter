@@ -106,40 +106,21 @@ public class As2CsConverter extends As2WhateverConverter
 			
 			if (node.selector.isGetExpression() || node.selector.isSetExpression())
 			{
-				if (node.selector.expr.isIdentifier())
+				if (preprocess(node, baseType, true))
 				{
-					String identifier = BcNodeHelper.tryExtractIdentifier(node.selector);
-					failConversionUnless(identifier != null);
-					
-					BcClassDefinitionNode baseClass = baseType.getClassNode();
-					failConversionUnless(baseClass != null);
-					
-					BcVariableDeclaration bcVar = baseClass.findField(identifier);
-					if (bcVar == null)
-					{
-						if (node.selector.isGetExpression())
-						{
-							BcFunctionDeclaration getterFunc = findGetterFunction(baseClass, identifier);
-							if (getterFunc == null)
-							{
-								BcNodeFactory.turnSelectorToCall(node, "getOwnProperty", identifier);
-								return true;
-							}
-						}
-						
-						if (node.selector.isSetExpression())
-						{
-							BcFunctionDeclaration setterFunc = findSetterFunction(baseClass, identifier);
-							if (setterFunc == null)
-							{
-								SetExpressionNode set = (SetExpressionNode) node.selector;
-								
-								ArgumentListNode args = BcNodeFactory.concat(identifier, set.args);
-								BcNodeFactory.turnSelectorToCall(node, "setOwnProperty", args);
-								return true;
-							}
-						}
-					}
+					return true;
+				}
+			}
+		}
+		else
+		{
+			BcClassDefinitionNode lastBcClass = BcGlobal.lastBcClass;
+			if (lastBcClass != null)
+			{
+				BcTypeNode baseType = lastBcClass.getClassType();
+				if (preprocess(node, baseType, false))
+				{
+					return true;
 				}
 			}
 		}
@@ -147,6 +128,81 @@ public class As2CsConverter extends As2WhateverConverter
 		return false;
 	}
 
+	private boolean preprocess(MemberExpressionNode node, BcTypeNode baseType, boolean useOwnProperties)
+	{
+		if (node.selector.expr.isIdentifier())
+		{
+			String identifier = BcNodeHelper.tryExtractIdentifier(node.selector);
+			failConversionUnless(identifier != null);
+			
+			BcClassDefinitionNode baseClass = baseType.getClassNode();
+			failConversionUnless(baseClass != null);
+			
+			boolean checkLocalVariables = node.base == null;
+			BcVariableDeclaration bcVar = findVariable(baseClass, identifier, checkLocalVariables);
+			if (bcVar != null)
+			{
+				return false;
+			}
+			
+			if (node.selector.isGetExpression())
+			{
+				BcFunctionDeclaration getterFunc = findGetterFunction(baseClass, identifier);
+				if (getterFunc != null)
+				{
+					return processGetter(node);
+				}
+				
+				if (useOwnProperties)
+				{
+					BcNodeFactory.turnSelectorToCall(node, "getOwnProperty", identifier);
+					return true;
+				}
+			}
+			
+			if (node.selector.isSetExpression())
+			{
+				BcFunctionDeclaration setterFunc = findSetterFunction(baseClass, identifier);
+				if (setterFunc != null)
+				{
+					return processSetter(node);
+				}
+
+				if (useOwnProperties)
+				{
+					SetExpressionNode set = (SetExpressionNode) node.selector;
+					
+					ArgumentListNode args = BcNodeFactory.concat(identifier, set.args);
+					BcNodeFactory.turnSelectorToCall(node, "setOwnProperty", args);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean processGetter(MemberExpressionNode node)
+	{
+		String identifier = BcNodeHelper.tryExtractIdentifier(node.selector);
+		failConversionUnless(identifier != null);
+		
+		CallExpressionNode call = BcNodeFactory.turnSelectorToCall(node, identifier);
+		call.kind = BcFunctionDeclaration.KIND_GETTER;
+		return true;
+	}
+	
+	private boolean processSetter(MemberExpressionNode node)
+	{
+		String identifier = BcNodeHelper.tryExtractIdentifier(node.selector);
+		failConversionUnless(identifier != null);
+		
+		SetExpressionNode set = (SetExpressionNode) node.selector;
+		CallExpressionNode call = BcNodeFactory.turnSelectorToCall(node, identifier, set.args);
+		call.kind = BcFunctionDeclaration.KIND_SETTER;
+		
+		return true;
+	}
+	
 	private boolean preprocessFuncType(MemberExpressionNode node)
 	{
 		SelectorNode selector = node.selector;
