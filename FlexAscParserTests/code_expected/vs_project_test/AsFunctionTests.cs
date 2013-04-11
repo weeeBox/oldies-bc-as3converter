@@ -75,6 +75,18 @@ namespace vs_project_test
             AssertResult("delegate()", "delegate(10,20)");
         }
 
+        [TestMethod]
+        public void TestInnerFunctionReturn()
+        {   
+            AsFunction func;
+            func = new Anonymous3(delegate(String value)
+            {
+                return value;
+            });
+            
+            Assert.AreEqual(func.invoke("test"), "test");
+        }
+
         private void AssertResult(params String[] data)
         {
             Assert.AreEqual(data.Length, target.result.Count);
@@ -162,6 +174,23 @@ namespace vs_project_test
         {
             type((int)parameters[0], (int)parameters[1]);
             return null;
+        }
+    }
+
+    class Anonymous3 : AsFunction
+    {
+        public delegate Object DelegateType(String value);
+
+        private DelegateType type;
+
+        public Anonymous3(DelegateType type)
+        {
+            this.type = type;
+        }
+
+        public override Object invoke(Object param)
+        {   
+            return type((String)param);
         }
     }
 }
