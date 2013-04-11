@@ -60,14 +60,19 @@ namespace vs_project_test
             target.Clear();
 
             AsFunction func;
-            func = new Anonymous1(delegate(int x, int y)
+            func = new Anonymous1(delegate()
+            {
+                target.result.Add("delegate()");
+            });
+            func.invoke();
+
+            func = new Anonymous2(delegate(int x, int y)
             {
                 target.result.Add("delegate(" + x + "," + y + ")");
             });
-
             func.invoke(10, 20);
 
-            AssertResult("delegate(10,20)");
+            AssertResult("delegate()", "delegate(10,20)");
         }
 
         private void AssertResult(params String[] data)
@@ -126,12 +131,30 @@ namespace vs_project_test
 
     class Anonymous1 : AsFunction
     {
-        public delegate void DelegateType(int x, int y);
+        public delegate void DelegateType();
 
         private DelegateType type;
 
         public Anonymous1(DelegateType type)
         {   
+            this.type = type;
+        }
+
+        public override Object invoke()
+        {
+            type();
+            return null;
+        }
+    }
+
+    class Anonymous2 : AsFunction
+    {
+        public delegate void DelegateType(int x, int y);
+
+        private DelegateType type;
+
+        public Anonymous2(DelegateType type)
+        {
             this.type = type;
         }
 
