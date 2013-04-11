@@ -42,7 +42,7 @@ namespace bc.flash
 
         public AsFunction __function(String name)
         {
-            return new AsFunction(this, name);
+            return new FunctionRef(this, name);
         }
 
         public virtual String toString()

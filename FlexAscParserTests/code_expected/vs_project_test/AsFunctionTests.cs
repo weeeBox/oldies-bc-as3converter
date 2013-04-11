@@ -16,13 +16,13 @@ namespace vs_project_test
         public void TestAssignmet()
         {
             AsFunction func;
-            func = new AsFunction(target, "PrivateFunc");
-            func = new AsFunction(target, "ProtectedFunc");
-            func = new AsFunction(target, "PublicFunc");
-            func = new AsFunction(target, "Func", typeof(int));
-            func = new AsFunction(target, "Func", typeof(int), typeof(int));
-            func = new AsFunction(target, "Func", typeof(Foo));
-            func = new AsFunction(target, "Func", typeof(Bar)); // covariant param
+            func = new FunctionRef(target, "PrivateFunc");
+            func = new FunctionRef(target, "ProtectedFunc");
+            func = new FunctionRef(target, "PublicFunc");
+            func = new FunctionRef(target, "Func", typeof(int));
+            func = new FunctionRef(target, "Func", typeof(int), typeof(int));
+            func = new FunctionRef(target, "Func", typeof(Foo));
+            func = new FunctionRef(target, "Func", typeof(Bar)); // covariant param
         }
 
         [TestMethod]
@@ -31,28 +31,40 @@ namespace vs_project_test
             target.Clear();
 
             AsFunction func;
-            func = new AsFunction(target, "PrivateFunc");
+            func = new FunctionRef(target, "PrivateFunc");
             func.invoke();
 
-            func = new AsFunction(target, "ProtectedFunc");
+            func = new FunctionRef(target, "ProtectedFunc");
             func.invoke();
 
-            func = new AsFunction(target, "PublicFunc");
+            func = new FunctionRef(target, "PublicFunc");
             func.invoke();
 
-            func = new AsFunction(target, "Func", typeof(int));
+            func = new FunctionRef(target, "Func", typeof(int));
             func.invoke(10);
 
-            func = new AsFunction(target, "Func", typeof(int), typeof(int));
+            func = new FunctionRef(target, "Func", typeof(int), typeof(int));
             func.invoke(20, 30);
 
-            func = new AsFunction(target, "Func", typeof(Foo));
+            func = new FunctionRef(target, "Func", typeof(Foo));
             func.invoke(new Foo());
 
-            func = new AsFunction(target, "Func", typeof(Bar));
+            func = new FunctionRef(target, "Func", typeof(Bar));
             func.invoke(new Bar());
 
             AssertResult("PrivateFunc()", "ProtectedFunc()", "PublicFunc()", "Func(10)", "Func(20,30)", "Func(Foo)", "Func(Bar)");
+        }
+
+        [TestMethod]
+        public void TestInnerFunction()
+        {
+            target.Clear();
+
+            AsFunction func;
+            func = new Anonymous1(delegate(int x, int y)
+            {
+
+            });
         }
 
         private void AssertResult(params String[] data)
@@ -106,6 +118,43 @@ namespace vs_project_test
         private void Func(Foo foo)
         {
             result.Add("Func(" + foo.GetType().Name + ")");
+        }
+    }
+
+    class Anonymous1 : AsFunction
+    {
+        public delegate void DelegateType(Object x, Object y);
+
+        private DelegateType type;
+
+        public Anonymous1(DelegateType type)
+        {
+            this.type = type;
+        }
+
+        public override Object apply(Object target, AsArray args)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public override Object apply(Object target, params Object[] args)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public override Object invoke()
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public override Object invoke(Object param)
+        {
+            throw new Exception("The method or operation is not implemented.");
+        }
+
+        public override Object invoke(params Object[] parameters)
+        {
+            throw new Exception("The method or operation is not implemented.");
         }
     }
 }
