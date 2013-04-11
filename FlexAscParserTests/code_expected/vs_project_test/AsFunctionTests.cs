@@ -62,8 +62,12 @@ namespace vs_project_test
             AsFunction func;
             func = new Anonymous1(delegate(int x, int y)
             {
-
+                target.result.Add("delegate(" + x + "," + y + ")");
             });
+
+            func.invoke(10, 20);
+
+            AssertResult("delegate(10,20)");
         }
 
         private void AssertResult(params String[] data)
@@ -153,7 +157,8 @@ namespace vs_project_test
 
         public override Object invoke(params Object[] parameters)
         {
-            throw new Exception("The method or operation is not implemented.");
+            type((int)parameters[0], (int)parameters[1]);
+            return null;
         }
     }
 }
