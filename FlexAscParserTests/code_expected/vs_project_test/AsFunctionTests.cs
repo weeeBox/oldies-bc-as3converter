@@ -131,28 +131,8 @@ namespace vs_project_test
         private DelegateType type;
 
         public Anonymous1(DelegateType type)
-        {
+        {   
             this.type = type;
-        }
-
-        public override Object apply(Object target, AsArray args)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public override Object apply(Object target, params Object[] args)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public override Object invoke()
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public override Object invoke(Object param)
-        {
-            throw new Exception("The method or operation is not implemented.");
         }
 
         public override Object invoke(params Object[] parameters)

@@ -8,12 +8,30 @@ namespace bc.flash
 {
     public abstract class AsFunction : AsObject
     {
-        public abstract Object apply(Object target, AsArray args);
-        public abstract Object apply(Object target, params Object[] args);
+        public virtual Object apply(Object target, AsArray args)
+        {
+            throw new NotImplementedException();
+        }
 
-        public abstract Object invoke();
-        public abstract Object invoke(Object param);
-        public abstract Object invoke(params Object[] parameters);
+        public virtual Object apply(Object target, params Object[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual Object invoke()
+        {
+            throw new FunctionInvokationException("Can't invoke function with no parameters");
+        }
+
+        public virtual Object invoke(Object param)
+        {
+            throw new FunctionInvokationException("Can't invoke function with 1 parameter");
+        }
+
+        public virtual Object invoke(params Object[] parameters)
+        {
+            throw new FunctionInvokationException("Can't invoke function with " + parameters.Length + " parameter(s)");
+        }
     }
 
     public class FunctionRef : AsFunction
@@ -22,6 +40,7 @@ namespace bc.flash
                                            BindingFlags.Static | BindingFlags.Instance;
 
         private static Object[] EMPTY_PARAMS = new Object[0];
+        private static Object[] SINGLE_PARAM = new Object[1];
 
         private Object target;
         private MethodInfo methodInfo;
@@ -51,30 +70,33 @@ namespace bc.flash
             this.target = target;
         }
 
-        public override Object apply(Object target, AsArray args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Object apply(Object target, params Object[] args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Object invoke()
+        public override object invoke()
         {
             return invoke(EMPTY_PARAMS);
         }
 
         public override Object invoke(Object param)
         {
-            return invoke(new Object[] { param });
+            return invoke(singleParam(param));
         }
 
         public override Object invoke(params Object[] parameters)
         {
-            return parameters == null ? invoke(new Object[] { null }) : 
-                   methodInfo.Invoke(target, parameters);
+            return methodInfo.Invoke(target, parameters);
+        }
+
+        private Object[] singleParam(Object param)
+        {
+            SINGLE_PARAM[0] = param;
+            return SINGLE_PARAM;
+        }
+    }
+
+    public class FunctionInvokationException : Exception
+    {
+        public FunctionInvokationException(String message = "") 
+            : base(message)
+        {
         }
     }
 }
