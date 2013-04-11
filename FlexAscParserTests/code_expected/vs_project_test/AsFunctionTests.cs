@@ -16,13 +16,12 @@ namespace vs_project_test
         public void TestAssignmet()
         {
             AsFunction func;
-            func = new FunctionRef(target, "PrivateFunc");
-            func = new FunctionRef(target, "ProtectedFunc");
-            func = new FunctionRef(target, "PublicFunc");
-            func = new FunctionRef(target, "Func", typeof(int));
-            func = new FunctionRef(target, "Func", typeof(int), typeof(int));
-            func = new FunctionRef(target, "Func", typeof(Foo));
-            func = new FunctionRef(target, "Func", typeof(Bar)); // covariant param
+            func = target.__function("PrivateFunc");
+            func = target.__function("ProtectedFunc");
+            func = target.__function("PublicFunc");
+            func = target.__function("Func1");
+            func = target.__function("Func2");
+            func = target.__function("Func3");
         }
 
         [TestMethod]
@@ -31,28 +30,28 @@ namespace vs_project_test
             target.Clear();
 
             AsFunction func;
-            func = new FunctionRef(target, "PrivateFunc");
+            func = target.__function("PrivateFunc");
             func.invoke();
 
-            func = new FunctionRef(target, "ProtectedFunc");
+            func = target.__function("ProtectedFunc");
             func.invoke();
 
-            func = new FunctionRef(target, "PublicFunc");
+            func = target.__function("PublicFunc");
             func.invoke();
 
-            func = new FunctionRef(target, "Func", typeof(int));
+            func = target.__function("Func1");
             func.invoke(10);
 
-            func = new FunctionRef(target, "Func", typeof(int), typeof(int));
+            func = target.__function("Func2");
             func.invoke(20, 30);
 
-            func = new FunctionRef(target, "Func", typeof(Foo));
+            func = target.__function("Func3");
             func.invoke(new Foo());
 
-            func = new FunctionRef(target, "Func", typeof(Bar));
+            func = target.__function("Func3");
             func.invoke(new Bar());
 
-            AssertResult("PrivateFunc()", "ProtectedFunc()", "PublicFunc()", "Func(10)", "Func(20,30)", "Func(Foo)", "Func(Bar)");
+            AssertResult("PrivateFunc()", "ProtectedFunc()", "PublicFunc()", "Func1(10)", "Func2(20,30)", "Func3(Foo)", "Func3(Bar)");
         }
 
         [TestMethod]
@@ -78,7 +77,7 @@ namespace vs_project_test
         }
     }
 
-    class Foo 
+    class Foo : AsObject
     {
         public List<String> result = new List<String>();
 
@@ -105,25 +104,25 @@ namespace vs_project_test
             result.Add("PrivateFunc()");
         }
 
-        private void Func(int arg)
+        private void Func1(int arg)
         {
-            result.Add("Func(" + arg + ")");
+            result.Add("Func1(" + arg + ")");
         }
 
-        private void Func(int arg1, int arg2)
+        private void Func2(int arg1, int arg2)
         {
-            result.Add("Func(" + arg1 + "," + arg2 + ")");
+            result.Add("Func2(" + arg1 + "," + arg2 + ")");
         }
 
-        private void Func(Foo foo)
+        private void Func3(Foo foo)
         {
-            result.Add("Func(" + foo.GetType().Name + ")");
+            result.Add("Func3(" + foo.GetType().Name + ")");
         }
     }
 
     class Anonymous1 : AsFunction
     {
-        public delegate void DelegateType(Object x, Object y);
+        public delegate void DelegateType(int x, int y);
 
         private DelegateType type;
 

@@ -22,27 +22,30 @@ namespace bc.flash
                                            BindingFlags.Static | BindingFlags.Instance;
 
         private static Object[] EMPTY_PARAMS = new Object[0];
-        private static Type[] EMPTY_TYPES = new Type[0];
 
         private Object target;
         private MethodInfo methodInfo;
 
         public FunctionRef(Object target, String name)
-            : this(target, name, EMPTY_TYPES)
-        {
-        }
-
-        public FunctionRef(Object target, String name, params Type[] types)
-        {
+        {   
             if (target == null)
             {
                 throw new ArgumentException("Target is null");
             }
 
-            methodInfo = target.GetType().GetMethod(name, flags, null, types, null);
+            MethodInfo[] methods = target.GetType().GetMethods(flags);
+            foreach (MethodInfo method in methods)
+            {
+                if (method.Name == name)
+                {
+                    methodInfo = method;
+                    break;
+                }
+            }
+
             if (methodInfo == null)
             {
-                throw new ArgumentException("Can't function: " + name);
+                throw new ArgumentException("Can't resolve function: " + name);
             }
 
             this.target = target;
