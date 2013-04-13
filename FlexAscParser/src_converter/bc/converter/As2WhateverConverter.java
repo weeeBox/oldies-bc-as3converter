@@ -1011,7 +1011,20 @@ public abstract class As2WhateverConverter
 		}
 		
 		BcGlobal.pushFunction(func);
+		
+		// TODO: code duplication
+		ListWriteDestination bodyDest = pushDest();
 		process(node.body);
+		popDest();
+		
+		List<String> lines = bodyDest.getLines();
+		String lastLine = lines.get(lines.size() - 2);
+		if (lastLine.contains("return;"))
+		{
+			lines.remove(lines.size() - 2);
+		}
+		
+		dest.write(bodyDest);
 		BcGlobal.popFunction();
 	}
 

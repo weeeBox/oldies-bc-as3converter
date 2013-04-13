@@ -157,6 +157,7 @@
     <Compile Include="Converted\bc\test\basic\packages\bar\AsPackageClass.cs"/>
     <Compile Include="Converted\bc\test\basic\packages\foo\AsPackageClass.cs"/>
     <Compile Include="Converted\bc\test\basic\types\AsTypesTests.cs"/>
+    <Compile Include="Converted\bc\test\functions\anonymous\AsFunctionsAnonymousTest.cs"/>
     <Compile Include="Converted\bc\test\functions\syntax\AsFunctionsSyntaxTest.cs"/>
     <Compile Include="Converted\bc\test\functions\types\AsFunctionsTypeTest.cs"/>
     <Compile Include="Converted\bc\test\objects\AsFooObjectClass.cs"/>
