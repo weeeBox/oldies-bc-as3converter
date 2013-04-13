@@ -1,5 +1,6 @@
 package bc.help;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import macromedia.asc.parser.DefinitionNode;
@@ -11,6 +12,7 @@ import bc.lang.BcImportList;
 import bc.lang.BcMetadata;
 import bc.lang.BcVariableDeclaration;
 
+// TODO: make it into a context class
 public class BcGlobal
 {
 	public static String lastBcPath;
@@ -20,6 +22,7 @@ public class BcGlobal
 	public static BcFunctionDeclaration lastBcFunction;
 	public static BcImportList lastBcImportList;
 	
+	public static List<BcFunctionDeclaration> enclosingFunctionStack = new ArrayList<BcFunctionDeclaration>();
 	public static List<BcVariableDeclaration> declaredVars;
 	
 	public static BcClassList bcPlatformClasses;
@@ -35,6 +38,8 @@ public class BcGlobal
 		lastBcImportList = null;
 		declaredVars = null;
 		bcClasses = null;
+		
+		enclosingFunctionStack.clear();
 	}
 
 	public static void addGlobalFunction(BcFunctionDeclaration bcFunc) 
@@ -138,5 +143,26 @@ public class BcGlobal
 		}
 		
 		return null;
+	}
+	
+	public static void setFunction(BcFunctionDeclaration func)
+	{
+		lastBcFunction = func;
+		enclosingFunctionStack.clear();
+	}
+	
+	public static void pushFunction(BcFunctionDeclaration func)
+	{
+		if (lastBcFunction != null)
+		{
+			enclosingFunctionStack.add(lastBcFunction);
+		}
+		lastBcFunction = func;
+	}
+	
+	public static void popFunction()
+	{
+		assert enclosingFunctionStack.size() > 0;
+		lastBcFunction = enclosingFunctionStack.remove(enclosingFunctionStack.size()-1);
 	}
 }

@@ -991,17 +991,28 @@ public abstract class As2WhateverConverter
 	{
 		dest.write("function");
 		
+		BcFunctionDeclaration func = new BcFunctionDeclaration("");
+		
 		ParameterListNode parameterList = node.signature.parameter;
 		if (parameterList != null)
 		{
 			List<BcFuncParam> params = extractFuncParams(parameterList);
+			for (BcFuncParam param : params)
+			{
+				func.addParam(param);
+				func.getDeclaredVars().add(param);
+			}
+			
 			dest.writelnf("(%s)", argsDef(params));
 		}
 		else
 		{
 			dest.writeln("()");
 		}
+		
+		BcGlobal.pushFunction(func);
 		process(node.body);
+		BcGlobal.popFunction();
 	}
 
 	private List<BcVariableDeclaration> process(VariableDefinitionNode node)
@@ -1402,12 +1413,21 @@ public abstract class As2WhateverConverter
 
 	private BcVariableDeclaration findLocalVar(String name)
 	{
-		if (BcGlobal.lastBcFunction == null)
+		if (BcGlobal.lastBcFunction != null)
 		{
-			return null;
+			BcVariableDeclaration localVar = BcGlobal.lastBcFunction.findVariable(name);
+			if (localVar != null) return localVar;
+			
+			List<BcFunctionDeclaration> stack = BcGlobal.enclosingFunctionStack;
+			for (int i = stack.size()-1; i >= 0; --i)
+			{
+				BcFunctionDeclaration enclosingFunc = stack.get(i);
+				localVar = enclosingFunc.findVariable(name);
+				if (localVar != null) return localVar;
+			}
 		}
-
-		return BcGlobal.lastBcFunction.findVariable(name);
+		
+		return null;
 	}
 
 	protected void process(CallExpressionNode node)
@@ -2573,7 +2593,8 @@ public abstract class As2WhateverConverter
 	protected void process(BcFunctionDeclaration bcFunc, BcClassDefinitionNode bcClass)
 	{
 		List<BcVariableDeclaration> oldDeclaredVars = BcGlobal.declaredVars;
-		BcGlobal.lastBcFunction = bcFunc;
+		
+		BcGlobal.setFunction(bcFunc);
 		BcGlobal.declaredVars = bcFunc.getDeclaredVars();
 
 		// handling default params. TODO: remove code duplication
@@ -2624,7 +2645,7 @@ public abstract class As2WhateverConverter
 
 		bcFunc.setBody(body);
 		BcGlobal.declaredVars = oldDeclaredVars;
-		BcGlobal.lastBcFunction = null;
+		BcGlobal.setFunction(null);
 	}
 
 	protected void process(ExpressionStatementNode node)
@@ -3638,11 +3659,12 @@ public abstract class As2WhateverConverter
 		String name = typeName.getName();
 
 		// search for local variable
-		if (!hasCallTarget && BcGlobal.lastBcFunction != null)
+		if (!hasCallTarget)
 		{
-			BcVariableDeclaration bcVar = BcGlobal.lastBcFunction.findVariable(name);
-			if (bcVar != null) return bcVar.getType();
+			BcVariableDeclaration localVar = findLocalVar(name);
+			if (localVar != null) return localVar.getType();
 		}
+		
 		// search for function
 		BcFunctionDeclaration bcFunc = baseClass.findFunction(name);
 		if (bcFunc != null || 
@@ -3651,6 +3673,7 @@ public abstract class As2WhateverConverter
 		{
 			return new BcFunctionTypeNode(bcFunc);
 		}
+		
 		// search for field
 		BcVariableDeclaration bcField = baseClass.findField(name);
 		if (bcField != null)
