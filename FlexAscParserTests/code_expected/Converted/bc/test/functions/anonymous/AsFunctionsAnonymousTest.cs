@@ -18,7 +18,7 @@ namespace bc.test.functions.anonymous
 		public virtual void testAnonymous2()
 		{
 			AsFunction func = null;
-			func = __function(delegate(String  arg1)
+			func = __function(delegate(String arg1)
 			{
 				doStuff();
 			});

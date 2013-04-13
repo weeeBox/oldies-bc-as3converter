@@ -989,7 +989,7 @@ public abstract class As2WhateverConverter
 	
 	protected void process(FunctionCommonNode node)
 	{
-		dest.write("function");
+		dest.write(getCodeHelper().anonymousFunction());
 		
 		BcFunctionDeclaration func = new BcFunctionDeclaration("");
 		

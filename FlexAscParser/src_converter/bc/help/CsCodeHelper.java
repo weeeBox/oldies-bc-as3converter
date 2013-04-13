@@ -58,6 +58,12 @@ public class CsCodeHelper extends BcCodeHelper
 	}
 	
 	@Override
+	public String anonymousFunction()
+	{
+		return "delegate";
+	}
+	
+	@Override
 	public boolean shouldCastFunction(BcFunctionTypeNode bcFunc)
 	{
 		return !bcFunc.isComplete();

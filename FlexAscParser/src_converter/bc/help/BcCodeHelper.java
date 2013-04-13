@@ -162,6 +162,12 @@ public abstract class BcCodeHelper
 		return stringSetting(name, null);
 	}
 	
+	// TODO: not sure how to handle it
+	public String anonymousFunction()
+	{
+		return "function";
+	}
+	
 	public String stringSetting(String name, String defaultValue)
 	{
 		Object value = objectSetting(name);
