@@ -1003,7 +1003,7 @@ public abstract class As2WhateverConverter
 				func.getDeclaredVars().add(param);
 			}
 			
-			dest.writelnf("(%s)", argsDef(params));
+			dest.writelnf("(%s)", paramsDef(params));
 		}
 		else
 		{

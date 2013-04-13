@@ -13,11 +13,14 @@ import java.util.Map;
 
 import macromedia.asc.parser.ArgumentListNode;
 import macromedia.asc.parser.CallExpressionNode;
+import macromedia.asc.parser.FunctionCommonNode;
 import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.MemberExpressionNode;
+import macromedia.asc.parser.Node;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
+import macromedia.asc.util.ObjectList;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
 import bc.help.BcCodeHelper;
@@ -65,6 +68,13 @@ public class As2CsConverter extends As2WhateverConverter
 	
 	@Override
 	protected void process(MemberExpressionNode node) 
+	{
+		preprocess(node);
+		super.process(node);
+	}
+	
+	@Override
+	protected void process(ArgumentListNode node)
 	{
 		preprocess(node);
 		super.process(node);
@@ -122,6 +132,22 @@ public class As2CsConverter extends As2WhateverConverter
 				{
 					return true;
 				}
+			}
+		}
+		
+		return false;
+	}
+	
+	private boolean preprocess(ArgumentListNode node)
+	{
+		ObjectList<Node> items = node.items;
+		for (int i = 0; i < items.size(); ++i)
+		{
+			Node item = items.get(i);
+			if (item instanceof FunctionCommonNode)
+			{
+				Node newItem = BcNodeFactory.wrapToCall(item, "__function");
+				items.set(i, newItem);
 			}
 		}
 		

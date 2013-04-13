@@ -189,6 +189,19 @@ public class BcNodeFactory {
 		return callExpr;
 	}
 	
+	public static MemberExpressionNode wrapToConstructor(Node node, String typeName)
+	{
+		CallExpressionNode selector = new CallExpressionNode(identifier(typeName), args(node));
+		selector.is_new = true;
+		return new MemberExpressionNode(null, selector, -1);
+	}
+	
+	public static MemberExpressionNode wrapToCall(Node node, String funcName)
+	{	
+		CallExpressionNode selector = callExpression(funcName, args(node));
+		return new MemberExpressionNode(null, selector, -1);
+	}
+	
 	public static CallExpressionNode turnSelectorToCall(MemberExpressionNode node, String funcName)
 	{
 		ArgumentListNode args = null;

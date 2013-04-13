@@ -49,7 +49,7 @@ package bc.flash
 			}
         }
 
-		public function __function(name:String) : Function
+		public function __function(arg:Object) : Function
 		{
 			return null;
 		}
