@@ -156,6 +156,19 @@ public class SyntaxConversionTest extends ConverterTestSuite
 	}
 	
 	@Test
+	public void testFunctionAnonymous() throws IOException 
+	{
+		convert("/bc/test/functions/anonymous");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/functions/anonymous/AsFunctionsAnonymousTest.cs",
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
 	public void testObjectClass() throws IOException
 	{
 		convert("/bc/test/objects");

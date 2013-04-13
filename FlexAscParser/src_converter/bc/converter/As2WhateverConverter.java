@@ -41,6 +41,7 @@ import macromedia.asc.parser.ForStatementNode;
 import macromedia.asc.parser.FunctionCommonNode;
 import macromedia.asc.parser.FunctionDefinitionNode;
 import macromedia.asc.parser.FunctionNameNode;
+import macromedia.asc.parser.FunctionSignatureNode;
 import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.HasNextNode;
 import macromedia.asc.parser.IdentifierNode;
@@ -558,56 +559,15 @@ public abstract class As2WhateverConverter
 	
 	private BcFunctionDeclaration collect(FunctionDefinitionNode functionDefinitionNode, BcFunctionDeclaration bcFunc)
 	{
-		List<BcFunctionTypeNode> functionTypes = null;
-		BcMetadata funcMetadata = bcFunc.getMetadata();
-		if (funcMetadata != null)
-		{
-			functionTypes = extractFunctionTypes(funcMetadata);
-		}
-
 		// get function params
 		ParameterListNode parameterNode = functionDefinitionNode.fexpr.signature.parameter;
 		if (parameterNode != null)
 		{
-			ObjectList<ParameterNode> params = parameterNode.items;
-			for (ParameterNode param : params)
+			List<BcFuncParam> paramsNodes = extractFuncParams(parameterNode);
+			for (BcFuncParam param : paramsNodes)
 			{
-				BcTypeNode paramType = extractBcType(param);
-				boolean qualified = isTypeQualified(param);
-
-				String paramName = param.identifier.name;
-
-				// search for func param in metadata
-				if (paramType instanceof BcFunctionTypeNode && functionTypes != null)
-				{
-					if (functionTypes.size() > 1)
-					{
-						for (BcFunctionTypeNode funcType : functionTypes)
-						{
-							if (funcType.hasAttachedParam() && funcType.getAttachedParam().equals(paramName))
-							{
-								paramType = funcType;
-								break;
-							}
-						}
-					}
-					else
-					{
-						paramType = functionTypes.get(0);
-					}
-
-					BcFunctionTypeNode funcType = (BcFunctionTypeNode) paramType;
-					failConversionUnless(funcType.isComplete(), "Function param '%s' is incomplete. Please provide function metadata or global function metadata", paramName);
-				}
-
-				BcFuncParam bcParam = new BcFuncParam(paramType.createTypeInstance(qualified), getCodeHelper().identifier(paramName));
-				if (param.init != null)
-				{
-					bcParam.setInitializerNode(param.init);
-				}
-
-				bcFunc.addParam(bcParam);
-				bcFunc.getDeclaredVars().add(bcParam);
+				bcFunc.addParam(param);
+				bcFunc.getDeclaredVars().add(param);
 			}
 		}
 
@@ -1029,7 +989,19 @@ public abstract class As2WhateverConverter
 	
 	protected void process(FunctionCommonNode node)
 	{
-		failConversion("Unexpected function common node");
+		dest.write("function");
+		
+		ParameterListNode parameterList = node.signature.parameter;
+		if (parameterList != null)
+		{
+			List<BcFuncParam> params = extractFuncParams(parameterList);
+			dest.writelnf("(%s)", argsDef(params));
+		}
+		else
+		{
+			dest.writeln("()");
+		}
+		process(node.body);
 	}
 
 	private List<BcVariableDeclaration> process(VariableDefinitionNode node)
@@ -3224,6 +3196,28 @@ public abstract class As2WhateverConverter
 
 		return functionTypes;
 	}
+	
+	private List<BcFuncParam> extractFuncParams(ParameterListNode parameterNode)
+	{
+		ObjectList<ParameterNode> params = parameterNode.items;
+		
+		List<BcFuncParam> paramsNodes = new ArrayList<BcFuncParam>(params.size());
+		for (ParameterNode param : params)
+		{
+			BcTypeNode paramType = extractBcType(param);
+			boolean qualified = isTypeQualified(param);
+
+			String paramName = getCodeHelper().identifier(param.identifier.name);
+			BcFuncParam bcParam = new BcFuncParam(paramType.createTypeInstance(qualified), paramName);
+			if (param.init != null)
+			{
+				bcParam.setInitializerNode(param.init);
+			}
+
+			paramsNodes.add(bcParam);
+		}
+		return paramsNodes;
+	}
 
 	public BcTypeNodeInstance evaluateTypeInstance(Node node)
 	{
@@ -3480,6 +3474,11 @@ public abstract class As2WhateverConverter
 		if (node instanceof LiteralXMLNode)
 		{
 			return createBcType(BcTypeNode.typeXML);
+		}
+		
+		if (node instanceof FunctionCommonNode)
+		{
+			return createBcType(BcTypeNode.typeFunction);
 		}
 
 		failConversion("Unable to evaluate node's type: %s", node.getClass());
