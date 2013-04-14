@@ -63,20 +63,39 @@ namespace bc.flash
             return methodInfo.Invoke(target, parameters);
         }
 
-        public Object apply(Object thisArg = null, Object argArray = null)
+        public override Object apply(Object thisArg = null, AsArray argArray = null)
         {
-            throw new NotImplementedException();
+            return call(thisArg, createArgs(argArray));
         }
 
-        public Object call(Object thisArg = null, params Object[] args)
+        public override Object apply(Object thisArg = null, params Object[] args)
         {
-            throw new NotImplementedException();
+            return call(thisArg, args);
+        }
+
+        public override Object call(Object thisArg = null, params Object[] args)
+        {
+            Object targetObj = thisArg != null ? thisArg : target;
+            return methodInfo.Invoke(targetObj, args);
         }
 
         private Object[] singleParam(Object param)
         {
             SINGLE_PARAM[0] = param;
             return SINGLE_PARAM;
+        }
+
+        private object[] createArgs(AsArray argArray)
+        {
+            if (argArray == null) return EMPTY_PARAMS;
+            uint count = argArray.getLength();
+
+            Object[] args = new Object[count];
+            for (int i = 0; i < count; ++i)
+            {
+                args[i] = argArray[i];
+            }
+            return args;
         }
     }
 

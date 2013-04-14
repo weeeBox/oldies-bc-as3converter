@@ -5,17 +5,10 @@ package bc.flash
 	{
 		/* public static const length : int = 1; */
 
-		public function apply(thisArg : * = null, argArray : * = null) : *
-		{
-			return null;
-		}
-		
 		public function invoke(...args) : *
 		{
 			return null;
 		}
-
-		/* public function call(thisArg : * = undefined, ...args : *) : *; */
 
 		/* public function get length() : int; */
 

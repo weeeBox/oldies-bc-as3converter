@@ -111,7 +111,20 @@ namespace bc.flash
 
         public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, Result>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, Result> func) { return new AsFunction(this, func.Method); }
 
+        public virtual Object apply(Object thisArg = null, AsArray argArray = null)
+        {
+            throw new NotImplementedException();
+        }
 
+        public virtual Object apply(Object thisArg = null, params Object[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual Object call(Object thisArg = null, params Object[] args)
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
 

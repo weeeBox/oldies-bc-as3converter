@@ -33,14 +33,19 @@ package bc.test.functions.types
             mObj.functionDefaultCallback.apply(null, args);
         }
         
-        public function argumentsFunction(a:String, b:String) : void
+        public function testApplyFunction(args:Array) : void
         {
-            mFunc.apply();
+            mFunc.apply(null, args);
         }
         
-        public function argumentsCastFunction(a:Object, b:String) : void
+        public function testApplyFunction(...args) : void
         {
-            mFunc.apply();
+            mFunc.apply(null, args);
+        }
+        
+        public function testCallFunction(a:Object, b:String) : void
+        {
+            mFunc.call(null, a, b);
         }
 
         private function accept(func:Function) : void 
