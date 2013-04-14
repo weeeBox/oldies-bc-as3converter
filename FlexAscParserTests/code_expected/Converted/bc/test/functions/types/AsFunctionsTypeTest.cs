@@ -26,23 +26,27 @@ namespace bc.test.functions.types
             accept(__function("functionDefaultCallback"));
             mObj.accept(__function("functionDefaultCallback"));
         }
-        public virtual void testFunctionApply()
+        public virtual void testFunctionApply1()
         {
             AsArray args = new AsArray("This is string", "This is another string");
             __function("functionDefaultCallback").apply(null, args);
             mObj.__function("functionDefaultCallback").apply(null, args);
         }
-        public virtual void testApplyFunction(AsArray args)
+        public virtual void testFunctionApply2(params Object[] args)
         {
             mFunc.apply(null, args);
         }
-        public virtual void testApplyFunction(params Object[] args)
+        public virtual void testFunctionApply3(params Object[] args)
         {
-            mFunc.apply(null, args);
+            __function("functionDefaultCallback").apply(null, args);
         }
-        public virtual void testCallFunction(Object a, String b)
+        public virtual void testCallFunction1(Object a, String b)
         {
             mFunc.call(null, a, b);
+        }
+        public virtual void testCallFunction2(Object a, String b)
+        {
+            __function("functionDefaultCallback").call(null, a, b);
         }
         private void accept(AsFunction func)
         {

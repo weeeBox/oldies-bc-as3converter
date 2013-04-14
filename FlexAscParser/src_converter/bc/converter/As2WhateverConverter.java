@@ -4097,9 +4097,14 @@ public abstract class As2WhateverConverter
 			}
 		}
 
+		if (toType.isRest() || toType.isUntyped())
+		{
+			return false;
+		}
+		
 		if (typeEquals(fromType, BcTypeNode.typeObject))
 		{
-			return !typeEquals(toType, BcTypeNode.typeObject) && !toType.isUntyped();
+			return !typeEquals(toType, BcTypeNode.typeObject);
 		}
 
 		if (toType.isIntegral() && typeEquals(fromType, BcTypeNode.typeString))

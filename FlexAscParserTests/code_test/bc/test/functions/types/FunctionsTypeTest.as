@@ -26,26 +26,31 @@ package bc.test.functions.types
             mObj.accept(functionDefaultCallback);
         }
         
-        public function testFunctionApply() : void
+        public function testFunctionApply1() : void
         {
             var args : Array = ["This is string", "This is another string"];
             functionDefaultCallback.apply(null, args);
             mObj.functionDefaultCallback.apply(null, args);
         }
         
-        public function testApplyFunction(args:Array) : void
+        public function testFunctionApply2(...args) : void
         {
             mFunc.apply(null, args);
         }
         
-        public function testApplyFunction(...args) : void
+        public function testFunctionApply3(...args) : void
         {
-            mFunc.apply(null, args);
+            functionDefaultCallback.apply(null, args);
         }
         
-        public function testCallFunction(a:Object, b:String) : void
+        public function testCallFunction1(a:Object, b:String) : void
         {
             mFunc.call(null, a, b);
+        }
+        
+        public function testCallFunction2(a:Object, b:String) : void
+        {
+            functionDefaultCallback.call(null, a, b);
         }
 
         private function accept(func:Function) : void 

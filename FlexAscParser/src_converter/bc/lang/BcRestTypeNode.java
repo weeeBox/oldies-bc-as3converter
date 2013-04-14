@@ -6,7 +6,7 @@ public class BcRestTypeNode extends BcTypeNode
 
 	protected BcRestTypeNode(BcTypeNodeInstance resType)
 	{
-		super("_AS_REST");
+		super("...");
 		this.restTypeInstance = resType;
 	}
 	
@@ -18,5 +18,11 @@ public class BcRestTypeNode extends BcTypeNode
 	public BcTypeNode getRestType()
 	{
 		return restTypeInstance.getType();
+	}
+
+	@Override
+	public boolean isRest()
+	{
+		return true;
 	}
 }
