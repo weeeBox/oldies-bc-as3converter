@@ -13,4 +13,10 @@ public class BcUndefinedType extends BcTypeNode
 	{
 		return instance;
 	}
+	
+	@Override
+	public boolean isUndefined()
+	{
+		return true;
+	}
 }

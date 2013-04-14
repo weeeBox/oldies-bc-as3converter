@@ -6,4 +6,10 @@ public class BcUntypedNode extends BcTypeNode
 	{
 		super("*");
 	}
+	
+	@Override
+	public boolean isUntyped()
+	{
+		return true;
+	}
 }

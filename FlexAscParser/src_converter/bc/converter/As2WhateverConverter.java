@@ -2520,6 +2520,12 @@ public abstract class As2WhateverConverter
 	{
 		failConversionUnless(!node.finallyInserted, "Return statement with finally inserted is not supported yet");
 
+		if (node.expr instanceof UnaryExpressionNode)
+		{
+			UnaryExpressionNode unaryNode = (UnaryExpressionNode) node.expr;
+			if (unaryNode.op == Tokens.VOID_TOKEN) return; // special case
+		}
+		
 		dest.write("return");
 		if (node.expr != null)
 		{
@@ -2676,7 +2682,7 @@ public abstract class As2WhateverConverter
 
 	protected void process(BcTypeNode typeNode)
 	{
-		if (!typeNode.hasClassNode())
+		if (!typeNode.hasClassNode() && !typeNode.isSpecialType())
 		{
 			BcClassDefinitionNode classNode;
 			if (typeNode.isBasic())
@@ -4093,7 +4099,7 @@ public abstract class As2WhateverConverter
 
 		if (typeEquals(fromType, BcTypeNode.typeObject))
 		{
-			return !typeEquals(toType, BcTypeNode.typeObject);
+			return !typeEquals(toType, BcTypeNode.typeObject) && !toType.isUntyped();
 		}
 
 		if (toType.isIntegral() && typeEquals(fromType, BcTypeNode.typeString))
@@ -4102,6 +4108,11 @@ public abstract class As2WhateverConverter
 		}
 
 		if (!toType.isIntegral() && typeEquals(fromType, BcTypeNode.typeObject) && !typeEquals(toType, BcTypeNode.typeObject))
+		{
+			return true;
+		}
+		
+		if (fromType.isUntyped() && !toType.isUntyped())
 		{
 			return true;
 		}

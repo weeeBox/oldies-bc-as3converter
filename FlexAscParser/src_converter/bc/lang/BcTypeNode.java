@@ -13,6 +13,7 @@ public class BcTypeNode extends BcNode
 {
 	private static final String TYPE_FUNCTION 	= "Function";
 	private static final String TYPE_GENERIC 	= "_$_generic_$_";
+	private static final String TYPE_UNTYPED 	= "*";
 	
 	public static final String typeVoid 		= "void";
 	public static final String typeGlobal 		= "Global";
@@ -94,6 +95,11 @@ public class BcTypeNode extends BcNode
 		if (name.equals(TYPE_GENERIC))
 		{
 			return new BcGenericTypeNode(typeName);
+		}
+		
+		if (name.equals(TYPE_UNTYPED))
+		{
+			return BcUndefinedType.instance();
 		}
 
 		if (name.equals("void"))
@@ -324,6 +330,21 @@ public class BcTypeNode extends BcNode
 	public boolean isRest()
 	{
 		return false;
+	}
+	
+	public boolean isUntyped()
+	{
+		return false;
+	}
+	
+	public boolean isUndefined()
+	{
+		return false;
+	}
+	
+	public boolean isSpecialType()
+	{
+		return isUntyped() || isUndefined();
 	}
 
 	@Override
