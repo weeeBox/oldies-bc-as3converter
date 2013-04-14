@@ -4243,6 +4243,11 @@ public abstract class As2WhateverConverter
 			return bcType.getName();
 		}
 		
+		if (bcType.isUndefined())
+		{
+			return getCodeHelper().undefinedType();
+		}
+		
 		String typeString = createTypeString(bcType);
 		return typeString != null ? typeString : createTypeName(bcType.getName());
 	}

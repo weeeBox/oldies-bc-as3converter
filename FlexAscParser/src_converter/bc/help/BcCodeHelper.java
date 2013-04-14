@@ -194,6 +194,11 @@ public abstract class BcCodeHelper
 	{
 		return literalString(value);
 	}
+	
+	public String undefinedType()
+	{
+		return "*";
+	}
 
 	public boolean shouldCastFunction(BcFunctionTypeNode bcFunc)
 	{

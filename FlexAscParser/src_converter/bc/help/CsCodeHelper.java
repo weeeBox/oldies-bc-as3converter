@@ -58,6 +58,12 @@ public class CsCodeHelper extends BcCodeHelper
 	}
 	
 	@Override
+	public String undefinedType()
+	{
+		return "Object";
+	}
+	
+	@Override
 	public String anonymousFunction()
 	{
 		return "delegate";

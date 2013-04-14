@@ -141,13 +141,10 @@ package bc.test.basic.calls
             return null;
         }
         
-        /*
-        // FIXME: add support for untyped return
         public function funcWithUntypedArgAndUndefinedReturnType(arg : *) : *
         {
             return null;
         }
-        */
         
         public function funcWithArgsAndRestArgsAndReturnType(arg1 : String, arg2 : String, ... args) : String
         {
