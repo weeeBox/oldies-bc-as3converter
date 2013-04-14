@@ -22,7 +22,7 @@ import bc.lang.BcFunctionDeclaration;
 import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
-import bc.lang.BcUntypedTypeNode;
+import bc.lang.BcUntypedNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 
@@ -1054,7 +1054,7 @@ public class As2CppConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	protected String wildCardType(BcUntypedTypeNode type)
+	protected String wildCardType(BcUntypedNode type)
 	{
 		failConversion("Implement me");
 		return null;

@@ -40,7 +40,7 @@ import bc.lang.BcMetadataNode;
 import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
-import bc.lang.BcUntypedTypeNode;
+import bc.lang.BcUntypedNode;
 
 public class BcNodeHelper
 {
@@ -228,7 +228,7 @@ public class BcNodeHelper
 	{
 		if (type == null)
 		{			
-			return new BcUntypedTypeNode();
+			return new BcUntypedNode();
 		}
 		
 		if (type instanceof IdentifierNode)

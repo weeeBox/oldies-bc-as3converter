@@ -87,7 +87,7 @@ public final class Context implements ErrorConstants
 
     private TreeMap<UnresolvedNamespace, ObjectList<ObjectValue>> unresolved_namespaces;
 	public ObjectList<Node>    comments = new ObjectList<Node>();
-	public boolean scriptAssistParsing = false;	// allows use of the Asc parser by flex-debugger
+	public boolean scriptAssistParsing = true;	// allows use of the Asc parser by flex-debugger
 	public boolean spaceOperators = false;
 	
     public Context(ContextStatics statics)

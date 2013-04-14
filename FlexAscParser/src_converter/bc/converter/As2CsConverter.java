@@ -39,7 +39,7 @@ import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
-import bc.lang.BcUntypedTypeNode;
+import bc.lang.BcUntypedNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 import bc.utils.string.StringUtils;
@@ -663,7 +663,7 @@ public class As2CsConverter extends As2WhateverConverter
 		
 	private void tryAddUniqueNamespace(CsImportsData importsData, BcTypeNode type)
 	{
-		if (type instanceof BcUntypedTypeNode)
+		if (type instanceof BcUntypedNode)
 		{
 			return;
 		}
@@ -754,7 +754,7 @@ public class As2CsConverter extends As2WhateverConverter
 	}
 	
 	@Override
-	protected String wildCardType(BcUntypedTypeNode type)
+	protected String wildCardType(BcUntypedNode type)
 	{
 		return "Object";
 	}

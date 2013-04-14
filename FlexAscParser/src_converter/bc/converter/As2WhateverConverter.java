@@ -13,7 +13,6 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,7 +40,6 @@ import macromedia.asc.parser.ForStatementNode;
 import macromedia.asc.parser.FunctionCommonNode;
 import macromedia.asc.parser.FunctionDefinitionNode;
 import macromedia.asc.parser.FunctionNameNode;
-import macromedia.asc.parser.FunctionSignatureNode;
 import macromedia.asc.parser.GetExpressionNode;
 import macromedia.asc.parser.HasNextNode;
 import macromedia.asc.parser.IdentifierNode;
@@ -121,7 +119,7 @@ import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcUndefinedType;
-import bc.lang.BcUntypedTypeNode;
+import bc.lang.BcUntypedNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
 import bc.preprocessor.Preprocessor;
@@ -2712,7 +2710,7 @@ public abstract class As2WhateverConverter
 			return null;
 		}
 
-		if (type instanceof BcUntypedTypeNode)
+		if (type instanceof BcUntypedNode)
 		{
 			return findClass(BcTypeNode.typeObject);
 		}
@@ -4205,7 +4203,7 @@ public abstract class As2WhateverConverter
 
 	protected abstract String vectorType(BcVectorTypeNode vectorType);
 	protected abstract String restType(BcRestTypeNode type);
-	protected abstract String wildCardType(BcUntypedTypeNode type);
+	protected abstract String wildCardType(BcUntypedNode type);
 	
 	public abstract String constructVector(BcVectorTypeNode vectorType, BcArgumentsList args);
 	public abstract String constructLiteralVector(BcVectorTypeNode vectorType, BcArgumentsList args);
@@ -4274,9 +4272,9 @@ public abstract class As2WhateverConverter
 			return restType((BcRestTypeNode) bcType);
 		}
 		
-		if (bcType instanceof BcUntypedTypeNode)
+		if (bcType instanceof BcUntypedNode)
 		{
-			return wildCardType((BcUntypedTypeNode) bcType);
+			return wildCardType((BcUntypedNode) bcType);
 		}
 		
 		if (bcType instanceof BcVectorTypeNode)
