@@ -114,5 +114,8 @@ package bc.flash.events
         
         /** A string that identifies the event. */
         public function get type():String { return mType; }
+        
+        /** TODO: add a real method. */
+        public function get cancelable():Boolean { return false; }
 	}
 }
