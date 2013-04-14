@@ -6,35 +6,7 @@ using System.Reflection;
 
 namespace bc.flash
 {
-    public abstract class AsFunction : AsObject
-    {
-        public virtual Object apply(Object target, AsArray args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual Object apply(Object target, params Object[] args)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual Object invoke()
-        {
-            throw new FunctionInvokationException("Can't invoke function with no parameters");
-        }
-
-        public virtual Object invoke(Object param)
-        {
-            throw new FunctionInvokationException("Can't invoke function with 1 parameter");
-        }
-
-        public virtual Object invoke(params Object[] parameters)
-        {
-            throw new FunctionInvokationException("Can't invoke function with " + parameters.Length + " parameter(s)");
-        }
-    }
-
-    public class FunctionRef : AsFunction
+    public class AsFunction : AsObject
     {
         private const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic |
                                            BindingFlags.Static | BindingFlags.Instance;
@@ -45,7 +17,7 @@ namespace bc.flash
         private Object target;
         private MethodInfo methodInfo;
 
-        public FunctionRef(Object target, String name)
+        public AsFunction(Object target, String name)
         {   
             if (target == null)
             {
@@ -70,19 +42,35 @@ namespace bc.flash
             this.target = target;
         }
 
-        public override object invoke()
+        public AsFunction(Object target, MethodInfo info)
+        {
+            this.target = target;
+            this.methodInfo = info;
+        }
+
+        public Object invoke()
         {
             return invoke(EMPTY_PARAMS);
         }
 
-        public override Object invoke(Object param)
+        public Object invoke(Object param)
         {
             return invoke(singleParam(param));
         }
 
-        public override Object invoke(params Object[] parameters)
+        public Object invoke(params Object[] parameters)
         {
             return methodInfo.Invoke(target, parameters);
+        }
+
+        public Object apply(Object thisArg = null, Object argArray = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Object call(Object thisArg = null, params Object[] args)
+        {
+            throw new NotImplementedException();
         }
 
         private Object[] singleParam(Object param)

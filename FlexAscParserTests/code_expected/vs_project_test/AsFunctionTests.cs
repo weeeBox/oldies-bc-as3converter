@@ -8,7 +8,7 @@ using bc.flash;
 namespace vs_project_test
 {
     [TestClass]
-    public class AsFunctionTests
+    public class AsFunctionTests : AsObject
     {   
         private Bar target = new Bar();
         
@@ -60,13 +60,13 @@ namespace vs_project_test
             target.Clear();
 
             AsFunction func;
-            func = new Anonymous1(delegate()
+            func = __function(delegate()
             {
                 target.result.Add("delegate()");
             });
             func.invoke();
 
-            func = new Anonymous2(delegate(int x, int y)
+            func = __function(delegate(int x, int y)
             {
                 target.result.Add("delegate(" + x + "," + y + ")");
             });
@@ -79,7 +79,7 @@ namespace vs_project_test
         public void TestInnerFunctionReturn()
         {   
             AsFunction func;
-            func = new Anonymous3(delegate(String value)
+            func = __function(delegate(String value)
             {
                 return value;
             });
@@ -138,59 +138,6 @@ namespace vs_project_test
         private void Func3(Foo foo)
         {
             result.Add("Func3(" + foo.GetType().Name + ")");
-        }
-    }
-
-    class Anonymous1 : AsFunction
-    {
-        public delegate void DelegateType();
-
-        private DelegateType type;
-
-        public Anonymous1(DelegateType type)
-        {   
-            this.type = type;
-        }
-
-        public override Object invoke()
-        {
-            type();
-            return null;
-        }
-    }
-
-    class Anonymous2 : AsFunction
-    {
-        public delegate void DelegateType(int x, int y);
-
-        private DelegateType type;
-
-        public Anonymous2(DelegateType type)
-        {
-            this.type = type;
-        }
-
-        public override Object invoke(params Object[] parameters)
-        {
-            type((int)parameters[0], (int)parameters[1]);
-            return null;
-        }
-    }
-
-    class Anonymous3 : AsFunction
-    {
-        public delegate Object DelegateType(String value);
-
-        private DelegateType type;
-
-        public Anonymous3(DelegateType type)
-        {
-            this.type = type;
-        }
-
-        public override Object invoke(Object param)
-        {   
-            return type((String)param);
         }
     }
 }

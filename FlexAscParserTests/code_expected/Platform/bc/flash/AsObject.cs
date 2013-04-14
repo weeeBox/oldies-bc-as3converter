@@ -40,10 +40,80 @@ namespace bc.flash
             }
         }
 
+        #region Functions
+
         public AsFunction __function(String name)
         {
-            return new FunctionRef(this, name);
+            return new AsFunction(this, name);
         }
+
+        public AsFunction __function(Action func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<Result>(Func<Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1>(Action<T1> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, Result>(Func<T1, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2>(Action<T1, T2> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, Result>(Func<T1, T2, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3>(Action<T1, T2, T3> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, Result>(Func<T1, T2, T3, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4>(Action<T1, T2, T3, T4> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, Result>(Func<T1, T2, T3, T4, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, Result>(Func<T1, T2, T3, T4, T5, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, Result>(Func<T1, T2, T3, T4, T5, T6, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, Result>(Func<T1, T2, T3, T4, T5, T6, T7, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, Result>(Func<T1, T2, T3, T4, T5, T6, T7, T8, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, Result>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Result>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, Result>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, Result>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, Result>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, Result>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, Result> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> func) { return new AsFunction(this, func.Method); }
+
+        public AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, Result>(Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, Result> func) { return new AsFunction(this, func.Method); }
+
+
+
+        #endregion
 
         public virtual String toString()
         {
