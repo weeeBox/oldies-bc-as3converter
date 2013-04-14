@@ -58,7 +58,7 @@ public class CsCodeHelper extends BcCodeHelper
 	}
 	
 	@Override
-	public String undefinedType()
+	public String untyped()
 	{
 		return "Object";
 	}

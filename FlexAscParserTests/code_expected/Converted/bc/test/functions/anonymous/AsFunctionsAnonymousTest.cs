@@ -40,7 +40,7 @@ namespace bc.test.functions.anonymous
 			{
 				return arg1 + " " + arg2;
 			});
-			String result = (String)func.invoke();
+			String result = (String)(func.invoke());
 		}
 		public virtual void testAnonymous5()
 		{
@@ -49,7 +49,7 @@ namespace bc.test.functions.anonymous
 			{
 				return arg1 + arg2;
 			});
-			int result = (int)func.invoke();
+			int result = (int)(func.invoke());
 		}
 		private void doStuff()
 		{

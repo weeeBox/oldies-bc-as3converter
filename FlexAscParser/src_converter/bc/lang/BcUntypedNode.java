@@ -2,7 +2,9 @@ package bc.lang;
 
 public class BcUntypedNode extends BcTypeNode
 {
-	public BcUntypedNode()
+	private static BcUntypedNode instance = new BcUntypedNode();
+	
+	private BcUntypedNode()
 	{
 		super("*");
 	}
@@ -11,5 +13,10 @@ public class BcUntypedNode extends BcTypeNode
 	public boolean isUntyped()
 	{
 		return true;
+	}
+	
+	public static BcUntypedNode instance()
+	{
+		return instance;
 	}
 }

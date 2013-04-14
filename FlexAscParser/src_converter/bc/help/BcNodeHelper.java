@@ -228,7 +228,7 @@ public class BcNodeHelper
 	{
 		if (type == null)
 		{			
-			return new BcUntypedNode();
+			return BcUntypedNode.instance();
 		}
 		
 		if (type instanceof IdentifierNode)

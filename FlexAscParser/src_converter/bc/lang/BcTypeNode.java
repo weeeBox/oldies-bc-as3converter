@@ -99,7 +99,7 @@ public class BcTypeNode extends BcNode
 		
 		if (name.equals(TYPE_UNTYPED))
 		{
-			return BcUndefinedType.instance();
+			return BcUntypedNode.instance();
 		}
 
 		if (name.equals("void"))

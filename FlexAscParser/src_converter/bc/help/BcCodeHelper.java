@@ -195,7 +195,7 @@ public abstract class BcCodeHelper
 		return literalString(value);
 	}
 	
-	public String undefinedType()
+	public String untyped()
 	{
 		return "*";
 	}

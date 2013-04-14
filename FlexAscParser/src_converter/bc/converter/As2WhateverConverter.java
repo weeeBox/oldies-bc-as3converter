@@ -4188,6 +4188,10 @@ public abstract class As2WhateverConverter
 			{
 				return castInterface(expression, fromType, toTypeInstance);
 			}
+			else if (fromType.isUntyped())
+			{
+				return createCast(expression, toTypeInstance);
+			}
 			else
 			{
 				failConversion("Can't make a class cast from '%s' to '%s': %s", fromType.getName(), toType.getName(), expression);
@@ -4243,9 +4247,9 @@ public abstract class As2WhateverConverter
 			return bcType.getName();
 		}
 		
-		if (bcType.isUndefined())
+		if (bcType.isUntyped())
 		{
-			return getCodeHelper().undefinedType();
+			return getCodeHelper().untyped();
 		}
 		
 		String typeString = createTypeString(bcType);
