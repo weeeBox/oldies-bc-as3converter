@@ -236,7 +236,23 @@ public class As2CsConverter extends As2WhateverConverter
 		if (selector.isGetExpression())
 		{
 			BcTypeNode nodeType = evaluateType(node, true);
-			failConversionUnless(nodeType != null);
+			if (nodeType == null)
+			{
+				failConversionUnless(node.base != null);
+				
+				BcTypeNode baseType = evaluateType(node.base, true);
+				failConversionUnless(baseType != null);
+				
+				if (typeEquals(baseType, BcTypeNode.typeMovieClip))
+				{
+					String identifier = BcNodeHelper.tryExtractIdentifier(node.selector);
+					failConversionUnless(identifier != null);
+					BcNodeFactory.turnSelectorToCall(node, "_", BcNodeFactory.args(new LiteralStringNode(identifier)));
+					return true;
+				}
+				
+				failConversion("Unexpected base type: " + baseType);
+			}
 			
 			if (nodeType.isFunction())
 			{

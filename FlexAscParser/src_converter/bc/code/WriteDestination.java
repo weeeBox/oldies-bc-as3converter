@@ -70,7 +70,14 @@ public abstract class WriteDestination
 
 	public void writef(String str, Object...args)
 	{
-		write(String.format(str, args));
+		if (args.length > 0)
+		{
+			write(String.format(str, args));
+		}
+		else
+		{
+			write(str);
+		}
 	}
 
 	public void writelnf(String str, Object...args)

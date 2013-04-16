@@ -28,6 +28,7 @@ public class BcTypeNode extends BcNode
 	public static final String typeXML 			= "XML";
 	public static final String typeXMLList 		= "XMLList";
 	public static final String typeBoolean 		= "Boolean";
+	public static final String typeMovieClip 	= "MovieClip";
 	
 	private BcTypeName typeName;
 	

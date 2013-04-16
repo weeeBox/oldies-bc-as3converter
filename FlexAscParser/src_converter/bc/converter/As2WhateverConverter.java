@@ -4571,6 +4571,27 @@ public abstract class As2WhateverConverter
 		}
 	}
 	
+	protected void warnConversion(String format, Object... args)
+	{
+		warnConversionUnless(false, format, args);
+	}
+	
+	protected void warnConversionUnless(boolean condition)
+	{
+		warnConversionUnless(condition, "");
+	}
+	
+	protected void warnConversionUnless(boolean condition, String format, Object... args)
+	{
+		if (!condition)
+		{
+			String message = new Formatter().format(format, args).toString();
+			String className = BcGlobal.lastBcClass != null ? BcGlobal.lastBcClass.toString() : null;
+			String functionName = BcGlobal.lastBcFunction != null ? BcGlobal.lastBcFunction.toString() : null;
+			System.err.println(String.format("Conversion failed:\n\treason: %s\n\tclass: %s\n\tfunction: %s", message, className, functionName));
+		}
+	}
+	
 	private InputStream preprocess(File file) throws IOException 
 	{
 		try {
