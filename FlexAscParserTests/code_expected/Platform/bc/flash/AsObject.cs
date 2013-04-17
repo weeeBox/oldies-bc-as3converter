@@ -150,4 +150,33 @@ namespace bc.flash
             return obj;
         }
     }
+
+    public static class ObjectExtensions
+    {
+        public static Object getOwnProperty(this Object obj, String name)
+        {
+            AsObject asObj = obj as AsObject;
+            return asObj != null ? asObj.getOwnProperty(name) : null;
+        }
+
+        public static void setOwnProperty(this Object obj, String name, Object value)
+        {
+            AsObject asObj = obj as AsObject;
+            if (asObj == null)
+            {
+                throw new ArgumentException("Unexpected type: " + obj.GetType());
+            }
+            asObj.setOwnProperty(name, value);
+        }
+
+        public static void deleteOwnProperty(this Object obj, String name)
+        {
+            AsObject asObj = obj as AsObject;
+            if (asObj == null)
+            {
+                throw new ArgumentException("Unexpected type: " + obj.GetType());
+            }
+            asObj.deleteOwnProperty(name);
+        }
+    }
 }

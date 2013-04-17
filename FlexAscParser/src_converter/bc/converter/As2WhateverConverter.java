@@ -1123,80 +1123,38 @@ public abstract class As2WhateverConverter
 			popDest();
 		}
 
-		boolean objectAsDictionaryCall = false;
-
 		if (base != null)
 		{
-			if (selector.getMode() == Tokens.LEFTBRACKET_TOKEN)
+			if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
 			{
-				objectAsDictionaryCall = !typeOneOf(baseType, BcTypeNode.typeVector, BcTypeNode.typeDictionary, BcTypeNode.typeArray, BcTypeNode.typeString, BcTypeNode.typeXMLList);
-			}
-		}
-
-		if (objectAsDictionaryCall)
-		{
-			ListWriteDestination exprDest = new ListWriteDestination();
-			pushDest(exprDest);
-			processNode(selector.expr);
-			popDest();
-
-			if (selector instanceof SetExpressionNode)
-			{
-				SetExpressionNode setExpr = (SetExpressionNode) selector;
-
-				failConversionUnless(setExpr.args != null, "Set expression with no args: %s", exprDest);
-
-				ListWriteDestination argsDest = new ListWriteDestination();
-				pushDest(argsDest);
-				processNode(setExpr.args);
-				popDest();
-
-				writeMemberSelector(baseType, baseDest, call("setOwnProperty", exprDest, argsDest));
-			}
-			else if (selector instanceof GetExpressionNode)
-			{
-				writeMemberSelector(baseType, baseDest, call("getOwnProperty", exprDest));
+				if (staticCall)
+				{
+					dest.write(staticSelector(baseDest, selectorDest));
+				}
+				else if (base instanceof ThisExpressionNode)
+				{
+					failConversionUnless(BcGlobal.lastBcClass != null, "Try to use 'this' without of a class: base=%s selector=%s", baseDest, selectorDest);
+					dest.write(thisSelector(BcGlobal.lastBcClass, selectorDest));
+				}
+				else if (base instanceof SuperExpressionNode)
+				{
+					failConversionUnless(BcGlobal.lastBcClass != null, "Try to use 'super' without of a class: base=%s selector=%s", baseDest, selectorDest);
+					dest.write(superSelector(BcGlobal.lastBcClass, selectorDest));
+				}
+				else
+				{
+					writeMemberSelector(baseType, baseDest, selectorDest);
+				}
 			}
 			else
 			{
-				failConversion("Unexpected selector for 'object-as-dictionary' call: type=%s expr=%s", selector.getClass(), exprDest);
+				dest.write(baseDest);
+				dest.write(selectorDest);
 			}
 		}
 		else
 		{
-			if (base != null)
-			{
-				if (selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
-				{
-					if (staticCall)
-					{
-						dest.write(staticSelector(baseDest, selectorDest));
-					}
-					else if (base instanceof ThisExpressionNode)
-					{
-						failConversionUnless(BcGlobal.lastBcClass != null, "Try to use 'this' without of a class: base=%s selector=%s", baseDest, selectorDest);
-						dest.write(thisSelector(BcGlobal.lastBcClass, selectorDest));
-					}
-					else if (base instanceof SuperExpressionNode)
-					{
-						failConversionUnless(BcGlobal.lastBcClass != null, "Try to use 'super' without of a class: base=%s selector=%s", baseDest, selectorDest);
-						dest.write(superSelector(BcGlobal.lastBcClass, selectorDest));
-					}
-					else
-					{
-						writeMemberSelector(baseType, baseDest, selectorDest);
-					}
-				}
-				else
-				{
-					dest.write(baseDest);
-					dest.write(selectorDest);
-				}
-			}
-			else
-			{
-				dest.write(selectorDest);
-			}
+			dest.write(selectorDest);
 		}
 
 		lastBcMemberType = bcMembersTypesStack.pop();
@@ -1330,6 +1288,10 @@ public abstract class As2WhateverConverter
 						{
 							lastBcMemberType = BcUndefinedType.instance();
 						}
+						else if (node.getMode() == Tokens.LEFTBRACKET_TOKEN)
+						{
+							lastBcMemberType = BcTypeNode.create(BcTypeNode.typeObject);
+						}	
 						else
 						{
 							failConversion("Unexpected something");
@@ -1355,6 +1317,10 @@ public abstract class As2WhateverConverter
 			{
 				lastBcMemberType = createBcType(BcTypeNode.typeObject);
 			}
+		}
+		else if (node.expr instanceof LiteralStringNode)
+		{
+			// nothing
 		}
 		else
 		{
@@ -3610,6 +3576,10 @@ public abstract class As2WhateverConverter
 					}
 
 					return createBcType(BcTypeNode.typeXMLList); // dirty hack
+				}
+				else if (classEquals(baseClass, BcTypeNode.typeMovieClip) && selector.isGetExpression())
+				{
+					return baseClass.getClassType(); // accessing movie clips as properties
 				}
 				else if (getCodeHelper().extractIdentifier(identifier).equals(BcCodeHelper.thisCallMarker))
 				{

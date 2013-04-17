@@ -15,11 +15,13 @@ import macromedia.asc.parser.ArgumentListNode;
 import macromedia.asc.parser.CallExpressionNode;
 import macromedia.asc.parser.FunctionCommonNode;
 import macromedia.asc.parser.GetExpressionNode;
+import macromedia.asc.parser.IdentifierNode;
 import macromedia.asc.parser.LiteralStringNode;
 import macromedia.asc.parser.MemberExpressionNode;
 import macromedia.asc.parser.Node;
 import macromedia.asc.parser.SelectorNode;
 import macromedia.asc.parser.SetExpressionNode;
+import macromedia.asc.parser.Tokens;
 import macromedia.asc.util.ObjectList;
 import bc.code.ListWriteDestination;
 import bc.code.WriteDestination;
@@ -156,7 +158,8 @@ public class As2CsConverter extends As2WhateverConverter
 
 	private boolean preprocess(MemberExpressionNode node, BcTypeNode baseType, boolean useOwnProperties)
 	{
-		if (node.selector.expr.isIdentifier())
+		SelectorNode selector = node.selector;
+		if (selector.expr.isIdentifier())
 		{
 			String identifier = BcNodeHelper.tryExtractIdentifier(node.selector);
 			failConversionUnless(identifier != null);
@@ -204,6 +207,28 @@ public class As2CsConverter extends As2WhateverConverter
 				}
 			}
 		}
+		else if (selector.expr instanceof ArgumentListNode)
+		{
+			if (selector.getMode() == Tokens.LEFTBRACKET_TOKEN)
+			{
+				if (!typeOneOf(baseType, BcTypeNode.typeVector, BcTypeNode.typeDictionary, 
+										 BcTypeNode.typeArray, BcTypeNode.typeString, BcTypeNode.typeXMLList))
+				{
+					if (selector.isGetExpression())
+					{
+						ArgumentListNode args = (ArgumentListNode) selector.expr;
+						BcNodeFactory.turnSelectorToCall(node, "getOwnProperty", args);
+					}
+					else if (selector.isSetExpression())
+					{
+						SetExpressionNode set = (SetExpressionNode) selector;
+						ArgumentListNode args = (ArgumentListNode) set.expr;
+						BcNodeFactory.turnSelectorToCall(node, "setOwnProperty", BcNodeFactory.concat(args.items.first(), set.args));
+					}
+				}
+			}
+		}
+		
 		return false;
 	}
 
@@ -735,12 +760,6 @@ public class As2CsConverter extends As2WhateverConverter
 		}
 		
 		return super.createTypeName(name);
-	}
-	
-	@Override
-	public String objectSelector(Object target, Object selector)
-	{
-		return String.format("((%s)%s).%s", createClassName(BcTypeNode.typeObject), target, selector);
 	}
 	
 	@Override
