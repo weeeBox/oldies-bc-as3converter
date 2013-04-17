@@ -771,6 +771,7 @@ public class As2CsConverter extends As2WhateverConverter
 	@Override
 	public String construct(String type, Object initializer)
 	{
+		type = type.equals("Object") ? "AsObject" : type; // XXX: we use Object and String as-is, but should construct Object properly
 		return NEW + " " + type + "(" + initializer + ")";
 	}
 	

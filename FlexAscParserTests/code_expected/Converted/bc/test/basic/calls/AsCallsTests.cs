@@ -45,7 +45,7 @@ namespace bc.test.basic.calls
         }
         public virtual void testMemberCallWithUntypedArg3()
         {
-            Object arg = new Object();
+            Object arg = new AsObject();
             instance.funcWithUntypedArg(arg);
         }
         public virtual void testMemberCallWithArgsAndRestArgs()

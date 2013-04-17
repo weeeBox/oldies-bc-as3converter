@@ -9,7 +9,7 @@ namespace bc.test.basic.fields
 	{
 		public Object memberA1;
 		public Object memberA2 = null;
-		public Object memberA3 = new Object();
+		public Object memberA3 = new AsObject();
 		public Object memberA4;
 		public String memberB1;
 		public String memberB2 = null;
