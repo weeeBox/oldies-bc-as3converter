@@ -84,6 +84,11 @@ public class As2CsConverter extends As2WhateverConverter
 
 	private boolean preprocess(MemberExpressionNode node)
 	{
+		if (node.base != null && node.base.isMemberExpression())
+		{
+			preprocess((MemberExpressionNode) node.base);
+		}
+		
 		if (preprocessFuncType(node))
 		{
 			return true;
@@ -261,10 +266,8 @@ public class As2CsConverter extends As2WhateverConverter
 		if (selector.isGetExpression())
 		{
 			BcTypeNode nodeType = evaluateType(node, true);
-			if (nodeType == null)
+			if (node.base != null)
 			{
-				failConversionUnless(node.base != null);
-				
 				BcTypeNode baseType = evaluateType(node.base, true);
 				failConversionUnless(baseType != null);
 				
@@ -275,8 +278,6 @@ public class As2CsConverter extends As2WhateverConverter
 					BcNodeFactory.turnSelectorToCall(node, "_", BcNodeFactory.args(new LiteralStringNode(identifier)));
 					return true;
 				}
-				
-				failConversion("Unexpected base type: " + baseType);
 			}
 			
 			if (nodeType.isFunction())
