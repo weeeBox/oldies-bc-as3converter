@@ -268,7 +268,7 @@ public class As2CsConverter extends As2WhateverConverter
 			BcTypeNode nodeType = evaluateType(node, true);
 			if (node.base != null)
 			{
-				BcTypeNode baseType = evaluateType(node.base, true);
+				BcTypeNode baseType = evaluateType(node.base);
 				failConversionUnless(baseType != null);
 				
 				if (typeEquals(baseType, BcTypeNode.typeMovieClip))

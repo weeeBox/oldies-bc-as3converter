@@ -1,5 +1,7 @@
 package bc.test.objects
 {
+    import bc.flash.display.MovieClip;
+
     public class ObjectTypeTest
     {
         public function testNullAssignemnt() : void
@@ -90,6 +92,15 @@ package bc.test.objects
             obj = integer;
             obj = number;
             obj = boolean;
+        }
+        
+        public function testMovieClipCall() : void
+        {
+            var mc : MovieClip = null;
+            var mc1 : MovieClip = mc.childClip;
+            var mc2 : MovieClip = mc.childClip.anotherClip;
+            
+            mc.childClip.anotherClip.play();
         }
     }
 }
