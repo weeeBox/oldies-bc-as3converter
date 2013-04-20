@@ -3423,7 +3423,7 @@ public abstract class As2WhateverConverter
 				return createBcType("int");
 			}
 
-			if (binaryNode.op == Tokens.DIV_TOKEN || binaryNode.op == Tokens.MULT_TOKEN)
+			if (binaryNode.op == Tokens.DIV_TOKEN || binaryNode.op == Tokens.MULT_TOKEN || binaryNode.op == Tokens.MINUS_TOKEN)
 			{
 				return createBcType("int");
 			}
