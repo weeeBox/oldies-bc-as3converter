@@ -47,6 +47,7 @@ import macromedia.asc.parser.IfStatementNode;
 import macromedia.asc.parser.ImportDirectiveNode;
 import macromedia.asc.parser.IncrementNode;
 import macromedia.asc.parser.InterfaceDefinitionNode;
+import macromedia.asc.parser.LabeledStatementNode;
 import macromedia.asc.parser.ListNode;
 import macromedia.asc.parser.LiteralArrayNode;
 import macromedia.asc.parser.LiteralBooleanNode;
@@ -936,6 +937,8 @@ public abstract class As2WhateverConverter
 			process((LoadRegisterNode) node);
 		else if (node instanceof EmptyStatementNode)
 			process((EmptyStatementNode) node);
+		else if (node instanceof LabeledStatementNode)
+			process((LabeledStatementNode)node);
 		else
 			failConversion("Unsupported node class: %s", node.getClass());
 	}
@@ -993,6 +996,11 @@ public abstract class As2WhateverConverter
 	protected void process(EmptyStatementNode node)
 	{
 		dest.writeln(";");
+	}
+	
+	protected void process(LabeledStatementNode node)
+	{
+		dest.writeln("#ERROR"); // FIXME: fix labeled statements
 	}
 	
 	protected void process(FunctionCommonNode node)

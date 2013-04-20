@@ -275,8 +275,13 @@ public class As2CsConverter extends As2WhateverConverter
 				{
 					String identifier = BcNodeHelper.tryExtractIdentifier(node.selector);
 					failConversionUnless(identifier != null);
-					BcNodeFactory.turnSelectorToCall(node, "_", BcNodeFactory.args(new LiteralStringNode(identifier)));
-					return true;
+					
+					BcFunctionDeclaration getter = baseType.getClassNode().findGetterFunction(identifier);
+					if (getter == null)
+					{
+						BcNodeFactory.turnSelectorToCall(node, "_", BcNodeFactory.args(new LiteralStringNode(identifier)));
+						return true;
+					}
 				}
 			}
 			
