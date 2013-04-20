@@ -764,6 +764,7 @@ public abstract class As2WhateverConverter
 	
 	protected void processSpecialTypes()
 	{
+		// '*'
 		BcUntypedNode untypedNode = BcUntypedNode.instance();
 		BcUntypedClass untypedClass = new BcUntypedClass(untypedNode);
 		untypedClass.setExtendsType(BcTypeNode.create(BcTypeNode.typeObject).createTypeInstance());
@@ -1588,7 +1589,7 @@ public abstract class As2WhateverConverter
 				LiteralArrayNode arrayNode = (LiteralArrayNode) argNode;
 				ArgumentListNode elementlist = arrayNode.elementlist;
 
-				writeNewLiteralVector((BcVectorTypeNode) type, elementlist.items);
+				writeNewLiteralVector((BcVectorTypeNode) type, elementlist != null ? elementlist.items : null);
 			}
 			else
 			{
