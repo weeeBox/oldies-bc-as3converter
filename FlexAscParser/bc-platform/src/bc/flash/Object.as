@@ -14,6 +14,11 @@ package bc.flash
         
         /* protected static function _setPropertyIsEnumerable(o : *, V : String, enumerable : Boolean) : void; */
         
+        public function get length() : void
+        {
+            return mProperties != null ? mProperties.length : 0;
+        }
+        
         public function hasOwnProperty(name : String) : Boolean
         {
             if (mProperties != null)
@@ -23,7 +28,7 @@ package bc.flash
             return false;
         }
 
-        public function getOwnProperty(name : String) : Object
+        public function getOwnProperty(name : String) : *
         {
             if (hasOwnProperty(name))
             {
@@ -32,7 +37,7 @@ package bc.flash
             return null;
         }
 
-        public function setOwnProperty(name : String, value : Object) : void
+        public function setOwnProperty(name : String, value : *) : void
         {
             if (mProperties == null)
             {

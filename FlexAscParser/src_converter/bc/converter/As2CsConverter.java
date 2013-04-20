@@ -41,6 +41,7 @@ import bc.lang.BcInterfaceDefinitionNode;
 import bc.lang.BcRestTypeNode;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
+import bc.lang.BcUndefinedType;
 import bc.lang.BcUntypedNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -265,13 +266,12 @@ public class As2CsConverter extends As2WhateverConverter
 		
 		if (selector.isGetExpression())
 		{
-			BcTypeNode nodeType = evaluateType(node, true);
 			if (node.base != null)
 			{
 				BcTypeNode baseType = evaluateType(node.base);
 				failConversionUnless(baseType != null);
 				
-				if (typeEquals(baseType, BcTypeNode.typeMovieClip))
+				if (typeEquals(baseType, BcTypeNode.typeMovieClip) && node.selector.getMode() != Tokens.LEFTBRACKET_TOKEN)
 				{
 					String identifier = BcNodeHelper.tryExtractIdentifier(node.selector);
 					failConversionUnless(identifier != null);
@@ -279,6 +279,9 @@ public class As2CsConverter extends As2WhateverConverter
 					return true;
 				}
 			}
+			
+			BcTypeNode nodeType = evaluateType(node, true);
+			failConversionUnless(nodeType != null);
 			
 			if (nodeType.isFunction())
 			{

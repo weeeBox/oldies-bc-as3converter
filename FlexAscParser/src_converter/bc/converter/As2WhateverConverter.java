@@ -119,6 +119,7 @@ import bc.lang.BcTypeName;
 import bc.lang.BcTypeNode;
 import bc.lang.BcTypeNodeInstance;
 import bc.lang.BcUndefinedType;
+import bc.lang.BcUntypedClass;
 import bc.lang.BcUntypedNode;
 import bc.lang.BcVariableDeclaration;
 import bc.lang.BcVectorTypeNode;
@@ -742,6 +743,7 @@ public abstract class As2WhateverConverter
 	protected void process()
 	{
 		processUniqueTypes();
+		processSpecialTypes();
 
 		process(BcGlobal.bcPlatformClasses);
 		process(BcGlobal.bcApiClasses);
@@ -757,6 +759,14 @@ public abstract class As2WhateverConverter
 		{
 			process(type);
 		}
+	}
+	
+	protected void processSpecialTypes()
+	{
+		BcUntypedNode untypedNode = BcUntypedNode.instance();
+		BcUntypedClass untypedClass = new BcUntypedClass(untypedNode);
+		untypedClass.setExtendsType(BcTypeNode.create(BcTypeNode.typeObject).createTypeInstance());
+		untypedNode.setClassNode(untypedClass);
 	}
 
 	protected void process(BcClassList classList)
@@ -1515,7 +1525,8 @@ public abstract class As2WhateverConverter
 					}
 					else
 					{
-						failConversion("'Function' type not found: class='%s' identifier='%s'", bcClass.getName(), identifier);
+						warnConversion("'Function' type not found: class='%s' identifier='%s'", bcClass.getName(), identifier);
+						lastBcMemberType = BcUntypedNode.instance();
 					}
 				}
 			}
@@ -2695,7 +2706,7 @@ public abstract class As2WhateverConverter
 		return findClass(type.getTypeName());
 	}
 
-	private BcClassDefinitionNode findClass(String identifier)
+	protected BcClassDefinitionNode findClass(String identifier)
 	{
 		BcTypeName typeName = codeHelper.extractTypeName(identifier);
 		return findClass(typeName);
@@ -3356,11 +3367,13 @@ public abstract class As2WhateverConverter
 				binaryNode.op == Tokens.LESSTHAN_TOKEN ||
 				binaryNode.op == Tokens.LESSTHANOREQUALS_TOKEN ||
 				binaryNode.op == Tokens.IS_TOKEN ||
-				binaryNode.op == Tokens.IN_TOKEN)
+				binaryNode.op == Tokens.IN_TOKEN ||
+				binaryNode.op == Tokens.STRICTEQUALS_TOKEN ||
+				binaryNode.op == Tokens.STRICTNOTEQUALS_TOKEN)
 			{
 				return createBcType(BcTypeNode.typeBoolean);
 			}
-
+			
 			if (binaryNode.op == Tokens.AS_TOKEN)
 			{
 				return extractBcType(binaryNode.rhs);
@@ -3396,7 +3409,27 @@ public abstract class As2WhateverConverter
 			{
 				return createBcType("long");
 			}
+			
+			if (typeEquals(lhsType, "Object") && typeEquals(rhsType, "int"))
+			{
+				return createBcType("int");
+			}
 
+			if (binaryNode.op == Tokens.DIV_TOKEN || binaryNode.op == Tokens.MULT_TOKEN)
+			{
+				return createBcType("int");
+			}
+			
+			if (binaryNode.op == Tokens.PLUS_TOKEN)
+			{
+				if (typeEquals(lhsType, "int") || typeEquals(rhsType, "int"))
+				{
+					return createBcType("int");
+				}
+				
+				return BcUntypedNode.instance();
+			}
+			
 			failConversion("Can't evaluate node's type: %s", node.getClass());
 		}
 
@@ -3484,6 +3517,11 @@ public abstract class As2WhateverConverter
 		{
 			return createBcType(BcTypeNode.typeFunction);
 		}
+		
+		if (node instanceof LiteralRegExpNode)
+		{
+			return createBcType(BcTypeNode.typeObject);
+		}
 
 		failConversion("Unable to evaluate node's type: %s", node.getClass());
 		return null;
@@ -3502,8 +3540,21 @@ public abstract class As2WhateverConverter
 
 				failConversionUnless(baseType != null, "Can't evaluate member expression. Base type is 'null'");
 				baseClass = baseType.getClassNode();
-
-				failConversionUnless(baseClass != null, "Can't evaluate member expression. Base class type is 'null'");
+				
+				if (baseClass == null && baseType.isFunction())
+				{
+					BcFunctionTypeNode func = (BcFunctionTypeNode) baseType;
+					BcTypeNode returnType = func.getReturnType();
+					
+					failConversionUnless(returnType != null);
+					baseClass = returnType.getClassNode();
+					
+					failConversionUnless(baseClass != null, "Can't evaluate member expression. Base class type is 'null'");
+				}
+				else
+				{
+					failConversionUnless(baseClass != null, "Can't evaluate member expression. Base class type is 'null'");
+				}
 			}
 			else if (node.base instanceof ThisExpressionNode)
 			{
@@ -3585,7 +3636,7 @@ public abstract class As2WhateverConverter
 				{
 					return BcGlobal.lastBcClass.getClassType(); // this referes to the current class
 				}
-				else if (classEquals(baseClass, BcTypeNode.typeObject))
+				else /* if (classEquals(baseClass, BcTypeNode.typeObject)) */
 				{
 					return createBcType(BcTypeNode.typeObject);
 				}
