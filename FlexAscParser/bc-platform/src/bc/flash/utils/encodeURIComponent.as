@@ -2,7 +2,7 @@ package bc.flash.utils
 {
     import bc.flash.errors.NotImplementedError;
 
-    public function isNaN(num:Number):Boolean
+    public function encodeURIComponent(uri:String):String
     {
         throw new NotImplementedError();
     }
