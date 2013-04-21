@@ -1,9 +1,9 @@
 using System;
 
 using bc.flash;
-using bc.test.objects;
+using bc.test.objects.type;
 
-namespace bc.test.objects
+namespace bc.test.objects.type
 {
     public class AsObjectTypeTest : AsObject
     {

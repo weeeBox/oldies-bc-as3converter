@@ -171,11 +171,24 @@ public class SyntaxConversionTest extends ConverterTestSuite
 	@Test
 	public void testObjectClass() throws IOException
 	{
-		convert("/bc/test/objects");
+		convert("/bc/test/objects/type");
 		
 		String[] filenames = 
 		{
-				"Converted/bc/test/objects/AsObjectTypeTest.cs",
+				"Converted/bc/test/objects/type/AsObjectTypeTest.cs",
+		};
+		
+		assertExpectedAndActualEquals(filenames);
+	}
+	
+	@Test
+	public void testObjectDynamics() throws IOException
+	{
+		convert("/bc/test/objects/dynamics");
+		
+		String[] filenames = 
+		{
+			"Converted/bc/test/objects/dynamics/AsDynamicObjectTest.cs",
 		};
 		
 		assertExpectedAndActualEquals(filenames);

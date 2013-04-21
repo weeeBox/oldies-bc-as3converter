@@ -1,4 +1,4 @@
-package bc.test.objects
+package bc.test.objects.type
 {
     public class MovieClip
     {

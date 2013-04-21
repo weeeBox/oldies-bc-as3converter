@@ -160,8 +160,9 @@
     <Compile Include="Converted\bc\test\functions\anonymous\AsFunctionsAnonymousTest.cs"/>
     <Compile Include="Converted\bc\test\functions\syntax\AsFunctionsSyntaxTest.cs"/>
     <Compile Include="Converted\bc\test\functions\types\AsFunctionsTypeTest.cs"/>
-    <Compile Include="Converted\bc\test\objects\AsFooObjectClass.cs"/>
-    <Compile Include="Converted\bc\test\objects\AsObjectTypeTest.cs"/>
+    <Compile Include="Converted\bc\test\objects\type\AsFooObjectClass.cs"/>
+    <Compile Include="Converted\bc\test\objects\type\AsMovieClip.cs"/>
+    <Compile Include="Converted\bc\test\objects\type\AsObjectTypeTest.cs"/>
     <Compile Include="Converted\bc\test\strings\AsStringsTest.cs"/>
     <Compile Include="Converted\bc\test\vectors\AsVectorsTest.cs"/>
   </ItemGroup>  

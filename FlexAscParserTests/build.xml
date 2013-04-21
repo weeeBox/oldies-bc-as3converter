@@ -30,6 +30,11 @@
 	</target>
 
 	<target name="run" depends="build">
-		<updater projectfile="${project.dir}/${project.file}.csproj" sourcedir="${dir.input}" />
+		<updater projectfile="${project.dir}/${project.file}.csproj">
+			<fileset dir="${dir.input}">
+				<include name="**/*.cs" />
+				<exclude name="**/AsDynamicObjectTest.cs"/> <!-- This file won't get compiled -->
+			</fileset>
+		</updater>
 	</target>
 </project>

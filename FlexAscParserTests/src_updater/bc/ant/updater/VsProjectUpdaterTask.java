@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Task;
+import org.apache.tools.ant.types.FileSet;
 import org.dom4j.Comment;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -26,29 +28,20 @@ public class VsProjectUpdaterTask extends Task
 	private static final String ELEMENT_COMPILE = "Compile";
 	private static final String ATTRIBUTE_INCLUDE = "Include";
 	
-	private static final String SOURCE_FILE_EXT = ".cs";
-	
 	private File projectFile;
 	private File projectDir;
-	private File sourceDir;
+	
+	private List<FileSet> sets;
 	
 	public VsProjectUpdaterTask() 
 	{
-	}
-	
-	public static void main(String[] args) 
-	{
-		VsProjectUpdaterTask task = new VsProjectUpdaterTask();
-		task.projectFile = new File(args[0]);
-		task.sourceDir = new File(args[1]);
-		task.execute();
+		sets = new ArrayList<FileSet>();
 	}
 	
 	@Override
 	public void execute() throws BuildException 
 	{
 		checkProjectFile();
-		checkSourceDir();
 		
 		projectDir = projectFile.getParentFile();
 		
@@ -92,7 +85,7 @@ public class VsProjectUpdaterTask extends Task
 			removeElements(target.elements(ELEMENT_COMPILE));
 		}
 		
-		List<File> sourceFiles = collectSourceFiles(sourceDir);
+		List<File> sourceFiles = collectSourceFiles(sets);
 		addSourceFiles(target, sourceFiles);
 	}
 
@@ -141,29 +134,32 @@ public class VsProjectUpdaterTask extends Task
 	
 	/* Source files */
 	
-	private List<File> collectSourceFiles(File dir) 
+	private List<File> collectSourceFiles(List<FileSet> sets) 
 	{
 		List<File> files = new ArrayList<File>();
-		collectSourceFiles(dir, files);
+		collectSourceFiles(sets, files);
 		return files;
 	}
 	
-	private void collectSourceFiles(File file, List<File> list) 
+	private void collectSourceFiles(List<FileSet> sets, List<File> list) 
 	{
-		if (file.isDirectory())
+		for (FileSet fileSet : sets)
 		{
-			File[] files = FileUtils.listFilesAndDirectories(file, SOURCE_FILE_EXT);
-			for (File childFile : files) 
-			{
-				collectSourceFiles(childFile, list);
-			}
-		}
-		else
-		{
-			list.add(file);
+			collectSourceFiles(fileSet, list);
 		}
 	}
 	
+	private void collectSourceFiles(FileSet set, List<File> list)
+	{
+		DirectoryScanner scanner = set.getDirectoryScanner();
+		File basedir = scanner.getBasedir();
+		String[] filenames = scanner.getIncludedFiles();
+		for (String filename : filenames)
+		{
+			list.add(new File(basedir, filename));
+		}
+	}
+
 	/* Setters */
 
 	public void setProjectFile(File projectFile) 
@@ -171,9 +167,9 @@ public class VsProjectUpdaterTask extends Task
 		this.projectFile = projectFile;
 	}
 	
-	public void setSourceDir(File sourceDir) 
+	public void addFileset(FileSet set)
 	{
-		this.sourceDir = sourceDir;
+		sets.add(set);
 	}
 	
 	/* Helpers */
@@ -190,21 +186,6 @@ public class VsProjectUpdaterTask extends Task
 		if (projectFile.isDirectory())
 		{
 			throw new BuildException("C# project file is a directory: " + projectFile.getAbsolutePath());
-		}
-	}
-	
-	private void checkSourceDir() 
-	{
-		checkArgument(sourceDir, "sourceDir");
-		
-		if (!sourceDir.exists())
-		{
-			throw new BuildException("Source directory doesn't exist: " + sourceDir.getAbsolutePath());
-		}
-		
-		if (!sourceDir.isDirectory())
-		{
-			throw new BuildException("Source directory is not a directory: " + sourceDir.getAbsolutePath());
 		}
 	}
 	
