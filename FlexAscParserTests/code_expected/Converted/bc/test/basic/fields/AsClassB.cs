@@ -26,7 +26,7 @@ namespace bc.test.basic.fields
 		{
 			memberA4 = memberA3;
 			memberB4 = memberB3;
-			memberC3 = memberB1.Length;
+			memberC3 = memberB1.length();
 		}
 		public AsClassB()
 		 : base("Some arg")

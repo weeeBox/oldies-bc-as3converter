@@ -3114,7 +3114,7 @@ public abstract class As2WhateverConverter
 				ArgumentListNode args = callNode.args;
 				if (args == null || args.items.isEmpty())
 				{
-					return true;
+					return callNode.is_new;
 				}
 
 				ObjectList<Node> argItems = args.items;
