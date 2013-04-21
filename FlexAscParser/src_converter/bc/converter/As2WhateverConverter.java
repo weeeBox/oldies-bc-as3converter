@@ -1216,7 +1216,6 @@ public abstract class As2WhateverConverter
 		processNode(node.expr);
 		popDest();
 
-		failConversionUnless(node.getMode() == Tokens.LEFTBRACKET_TOKEN, "LEFTBRACKET_TOKEN expected for 'delete' expression node");
 		dest.writef(".remove(%s)", expr); // fix me for member call
 	}
 
@@ -1467,6 +1466,15 @@ public abstract class As2WhateverConverter
 					else if (node.is_new)
 					{
 						BcClassDefinitionNode bcNewClass = findClass(identifier);
+						if (bcNewClass == null)
+						{
+							BcVariableDeclaration var = findVariable(identifier);
+							if (var != null && typeEquals(var.getType(), BcTypeNode.typeClass))
+							{
+								bcNewClass = findClass(BcTypeNode.typeClass);
+							}
+						}
+						
 						failConversionUnless(bcNewClass != null, "Can't create undefined class instance: %s", exprDest);
 						BcTypeNode bcClassType = bcNewClass.getClassType();
 						failConversionUnless(bcClassType != null, "Can't create class instance without class type: %s", exprDest);
