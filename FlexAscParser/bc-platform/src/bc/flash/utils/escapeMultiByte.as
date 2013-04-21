@@ -2,7 +2,7 @@ package bc.flash.utils
 {
     import bc.flash.errors.NotImplementedError;
 
-    public function setTimeout(closure:Function, delay:Number, ... arguments):uint
+    public function escapeMultiByte(value:String):String
     {
         throw new NotImplementedError();
     }

@@ -1,9 +1,9 @@
 package bc.flash.utils
-{	
-	import bc.flash.errors.NotImplementedError;
+{
+    import bc.flash.errors.NotImplementedError;
 
-	public function getDefinitionByName(name:String) : *;
-	{
-		throw new NotImplementedError();
-	}
+    public function getDefinitionByName(name:String):Object
+    {
+        throw new NotImplementedError();
+    }
 }
