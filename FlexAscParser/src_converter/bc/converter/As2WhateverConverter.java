@@ -2668,19 +2668,27 @@ public abstract class As2WhateverConverter
 
 	protected void process(BcTypeNode typeNode)
 	{
-		if (!typeNode.hasClassNode() && !typeNode.isSpecialType())
+		if (!typeNode.hasClassNode())
 		{
-			BcClassDefinitionNode classNode;
-			if (typeNode.isBasic())
+			if (!typeNode.isSpecialType())
 			{
-				classNode = findBindedClass(typeNode);
+				BcClassDefinitionNode classNode;
+				if (typeNode.isBasic())
+				{
+					classNode = findBindedClass(typeNode);
+				}
+				else
+				{
+					classNode = findClass(typeNode);
+					failConversionUnless(classNode != null, "Can't find class: %s", typeNode.getNameEx());
+				}
+				typeNode.setClassNode(classNode);
 			}
-			else
+			else if (typeNode.isRest())
 			{
-				classNode = findClass(typeNode);
-				failConversionUnless(classNode != null, "Can't find class: %s", typeNode.getNameEx());
+				BcClassDefinitionNode classNode = findClass(BcTypeNode.typeArray);
+				typeNode.setClassNode(classNode);
 			}
-			typeNode.setClassNode(classNode);
 		}
 	}
 

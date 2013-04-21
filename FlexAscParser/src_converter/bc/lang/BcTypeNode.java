@@ -182,7 +182,15 @@ public class BcTypeNode extends BcNode
 	
 	public static BcTypeNode createRestType(BcTypeNodeInstance typeInstance)
 	{
-		return new BcRestTypeNode(typeInstance);
+		BcTypeName typeName = new BcTypeName("..." + typeInstance.getQualifiedName());
+		BcTypeNode typeNode = uniqueTypes.get(typeName);
+		if (typeNode == null)
+		{
+			System.out.println("Added rest: " + typeName);
+			typeNode = new BcRestTypeNode(typeInstance);
+			uniqueTypes.put(typeName, typeNode);
+		}
+		return typeNode;
 	}
 	
 	public static List<BcTypeNode> typesForPackage(String packageName)
@@ -345,7 +353,7 @@ public class BcTypeNode extends BcNode
 	
 	public boolean isSpecialType()
 	{
-		return isUntyped() || isUndefined();
+		return isUntyped() || isUndefined() || isRest();
 	}
 
 	@Override
