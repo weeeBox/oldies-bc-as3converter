@@ -57,49 +57,125 @@ namespace bc.flash
             throw new NotImplementedException();
         }
 
-        public static string toExponential(float num)
+        public String toExponential(uint fractionDigits) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public String toFixed(uint fractionDigits) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public String toPrecision(uint precision) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public String toString(float radix = 10) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public float valueOf() 
+        { 
+            throw new NotImplementedException(); 
+        }
+    }
+
+    #region Single Extension
+
+    public static class SingleExtension
+    {
+        public static String toExponential(this Single val, uint fractionDigits)
         {
             throw new NotImplementedException();
         }
 
-        public static string toExponential(float num, int p)
+        public static String toFixed(this Single val, uint fractionDigits)
         {
             throw new NotImplementedException();
         }
 
-        public static string toFixed(float num)
+        public static String toPrecision(this Single val, uint precision)
         {
             throw new NotImplementedException();
         }
 
-        public static string toFixed(float num, int p)
+        public static String toString(this Single val, float radix = 10)
         {
             throw new NotImplementedException();
         }
 
-        public static string toPrecision(float num)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static string toPrecision(float num, int p)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static string toString(float num)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static string toString(float num, int p)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static float valueOf(float num)
+        public static float valueOf(this Single val)
         {
             throw new NotImplementedException();
         }
     }
+
+    #endregion
+
+    #region Int32 Extension
+
+    public static class Int32Extension
+    {
+        public static String toExponential(this Int32 val, uint fractionDigits)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static String toFixed(this Int32 val, uint fractionDigits)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static String toPrecision(this Int32 val, uint precision)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static String toString(this Int32 val, uint radix)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static int valueOf(this Int32 val)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    #endregion
+
+    #region UInt32 Extension
+
+    public static class UInt32Extension
+    {
+        public String toExponential(this UInt32 val, uint fractionDigits)
+        {
+            throw new NotImplementedException();
+        }
+
+        public String toFixed(this UInt32 val, uint fractionDigits)
+        {
+            throw new NotImplementedException();
+        }
+
+        public String toPrecision(this UInt32 val, uint precision)
+        {
+            throw new NotImplementedException();
+        }
+
+        public String toString(this UInt32 val, uint radix)
+        {
+            throw new NotImplementedException();
+        }
+
+        public uint valueOf(this UInt32 val)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    #endregion
 }

@@ -89,12 +89,6 @@ public class As2CsConverter extends As2WhateverConverter
 				}
 			}
 			
-			if (baseType.isIntegral())
-			{
-				BcNodeFactory.turnToStaticTypeDelegateCall(node, baseTypeInstance);
-				return true;
-			}
-			
 			if (node.selector.isGetExpression() || node.selector.isSetExpression())
 			{
 				if (preprocess(node, baseType, true))

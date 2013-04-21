@@ -12,6 +12,12 @@ public class ListWriteDestination extends WriteDestination
 		this(new ArrayList<String>());
 	}
 	
+	public ListWriteDestination(String tab)
+	{
+		this();
+		setTab(tab);
+	}
+	
 	public ListWriteDestination(List<String> lines)
 	{
 		this.lines = lines;
