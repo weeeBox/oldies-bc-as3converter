@@ -1553,6 +1553,13 @@ public abstract class As2WhateverConverter
 			lastBcMemberType = evaluateType(node.expr);
 			failConversionUnless(lastBcMemberType != null, "Unable to evaluate member expression type: " + exprDest);
 		}
+		else if (node.expr instanceof ListNode)
+		{
+			lastBcMemberType = evaluateType(node.expr);
+			failConversionUnless(lastBcMemberType != null, "Unable to evaluate list node expression type: " + exprDest);
+			
+			isCast = true;
+		}
 		else
 		{
 			failConversion("Unexpected node type for 'call' expression: %s expr: %s", node.expr.getClass(), exprDest);
@@ -3487,9 +3494,13 @@ public abstract class As2WhateverConverter
 			{
 				return extractBcType(callExpr.expr);
 			}
+			else if (callExpr.expr instanceof ListNode)
+			{
+				return extractBcType(callExpr.expr);
+			}
 			else
 			{
-				failConversion("Can't evaluate 'call' expression's type: %d", callExpr.expr.getClass());
+				failConversion("Can't evaluate 'call' expression's type: %s", callExpr.expr.getClass());
 			}
 		}
 

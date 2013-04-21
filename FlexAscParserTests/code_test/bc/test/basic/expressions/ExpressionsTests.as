@@ -40,6 +40,13 @@ package bc.test.basic.expressions
             var c : int = 30;
             var d = a + (b + c);
         }
+		
+        public function testAssignment5() : void
+        {
+            var a : Number = 10;
+            var b : Number = 20;
+            var c : int = (int)(a + b);
+        }
         
         public function testPriority() : void
         {

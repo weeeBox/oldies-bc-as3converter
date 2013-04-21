@@ -308,6 +308,15 @@ public class BcNodeHelper
 			return extractBcType(((ParameterNode) type).type);
 		}
 		
+		if (type instanceof ListNode)
+		{
+			ListNode node = (ListNode) type;
+			if (node.size() == 1)
+			{
+				return extractBcType(node.items.first());
+			}
+		}
+		
 		assert false : type.getClass();
 		return null;
 	}
