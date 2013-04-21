@@ -6,101 +6,9 @@ namespace bc.flash
 {
     public class AsString : AsObject
     {
-        public static String charAt(String str, int index)
-        {
-            return str.Substring(index, 1);
-        }
-
-        public static int indexOf(String str, String s, int index)
-        {
-            return str.IndexOf(s, index);
-        }
-
-        public static int indexOf(String str, String s)
-        {
-            return str.IndexOf(s);
-        }
-
-        public static int lastIndexOf(String str, String s, int index)
-        {
-            return str.LastIndexOf(s, index);
-        }
-
-        public static int lastIndexOf(String str, String s)
-        {
-            return str.LastIndexOf(s);
-        }
-
-        public static String replace(String str, String token, String replacement)
-        {
-            int startIndex = str.IndexOf(token);
-            if (startIndex == -1)
-            {
-                return str;
-            }
-
-            return str.Substring(0, startIndex) + replacement + str.Substring(startIndex + 1);
-        }
-
-        public static String slice(String str, int start, int end)
-        {
-            return str.Substring(start, end - start);
-        }
-
-        public static String slice(String str, int start)
-        {
-            return str.Substring(start);
-        }
-
-        public static AsArray split(String str, String delim)
-        {
-            String[] tokens = str.Split(new String[] { delim }, StringSplitOptions.None);
-            return new AsArray(tokens);
-        }
-
-        public static String substr(String str, int start, int len)
-        {
-            return str.Substring(start, len);
-        }
-
-        public static String substr(String str, int start)
-        {
-            return str.Substring(start);
-        }
-
-        public static String substring(String str, int start, int end)
-        {
-            return str.Substring(start, end - start);
-        }
-
-        public static String substring(String str, int start)
-        {
-            return str.Substring(start);
-        }
-
-        public static String toLocaleLowerCase(String str)
-        {
-            return str.ToLower();
-        }
-
-        public static String toLocaleUpperCase(String str)
-        {
-            return str.ToUpper();
-        }
-
-        public static String toLowerCase(String str)
-        {
-            return str.ToLower();
-        }
-
-        public static String toUpperCase(String str)
-        {
-            return str.ToUpper();
-        }
-
-        public static String valueOf(Object obj)
-        {
-            return obj.ToString();
+        public static String fromCharCode(params Object[] charCodes) 
+        { 
+            throw new NotImplementedException(); 
         }
 
         public static int parseInt(String str)
@@ -127,15 +35,108 @@ namespace bc.flash
         {
             return AsGlobal.parseBool(str);
         }
+    }
 
-        public static float charCodeAt(string str, int index)
+    public static class StringExtensions
+    {
+        public static int length(this String str)
         {
-            throw new NotImplementedException();
+            return str.Length;
         }
 
-        public static string fromCharCode(int code)
+        public static String charAt(this String str, float index = 0) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static float charCodeAt(this String str, float index = 0) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String concat(this String str, params Object[] args) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static int indexOf(this String str, String val, float startIndex = 0) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static int lastIndexOf(this String str, String val, float startIndex = 0x7FFFFFFF) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static int localeCompare(this String str, String other, params Object[] values) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static AsArray match(this String str, Object pattern) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String replace(this String str, Object pattern, Object repl) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static int search(this String str, Object pattern) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String slice(this String str, float startIndex = 0, float endIndex = 0x7fffffff) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static AsArray split(this String str, Object delimiter, float limit = 0x7fffffff) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String substr(this String str, float startIndex = 0, float len = 0x7fffffff) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String substring(this String str, float startIndex = 0, float endIndex = 0x7fffffff) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String toLocaleLowerCase(this String str) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String toLocaleUpperCase(this String str) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String toLowerCase(this String str) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String toUpperCase(this String str) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String valueOf(this String str) 
+        { 
+            throw new NotImplementedException(); 
+        }
+
+        public static String toString(this String str)
         {
-            throw new NotImplementedException();
+            return str;
         }
     }
 }
