@@ -324,6 +324,19 @@ public class As2CsConverter extends As2WhateverConverter
 					return true;
 				}
 			}
+			else if (selector.expr instanceof ArgumentListNode)
+			{
+				ArgumentListNode args = (ArgumentListNode) selector.expr;
+				if (args.size() == 1)
+				{
+					CallExpressionNode resolveCall = BcNodeFactory.callExpression("__function", args);
+					MemberExpressionNode member = new MemberExpressionNode(node.base, resolveCall, -1);
+					node.base = member;
+					node.selector = BcNodeFactory.callExpression("invoke", ((CallExpressionNode)selector).args);
+					
+					return true;
+				}
+			}
 		}
 		
 		return false;

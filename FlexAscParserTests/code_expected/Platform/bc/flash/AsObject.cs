@@ -42,10 +42,7 @@ namespace bc.flash
 
         #region Functions
 
-        public AsFunction __function(String name)
-        {
-            return new AsFunction(this, name);
-        }
+        public AsFunction __function(String name) { return new AsFunction(this, name); } // TODO: add caching
 
         public AsFunction __function(Action func) { return new AsFunction(this, func.Method); }
 
@@ -151,6 +148,8 @@ namespace bc.flash
         }
     }
 
+    #region Object extension
+
     public static class ObjectExtensions
     {
         public static Object getOwnProperty(this Object obj, String name)
@@ -160,23 +159,198 @@ namespace bc.flash
         }
 
         public static void setOwnProperty(this Object obj, String name, Object value)
-        {
-            AsObject asObj = obj as AsObject;
-            if (asObj == null)
-            {
-                throw new ArgumentException("Unexpected type: " + obj.GetType());
-            }
-            asObj.setOwnProperty(name, value);
+        {   
+            cast(obj).setOwnProperty(name, value);
         }
 
         public static void deleteOwnProperty(this Object obj, String name)
         {
+            cast(obj).deleteOwnProperty(name);
+        }
+
+        public static Object apply(this Object obj, Object thisArg = null, AsArray argArray = null)
+        {
+            return cast(obj).apply(thisArg, argArray);
+        }
+
+        public static Object apply(this Object obj, Object thisArg = null, params Object[] args)
+        {
+            return cast(obj).apply(thisArg, args);
+        }
+        
+        public static Object call(this Object obj, Object thisArg = null, params Object[] args)
+        {
+            return cast(obj).call(thisArg, args);
+        }
+        
+        public static AsFunction __function(this Object obj, String name) 
+        {
+            return cast(obj).__function(name);
+        }
+
+        /*
+        public static AsFunction __function<T1>(this Object obj, Action<T1> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, Result>(this Object obj, Func<T1, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2>(this Object obj, Action<T1, T2> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, Result>(this Object obj, Func<T1, T2, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3>(this Object obj, Action<T1, T2, T3> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, Result>(this Object obj, Func<T1, T2, T3, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4>(this Object obj, Action<T1, T2, T3, T4> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, Result>(this Object obj, Func<T1, T2, T3, T4, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5>(this Object obj, Action<T1, T2, T3, T4, T5> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, Result>(this Object obj, Func<T1, T2, T3, T4, T5, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6>(this Object obj, Action<T1, T2, T3, T4, T5, T6> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7>(this Object obj, Action<T1, T2, T3, T4, T5, T6, T7> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, T7, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8>(this Object obj, Action<T1, T2, T3, T4, T5, T6, T7, T8> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, T7, T8, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this Object obj, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this Object obj, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this Object obj, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this Object obj, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this Object obj, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this Object obj, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this Object obj, Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> func)
+        {
+            return cast(obj).__function(func);
+        }
+
+        public static AsFunction __function<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, Result>(this Object obj, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, Result> func)
+        {
+            return cast(obj).__function(func);
+        }
+        
+        */ 
+
+        private static AsObject cast(Object obj)
+        {
             AsObject asObj = obj as AsObject;
             if (asObj == null)
             {
                 throw new ArgumentException("Unexpected type: " + obj.GetType());
             }
-            asObj.deleteOwnProperty(name);
+            return asObj;
         }
     }
+
+    #endregion
 }

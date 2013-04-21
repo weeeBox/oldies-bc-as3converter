@@ -189,6 +189,7 @@ public class SyntaxConversionTest extends ConverterTestSuite
 		String[] filenames = 
 		{
 			"Converted/bc/test/objects/dynamics/AsDynamicObjectTest.cs",
+			"Converted/bc/test/objects/dynamics/AsDynamicMethodCallTest.cs",
 		};
 		
 		assertExpectedAndActualEquals(filenames);
