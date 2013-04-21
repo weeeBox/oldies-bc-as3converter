@@ -383,7 +383,7 @@ public class As2CsConverter extends As2WhateverConverter
 			for (BcFuncParam bcParam : params)
 			{
 				String paramType = type(bcParam.getTypeInstance());
-				String paramName = getCodeHelper().identifier(bcParam.getIdentifier());
+				String paramName = getCodeHelper().identifier(bcParam.getName());
 				paramsBuffer.append(String.format("%s %s", paramType, paramName));
 				argsBuffer.append(paramName);
 				if (++paramIndex < params.size())
@@ -510,7 +510,7 @@ public class As2CsConverter extends As2WhateverConverter
 		for (BcVariableDeclaration bcField : fields)
 		{
 			String type = type(bcField.getTypeInstance());
-			String name = getCodeHelper().identifier(bcField.getIdentifier());
+			String name = getCodeHelper().identifier(bcField.getName());
 						
 			src.write(bcField.getVisiblity() + " ");
 			
@@ -546,7 +546,7 @@ public class As2CsConverter extends As2WhateverConverter
 		
 		for (BcVariableDeclaration bcVar : bcFields) 
 		{
-			String name = getCodeHelper().identifier(bcVar.getIdentifier());
+			String name = getCodeHelper().identifier(bcVar.getName());
 			src.writelnf("%s = %s;", name, bcVar.getInitializer());
 		}
 		

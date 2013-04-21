@@ -6,15 +6,15 @@ import bc.code.ListWriteDestination;
 public class BcVariableDeclaration extends BcDeclaration
 {
 	private BcTypeNodeInstance typeInstance;
-	private String identifier;
+	private String name;
 	private ListWriteDestination initializer;
 	private boolean integralInitializerFlag;
 	
 	private Node initializerNode;
 	
-	public BcVariableDeclaration(BcTypeNodeInstance typeInstance, String identifier)
+	public BcVariableDeclaration(BcTypeNodeInstance typeInstance, String name)
 	{
-		this.identifier = identifier;
+		this.name = name;
 		this.typeInstance = typeInstance;
 	}
 	
@@ -48,9 +48,9 @@ public class BcVariableDeclaration extends BcDeclaration
 		this.typeInstance = typeInstance;
 	}
 	
-	public String getIdentifier()
+	public String getName()
 	{
-		return identifier;
+		return name;
 	}
 	
 	public void setInitializer(ListWriteDestination initializer)
@@ -84,7 +84,7 @@ public class BcVariableDeclaration extends BcDeclaration
 		StringBuilder result = new StringBuilder();
 		result.append(typeInstance.getQualifiedName());
 		result.append(" ");
-		result.append(getIdentifier());
+		result.append(getName());
 		
 		if (hasInitializer())
 		{

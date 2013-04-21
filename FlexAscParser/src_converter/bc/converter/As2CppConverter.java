@@ -320,7 +320,7 @@ public class As2CppConverter extends As2WhateverConverter
 		for (BcVariableDeclaration bcField : fields)
 		{
 			String type = typeRef(bcField.getType());
-			String name = getCodeHelper().identifier(bcField.getIdentifier());
+			String name = getCodeHelper().identifier(bcField.getName());
 			boolean canBeClass = canBeClass(bcField.getType());
 			boolean isConst = bcField.isConst();
 			
@@ -513,7 +513,7 @@ public class As2CppConverter extends As2WhateverConverter
 			writeBlockOpen(impl);
 			for (BcVariableDeclaration field : fields)
 			{
-				impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), field.getInitializer());
+				impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getName()), field.getInitializer());
 			}
 			writeBlockClose(impl);
 		}
@@ -579,7 +579,7 @@ public class As2CppConverter extends As2WhateverConverter
 			for (BcVariableDeclaration field : fields)
 			{
 				Object initializer = field.hasInitializer() ? field.getInitializer() : typeDefault(field.getType());
-				impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getIdentifier()), initializer);
+				impl.writelnf("%s = %s;", getCodeHelper().identifier(field.getName()), initializer);
 			}
 		}
 		
@@ -626,11 +626,11 @@ public class As2CppConverter extends As2WhateverConverter
 				
 				if (field.getType().isIntegral())
 				{
-					impl.writef("%s(0)", getCodeHelper().identifier(field.getIdentifier()));
+					impl.writef("%s(0)", getCodeHelper().identifier(field.getName()));
 				}
 				else
 				{
-					impl.writef("%s(false)", getCodeHelper().identifier(field.getIdentifier()));
+					impl.writef("%s(false)", getCodeHelper().identifier(field.getName()));
 				}
 				if (++fieldIndex < fields.size())
 				{
@@ -720,7 +720,7 @@ public class As2CppConverter extends As2WhateverConverter
 			
 			for (BcVariableDeclaration field : fields)
 			{
-				String identifier = getCodeHelper().identifier(field.getIdentifier());
+				String identifier = getCodeHelper().identifier(field.getName());
 				impl.writelnf("%s(%s)", defineGcMark, identifier);
 			}
 			

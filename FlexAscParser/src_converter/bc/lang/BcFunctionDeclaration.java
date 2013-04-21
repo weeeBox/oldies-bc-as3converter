@@ -86,7 +86,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 	{
 		for (BcFuncParam param : params) 
 		{
-			if (param.getIdentifier().equals(name))
+			if (param.getName().equals(name))
 			{
 				return param;
 			}
@@ -138,7 +138,7 @@ public class BcFunctionDeclaration extends BcDeclaration
 	{
 		for (BcVariableDeclaration bcVar : declaredVars)
 		{
-			if (bcVar.getIdentifier().equals(name))
+			if (bcVar.getName().equals(name))
 			{
 				return bcVar;
 			}

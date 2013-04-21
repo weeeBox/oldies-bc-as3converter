@@ -243,7 +243,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 			@Override
 			public boolean accept(BcVariableDeclaration bcVar) 
 			{
-				return bcVar.getIdentifier().equals(name);
+				return bcVar.getName().equals(name);
 			}
 		});
 	}
@@ -257,7 +257,7 @@ public class BcClassDefinitionNode extends BcDeclaration
 			@Override
 			public boolean accept(BcVariableDeclaration bcVar) 
 			{
-				return bcVar.getType() == functionType && bcVar.getIdentifier().equals(name);
+				return bcVar.getType() == functionType && bcVar.getName().equals(name);
 			}
 		});
 	}

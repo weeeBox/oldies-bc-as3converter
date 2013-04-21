@@ -832,7 +832,7 @@ public abstract class As2WhateverConverter
 	{
 		BcTypeNodeInstance varTypeInstance = bcVar.getTypeInstance();
 
-		String varId = bcVar.getIdentifier();
+		String varId = bcVar.getName();
 
 		dest.write(varDecl(varTypeInstance, varId));
 
@@ -2624,7 +2624,7 @@ public abstract class As2WhateverConverter
 				popDest();
 
 				BcTypeNode initializerType = evaluateType(initializerNode);
-				failConversionUnless(initializerType != null, "Unable to evaluate initializer's type: %s = %s", varDecl(varTypeInstance, param.getIdentifier()), initializer);
+				failConversionUnless(initializerType != null, "Unable to evaluate initializer's type: %s = %s", varDecl(varTypeInstance, param.getName()), initializer);
 
 				if (needExplicitCast(initializerType, varTypeInstance))
 				{
@@ -3060,7 +3060,7 @@ public abstract class As2WhateverConverter
 
 		for (BcVariableDeclaration var : BcGlobal.declaredVars)
 		{
-			if (var.getIdentifier().equals(name))
+			if (var.getName().equals(name))
 				return var;
 		}
 
@@ -4055,7 +4055,7 @@ public abstract class As2WhateverConverter
 				BcArgumentsList list = new BcArgumentsList(enclosingFunction.paramsCount());
 				List<BcFuncParam> args = enclosingFunction.getParams();
 				for (BcFuncParam arg : args) {
-					list.add(codeHelper.identifier(arg.getIdentifier()));
+					list.add(codeHelper.identifier(arg.getName()));
 				}
 				return list;
 			}
@@ -4446,7 +4446,7 @@ public abstract class As2WhateverConverter
 		int paramIndex = 0;
 		for (BcFuncParam bcParam : params)
 		{
-			buffer.append(paramDecl(bcParam.getTypeInstance(), bcParam.getIdentifier()));
+			buffer.append(paramDecl(bcParam.getTypeInstance(), bcParam.getName()));
 			
 			if (bcParam.hasInitializer())
 			{
@@ -4468,7 +4468,7 @@ public abstract class As2WhateverConverter
 		int paramIndex = 0;
 		for (BcVariableDeclaration bcParam : params)
 		{
-			buffer.append(getCodeHelper().identifier(bcParam.getIdentifier()));
+			buffer.append(getCodeHelper().identifier(bcParam.getName()));
 			if (++paramIndex < params.size())
 			{
 				buffer.append(", ");
