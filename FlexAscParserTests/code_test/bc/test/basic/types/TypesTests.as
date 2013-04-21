@@ -53,11 +53,8 @@ package bc.test.basic.types
         {
             var num : Number = 10;
             var str : String;
-            str = num.toExponential();
             str = num.toExponential(10);
-            str = num.toFixed();
             str = num.toFixed(10);
-            str = num.toPrecision();
             str = num.toPrecision(10);
             str = num.toString();
             str = num.toString(10);
