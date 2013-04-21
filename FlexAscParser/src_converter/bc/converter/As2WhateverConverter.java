@@ -1312,7 +1312,8 @@ public abstract class As2WhateverConverter
 						}	
 						else
 						{
-							failConversion("Unexpected something");
+							lastBcMemberType = BcTypeNode.create(BcTypeNode.typeObject);
+							warnConversion("Unexpected expression: %s", expr);
 						}
 					}
 				}
@@ -2275,7 +2276,33 @@ public abstract class As2WhateverConverter
 
 	protected void process(DoStatementNode node)
 	{
-		failConversion("'do' statement is not supported yet. Sorry");
+		ListWriteDestination exprDest = new ListWriteDestination();
+		pushDest(exprDest);
+		processNode(node.expr);
+		popDest();
+
+		String condString = exprDest.toString();
+
+		failConversionUnless(node.expr instanceof ListNode, "'while' statement expression is supposed to be the ListNode: type=%s expr=%s", node.expr.getClass(), exprDest);
+		ListNode listNode = (ListNode) node.expr;
+
+		dest.writeln("do");
+		
+		if (node.statements != null)
+		{
+			ListWriteDestination statementDest = new ListWriteDestination();
+			pushDest(statementDest);
+			processNode(node.statements);
+			popDest();
+			dest.writeln(statementDest);
+		}
+		else
+		{
+			writeEmptyBlock();
+		}
+		
+		condString = createSafeConditionString(condString, listNode);
+		dest.writelnf("while(%s)", condString);
 	}
 
 	protected void process(SwitchStatementNode node)
