@@ -298,12 +298,15 @@ public class As2CsConverter extends As2WhateverConverter
 					}
 					
 					classNode = baseType.getClassNode();
-					failConversionUnless(classNode != null);
 				}
 				else
 				{
 					classNode = BcGlobal.lastBcClass;
-					failConversionUnless(classNode != null);
+				}
+				
+				if (classNode == null) 
+				{
+					return false;
 				}
 				
 				BcVariableDeclaration var = findVariable(classNode, identifier);

@@ -317,8 +317,20 @@ public class BcNodeHelper
 			}
 		}
 		
+		if (type instanceof BinaryExpressionNode)
+		{
+			BinaryExpressionNode binary = (BinaryExpressionNode) type;
+			switch (binary.op)
+			{
+				case Tokens.AS_TOKEN:
+					return extractBcType(binary.rhs);
+				default:
+					assert false : binary.op;
+			}
+		}
+		
 		assert false : type.getClass();
-		return null;
+		return BcUntypedNode.instance();
 	}
 	
 	public static boolean isTypeQualified(Node node)

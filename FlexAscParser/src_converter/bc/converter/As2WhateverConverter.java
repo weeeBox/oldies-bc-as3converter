@@ -769,6 +769,10 @@ public abstract class As2WhateverConverter
 		BcUntypedClass untypedClass = new BcUntypedClass(untypedNode);
 		untypedClass.setExtendsType(BcTypeNode.create(BcTypeNode.typeObject).createTypeInstance());
 		untypedNode.setClassNode(untypedClass);
+		
+		// 'arguments'
+		BcTypeNode createBcType = BcTypeNode.createArgumentsType();
+		createBcType.setClassNode(findClass(BcTypeNode.typeArray));
 	}
 
 	protected void process(BcClassList classList)
@@ -1300,7 +1304,7 @@ public abstract class As2WhateverConverter
 						}
 						else if (identifier.equals("arguments"))
 						{
-							lastBcMemberType = BcArgumentsType.instance();
+							lastBcMemberType = BcArgumentsType.createArgumentsType();
 						}
 						else if (identifier.equals("undefined"))
 						{
@@ -1476,13 +1480,21 @@ public abstract class As2WhateverConverter
 							}
 						}
 						
-						failConversionUnless(bcNewClass != null, "Can't create undefined class instance: %s", exprDest);
-						BcTypeNode bcClassType = bcNewClass.getClassType();
-						failConversionUnless(bcClassType != null, "Can't create class instance without class type: %s", exprDest);
-
-						lastBcMemberType = bcClassType;
-
-						addToImport(bcClassType);
+						if (bcNewClass != null)
+						{
+							failConversionUnless(bcNewClass != null, "Can't create undefined class instance: %s", exprDest);
+							BcTypeNode bcClassType = bcNewClass.getClassType();
+							failConversionUnless(bcClassType != null, "Can't create class instance without class type: %s", exprDest);
+	
+							lastBcMemberType = bcClassType;
+	
+							addToImport(bcClassType);
+						}
+						else
+						{
+							warnConversion("Can't create undefined class instance: %s", exprDest);
+							lastBcMemberType = BcUntypedNode.instance();
+						}
 					}
 					else
 					{
@@ -1517,35 +1529,43 @@ public abstract class As2WhateverConverter
 			else
 			{
 				BcClassDefinitionNode bcClass = lastBcMemberType.getClassNode();
-				failConversionUnless(bcClass != null, "Class type is undefined: " + exprDest);
-
-				BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier, node.kind);
-				if (bcFunc != null)
+				warnConversionUnless(bcClass != null, "Class type is undefined: " + exprDest);
+				
+				if (bcClass != null)
 				{
-					calledFunction = bcFunc;
-					lastBcMemberType = bcFunc.getReturnType();
-				}
-				else
-				{
-					// TODO: remove code duplication
-					BcVariableDeclaration bcFuncVar = findVariable(bcClass, identifier);
-					if (bcFuncVar != null)
+					BcFunctionDeclaration bcFunc = bcClass.findFunction(identifier, node.kind);
+					if (bcFunc != null)
 					{
-						if (typeEquals(bcFuncVar.getType(), BcTypeNode.typeFunction))
-						{
-							System.err.println("Warning! Function type: " + identifier);
-							lastBcMemberType = bcFuncVar.getType();
-						}
-						else
-						{
-							failConversion("Identifier is supposed to be 'Function' type: '" + identifier + "'");
-						}
+						calledFunction = bcFunc;
+						lastBcMemberType = bcFunc.getReturnType();
 					}
 					else
 					{
-						warnConversion("'Function' type not found: class='%s' identifier='%s'", bcClass.getName(), identifier);
-						lastBcMemberType = BcUntypedNode.instance();
+						// TODO: remove code duplication
+						BcVariableDeclaration bcFuncVar = findVariable(bcClass, identifier);
+						if (bcFuncVar != null)
+						{
+							if (typeEquals(bcFuncVar.getType(), BcTypeNode.typeFunction))
+							{
+								System.err.println("Warning! Function type: " + identifier);
+								lastBcMemberType = bcFuncVar.getType();
+							}
+							else
+							{
+								warnConversion("Identifier is supposed to be 'Function' type: '" + identifier + "'");
+								lastBcMemberType = BcUntypedNode.instance();
+							}
+						}
+						else
+						{
+							warnConversion("'Function' type not found: class='%s' identifier='%s'", bcClass.getName(), identifier);
+							lastBcMemberType = BcUntypedNode.instance();
+						}
 					}
+				}
+				else
+				{
+					lastBcMemberType = BcUntypedNode.instance();
 				}
 			}
 		}
@@ -1585,10 +1605,19 @@ public abstract class As2WhateverConverter
 
 		if (node.is_new)
 		{
-			BcTypeNodeInstance typeInstance = extractBcTypeInstance(node.expr);
-			failConversionUnless(typeInstance != null, "Can't detect new's type: ", exprDest);
-
-			dest.write(construct(typeInstance, argsList));
+			BcVariableDeclaration var = findVariable(identifier);
+			if (var == null)
+			{
+				BcTypeNodeInstance typeInstance = extractBcTypeInstance(node.expr);
+				failConversionUnless(typeInstance != null, "Can't detect new's type: ", exprDest);
+				
+				dest.write(construct(typeInstance, argsList));
+			}
+			else
+			{
+				warnConversion("Tried to construct from a variable: %s", var);
+				dest.write(construct(identifier, argsList));
+			}
 		}
 		else if (node.expr instanceof MemberExpressionNode && ((MemberExpressionNode) node.expr).selector instanceof ApplyTypeExprNode)
 		{
@@ -1726,7 +1755,8 @@ public abstract class As2WhateverConverter
 					}
 					else
 					{
-						failConversion("Unexpected something");
+						warnConversion("Unexpected set identifier: %s", exprDest);
+						lastBcMemberType = createBcType(BcTypeNode.typeObject);
 					}
 				}
 			}
@@ -2386,7 +2416,14 @@ public abstract class As2WhateverConverter
 			popDest();
 			
 			dest.writeln(catchClause(paramDest));
-			processNode(node.statements);
+			if (node.statements != null)
+			{
+				processNode(node.statements);
+			}
+			else
+			{
+				writeEmptyBlock();
+			}
 		}
 	}
 
@@ -2536,6 +2573,12 @@ public abstract class As2WhateverConverter
 		{
 			boolean needsParentesis = BcNodeHelper.needsParentesisForNode(node.expr, node.op);
 			dest.writef("-%s", needsParentesis? expr(expr) : expr);
+			break;
+		}
+		
+		case Tokens.TYPEOF_TOKEN:
+		{
+			dest.writef("typeof(%s)", expr);
 			break;
 		}
 
@@ -3598,7 +3641,6 @@ public abstract class As2WhateverConverter
 		{
 			if (node.base instanceof MemberExpressionNode)
 			{
-				failConversionUnless(node.base instanceof MemberExpressionNode, "Can't evaluate member expression. Base node is supposed to be a MemberExpressionNode: %s", node.base.getClass());
 				BcTypeNode baseType = evaluateMemberExpression((MemberExpressionNode) node.base);
 
 				failConversionUnless(baseType != null, "Can't evaluate member expression. Base type is 'null'");
@@ -3607,7 +3649,7 @@ public abstract class As2WhateverConverter
 				if (baseClass == null && baseType.isFunction())
 				{
 					BcFunctionTypeNode func = (BcFunctionTypeNode) baseType;
-					BcTypeNode returnType = func.getReturnType();
+					BcTypeNode returnType = func.hasReturnType() ? func.getReturnType() : createBcType(BcTypeNode.typeObject);
 					
 					failConversionUnless(returnType != null);
 					baseClass = returnType.getClassNode();
@@ -3649,7 +3691,11 @@ public abstract class As2WhateverConverter
 					failConversionUnless(baseType != null, "Can't evaluate BinaryExpressionNode. Base type is 'null'");
 					baseClass = baseType.getClassNode();
 
-					failConversionUnless(baseClass != null, "Can't evaluate BinaryExpressionNode. Base class is 'null'");
+					if (baseClass == null)
+					{
+						warnConversion("Can't evaluate BinaryExpressionNode. Base class is 'null'");
+						baseClass = BcUntypedNode.instance().getClassNode();
+					}
 				}
 				else
 				{
@@ -3784,7 +3830,7 @@ public abstract class As2WhateverConverter
 		
 		if (identifier.name.equals("arguments"))
 		{
-			return BcArgumentsType.instance();
+			return BcTypeNode.createArgumentsType();
 		}
 
 		return null;

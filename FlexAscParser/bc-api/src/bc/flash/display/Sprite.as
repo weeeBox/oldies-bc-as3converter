@@ -1,7 +1,9 @@
 package bc.flash.display
 {
+	import bc.flash.errors.NotImplementedError;
 	import bc.flash.events.Event;
 	import bc.flash.events.TouchEvent;
+	import bc.flash.geom.Rectangle;
 	import bc.flash.ui.Mouse;
 	import bc.flash.ui.MouseCursor;
 
@@ -90,6 +92,27 @@ package bc.flash.display
 		public function set tabChildren(enable : Boolean) : void
 		{
 		}
+		
+		public function startDrag(lockCenter:Boolean = false, bounds:Rectangle = null):void
+		{
+			throw new NotImplementedError();
+		}
+		
+		public function startTouchDrag(touchPointID:int, lockCenter:Boolean = false, bounds:Rectangle = null):void
+		{
+			throw new NotImplementedError();
+		}
+		
+		public function stopDrag():void
+		{
+			throw new NotImplementedError();
+		}
+		
+		public function stopTouchDrag(touchPointID:int):void
+		{
+			throw new NotImplementedError();
+		}
+		
 		/** Optimizes the sprite for optimal rendering performance. Changes in the
 		 *  children of a flattened sprite will not be displayed any longer. For this to happen,
 		 *  either call <code>flatten</code> again, or <code>unflatten</code> the sprite. */

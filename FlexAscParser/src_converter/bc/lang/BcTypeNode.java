@@ -194,6 +194,19 @@ public class BcTypeNode extends BcNode
 		return typeNode;
 	}
 	
+	public static BcTypeNode createArgumentsType()
+	{
+		BcTypeName typeName = new BcTypeName(BcTypeNode.typeArguments);
+		BcTypeNode typeNode = uniqueTypes.get(typeName);
+		if (typeNode == null)
+		{
+			System.out.println("Added arguments type: " + typeName);
+			typeNode = BcArgumentsType.instance();
+			uniqueTypes.put(typeName, typeNode);
+		}
+		return typeNode;
+	}
+	
 	public static List<BcTypeNode> typesForPackage(String packageName)
 	{
 		Collection<BcTypeNode> types = uniqueTypes.values();
