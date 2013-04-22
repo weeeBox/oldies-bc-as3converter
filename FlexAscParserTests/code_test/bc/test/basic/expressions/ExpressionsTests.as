@@ -41,7 +41,7 @@ package bc.test.basic.expressions
             var d = a + (b + c);
         }
 		
-        public function testAssignment5() : void
+        public function testAssignment6() : void
         {
             var a : Number = 10;
             var b : Number = 20;

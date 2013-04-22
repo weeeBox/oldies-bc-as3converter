@@ -151,27 +151,27 @@ namespace bc.flash
 
     public static class UInt32Extension
     {
-        public String toExponential(this UInt32 val, uint fractionDigits)
+        public static String toExponential(this UInt32 val, uint fractionDigits)
         {
             throw new NotImplementedException();
         }
 
-        public String toFixed(this UInt32 val, uint fractionDigits)
+        public static String toFixed(this UInt32 val, uint fractionDigits)
         {
             throw new NotImplementedException();
         }
 
-        public String toPrecision(this UInt32 val, uint precision)
+        public static String toPrecision(this UInt32 val, uint precision)
         {
             throw new NotImplementedException();
         }
 
-        public String toString(this UInt32 val, uint radix)
+        public static String toString(this UInt32 val, uint radix)
         {
             throw new NotImplementedException();
         }
 
-        public uint valueOf(this UInt32 val)
+        public static uint valueOf(this UInt32 val)
         {
             throw new NotImplementedException();
         }

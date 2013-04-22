@@ -39,7 +39,7 @@ namespace bc.test.basic.expressions
             int c = 30;
             Object d = a + (b + c);
         }
-        public virtual void testAssignment5()
+        public virtual void testAssignment6()
         {
             float a = 10;
             float b = 20;
