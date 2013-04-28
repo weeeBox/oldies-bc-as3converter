@@ -126,6 +126,6 @@ public abstract class WriteDestination
 		if (tabs.length() == 0)
 			throw new RuntimeException("Unable to dec tabs");
 		
-		tabs.setLength(tabs.length() - 1);
+		tabs.setLength(tabs.length() - tab.length());
 	}
 }

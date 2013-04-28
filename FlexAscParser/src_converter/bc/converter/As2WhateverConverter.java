@@ -2765,7 +2765,7 @@ public abstract class As2WhateverConverter
 				else
 				{
 					classNode = findClass(typeNode);
-					failConversionUnless(classNode != null, "Can't find class: %s", typeNode.getNameEx());
+					warnConversionUnless(classNode != null, "Can't find class: %s", typeNode.getNameEx());
 				}
 				typeNode.setClassNode(classNode);
 			}
@@ -3658,7 +3658,8 @@ public abstract class As2WhateverConverter
 				}
 				else
 				{
-					failConversionUnless(baseClass != null, "Can't evaluate member expression. Base class type is 'null'");
+					warnConversionUnless(baseClass != null, "Can't evaluate member expression. Base class type is 'null'");
+					baseClass = BcUntypedNode.instance().getClassNode();
 				}
 			}
 			else if (node.base instanceof ThisExpressionNode)
