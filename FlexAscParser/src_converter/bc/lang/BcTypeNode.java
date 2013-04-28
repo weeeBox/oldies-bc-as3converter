@@ -307,7 +307,7 @@ public class BcTypeNode extends BcNode
 	
 	public BcClassDefinitionNode getClassNode()
 	{
-		return classNode;
+		return classNode != null ? classNode : BcUntypedNode.instance().getClassNode();
 	}
 	
 	public boolean isVoid()

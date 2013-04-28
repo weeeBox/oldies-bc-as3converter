@@ -3532,6 +3532,22 @@ public abstract class As2WhateverConverter
 				return BcUntypedNode.instance();
 			}
 			
+			switch (binaryNode.op)
+			{
+			case Tokens.LEFTSHIFT_TOKEN:
+			case Tokens.RIGHTSHIFT_TOKEN:
+			case Tokens.LEFTSHIFTASSIGN_TOKEN:
+			case Tokens.RIGHTSHIFTASSIGN_TOKEN:
+			case Tokens.BITWISEAND_TOKEN:
+			case Tokens.BITWISEANDASSIGN_TOKEN:
+			case Tokens.BITWISENOT_TOKEN:
+			case Tokens.BITWISEOR_TOKEN:
+			case Tokens.BITWISEORASSIGN_TOKEN:
+			case Tokens.BITWISEXOR_TOKEN:
+			case Tokens.BITWISEXORASSIGN_TOKEN:
+				return createBcType("int");
+			}
+			
 			failConversion("Can't evaluate node's type: %s", node.getClass());
 		}
 

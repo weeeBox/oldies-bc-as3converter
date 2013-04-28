@@ -3,7 +3,7 @@ package bc.flash.events
 	import bc.flash.errors.NotImplementedError;
 	import bc.flash.events.Event;
 	
-	public class TextEvent : Event
+	public class TextEvent extends Event
 	{
 		public static const LINK:String = "link";
 		public static const TEXT_INPUT:String = "textInput";

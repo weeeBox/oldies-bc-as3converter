@@ -1,6 +1,9 @@
 package flash.filters
 {
-	public class DropShadowFilter extends BitmapFilter
+	import bc.flash.errors.NotImplementedError;
+	import bc.flash.filters.BitmapFilter;
+
+	public class DropShadowFilter extends bc.flash.filters.BitmapFilter
 	{
 		public function DropShadowFilter(arg1:Number=0, arg2:Number=0, arg3:uint=null, arg4:Number=0, arg5:Number=0, arg6:Number=0, arg7:Number=0, arg8:int=0, arg9:Boolean=false, arg10:Boolean=false, arg11:Boolean=false) { throw new NotImplementedError(); }
 		public function clone() : BitmapFilter { throw new NotImplementedError(); }

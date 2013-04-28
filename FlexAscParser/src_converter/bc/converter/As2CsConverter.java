@@ -138,7 +138,6 @@ public class As2CsConverter extends As2WhateverConverter
 			failConversionUnless(identifier != null);
 			
 			BcClassDefinitionNode baseClass = baseType.getClassNode();
-			failConversionUnless(baseClass != null, "Can't find class node: %s", baseType.getName());
 			
 			boolean checkLocalVariables = node.base == null;
 			BcVariableDeclaration bcVar = findVariable(baseClass, identifier, checkLocalVariables);
